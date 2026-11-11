@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>Create demo users</title>
+<style>
+:root{--ink:#1E2124;--muted:#5d6165;--line:#d9dcde;--bg:#f3f4f5;--panel:#fff;--accent:#F37021}
+*{box-sizing:border-box}body{margin:0;font:15px/1.5 system-ui,Segoe UI,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:980px;margin:0 auto;padding:24px 16px 60px}h1{font-size:26px;margin:0 0 6px}h2{font-size:17px;margin:0 0 10px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;margin:16px 0}.mu{color:var(--muted)}
+label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted)}input,select,textarea{font:inherit;padding:9px 10px;border:1px solid var(--line);border-radius:8px;color:var(--ink);background:#fff}
+.g{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+button{font:inherit;font-weight:600;padding:9px 14px;border-radius:8px;border:1px solid var(--line);background:#fff;cursor:pointer}button.pri{background:var(--accent);border-color:var(--accent);color:#fff}button.dan{color:#a4231b}
+table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:left;padding:8px;border-bottom:1px solid var(--line)}
+.warn{background:#fff4e5;border:1px solid #f0c987;border-radius:8px;padding:10px 12px;font-size:14px}.err{background:#fdecea;border:1px solid #f1a9a2;border-radius:8px;padding:10px 12px;color:#8a1c14}
+textarea.out{width:100%;min-height:220px;font:12px/1.4 ui-monospace,Consolas,monospace}.chk{flex-direction:row;align-items:center;gap:8px;color:var(--ink);font-size:14px}
+.hide{display:none}
+</style></head><body><main>
+<h1>Create demo users</h1>
+<p class="mu">Give each person an email, a password and a role. Then download <b>users.js</b> and upload it to your GitHub repository, replacing the old one. Everything on this page runs on your own computer. Passwords are never sent anywhere.</p>
+<div class="warn"><b>Read this first.</b> This is a gate for a demo, not real security. users.js is public on GitHub: anyone can read the names and the scrambled (hashed) passwords, and a determined person can get past the gate. Use throwaway passwords that you do not use anywhere else, and sample data only.</div>
+
+<div class="card"><h2>1. Start from your current list (optional)</h2>
+<div class="row"><input type="file" id="loadFile" accept=".js,text/javascript,text/plain"><span class="mu">Choose the users.js you have now, to keep its users and add more.</span></div></div>
+
+<div class="card"><h2>2. Add or change a user</h2>
+<div class="g">
+<label>Email<input id="u_email" type="email" placeholder="name@yourcompany.com"></label>
+<label>Name<input id="u_name" placeholder="Shown in the app"></label>
+<label>Role<select id="u_role"></select></label>
+<label id="carrierBox" class="hide">Carrier (must match a carrier in the shipments)<input id="u_carrier" list="carriers" placeholder="Dimerco"><datalist id="carriers"><option>Dimerco</option><option>Flex</option><option>CHR</option><option>Kerry Indev</option><option>Dahnay</option></datalist></label>
+<label>Password (at least 10 characters)<input id="u_pw" type="text" autocomplete="off" placeholder="Type one, or press Generate"></label>
+</div>
+<div id="whBox" class="hide" style="margin-top:12px"><span class="mu" style="font-size:13px">Warehouses this person looks after</span><div class="row" id="whList" style="margin-top:6px"></div></div>
+<div class="row" style="margin-top:12px"><label class="chk"><input type="checkbox" id="u_tools"> Show the demo tools (Preview as, Demo date, Reset demo data). Tick this only for yourself.</label></div>
+<div class="row" style="margin-top:12px"><button id="genPw" type="button">Generate a strong password</button><button class="pri" id="addBtn" type="button">Add or change this user</button></div>
+<div id="msg" style="margin-top:12px"></div></div>
+
+<div class="card"><h2>3. Users in the list</h2><div id="tbl"></div></div>
+
+<div class="card"><h2>4. Settings</h2><div class="g">
+<label>Sign-in<select id="s_required"><option value="1">Required: nobody gets in without signing in</option><option value="0">Not required: anyone can open the demo</option></select></label>
+<label>Where each person's data is kept<select id="s_storage"><option value="browser">In their own browser, kept between visits</option><option value="demo">Not kept: resets when the page reloads</option></select></label>
+<label>Send problem reports to (email, optional)<input id="s_report" type="email" placeholder="you@example.com"></label>
+<label>Wrong passwords allowed before a pause<input id="s_att" type="number" min="3" max="20" value="5"></label>
+<label>Length of the pause (seconds)<input id="s_lock" type="number" min="10" max="600" value="30"></label></div></div>
+
+<div class="card"><h2>5. Your users.js</h2>
+<div class="row"><button class="pri" id="dlBtn" type="button">Download users.js</button><button id="cpBtn" type="button">Copy the text</button></div>
+<p class="mu">Upload the downloaded file to your repository, in the same place as index.html, replacing the old users.js. The change goes live in a minute or two.</p>
+<textarea class="out" id="out" readonly></textarea></div>
+</main>
+<script>
+const ROLES=['In Organization','Logistics Executive','Logistics Associate','Logistics Analyst','Logistics Manager','Carrier Partner','Warehouse Team'];
+const WH=['RD - Fremont','RD - Germany','RD - Bangalore','RD - Petaluma','DC - US5 - Dallas','DC - CH1 - Flex Futian','MFG_SWDA'];
+const ITER=150000,$=id=>document.getElementById(id);
+let users=[];
+$('u_role').innerHTML=ROLES.map(r=>'<option>'+r+'</option>').join('');
+$('whList').innerHTML=WH.map(w=>'<label class="chk"><input type="checkbox" value="'+w+'"> '+w+'</label>').join('');
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function role(){const r=$('u_role').value;$('carrierBox').classList.toggle('hide',r!=='Carrier Partner');$('whBox').classList.toggle('hide',r!=='Warehouse Team')}
+$('u_role').addEventListener('change',role);role();
+function msg(t,bad){$('msg').innerHTML=t?'<div class="'+(bad?'err':'warn')+'">'+esc(t)+'</div>':''}
+const hex=b=>[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');
+async function hash(pw,saltBytes){const k=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveBits']);return hex(await crypto.subtle.deriveBits({name:'PBKDF2',hash:'SHA-256',salt:saltBytes,iterations:ITER},k,256))}
+$('genPw').onclick=()=>{const a='abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789',r=crypto.getRandomValues(new Uint8Array(14));$('u_pw').value=[...r].map(x=>a[x%a.length]).join('')};
+$('addBtn').onclick=async()=>{
+  const email=$('u_email').value.trim().toLowerCase(),name=$('u_name').value.trim(),r=$('u_role').value,pw=$('u_pw').value;
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))return msg('Enter a valid email address.',1);
+  if(pw.length<10)return msg('The password needs at least 10 characters. Press Generate for a strong one.',1);
+  const carrier=r==='Carrier Partner'?$('u_carrier').value.trim():'',wh=r==='Warehouse Team'?[...$('whList').querySelectorAll('input:checked')].map(x=>x.value).join('; '):'';
+  if(r==='Carrier Partner'&&!carrier)return msg('Enter the carrier for a Carrier Partner.',1);
+  if(r==='Warehouse Team'&&!wh)return msg('Tick at least one warehouse for a Warehouse Team user.',1);
+  const salt=crypto.getRandomValues(new Uint8Array(16)),h=await hash(pw,salt),u={email,name:name||email,role:r,carrier,warehouses:wh,tools:$('u_tools').checked,salt:hex(salt),hash:h,iter:ITER};
+  const i=users.findIndex(x=>x.email===email);if(i>=0)users[i]=u;else users.push(u);
+  msg('Saved '+email+' as '+r+'. Write the password down now: '+pw+'  (it cannot be shown again).');
+  $('u_pw').value='';render();
+};
+function render(){
+  $('tbl').innerHTML=users.length?'<table><tr><th>Email</th><th>Name</th><th>Role</th><th>Carrier or warehouses</th><th>Tools</th><th></th></tr>'+users.map((u,i)=>'<tr><td>'+esc(u.email)+'</td><td>'+esc(u.name)+'</td><td>'+esc(u.role)+'</td><td>'+esc(u.carrier||u.warehouses||'-')+'</td><td>'+(u.tools?'Yes':'-')+'</td><td><button class="dan" data-i="'+i+'">Remove</button></td></tr>').join('')+'</table>':'<p class="mu">No users yet.</p>';
+  $('tbl').querySelectorAll('button[data-i]').forEach(b=>b.onclick=()=>{users.splice(Number(b.dataset.i),1);render()});
+  const o={required:$('s_required').value==='1',storage:$('s_storage').value,reportTo:$('s_report').value.trim(),attempts:Math.max(3,Number($('s_att').value)||5),lockSeconds:Math.max(10,Number($('s_lock').value)||30),users};
+  $('out').value='/* Users for the demo sign-in. Create this file with make-users.html (open it on your own computer).\n   Passwords are stored only as salted hashes, but this file is public on GitHub, so use throwaway passwords. */\nwindow.ECT_LOGIN='+JSON.stringify(o,null,1)+';\n';
+}
+['s_required','s_storage','s_report','s_att','s_lock'].forEach(id=>$(id).addEventListener('input',render));
+$('loadFile').onchange=e=>{const f=e.target.files[0];if(!f)return;const fr=new FileReader();fr.onload=()=>{
+  const m=/window\.ECT_LOGIN\s*=\s*(\{[\s\S]*\})\s*;?\s*$/.exec(String(fr.result).trim());
+  try{const o=JSON.parse(m[1]);users=(o.users||[]).filter(u=>u&&u.email&&u.hash&&u.salt);$('s_required').value=o.required===false?'0':'1';$('s_storage').value=o.storage==='demo'?'demo':'browser';$('s_report').value=o.reportTo||'';$('s_att').value=o.attempts||5;$('s_lock').value=o.lockSeconds||30;render();msg('Loaded '+users.length+' user(s). Their passwords stay as they were.')}
+  catch(x){msg('That file is not a users.js made by this tool.',1)}};fr.readAsText(f)};
+$('dlBtn').onclick=()=>{render();const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([$('out').value],{type:'text/javascript'}));a.download='users.js';document.body.appendChild(a);a.click();a.remove()};
+$('cpBtn').onclick=()=>{render();$('out').select();document.execCommand('copy');msg('Copied.')};
+render();
+</script></body></html>
