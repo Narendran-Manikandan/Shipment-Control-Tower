@@ -59,8 +59,8 @@ window.ECT_LOGIN={
    "carrier": "",
    "warehouses": "",
    "tools": false,
-   "salt": "69c469b2c09098e00a2acbcdafe1702e",
-   "hash": "26411ea0a9b85a000bd6c5bbb8f68b1fe6828852475f0f0268898efda5414ff2",
+   "salt": "d627fd57a1f9d3dca6499d3881e4ef8a",
+   "hash": "395de79e059191ec3b5c19d75629305b309eb1e257946d643d157096fe47a665",
    "iter": 150000
   }
  ]
