@@ -39,6 +39,7 @@ textarea.out{width:100%;min-height:220px;font:12px/1.4 ui-monospace,Consolas,mon
 <div class="card"><h2>4. Settings</h2><div class="g">
 <label>Sign-in<select id="s_required"><option value="1">Required: nobody gets in without signing in</option><option value="0">Not required: anyone can open the demo</option></select></label>
 <label>Where each person's data is kept<select id="s_storage"><option value="browser">In their own browser, kept between visits</option><option value="demo">Not kept: resets when the page reloads</option></select></label>
+<label>Date and time in the app<select id="s_clock"><option value="real">The real date and time (sample data moves with it)</option><option value="demo">A fixed demo date (17 October 2026)</option></select></label>
 <label>Send problem reports to (email, optional)<input id="s_report" type="email" placeholder="you@example.com"></label>
 <label>Wrong passwords allowed before a pause<input id="s_att" type="number" min="3" max="20" value="5"></label>
 <label>Length of the pause (seconds)<input id="s_lock" type="number" min="10" max="600" value="30"></label></div></div>
@@ -77,13 +78,13 @@ $('addBtn').onclick=async()=>{
 function render(){
   $('tbl').innerHTML=users.length?'<table><tr><th>Email</th><th>Name</th><th>Role</th><th>Carrier or warehouses</th><th>Tools</th><th></th></tr>'+users.map((u,i)=>'<tr><td>'+esc(u.email)+'</td><td>'+esc(u.name)+'</td><td>'+esc(u.role)+'</td><td>'+esc(u.carrier||u.warehouses||'-')+'</td><td>'+(u.tools?'Yes':'-')+'</td><td><button class="dan" data-i="'+i+'">Remove</button></td></tr>').join('')+'</table>':'<p class="mu">No users yet.</p>';
   $('tbl').querySelectorAll('button[data-i]').forEach(b=>b.onclick=()=>{users.splice(Number(b.dataset.i),1);render()});
-  const o={required:$('s_required').value==='1',storage:$('s_storage').value,reportTo:$('s_report').value.trim(),attempts:Math.max(3,Number($('s_att').value)||5),lockSeconds:Math.max(10,Number($('s_lock').value)||30),users};
+  const o={required:$('s_required').value==='1',storage:$('s_storage').value,clock:$('s_clock').value,reportTo:$('s_report').value.trim(),attempts:Math.max(3,Number($('s_att').value)||5),lockSeconds:Math.max(10,Number($('s_lock').value)||30),users};
   $('out').value='/* Users for the demo sign-in. Create this file with make-users.html (open it on your own computer).\n   Passwords are stored only as salted hashes, but this file is public on GitHub, so use throwaway passwords. */\nwindow.ECT_LOGIN='+JSON.stringify(o,null,1)+';\n';
 }
-['s_required','s_storage','s_report','s_att','s_lock'].forEach(id=>$(id).addEventListener('input',render));
+['s_required','s_storage','s_clock','s_report','s_att','s_lock'].forEach(id=>$(id).addEventListener('input',render));
 $('loadFile').onchange=e=>{const f=e.target.files[0];if(!f)return;const fr=new FileReader();fr.onload=()=>{
   const m=/window\.ECT_LOGIN\s*=\s*(\{[\s\S]*\})\s*;?\s*$/.exec(String(fr.result).trim());
-  try{const o=JSON.parse(m[1]);users=(o.users||[]).filter(u=>u&&u.email&&u.hash&&u.salt);$('s_required').value=o.required===false?'0':'1';$('s_storage').value=o.storage==='demo'?'demo':'browser';$('s_report').value=o.reportTo||'';$('s_att').value=o.attempts||5;$('s_lock').value=o.lockSeconds||30;render();msg('Loaded '+users.length+' user(s). Their passwords stay as they were.')}
+  try{const o=JSON.parse(m[1]);users=(o.users||[]).filter(u=>u&&u.email&&u.hash&&u.salt);$('s_required').value=o.required===false?'0':'1';$('s_storage').value=o.storage==='demo'?'demo':'browser';$('s_clock').value=o.clock==='demo'?'demo':'real';$('s_report').value=o.reportTo||'';$('s_att').value=o.attempts||5;$('s_lock').value=o.lockSeconds||30;render();msg('Loaded '+users.length+' user(s). Their passwords stay as they were.')}
   catch(x){msg('That file is not a users.js made by this tool.',1)}};fr.readAsText(f)};
 $('dlBtn').onclick=()=>{render();const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([$('out').value],{type:'text/javascript'}));a.download='users.js';document.body.appendChild(a);a.click();a.remove()};
 $('cpBtn').onclick=()=>{render();$('out').select();document.execCommand('copy');msg('Copied.')};

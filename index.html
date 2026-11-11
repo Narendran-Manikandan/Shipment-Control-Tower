@@ -280,6 +280,7 @@ button.slot.free:hover{border-color:var(--accent)}
 #authGate{position:fixed;inset:0;background:rgba(17,19,21,.92);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px}
 .gate-box{background:var(--panel);border-radius:14px;padding:26px;max-width:420px;width:100%}
 body.signed-in .demobar{display:none}
+.monbar{display:flex;align-items:center;gap:10px;min-height:36px;padding:4px 2px 8px}.monbar.on{background:var(--info-bg);border-radius:8px;padding:6px 10px;margin-bottom:8px;position:sticky;top:calc(var(--topH,92px) + 4px);z-index:4;box-shadow:0 2px 6px rgba(0,0,0,.12)}
 .gate-brand{display:flex;align-items:center;gap:10px;margin-bottom:14px;font-size:15px}.gate-logo{height:38px;width:38px}
 .whol{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:2px}
 .lnk{background:none;border:0;padding:0;color:inherit;font:inherit;font-size:12px;text-decoration:underline;cursor:pointer;opacity:.85}.lnk:hover{opacity:1}
@@ -417,11 +418,13 @@ const val=id=>{const e=document.getElementById(id);return e?String(e.value).trim
 /* ---------- state ---------- */
 let S;
 function init(){
-  S={brand:clone(BRAND_DEFAULT),today:'2026-10-17',role:'Logistics Analyst',email:'demo.user@yourcompany.com',baseEmail:'demo.user@yourcompany.com',carrier:'',view:'track',
+  clockRefresh();
+  S={brand:clone(BRAND_DEFAULT),today:CLOCK.today,role:'Logistics Analyst',email:'demo.user@yourcompany.com',baseEmail:'demo.user@yourcompany.com',carrier:'',view:'track',
      lines:clone(RAW.lines),events:clone(RAW.events),users:clone(RAW.users),access:{},subs:clone(RAW.subs),
-     quotes:[],invoices:[],remind:{},revisions:[],uf:null,warehouses:[],slots:[],slotBlocks:[],whTeam:'',whLog:[],whNotified:{},wh:{lead:1,weekDay:4,overdue:true},utcTime:'12:00',whFail:false,mf:{log:[],ver:{master:1,commercial:1},hl:{},dock:true,closed:false,file:'master',tab:'tblShipments',q:'',only:false},outbox:[],audit:[],settings:{domain:'yourcompany.com',strip:{track:true}},draft:[],lastSaved:null,bulkResult:null,msResult:null,
-     ui:{q:'',dash:{ym:'2026-10',sel:'2026-10-17',mode:'All',ms:'Delivery',q:'',status:'All',overdueOnly:false,tile:null,type:'All',nature:'All',mm:{measure:'ships',basis:'pickup',dim:'mode',carrier:'All',sel:null}},
-         carrier:{mode:'All',win:'All',type:'All',nature:'All',metric:'ontime',target:90,mm:{measure:'weight',basis:'pickup',dim:'carrier',carrier:'All',sel:null}},tr:{seg:'d2d',basis:'actual',group:'mode',pcts:[50,90,95],mode:'All',carrier:'All',stype:'All',nature:'All',oc:'All',dc:'All',op:'All',dp:'All',win:'All'},com:'quotes',invCarrier:'All',invStatus:'All',admin:'users',msFilter:'active',cu:{carrier:'',filter:'active',q:''},ft:{series:'both',metric:'avg',group:'none',oc:'All',op:'All',dc:'All',dp:'All',nature:'All',mode:'All',vol:'All'},kt:{},sp:{carrier:'All'},wh:{tab:'schedule',code:'All',days:14},per:{kind:'all',y:2026,q:4,m:10,basis:'pickup'},sort:{},sl:{tab:'my',f:'All',ship:'',week:'',pick:'first',first:null,second:null,vehicle:'',driver:'',phone:'',note:''},dm:{tab:'review',f:'Open',code:'All',week:'',sel:[],prop:null}}};
+     quotes:[],invoices:[],remind:{},revisions:[],uf:null,warehouses:[],slots:[],slotBlocks:[],whTeam:'',whLog:[],whNotified:{},wh:{lead:1,weekDay:4,overdue:true},utcTime:CLOCK.utc,whFail:false,mf:{log:[],ver:{master:1,commercial:1},hl:{},dock:true,closed:false,file:'master',tab:'tblShipments',q:'',only:false},outbox:[],audit:[],settings:{domain:'yourcompany.com',strip:{track:true}},draft:[],lastSaved:null,bulkResult:null,msResult:null,
+     ui:{q:'',dash:{ym:CLOCK.today.slice(0,7),sel:CLOCK.today,mode:'All',ms:'Delivery',q:'',status:'All',overdueOnly:false,tile:null,type:'All',nature:'All',mm:{measure:'ships',basis:'pickup',dim:'mode',carrier:'All',sel:null}},
+         carrier:{mode:'All',win:'All',type:'All',nature:'All',metric:'ontime',target:90,mm:{measure:'weight',basis:'pickup',dim:'carrier',carrier:'All',sel:null}},tr:{seg:'d2d',basis:'actual',group:'mode',pcts:[50,90,95],mode:'All',carrier:'All',stype:'All',nature:'All',oc:'All',dc:'All',op:'All',dp:'All',win:'All'},com:'quotes',invCarrier:'All',invStatus:'All',admin:'users',msFilter:'active',cu:{carrier:'',filter:'active',q:''},ft:{series:'both',metric:'avg',group:'none',oc:'All',op:'All',dc:'All',dp:'All',nature:'All',mode:'All',vol:'All'},kt:{},sp:{carrier:'All'},wh:{tab:'schedule',code:'All',days:14},per:{kind:'all',y:+CLOCK.today.slice(0,4),q:Math.ceil(+CLOCK.today.slice(5,7)/3),m:+CLOCK.today.slice(5,7),basis:'pickup'},sort:{},sl:{tab:'my',f:'All',ship:'',week:'',pick:'first',first:null,second:null,vehicle:'',driver:'',phone:'',note:''},dm:{tab:'review',f:'Open',code:'All',week:'',sel:[],prop:null}}};
+  if(CLOCK.offset){shiftDates(S.lines,CLOCK.offset);shiftDates(S.events,CLOCK.offset);shiftDates(S.subs,CLOCK.offset)}
   const cnt={};S.lines.forEach(l=>{cnt[l.ShipmentRef]=(cnt[l.ShipmentRef]||0)+1;l.LineID=l.ShipmentRef+'-'+pad(cnt[l.ShipmentRef])});
   const order=uniq(S.lines.map(l=>l.ShipmentRef)),pat=['Raw Materials','Finished Goods','Finished Goods','Consumables','Raw Materials','Machineries','Finished Goods','Others'];
   S.lines.forEach(l=>{if(!l.ShipmentType)l.ShipmentType=pat[order.indexOf(l.ShipmentRef)%pat.length]});
@@ -596,17 +599,17 @@ function applyUpdates(ref,lines,opts){
     if(l.k==='Nominated'){
       if(car)bad(i,'Carriers cannot record forwarder nomination');
       if(l.type!=='actual')bad(i,'Forwarder nomination cannot be an estimate');
-      if(l.date>S.today)bad(i,'The actual date cannot be after the demo date ('+fmt(S.today)+')');
+      if(l.date>S.today)bad(i,'The actual date cannot be after today ('+fmt(S.today)+')');
       return;
     }
     if(MSX[l.k]){
       if(l.type!=='actual'){bad(i,L+' can only be recorded once it has happened');return}
-      if(l.date>S.today)bad(i,'The actual date cannot be after the demo date ('+fmt(S.today)+')');
+      if(l.date>S.today)bad(i,'The actual date cannot be after today ('+fmt(S.today)+')');
       if(car&&sh.f[MSX[l.k].act])bad(i,ref+': '+L+' is already recorded ('+fmt(sh.f[MSX[l.k].act])+'). Ask Your Company logistics to correct it');
       return;
     }
     if(l.type==='actual'){
-      if(l.date>S.today)bad(i,'The actual date cannot be after the demo date ('+fmt(S.today)+')');
+      if(l.date>S.today)bad(i,'The actual date cannot be after today ('+fmt(S.today)+')');
       if(car&&msAct(sh,l.k))bad(i,ref+': '+L+' is already recorded ('+fmt(msAct(sh,l.k))+'). Ask Your Company logistics to correct it');
     }else{
       if(msAct(sh,l.k))bad(i,L+' has already happened ('+fmt(msAct(sh,l.k))+'), so it cannot be re-estimated');
@@ -931,7 +934,7 @@ function mfModal(){
 }
 function mfWorkbook(fk){
   const wb=XLSX.utils.book_new(),F=MF_FILES[fk];
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([['File',F.name],['Planned location',F.path],['Version',S.mf.ver[fk]],['Exported (demo date)',S.today],['Note','Demo copy. Each sheet is one table. In production the app writes these tables in the workbook in SharePoint.']]),'Read me');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([['File',F.name],['Planned location',F.path],['Version',S.mf.ver[fk]],['Exported (date)',S.today],['Note','Demo copy. Each sheet is one table. In production the app writes these tables in the workbook in SharePoint.']]),'Read me');
   Object.keys(MF_T).filter(x=>MF_T[x].file===fk).forEach(tn=>{const rows=MF_T[tn].rows().map(r=>{const o={};Object.keys(r).forEach(k=>{const v=r[k];o[k]=Array.isArray(v)?v.join('; '):typeof v==='boolean'?(v?'TRUE':'FALSE'):v==null?'':v});return o}),cols=mfCols(rows);XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rows,{header:cols.length?cols:['(empty)']}),tn)});
   return wb;
 }
@@ -968,7 +971,7 @@ function sortInfo(tbl){
   const body=tbl.tBodies[0];if(!body)return null;
   const rows=[...body.rows],head=rows.find(r=>r.cells.length&&[...r.cells].every(c=>c.tagName==='TH'));if(!head)return null;
   const after=rows.slice(rows.indexOf(head)+1);
-  if(after.some(r=>r.querySelector('input[type=checkbox]')))return null;
+  if(tbl.dataset.sort!=='on'&&after.some(r=>r.querySelector('input[type=checkbox]')))return null;
   const groups=[],fixed=[];
   after.forEach(r=>{
     if(r.classList.contains('trx')&&groups.length){groups[groups.length-1].extras.push(r);return}
@@ -1355,19 +1358,45 @@ function dmBlockModal(ctx){
   <div class="row sec"><button class="btn pri" data-act="dmBlockSave">Block</button><button class="btn" data-act="close">Cancel</button></div>`);
 }
 function dmPropCollect(){const P=S.ui.dm.prop,g=id=>document.getElementById(id);if(P&&g('dm_reason')){P.reason=g('dm_reason').value;P.note=g('dm_note').value}}
+/* ========== real date and time ========== */
+const DEMO0='2026-10-17';
+const CLOCK={mode:'real',pin:'',today:DEMO0,utc:'12:00',offset:0};
+(function(){const L=window.ECT_LOGIN||{},q=/[?&]today=(\d{4}-\d{2}-\d{2})/.exec(location.search);CLOCK.pin=q&&!isNaN(Date.parse(q[1]))?q[1]:'';CLOCK.mode=CLOCK.pin?'pinned':(L.clock==='demo'?'demo':'real')})();
+function clockNow(){if(CLOCK.mode==='real'){const d=new Date();return {today:d.toISOString().slice(0,10),utc:d.toISOString().slice(11,16)}}return {today:CLOCK.pin||DEMO0,utc:'12:00'}}
+function clockRefresh(){const n=clockNow();CLOCK.today=n.today;CLOCK.utc=n.utc;CLOCK.offset=Math.round((Date.parse(n.today)-Date.parse(DEMO0))/86400000)}
+clockRefresh();
+function clockSync(){if(CLOCK.mode==='demo')return false;const n=clockNow(),ch=n.today!==S.today;S.today=n.today;S.utcTime=n.utc;return ch}
+function clockLabel(){
+  if(CLOCK.mode==='real'){const d=new Date();return 'Today: '+d.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})+', '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}
+  return (CLOCK.mode==='pinned'?'Date fixed for testing: ':'Demo date: ')+new Date(dnum(S.today)*86400000).toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric',timeZone:'UTC'});
+}
+function clockShow(){const a=document.getElementById('asof');if(!a)return;a.textContent=clockLabel();a.title=CLOCK.mode==='real'?'Your local date and time. The app counts days in UTC: it is now '+S.today+' '+S.utcTime+' UTC.':''}
+function clockTick(){
+  if(CLOCK.mode!=='real'||typeof S==='undefined')return;
+  const ch=clockSync();clockShow();
+  if(ch){S.ui.dash.sel=S.today;S.ui.dash.ym=S.today.slice(0,7);render()}
+}
+const shs=(s,off)=>/^\d{4}-\d{2}-\d{2}$/.test(s)?addDays(s,off):s;
+function shiftDates(o,off){
+  if(Array.isArray(o)){for(let i=0;i<o.length;i++)o[i]=typeof o[i]==='string'?shs(o[i],off):shiftDates(o[i],off);return o}
+  if(o&&typeof o==='object'){for(const k in o){const v=o[k];o[k]=typeof v==='string'?shs(v,off):shiftDates(v,off)}}
+  return o;
+}
 function seedSlots(){
   S.slots=[];S.slotBlocks=[];
   S.warehouses.forEach(w=>{const m=/(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s*-\s*(Mon|Tue|Wed|Thu|Fri|Sat|Sun)/.exec(w.hours||''),a=m?DOWS.indexOf(m[1]):0,b=m?DOWS.indexOf(m[2]):4,days=[];for(let i=a;i<=b;i++)days.push(i);w.slotDays=days.length?days:[0,1,2,3,4];w.slotStart='08:00'});
+  const wd=d=>{while(isoDow(d)>4)d=addDays(d,1);return d},T0=S.today,A=wd(addDays(T0,2)),F=wd(addDays(T0,5)),X=wd(addDays(T0,39)),B=wd(addDays(X,1)),C=wd(addDays(B,1)),Y=addDays(T0,-1);
   const mk=(id,ref,date,slot,status,by,byRole,on,extra)=>{const sh=getShip(ref);if(!sh)return null;const w=whFind(whCodeOf(sh));if(!w)return null;const r=Object.assign({id,ref,code:w.code,date,slot,alt:null,status,by,byRole,on,vehicle:'',driver:'',phone:'',note:'',proposal:null,decision:null,flag:'',history:[{on,by,text:'Requested '+slotWhen(w,date,slot)}]},extra||{});S.slots.push(r);return r};
-  mk('DS-0001','SHP-0017','2026-10-19',3,'Requested',carrierEmail('CHR'),'Carrier, CHR','2026-10-17',{vehicle:'Truck TX-4410',driver:'D. Alvarez',phone:'+1 555 0147',note:'Last leg of the road shipment, it was due on 16 Oct'});
-  const r2=mk('DS-0002','SHP-0004','2026-10-19',2,'Approved','demo.user@yourcompany.com','Logistics','2026-10-15',{vehicle:'Truck FRA-204',driver:'M. Keller'});
-  if(r2){r2.decision={by:'germany.goodsin@yourcompany.com',on:'2026-10-16',reason:''};r2.history.push({on:'2026-10-16',by:'germany.goodsin@yourcompany.com',text:'Approved'})}
-  const r3=mk('DS-0003','SHP-0001','2026-11-25',6,'Alternative proposed',carrierEmail('Dimerco'),'Carrier, Dimerco','2026-10-16',{vehicle:'Container truck DAL-18',driver:'T. Brooks'});
-  if(r3){r3.proposal={date:'2026-11-27',slot:3,reason:'Reduced crew before the holiday',by:'dallas.receiving@yourcompany.com',on:'2026-10-16',from:{date:'2026-11-25',slot:6,status:'Requested'}};r3.history.push({on:'2026-10-16',by:'dallas.receiving@yourcompany.com',text:'Proposed Fri 27 Nov 10:00 to 11:00: Reduced crew before the holiday'})}
-  S.slotBlocks.push({id:'BL-0001',code:'RD - Fremont',date:'2026-10-22',slots:[1,2,3,4],reason:'Audit',note:'Quarterly stock audit',by:'fremont.logistics@yourcompany.com',on:'2026-10-14'});
-  S.slotBlocks.push({id:'BL-0002',code:'DC - US5 - Dallas',date:'2026-11-26',slots:[1,2,3,4,5,6,7,8],reason:'Holiday',note:'Thanksgiving',by:'dallas.receiving@yourcompany.com',on:'2026-10-10'});
+  mk('DS-0001','SHP-0017',A,3,'Requested',carrierEmail('CHR'),'Carrier, CHR',T0,{vehicle:'Truck TX-4410',driver:'D. Alvarez',phone:'+1 555 0147',note:'Last leg of the road shipment, it was due the day before'});
+  const r2=mk('DS-0002','SHP-0004',A,2,'Approved','demo.user@yourcompany.com','Logistics',addDays(T0,-2),{vehicle:'Truck FRA-204',driver:'M. Keller'});
+  if(r2){r2.decision={by:'germany.goodsin@yourcompany.com',on:Y,reason:''};r2.history.push({on:Y,by:'germany.goodsin@yourcompany.com',text:'Approved'})}
+  const r3=mk('DS-0003','SHP-0001',X,6,'Alternative proposed',carrierEmail('Dimerco'),'Carrier, Dimerco',Y,{vehicle:'Container truck DAL-18',driver:'T. Brooks'});
+  if(r3){r3.proposal={date:C,slot:3,reason:'Reduced crew before the holiday',by:'dallas.receiving@yourcompany.com',on:Y,from:{date:X,slot:6,status:'Requested'}};r3.history.push({on:Y,by:'dallas.receiving@yourcompany.com',text:'Proposed '+slotWhen(whFind(r3.code),C,3)+': Reduced crew before the holiday'})}
+  S.slotBlocks.push({id:'BL-0001',code:'RD - Fremont',date:F,slots:[1,2,3,4],reason:'Audit',note:'Quarterly stock audit',by:'fremont.logistics@yourcompany.com',on:addDays(T0,-3)});
+  S.slotBlocks.push({id:'BL-0002',code:'DC - US5 - Dallas',date:B,slots:[1,2,3,4,5,6,7,8],reason:'Holiday',note:'Public holiday',by:'dallas.receiving@yourcompany.com',on:addDays(T0,-7)});
   slotReflag();
 }
+
 /* ========== import and export: freight costs, users, warehouses ========== */
 const impKey=h=>String(h||'').toLowerCase().replace(/[^a-z0-9]/g,'');
 function impCols(hdr,alias){const hm={};hdr.forEach(h=>{hm[impKey(h)]=h});const out={};Object.entries(alias).forEach(([k,ns])=>{for(const n of ns){if(hm[n]){out[k]=hm[n];return}}});return out}
@@ -2095,8 +2124,8 @@ function reportModal(id){
 function reportForm(){const g=id=>document.getElementById(id).value;return {name:g('rp_name'),report:g('rp_report'),day:Number(g('rp_day')),time:g('rp_time'),recipients:g('rp_rec')}}
 function viewReports(){
   const L=S.reports||[],due=reportsDue();
-  return pageHead('Scheduled reports','Send the lists people ask for every week, by email. In this demo the schedule runs on the demo clock (Demo date and the UTC time in Warehouse Operations). In production a Power Automate flow runs it on the real clock.')+
-  `<div class="card"><div class="row" style="justify-content:space-between"><span class="mu">Demo clock: ${esc(dayLab(S.today))} ${esc(S.utcTime)} UTC. ${due.length?`<b>${due.length} report${due.length>1?'s':''} due now.</b>`:'No report is due now.'}</span><span class="row"><button class="btn" data-act="reportRunDue" ${due.length?'':'disabled'}>Send reports due now</button><button class="btn pri" data-act="reportNew">New schedule</button></span></div></div>
+  return pageHead('Scheduled reports','Send the lists people ask for every week, by email. In this demo a report is sent when you choose Send reports due now or Send now, using the app clock. In production a Power Automate flow runs it on the real clock.')+
+  `<div class="card"><div class="row" style="justify-content:space-between"><span class="mu">${CLOCK.mode==='real'?'Clock':'Demo clock'}: ${esc(dayLab(S.today))} ${esc(S.utcTime)} UTC. ${due.length?`<b>${due.length} report${due.length>1?'s':''} due now.</b>`:'No report is due now.'}</span><span class="row"><button class="btn" data-act="reportRunDue" ${due.length?'':'disabled'}>Send reports due now</button><button class="btn pri" data-act="reportNew">New schedule</button></span></div></div>
   <div class="card" style="padding:0"><div class="tbw"><table class="tb"><tr><th>Name</th><th>Report</th><th>When</th><th>Recipients</th><th>Last sent</th><th>Status</th><th></th></tr>
   ${L.length?L.map(r=>`<tr><td><b>${esc(r.name)}</b></td><td>${esc((REPORTS[r.report]||{label:r.report}).label)}${(REPORTS[r.report]||{}).money?' <span class="pill warn">costs</span>':''}</td><td>${repDays[r.day]} ${esc(r.time)} UTC</td><td>${esc(r.recipients.join(', '))}</td><td>${r.lastSent?fmtS(r.lastSent):'-'}</td><td>${r.active?'<span class="pill ok">Active</span>':'<span class="pill chip">Paused</span>'}</td>
    <td class="r" style="min-width:230px"><div class="row" style="justify-content:flex-end;gap:6px"><button class="btn sm" data-act="reportSendNow" data-id="${r.id}">Send now</button><button class="btn sm" data-act="reportEdit" data-id="${r.id}">Edit</button><button class="btn sm" data-act="reportToggle" data-id="${r.id}">${r.active?'Pause':'Resume'}</button><button class="btn sm danger" data-act="reportDel" data-id="${r.id}">Delete</button></div></td></tr>`).join(''):'<tr><td colspan="7" class="empty">No schedules yet. Choose New schedule.</td></tr>'}</table></div></div>
@@ -2651,8 +2680,8 @@ const BULK_HELP=[
  ['ETDPlanned','No','Planned departure date','yyyy-mm-dd',''],
  ['ETA','Yes, unless DeliveredOn is given','Planned arrival date, not before PickupPlanned. Can stay empty for a shipment that is already delivered','yyyy-mm-dd','2026-10-27'],
  ['ESTDelivery','No','Estimated delivery date','yyyy-mm-dd','2026-10-29'],
- ['NominatedOn','No','Date the forwarder was nominated, only if already done','yyyy-mm-dd, not after the demo date',''],
- ['PickupActual','No','Actual pickup date, only if the pickup has happened. Required if any later actual date is given','yyyy-mm-dd, not after the demo date',''],
+ ['NominatedOn','No','Date the forwarder was nominated, only if already done','yyyy-mm-dd, not after today',''],
+ ['PickupActual','No','Actual pickup date, only if the pickup has happened. Required if any later actual date is given','yyyy-mm-dd, not after today',''],
  ['ETDActual','No','Actual departure date, only if it has departed','yyyy-mm-dd, not before PickupActual',''],
  ['ETAActual','No','Actual arrival date at the destination, only if it has arrived','yyyy-mm-dd, not before ETDActual',''],
  ['DeliveredOn','No','Actual delivery date to the warehouse, only if delivered. The shipment is then marked Delivered','yyyy-mm-dd, not before ETAActual',''],
@@ -2742,7 +2771,7 @@ function bulkRowBasic(r){
   if(r.Freight&&!['Your Company','Shipper'].includes(r.Freight))e.push('Freight must be Your Company or Shipper');
   ['PickupPlanned','ETA','ETDPlanned','ESTDelivery','InvoiceDate'].forEach(c=>{if(r[c]&&!isoOK(r[c]))e.push(c+' must be yyyy-mm-dd')});
   if(isoOK(r.PickupPlanned)&&isoOK(r.ETA)&&r.ETA<r.PickupPlanned)e.push('ETA is before PickupPlanned');
-  ['NominatedOn','PickupActual','ETDActual','ETAActual','DeliveredOn'].forEach(c=>{if(r[c]&&!isoOK(r[c]))e.push(c+' must be yyyy-mm-dd');else if(r[c]&&r[c]>S.today)e.push(c+' cannot be after the demo date ('+fmt(S.today)+')')});
+  ['NominatedOn','PickupActual','ETDActual','ETAActual','DeliveredOn'].forEach(c=>{if(r[c]&&!isoOK(r[c]))e.push(c+' must be yyyy-mm-dd');else if(r[c]&&r[c]>S.today)e.push(c+' cannot be after today ('+fmt(S.today)+')')});
   if(!(num(r.ItemQty)>0))e.push('ItemQty must be a number above 0');
   return e;
 }
@@ -3004,12 +3033,42 @@ function listRows(arr,kind){
     const gap=kind==='over'?`<span class="late-t">${diffDays(D.sel,p)} day(s)</span>`:(doneBy(sh,D.ms,D.sel)?`<span class="ok-t">Done ${fmtS(a)}</span>`:'<span class="pill warn">Open</span>');
     return `<tr class="click" data-act="open" data-ref="${sh.ref}"><td><b>${sh.ref}</b><br><small class="mu">${esc(sh.route)}</small></td><td>${esc(sh.carrier)}</td><td>${fmtS(p)}</td><td>${gap}</td><td>${pill(sh)}</td></tr>`}).join('')+'</table></div>';
 }
+function monBarHTML(){
+  const n=((S.ui.dash.chk)||[]).length;if(!can('cancelship'))return '';
+  return `<div id="monBar" class="monbar${n?' on':''}">${n?`<b>${n} selected</b><button class="btn sm danger" data-act="monCancelOpen">Cancel selected (${n})</button><button class="btn sm" data-act="monClear">Clear</button>`:'<span class="mu sm">Tick the boxes to cancel several shipments at once.</span>'}</div>`;
+}
+function monBarRefresh(){
+  const b=document.getElementById('monBar');if(b)b.outerHTML=monBarHTML();
+  const a=document.getElementById('monAll');if(a){const e=[...document.querySelectorAll('#mon input[data-act=monSel]:not(:disabled)')];a.checked=e.length>0&&e.every(x=>x.checked);a.indeterminate=!a.checked&&e.some(x=>x.checked)}
+}
+function bulkCancelModal(){
+  const D=S.ui.dash,L=(D.chk||[]).map(r=>getShip(r)).filter(Boolean);if(!L.length)return;
+  openModal(`<div class="mh"><h2>Cancel ${L.length} shipment${L.length>1?'s':''}</h2><button class="x" data-act="close" aria-label="Close">&times;</button></div>
+  <div class="tbw" style="max-height:200px;overflow:auto"><table class="tb" data-sort="off"><tr><th>Shipment</th><th>Route</th><th>Carrier</th><th>Status</th></tr>${L.slice(0,30).map(s=>`<tr><td><b>${s.ref}</b></td><td>${esc(s.route)}</td><td>${esc(s.carrier)}</td><td>${esc(s.status)}</td></tr>`).join('')}</table></div>${L.length>30?`<p class="hint">and ${L.length-30} more</p>`:''}
+  <div class="note" style="margin-top:10px">Each shipment stays on record with its history and is left out of every dashboard, KPI, analytic and performance figure. Open delivery slot requests are cancelled, and followers and warehouse teams are emailed. Shipments that are already delivered or cancelled are skipped.</div>
+  <div class="g2" style="margin-top:10px"><label class="f">Reason<select id="cx_reason" class="in"><option value="">Choose a reason</option>${CANCEL_REASONS.map(x=>`<option>${esc(x)}</option>`).join('')}</select></label><label class="f">Details<input id="cx_note" class="in" placeholder="Required when the reason is Other"></label></div>
+  <div class="row sec"><button class="btn danger" data-act="monCancelDo">Cancel ${L.length} shipment${L.length>1?'s':''}</button><button class="btn" data-act="close">Keep them</button></div>`);
+}
+function bulkCancelRun(reason,note){
+  const D=S.ui.dash,refs=[...(D.chk||[])];
+  if(!can('cancelship'))return {ok:false,msg:'Your role cannot cancel shipments'};
+  if(!refs.length)return {ok:false,msg:'Select at least one shipment'};
+  if(!CANCEL_REASONS.includes(reason))return {ok:false,msg:'Choose a reason for cancelling'};
+  if(reason==='Other'&&!String(note||'').trim())return {ok:false,msg:'Describe the reason when you choose Other'};
+  const done=[],skipped=[];
+  refs.forEach(ref=>{const r=shipCancel(ref,reason,note);(r.ok?done:skipped).push({ref,msg:r.msg})});
+  audit('Bulk cancel','',done.length+' of '+refs.length+' shipment(s) cancelled: '+reason+(note?'. '+note:'')+(skipped.length?' ('+skipped.length+' skipped)':''));
+  D.chk=[];
+  return {ok:true,done,skipped,msg:done.length+' shipment'+(done.length===1?'':'s')+' cancelled'+(skipped.length?', '+skipped.length+' skipped':'')};
+}
 function monHTML(all){
   const D=S.ui.dash,q=D.q.toLowerCase();
   const rows=(D.status==='Cancelled'?cancelledList():all).filter(sh=>(D.status==='All'||D.status==='Cancelled'||sh.status===D.status||(D.status==='Delayed'&&isLateNow(sh))||(D.status==='Invoice pending'&&can('invoices')&&isInvPending(sh))||(D.status==='At risk'&&riskInfo(sh)&&!isLateNow(sh))||(D.status==='Free time ending'&&['ending','over'].includes((freeInfo(sh)||{}).state)))).filter(sh=>!D.overdueOnly||isLateNow(sh))
     .filter(sh=>!q||(sh.ref+' '+sh.carrier+' '+sh.shipper+' '+sh.consignee+' '+sh.route+' '+sh.pos.join(' ')).toLowerCase().includes(q)).sort((a,b)=>(a.due||'9').localeCompare(b.due||'9'));
   if(!rows.length)return '<div class="empty">No shipments match these filters.</div>';
-  return `<div class="tbw"><table class="tb"><tr><th>Shipment</th><th>Mode</th><th>Type</th><th>Route</th><th>Carrier</th><th>Progress</th><th>Due</th><th>Status</th>${can('invoices')?'<th>Freight invoice</th>':''}${can('cancelship')?'<th></th>':''}</tr>`+rows.map(sh=>`<tr class="click${can('invoices')&&isInvPending(sh)?' tr-pend':''}" data-act="open" data-ref="${sh.ref}"><td><b>${sh.ref}</b></td><td>${modeBadge(sh.mode)}</td><td>${typeBadge(sh.stype)}${dgTag(sh.nature)}</td><td>${esc(sh.route)}</td><td>${esc(sh.carrier)}</td><td>${miniHTML(sh)}</td>
+  const cb=can('cancelship'),elig=s=>!s.cancelled&&s.status!=='Delivered';D.chk=(D.chk||[]).filter(r=>rows.some(s=>s.ref===r&&elig(s)));
+  const allSel=cb&&rows.some(elig)&&rows.filter(elig).every(s=>D.chk.includes(s.ref));
+  return `${monBarHTML()}<div class="tbw"><table class="tb" data-sort="on"><tr>${cb?`<th style="width:34px"><input type="checkbox" id="monAll" data-act="monAll" aria-label="Select all open shipments" ${allSel?'checked':''}></th>`:''}<th>Shipment</th><th>Mode</th><th>Type</th><th>Route</th><th>Carrier</th><th>Progress</th><th>Due</th><th>Status</th>${can('invoices')?'<th>Freight invoice</th>':''}${can('cancelship')?'<th></th>':''}</tr>`+rows.map(sh=>`<tr class="click${can('invoices')&&isInvPending(sh)?' tr-pend':''}" data-act="open" data-ref="${sh.ref}">${cb?`<td><input type="checkbox" data-act="monSel" data-ref="${sh.ref}" aria-label="Select ${sh.ref}" ${elig(sh)?'':'disabled'} ${D.chk.includes(sh.ref)?'checked':''}></td>`:''}<td><b>${sh.ref}</b></td><td>${modeBadge(sh.mode)}</td><td>${typeBadge(sh.stype)}${dgTag(sh.nature)}</td><td>${esc(sh.route)}</td><td>${esc(sh.carrier)}</td><td>${miniHTML(sh)}</td>
     <td>${dueCell(sh)}</td><td>${pill(sh)}</td>${can('invoices')?`<td>${sh.cancelled?'-':invPill(sh)}</td>`:''}${can('cancelship')?`<td class="r">${sh.cancelled||sh.status==='Delivered'?'':`<button class="btn sm danger" data-act="cancelOpen" data-ref="${sh.ref}">Cancel</button>`}</td>`:''}</tr>`).join('')+'</table></div>';
 }
 function onTime(arr,k){
@@ -3078,11 +3137,11 @@ function viewDash(){
     <label class="f">Nature of goods<select id="d_nature" data-ch="dnature">${['All',...NATURES].map(o=>`<option ${o===(D.nature||'All')?'selected':''}>${o}</option>`).join('')}</select></label>
     <label class="f">Milestone<select id="d_ms" data-ch="dms">${Object.keys(MS).map(k=>`<option value="${k}" ${k===D.ms?'selected':''}>${MS[k].label}${k==='Delivery'?' (due date)':' (planned date)'}</option>`).join('')}</select></label>
     <label class="f">Selected date<input type="date" id="d_sel" class="in" value="${D.sel}" data-ch="dsel"></label>
-    <button class="btn" data-act="calToday" style="align-self:flex-end">Go to demo date</button></div></div>
+    <button class="btn" data-act="calToday" style="align-self:flex-end">Go to today</button></div></div>
   <div class="kpis">${(can('invoices')?[...tiles.slice(0,5),['invoiced','Invoiced',TS.invoiced.rows.length,'ok'],['invpend','Invoice pending',TS.invpend.rows.length,'late'],...tiles.slice(5)]:tiles).map(([id,l,v,cls])=>`<button class="kpi tile ${cls} ${D.tile===id?'sel':''}" data-act="tile" data-t="${id}" aria-pressed="${D.tile===id}"><small>${l}</small><b>${v}</b>${id==='ontime'?`<small>${onN} of ${dwith.length} delivered</small>`:''}</button>`).join('')}</div>
   ${tilePanel(all)}
   <div class="split"><div class="card"><div class="row" style="justify-content:space-between;margin-bottom:10px"><button class="btn sm" data-act="calPrev" aria-label="Previous month">Previous</button><b>${MONL[m-1]} ${y}</b><button class="btn sm" data-act="calNext" aria-label="Next month">Next</button></div>${calHTML(all)}
-     <p class="hint">Blue badge: milestones planned that day. Red badge: planned that day and still open on the demo date (${fmt(S.today)}).</p></div>
+     <p class="hint">Blue badge: milestones planned that day. Red badge: planned that day and still open today (${fmt(S.today)}).</p></div>
    <div><div class="card"><h3>Overdue as of ${fmt(D.sel)} (${over.length})</h3>${listRows(over,'over')}</div><div class="card"><h3>Due on ${fmt(D.sel)} (${dueOn.length})</h3>${listRows(dueOn,'due')}</div></div></div>
   ${monthlyCard('dash')}
   <div class="split">${perfCard(all)}<div><div class="card"><h3>Shipments by stage</h3>${STAGES.map(st=>{const n=all.filter(s=>s.status===st).length;return `<div class="row" style="margin-bottom:8px"><span style="width:120px">${st}</span><div class="bar grow" style="min-width:80px"><i style="width:${all.length?n/all.length*100:0}%"></i></div><b style="width:28px;text-align:right">${n}</b></div>`}).join('')}</div>
@@ -3344,7 +3403,7 @@ function quotesModal(ref){
    <td class="r">${q.status!=='Selected'?`<button class="btn sm pri" data-act="quoteSelect" data-id="${q.id}" data-ref="${esc(ref)}">Select and nominate</button>`:''}</td></tr>`).join('')}</table></div>`:'<div class="empty">No quotes recorded yet.</div>'}
   <h3 class="sec">Add a quote</h3><div class="g3"><label class="f">Vendor<input id="q_vendor" class="in" value="${esc(sh.carrier)}"></label><label class="f">Amount (USD)<input id="q_amt" class="in" inputmode="decimal"></label><label class="f">Transit days<input id="q_days" class="in" inputmode="numeric"></label></div>
   <div class="row sec"><button class="btn pri" data-act="quoteAdd" data-ref="${esc(ref)}">Add quote</button></div>
-  <p class="hint">Selecting a quote nominates that vendor as the carrier and records today's demo date as the nomination date. Other quotes for the shipment are marked rejected.</p>`);
+  <p class="hint">Selecting a quote nominates that vendor as the carrier and records today's date as the nomination date. Other quotes for the shipment are marked rejected.</p>`);
 }
 const payText=ls=>{if(!ls.length)return '-';const p=ls.filter(i=>i.paid==='Paid').length;return p===ls.length?'Paid':p?'Part paid':'Unpaid'};
 const extraTxt=v=>(v>0?'+':v<0?'-':'')+usd(Math.abs(v));
@@ -3626,9 +3685,9 @@ function whSchedulePanel(plan,ready){
 function whNotifyPanel(plan){
   const L=S.wh,ready=plan.filter(m=>!m.blocked&&m.status==='Ready'),pillc=t=>t==='Weekly update'?'info':t==='Delivery due'?'warn':'late';
   const stCls=s=>s==='Sent'?'ok':s==='Failed'||s==='Missed'?'late':'chip';
-  return `<div class="card"><div class="row"><label class="f">Demo time (UTC)<input type="time" class="in" value="${esc(S.utcTime)}" data-ch="whClock" style="width:auto"></label>
+  return `<div class="card"><div class="row">${CLOCK.mode==='real'?`<label class="f">Time now (UTC)<input class="in" value="${esc(S.utcTime)}" disabled style="width:90px"></label>`:`<label class="f">Demo time (UTC)<input type="time" class="in" value="${esc(S.utcTime)}" data-ch="whClock" style="width:auto"></label>`}
    <label class="f" style="flex-direction:row;gap:8px;align-items:center;align-self:flex-end"><input type="checkbox" data-ch="whFail" ${S.whFail?'checked':''}> Demo: make the next send fail</label>
-   <span class="hint" style="align-self:flex-end">The demo date and this time set the clock. Each warehouse runs on its own local time.</span></div>
+   <span class="hint" style="align-self:flex-end">${CLOCK.mode==='real'?'The clock is the real date and time.':'The demo date and this time set the clock.'} Each warehouse runs on its own local time.</span></div>
    <div class="row" style="margin-top:10px;gap:8px">${S.warehouses.filter(w=>w.active).map(w=>`<span class="pill chip" title="${esc(w.tz)} (${esc(tzWin(w.tz))})">${esc(w.code)}: ${locTxt(w)}</span>`).join('')}</div></div>
   <div class="card"><div class="row" style="justify-content:space-between;margin-bottom:10px"><h3 style="margin:0">Notifications to send</h3><button class="btn pri" data-act="whSendAll" ${ready.length?'':'disabled'}>Send all ready (${ready.length})</button></div>
   ${plan.length?`<div class="tbw"><table class="tb"><tr><th>Notification</th><th>Warehouse</th><th>Covers</th><th class="r">Shipments</th><th>Recipients</th><th>Scheduled for</th><th>Status</th><th></th></tr>
@@ -3967,7 +4026,7 @@ function addSampleHistory(){
   const R=rng32(7),ri=(a,b)=>a+Math.floor(R()*(b-a+1)),sk=(a,b)=>a+Math.floor(Math.pow(R(),1.6)*(b-a+1));
   const tpl=ships().filter(s=>!s.sample),R2=rng32(11),r2=(a,b)=>a+Math.floor(R2()*(b-a+1));let seaN=0;
   const P={Sea:{pu:1,etd:[2,7],tr:[16,34],ds:[2,9],w:[800,9000]},Air:{pu:1,etd:[0,2],tr:[1,5],ds:[0,3],w:[40,900]},Road:{pu:1,etd:[0,1],tr:[1,5],ds:[0,2],w:[300,4000]}};
-  const start='2026-07-12',span=diffDays('2026-10-10',start),N=60;
+  const start=addDays(S.today,-97),span=90,N=60;
   for(let i=0;i<N;i++){
     const t=tpl[i%tpl.length],f=t.f,m=P[t.mode]||P.Air,ref='SMP-'+pad(i+1,4);
     const dlv=addDays(start,ri(30,span)),ds=sk(m.ds[0],m.ds[1]),tr=sk(m.tr[0],m.tr[1]),et=sk(m.etd[0],m.etd[1]);
@@ -4053,7 +4112,7 @@ function renderNav(){
     h+=`<div class="nav-g">${g}</div>`+items.map(t=>`<button class="nav-i ${S.view===t.id?'on':''}" data-act="nav" data-id="${t.id}" ${S.view===t.id?'aria-current="page"':''}>${ICON[t.id]}<span>${esc(t.label)}</span>${t.id==='commercial'&&can('invoices')&&pendingList().length?`<span class="nav-badge" title="Delivered shipments waiting for a carrier invoice">${pendingList().length}</span>`:''}${t.id==='tasks'?taskBadge():''}</button>`).join('')});
   $('#nav').innerHTML=h;
   const ini=(S.role==='Carrier Partner'?S.carrier.slice(0,2):(S.email.split('@')[0].split(/[._-]/).map(x=>x[0]||'').join('').slice(0,2)||'U')).toUpperCase();
-  $('#who').innerHTML=`<div class="av">${esc(ini)}</div><div><b>${esc(S.role)}</b><span>${esc(S.role==='Carrier Partner'?S.carrier+', '+S.email:S.email)}</span></div><div class="whol"><button class="lnk" data-act="probOpen">Report a problem</button>${S.signedIn?'<button class="lnk" data-act="signOut">Sign out</button>':''}</div>`;
+  $('#who').innerHTML=`<div class="av">${esc(ini)}</div><div><b>${esc(S.role)}</b><span>${esc(S.role==='Carrier Partner'?S.carrier+', '+S.email:S.email)}</span></div><div class="whol"><button class="lnk" data-act="probOpen">Report a problem</button>${S.signedIn?'<button class="lnk" data-act="resetMine">Reset my data</button><button class="lnk" data-act="signOut">Sign out</button>':''}</div>`;
 }
 function towerStrip(){
   if(!can('dashboard')||S.view==='dashboard'||!(S.settings.strip||{})[S.view])return '';
@@ -4075,8 +4134,8 @@ function render(){
   if(!can(S.view)){const f=TABS.find(x=>can(x.id));S.view=f?f.id:'track'}
   renderNav();
   $('#crumb').innerHTML=`<span class="mu">${esc(S.brand.title)}</span><span class="sep">/</span><b>${esc(TABS.find(t=>t.id===S.view).label)}</b>`;
-  $('#asof').textContent='Demo date: '+new Date(dnum(S.today)*86400000).toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric',timeZone:'UTC'});
-  $('#demoDate').value=S.today;$('#roleSel').value=S.role;
+  clockShow();
+  $('#demoDate').value=S.today;$('#roleSel').value=S.role;{const dl=$('#demoDate').closest('label');if(dl)dl.style.display=CLOCK.mode==='real'?'none':''}
   {const isC=S.role==='Carrier Partner';$('#carrierLbl').style.display=isC?'':'none';if(isC)$('#carrierSel').innerHTML=carriersList().map(c=>`<option ${c===S.carrier?'selected':''}>${esc(c)}</option>`).join('')}
   {const isW=S.role==='Warehouse Team';$('#whTeamLbl').style.display=isW?'':'none';if(isW)$('#whTeamSel').innerHTML=S.users.filter(u=>u.Role==='Warehouse Team').map(u=>`<option value="${esc(u.UserEmail)}" ${u.UserEmail===S.whTeam?'selected':''}>${esc(u.DisplayName)} (${esc(u.Warehouses||'no warehouse')})</option>`).join('')}
   const V={track:viewTrack,request:viewRequest,milestones:viewMilestones,carrierupdates:viewCarrierUpdates,warehouse:viewWarehouse,dataquality:viewDataQuality,tasks:viewTasks,reports:viewReports,slotreq:viewSlotReq,slotmgmt:viewSlotMgmt,freighttrends:viewFreightTrends,dashboard:viewDash,carrier:viewCarrier,transit:viewTransit,commercial:viewCommercial,admin:viewAdmin};
@@ -4086,6 +4145,7 @@ function render(){
   sortEnhance($('#view'));
   mfRender();
   persistSoon();
+  try{document.documentElement.style.setProperty('--topH',((document.querySelector('.top')||{}).offsetHeight||0)+'px')}catch(e){}
 }
 function syncForm(){
   const inco=$('#f_inco'),fr=$('#f_freight'),mode=$('#f_mode');if(!inco)return;
@@ -4115,6 +4175,7 @@ function guide(){
   <li><b>Freight Trends</b>: filter by origin and destination country and port, nature of goods (DG or Non-DG), mode and volume (Air, LCL, 20FT, 40FT), group by any of them, and compare quoted and actual freight over time. Air and LCL show the rate per kg on the greater of actual weight and CBM &times; 167 kg; a shipment with no CBM uses actual weight and is flagged. 20FT and 40FT show the rate per container.</li>
   <li><b>Updating several milestones at once</b>: in Carrier Updates, Milestone Management and the shipment details, add one line per milestone. Mark what happened with its date, or give a new estimate with a reason. Overdue and due dates follow the latest estimate; on-time and delayed always use the original planned date.</li>
   <li><b>Delivery slots</b>: under Deliveries, Delivery Slot Requests lets Logistics and carriers book one of 8 one-hour slots a day (08:00 to 16:00 warehouse time) at the shipment's warehouse. Delivery Management is where the warehouse team approves, proposes a new slot or rejects, and blocks slots for holidays, audits and other reasons. Use Preview as, Warehouse Team to see the warehouse side.</li>
+  <li><b>Cancelling several shipments</b>: on the Control Tower Overview, tick the boxes in the shipment monitor (or the box in the heading for all open ones) and choose Cancel selected.</li>
   <li><b>Cancelling a shipment</b>: open the shipment (from the Control Tower monitor or Track &amp; Trace) and choose Cancel this shipment, with a reason. It stays on record, can be found in Track &amp; Trace and in the monitor under Cancelled, and is left out of every dashboard, KPI, analytic and spend figure. Open delivery slots are cancelled and followers and the warehouse are emailed. Cancelling and reinstating is the Role access item Cancel and reinstate shipments.</li>
   <li><b>Import and export</b>: Freight Commercials, Administration, Users and roles, and Administration, Warehouses each have Export (Excel or CSV) and Import. Export gives the template with the current data; edit it, import it back, review the result, and apply. In the user and warehouse files, Action = Delete removes a row. Users and warehouses can be searched by any field.</li>
   <li><b>Editing shipments</b>: open a shipment and choose Edit shipment to correct its details and item lines, or use Shipment Requests, Update existing to change many shipments through an Excel file. <b>Data Quality</b> lists gaps such as a missing CBM, a warehouse without a record, or a tracking number used twice, and the same checks warn you when you save a new shipment.</li>
@@ -4129,7 +4190,7 @@ function guide(){
   <li><b>Bulk upload with completed milestones</b>: the template has actual date columns. If the rows of one shipment show different dates, the latest date is used and the rows are listed under Loaded with a notice; a delivered shipment can leave the planned dates empty.</li>
   <li><b>Freight Commercials</b> (quotes): add and select a quote. As Logistics Manager, open Invoices and record a missing invoice.</li>
   <li><b>Administration</b>: change a role, tick tab access (including the new Transit Analytics tab), set branding and logo, run the daily digest, and read the audit log.</li></ol>
-  <p class="hint">Change the <b>Demo date</b> at the top to move time forward. Everything is calculated against that date. Reset demo data restores the starting data.</p>`);
+  <p class="hint">Everything is calculated against today's date and time, which the header shows. Reset demo data restores the starting data.</p>`);
 }
 
 /* ========== events ========== */
@@ -4194,10 +4255,20 @@ document.addEventListener('click',e=>{
    case 'authDemo':{const g=document.getElementById('authGate');if(g)g.remove();break}
    case 'flowSpecDl':{const ok=downloadText('power-automate-flow-specification.txt',flowSpecText(),'text/plain');toast(ok?'Specification downloaded':'Download is blocked here. ',ok?'':'bad');break}
    case 'schemaDl':{const ok=downloadText('table-layout.csv','\uFEFF'+toCSV(['Table','Workbook','KeyColumn','Column','Example'],schemaRows()),'text/csv');toast(ok?'Table layout downloaded':'Download is blocked here.',ok?'':'bad');break}
+   case 'monSel':{const D=S.ui.dash;D.chk=D.chk||[];const i=D.chk.indexOf(d.ref);if(t.checked&&i<0)D.chk.push(d.ref);if(!t.checked&&i>=0)D.chk.splice(i,1);monBarRefresh();break}
+   case 'monAll':{const D=S.ui.dash,e=[...document.querySelectorAll('#mon input[data-act=monSel]:not(:disabled)')];e.forEach(x=>{x.checked=t.checked});D.chk=t.checked?e.map(x=>x.dataset.ref):[];monBarRefresh();break}
+   case 'monClear':{S.ui.dash.chk=[];document.querySelectorAll('#mon input[data-act=monSel],#monAll').forEach(x=>{x.checked=false;x.indeterminate=false});monBarRefresh();break}
+   case 'monCancelOpen':bulkCancelModal();break;
+   case 'monCancelDo':{const r=bulkCancelRun(val('cx_reason'),val('cx_note'));if(!r.ok){toast(r.msg,'bad');break}closeModal();render();
+     if(r.skipped.length)openModal(`<div class="mh"><h2>${esc(r.msg)}</h2><button class="x" data-act="close" aria-label="Close">&times;</button></div><p class="mu" style="margin-bottom:8px">These were skipped:</p><ul style="margin:0 0 0 18px">${r.skipped.map(x=>`<li><b>${esc(x.ref)}</b>: ${esc(x.msg)}</li>`).join('')}</ul><div class="row sec"><button class="btn" data-act="close">Close</button></div>`);else toast(r.msg);break}
    case 'probOpen':problemModal();break;
    case 'probCopy':{const v=document.getElementById('pr_diag').value;const done=()=>toast('Copied. Paste it into your message.');if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(v).then(done,()=>{const a=document.getElementById('pr_diag');a.select();document.execCommand('copy');done()});else{const a=document.getElementById('pr_diag');a.select();document.execCommand('copy');done()}break}
    case 'probMail':{const v=document.getElementById('pr_diag').value;location.href='mailto:'+encodeURIComponent(window.ECT_LOGIN.reportTo)+'?subject='+encodeURIComponent('Problem report: Global Shipment Control Tower')+'&body='+encodeURIComponent(v.slice(0,1800));break}
    case 'signOut':signOut();break;
+   case 'resetMine':{if(!confirm('This replaces your sample data, and anything you changed, with fresh sample data dated from today. You stay signed in. Continue?'))break;
+     const em=S.signedIn&&S.signedIn.email,kb=S.brand;init();S.brand=kb;clockSync();
+     const u=((window.ECT_LOGIN&&ECT_LOGIN.users)||[]).find(x=>String(x.email).toLowerCase()===String(em).toLowerCase());
+     if(u)loginApply(u);closeModal();render();persistNow();toast('Your sample data was reset');break}
    case 'errDl':{const ok=downloadText('problems-noticed.txt',ErrLog.list().map(e=>e.t+'  '+e.kind+'  '+e.msg+'  '+e.src+'  page='+e.view+'  role='+e.role).join('\n'),'text/plain');toast(ok?'Downloaded':'Download is blocked here.',ok?'':'bad');break}
    case 'errClear':{ErrLog.clear();render();toast('List cleared');break}
    case 'csvXlsx':{const x=window._csv&&window._csv.xl;if(x)xlsxSave(x.name,x.sheets);break}
@@ -4527,10 +4598,10 @@ document.addEventListener('change',e=>{
 $('#modal').addEventListener('mousedown',e=>{if(e.target.id==='modal')closeModal()});
 
 /* ---------- boot ---------- */
-init();persistBoot();
+init();persistBoot();clockSync();
 $('#roleSel').innerHTML=ROLES.map(r=>`<option>${r}</option>`).join('');
 applyBrand();
-render();if(!loginBoot())authBoot();
+render();if(!loginBoot())authBoot();setInterval(clockTick,20000);
 window.addEventListener('beforeunload',()=>{persistNow()});
 window.addEventListener('resize',fitBrand);
 if(window.matchMedia)window.matchMedia('(max-width:620px)').addEventListener('change',()=>{if(S.view==='carrierupdates'&&S.ui.cu.driver===undefined)render()});
