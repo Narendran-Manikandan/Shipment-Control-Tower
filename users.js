@@ -8,36 +8,47 @@ window.ECT_LOGIN={
  "lockSeconds": 30,
  "users": [
   {
+   "email": "hussain0101@gmail.com",
+   "name": "Hussain Ali",
+   "role": "Logistics Executive",
+   "carrier": "",
+   "warehouses": "",
+   "tools": false,
+   "salt": "de9a17eb5fb16273c8c9aa4c00faa764",
+   "hash": "dbce5895d1b882e402ef1f3fcb872c280341e67865ba69c58adafef5583c6b7a",
+   "iter": 150000
+  },
+  {
    "email": "cvlnarendran@gmail.com",
    "name": "Narendran",
    "role": "Logistics Analyst",
    "carrier": "",
    "warehouses": "",
    "tools": false,
-   "salt": "8044f816a7b1505e9734a2f012a164cb",
-   "hash": "a2b7d8e09cbead15bdd5f4eaf53810dbdda2e3ea5b61a68fadf0acbd7775815e",
+   "salt": "835a182fc6575720c08fea6e700a5d8d",
+   "hash": "5e2d9a7a8ca388db4237073b88585aa9731e6406c0dd07ff32817dd86299bd27",
    "iter": 150000
   },
   {
    "email": "smnaren7.5@gmail.com",
    "name": "Narendran",
-   "role": "Carrier Partner",
-   "carrier": "Kerry Indev",
+   "role": "Logistics Manager",
+   "carrier": "",
    "warehouses": "",
    "tools": false,
-   "salt": "e7e4e3cc8c95ce4d419a6f1867a405e6",
-   "hash": "b5cecd4f035289ecd95057bec97118e5bb76ae32eb0544a80fb21c150a6f0a04",
+   "salt": "6ac2079b150c9fef81c579fc7311b2cb",
+   "hash": "d8459c0890072a30dbca869750d5899d89a73a40975c6cad9f1d6cf901442e9f",
    "iter": 150000
   },
   {
    "email": "narendranofficial@outlook.com",
    "name": "Narendran",
-   "role": "Warehouse Team",
-   "carrier": "",
-   "warehouses": "DC - US5 - Dallas",
+   "role": "Carrier Partner",
+   "carrier": "Kerry Indev",
+   "warehouses": "",
    "tools": false,
-   "salt": "753e59c6c2962f52794c85269b20860a",
-   "hash": "e9478273ec8be54cea989d306f5c62594543f0ba7fad5361c8641498e55eed35",
+   "salt": "939e502ca1fff678471300c162c4316c",
+   "hash": "ccb33f700e2394b48222497c6b2018122d010150d4e19660b1b22513aab44c2b",
    "iter": 150000
   }
  ]
