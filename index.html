@@ -281,6 +281,7 @@ button.slot.free:hover{border-color:var(--accent)}
 .gate-box{background:var(--panel);border-radius:14px;padding:26px;max-width:420px;width:100%}
 body.signed-in .demobar{display:none}
 .monbar{display:flex;align-items:center;gap:10px;min-height:36px;padding:4px 2px 8px}.monbar.on{background:var(--info-bg);border-radius:8px;padding:6px 10px;margin-bottom:8px;position:sticky;top:calc(var(--topH,92px) + 4px);z-index:4;box-shadow:0 2px 6px rgba(0,0,0,.12)}
+.ver{padding:2px 18px 14px;font-size:11px;opacity:.65;color:var(--side-ink)}@media(max-width:820px){.ver{display:none}}
 .gate-brand{display:flex;align-items:center;gap:10px;margin-bottom:14px;font-size:15px}.gate-logo{height:38px;width:38px}
 .whol{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:2px}
 .lnk{background:none;border:0;padding:0;color:inherit;font:inherit;font-size:12px;text-decoration:underline;cursor:pointer;opacity:.85}.lnk:hover{opacity:1}
@@ -535,12 +536,11 @@ function notifyUpdates(ref,lines,status){
   }
   return n;
 }
-const CANCEL_REASONS=['Order cancelled by the buyer','Duplicate entry','Shipper cancelled','Shipment replaced by another booking','Booked in error','Other'];
+const CANCEL_REASONS=['Order cancelled by the buyer','Duplicate entry','Shipper cancelled','Shipment replaced by another booking','Booked in error','Demo or test record','Other'];
 function shipCancel(ref,reason,note){
   const sh=getShip(ref);if(!sh)return {ok:false,msg:'Shipment not found'};
   if(!can('cancelship'))return {ok:false,msg:'Your role cannot cancel shipments'};
   if(sh.cancelled)return {ok:false,msg:ref+' is already cancelled'};
-  if(sh.status==='Delivered')return {ok:false,msg:ref+' is delivered and cannot be cancelled'};
   if(!CANCEL_REASONS.includes(reason))return {ok:false,msg:'Choose a reason for cancelling'};
   note=String(note||'').trim();if(reason==='Other'&&!note)return {ok:false,msg:'Describe the reason when you choose Other'};
   const prev=sh.status;let mails=0,slots=0;
@@ -557,7 +557,7 @@ function shipCancel(ref,reason,note){
   });
   if(w&&w.emails.length&&S.whNotified[ref]&&!slots){mail(w.emails.join(', '),'Shipment cancelled: '+ref+' is no longer due','The shipment '+ref+' ('+sh.route+') that was due on '+fmt(sh.dueL)+' has been cancelled. Please do not expect it.\nThis email contains no costs.','Shipment cancelled');mails++}
   audit('Shipment cancelled',ref,reason+(note?': '+note:'')+' (was '+prev+')'+(slots?', '+slots+' slot request(s) cancelled':''));
-  return {ok:true,msg:ref+': cancelled. It stays on record and is left out of all reports and KPIs.'+(slots?' '+slots+' delivery slot request(s) cancelled.':''),slots,mails};
+  return {ok:true,msg:ref+': cancelled. It stays on record and is left out of all reports and KPIs.'+(prev==='Delivered'?' It was delivered, so it no longer counts in delivery, carrier, transit or freight figures.':'')+(slots?' '+slots+' delivery slot request(s) cancelled.':''),slots,mails};
 }
 function shipReinstate(ref){
   const sh=getShip(ref);if(!sh)return {ok:false,msg:'Shipment not found'};
@@ -575,6 +575,7 @@ function cancelModal(ref){
   openModal(`<div class="mh"><h2>Cancel ${esc(ref)}</h2><button class="x" data-act="close" aria-label="Close">&times;</button></div>
   <p class="mu" style="margin-bottom:8px">${esc(sh.mode)}, ${esc(sh.route)}, ${esc(sh.carrier)}, ${esc(sh.status)}</p>
   <div class="note">The shipment stays on record with its full history. It is left out of every dashboard, KPI, analytic and performance figure. Open delivery slot requests are cancelled, and followers and the warehouse team are emailed.</div>
+  ${sh.status==='Delivered'?'<div class="err" style="margin-top:8px"><b>This shipment is delivered.</b> Cancelling it removes it from on-time delivery, carrier performance, transit and freight figures. Use it for demo or test records and entries made in error. Reinstate puts it back.</div>':''}
   <div class="g2" style="margin-top:10px"><label class="f">Reason<select id="cx_reason" class="in"><option value="">Choose a reason</option>${CANCEL_REASONS.map(x=>`<option>${esc(x)}</option>`).join('')}</select></label><label class="f">Details<input id="cx_note" class="in" placeholder="Required when the reason is Other"></label></div>
   <div class="row sec"><button class="btn danger" data-act="cancelDo" data-ref="${esc(ref)}">Cancel this shipment</button><button class="btn" data-act="close">Keep it</button></div>`);
 }
@@ -2377,7 +2378,7 @@ function goLivePanel(){
   ${errCard()}`;
 }
 /* ========== demo sign-in (email and password), problem log, report a problem ========== */
-const APP_BUILD='demo-2026-11-11';
+const APP_BUILD='site build 2026-11-11 08:54 UTC';
 const ErrLog={key:'ect.errors',max:60,
   add(kind,msg,src){try{const a=JSON.parse(localStorage.getItem(this.key)||'[]');a.push({t:new Date().toISOString(),kind,msg:String(msg==null?'':msg).slice(0,300),src:String(src||'').slice(0,160),view:(typeof S!=='undefined'&&S&&S.view)||'',role:(typeof S!=='undefined'&&S&&S.role)||''});while(a.length>this.max)a.shift();localStorage.setItem(this.key,JSON.stringify(a))}catch(e){}},
   list(){try{return JSON.parse(localStorage.getItem(this.key)||'[]')}catch(e){return []}},
@@ -2404,7 +2405,7 @@ function loginGate(msg,email,noform){
   let g=document.getElementById('authGate');if(!g){g=document.createElement('div');g.id='authGate';g.setAttribute('role','dialog');g.setAttribute('aria-modal','true');document.body.appendChild(g)}
   const b=(typeof S!=='undefined'&&S.brand)||{};
   g.innerHTML=`<form class="gate-box" id="loginForm" autocomplete="on"><div class="gate-brand">${b.logo?`<img src="${esc(b.logo)}" alt="" class="gate-logo">`:''}<b>${esc(b.company||'')}</b></div><h2 style="margin:0 0 4px">Global Shipment Control Tower</h2><p class="mu" style="margin:0 0 14px">${noform?'':'Sign in with the email and password you were given.'}</p>${msg?`<div class="err" role="alert" style="margin-bottom:12px">${esc(msg)}</div>`:''}
-  ${noform?'':`<label class="f">Email<input id="lg_email" class="in" type="email" name="username" autocomplete="username" value="${esc(email||'')}" required></label><label class="f" style="margin-top:10px">Password<input id="lg_pw" class="in" type="password" name="password" autocomplete="current-password" required></label><button class="btn pri dvb" type="submit" id="lg_go">Sign in</button><p class="hint" style="margin-top:12px">This is a demo with sample data. Do not enter real company information.</p>`}</form>`;
+  ${noform?'':`<label class="f">Email<input id="lg_email" class="in" type="email" name="username" autocomplete="username" value="${esc(email||'')}" required></label><label class="f" style="margin-top:10px">Password<input id="lg_pw" class="in" type="password" name="password" autocomplete="current-password" required></label><button class="btn pri dvb" type="submit" id="lg_go">Sign in</button><p class="hint" style="margin-top:12px">This is a demo with sample data. Do not enter real company information.</p>`}<p class="hint" style="margin-top:6px">Version: ${APP_BUILD.replace('site build ','')}</p></form>`;
   const f=g.querySelector(noform?'form':(email?'#lg_pw':'#lg_email'));if(f&&f.focus)setTimeout(()=>f.focus(),30);
 }
 async function loginSubmit(){
@@ -2571,7 +2572,7 @@ function detailModal(ref){
   <h3 class="sec">History</h3>${ev.length?`<div class="tbw"><table class="tb"><tr><th>Date</th><th>Status</th><th>Location</th><th>Note</th><th>Posted by</th></tr>${ev.map(e=>`<tr><td>${fmt(e.EventDate)}</td><td>${esc(e.Status)}</td><td>${esc(e.Location)}</td><td>${esc(e.Note)}</td><td>${esc(e.PostedBy)}</td></tr>`).join('')}</table></div>`:'<div class="empty">No history yet.</div>'}
   ${can('milestones')&&sh.status!=='Delivered'&&!sh.cancelled?`<h3 class="sec">Record an update</h3>${ufHTML(ref,false)}`:''}
   ${can('request')&&!sh.cancelled?`<h3 class="sec">Shipment details</h3><div class="row"><label class="f">Shipment type<select id="m_stype" class="in" style="width:auto">${(sh.stype?'':'<option value="" selected>Not set</option>')+TYPES.map(x=>`<option ${x===sh.stype?'selected':''}>${x}</option>`).join('')}</select></label><label class="f">Nature of goods<select id="m_nature" class="in" style="width:auto">${(sh.nature?'':'<option value="" selected>Not set</option>')+NATURES.map(x=>`<option ${x===sh.nature?'selected':''}>${x}</option>`).join('')}</select></label><button class="btn" data-act="saveType" data-ref="${esc(ref)}" style="align-self:flex-end">Save details</button></div>`:''}
-  <div class="row sec">${sh.cancelled?'':`<button class="btn" data-act="subOpen" data-ref="${esc(ref)}">Email me updates</button>`}${can('editship')&&!sh.cancelled?`<button class="btn" data-act="editOpen" data-ref="${esc(ref)}">Edit shipment</button>`:''}${can('cancelship')&&!sh.cancelled&&sh.status!=='Delivered'?`<button class="btn danger" data-act="cancelOpen" data-ref="${esc(ref)}">Cancel this shipment</button>`:''}</div>`);
+  <div class="row sec">${sh.cancelled?'':`<button class="btn" data-act="subOpen" data-ref="${esc(ref)}">Email me updates</button>`}${can('editship')&&!sh.cancelled?`<button class="btn" data-act="editOpen" data-ref="${esc(ref)}">Edit shipment</button>`:''}${can('cancelship')&&!sh.cancelled?`<button class="btn danger" data-act="cancelOpen" data-ref="${esc(ref)}">Cancel this shipment</button>`:''}</div>`);
 }
 
 /* ----- 2. Request form ----- */
@@ -3036,7 +3037,7 @@ function listRows(arr,kind){
 }
 function monBarHTML(){
   const n=((S.ui.dash.chk)||[]).length;if(!can('cancelship'))return '';
-  return `<div id="monBar" class="monbar${n?' on':''}">${n?`<b>${n} selected</b><button class="btn sm danger" data-act="monCancelOpen">Cancel selected (${n})</button><button class="btn sm" data-act="monClear">Clear</button>`:'<span class="mu sm">Tick the boxes to cancel several shipments at once.</span>'}</div>`;
+  return `<div id="monBar" class="monbar${n?' on':''}">${n?`<b>${n} selected</b><button class="btn sm danger" data-act="monCancelOpen">Cancel selected (${n})</button><button class="btn sm" data-act="monClear">Clear</button>`:'<span class="mu sm">Tick the boxes to cancel several shipments at once. To remove demo records, set the status filter to Delivered and tick the box in the heading.</span>'}</div>`;
 }
 function monBarRefresh(){
   const b=document.getElementById('monBar');if(b)b.outerHTML=monBarHTML();
@@ -3046,7 +3047,7 @@ function bulkCancelModal(){
   const D=S.ui.dash,L=(D.chk||[]).map(r=>getShip(r)).filter(Boolean);if(!L.length)return;
   openModal(`<div class="mh"><h2>Cancel ${L.length} shipment${L.length>1?'s':''}</h2><button class="x" data-act="close" aria-label="Close">&times;</button></div>
   <div class="tbw" style="max-height:200px;overflow:auto"><table class="tb" data-sort="off"><tr><th>Shipment</th><th>Route</th><th>Carrier</th><th>Status</th></tr>${L.slice(0,30).map(s=>`<tr><td><b>${s.ref}</b></td><td>${esc(s.route)}</td><td>${esc(s.carrier)}</td><td>${esc(s.status)}</td></tr>`).join('')}</table></div>${L.length>30?`<p class="hint">and ${L.length-30} more</p>`:''}
-  <div class="note" style="margin-top:10px">Each shipment stays on record with its history and is left out of every dashboard, KPI, analytic and performance figure. Open delivery slot requests are cancelled, and followers and warehouse teams are emailed. Shipments that are already delivered or cancelled are skipped.</div>
+  <div class="note" style="margin-top:10px">Each shipment stays on record with its history and is left out of every dashboard, KPI, analytic and performance figure. Open delivery slot requests are cancelled, and followers and warehouse teams are emailed. Shipments that are already cancelled are skipped.</div>${L.some(s=>s.status==='Delivered')?`<div class="err" style="margin-top:8px"><b>${L.filter(s=>s.status==='Delivered').length} of these ${L.filter(s=>s.status==='Delivered').length===1?'is':'are'} delivered.</b> They will no longer count in on-time delivery, carrier, transit or freight figures. Reinstate puts a shipment back.</div>`:''}
   <div class="g2" style="margin-top:10px"><label class="f">Reason<select id="cx_reason" class="in"><option value="">Choose a reason</option>${CANCEL_REASONS.map(x=>`<option>${esc(x)}</option>`).join('')}</select></label><label class="f">Details<input id="cx_note" class="in" placeholder="Required when the reason is Other"></label></div>
   <div class="row sec"><button class="btn danger" data-act="monCancelDo">Cancel ${L.length} shipment${L.length>1?'s':''}</button><button class="btn" data-act="close">Keep them</button></div>`);
 }
@@ -3067,10 +3068,10 @@ function monHTML(all){
   const rows=(D.status==='Cancelled'?cancelledList():all).filter(sh=>(D.status==='All'||D.status==='Cancelled'||sh.status===D.status||(D.status==='Delayed'&&isLateNow(sh))||(D.status==='Invoice pending'&&can('invoices')&&isInvPending(sh))||(D.status==='At risk'&&riskInfo(sh)&&!isLateNow(sh))||(D.status==='Free time ending'&&['ending','over'].includes((freeInfo(sh)||{}).state)))).filter(sh=>!D.overdueOnly||isLateNow(sh))
     .filter(sh=>!q||(sh.ref+' '+sh.carrier+' '+sh.shipper+' '+sh.consignee+' '+sh.route+' '+sh.pos.join(' ')).toLowerCase().includes(q)).sort((a,b)=>(a.due||'9').localeCompare(b.due||'9'));
   if(!rows.length)return '<div class="empty">No shipments match these filters.</div>';
-  const cb=can('cancelship'),elig=s=>!s.cancelled&&s.status!=='Delivered';D.chk=(D.chk||[]).filter(r=>rows.some(s=>s.ref===r&&elig(s)));
+  const cb=can('cancelship'),elig=s=>!s.cancelled;D.chk=(D.chk||[]).filter(r=>rows.some(s=>s.ref===r&&elig(s)));
   const allSel=cb&&rows.some(elig)&&rows.filter(elig).every(s=>D.chk.includes(s.ref));
-  return `${monBarHTML()}<div class="tbw"><table class="tb" data-sort="on"><tr>${cb?`<th style="width:34px"><input type="checkbox" id="monAll" data-act="monAll" aria-label="Select all open shipments" ${allSel?'checked':''}></th>`:''}<th>Shipment</th><th>Mode</th><th>Type</th><th>Route</th><th>Carrier</th><th>Progress</th><th>Due</th><th>Status</th>${can('invoices')?'<th>Freight invoice</th>':''}${can('cancelship')?'<th></th>':''}</tr>`+rows.map(sh=>`<tr class="click${can('invoices')&&isInvPending(sh)?' tr-pend':''}" data-act="open" data-ref="${sh.ref}">${cb?`<td><input type="checkbox" data-act="monSel" data-ref="${sh.ref}" aria-label="Select ${sh.ref}" ${elig(sh)?'':'disabled'} ${D.chk.includes(sh.ref)?'checked':''}></td>`:''}<td><b>${sh.ref}</b></td><td>${modeBadge(sh.mode)}</td><td>${typeBadge(sh.stype)}${dgTag(sh.nature)}</td><td>${esc(sh.route)}</td><td>${esc(sh.carrier)}</td><td>${miniHTML(sh)}</td>
-    <td>${dueCell(sh)}</td><td>${pill(sh)}</td>${can('invoices')?`<td>${sh.cancelled?'-':invPill(sh)}</td>`:''}${can('cancelship')?`<td class="r">${sh.cancelled||sh.status==='Delivered'?'':`<button class="btn sm danger" data-act="cancelOpen" data-ref="${sh.ref}">Cancel</button>`}</td>`:''}</tr>`).join('')+'</table></div>';
+  return `${monBarHTML()}<div class="tbw"><table class="tb" data-sort="on"><tr>${cb?`<th style="width:34px"><input type="checkbox" id="monAll" data-act="monAll" aria-label="Select all shown shipments" ${allSel?'checked':''}></th>`:''}<th>Shipment</th><th>Mode</th><th>Type</th><th>Route</th><th>Carrier</th><th>Progress</th><th>Due</th><th>Status</th>${can('invoices')?'<th>Freight invoice</th>':''}${can('cancelship')?'<th></th>':''}</tr>`+rows.map(sh=>`<tr class="click${can('invoices')&&isInvPending(sh)?' tr-pend':''}" data-act="open" data-ref="${sh.ref}">${cb?`<td><input type="checkbox" data-act="monSel" data-ref="${sh.ref}" aria-label="Select ${sh.ref}" ${elig(sh)?'':'disabled'} ${D.chk.includes(sh.ref)?'checked':''}></td>`:''}<td><b>${sh.ref}</b></td><td>${modeBadge(sh.mode)}</td><td>${typeBadge(sh.stype)}${dgTag(sh.nature)}</td><td>${esc(sh.route)}</td><td>${esc(sh.carrier)}</td><td>${miniHTML(sh)}</td>
+    <td>${dueCell(sh)}</td><td>${pill(sh)}</td>${can('invoices')?`<td>${sh.cancelled?'-':invPill(sh)}</td>`:''}${can('cancelship')?`<td class="r">${sh.cancelled?'':`<button class="btn sm danger" data-act="cancelOpen" data-ref="${sh.ref}">Cancel</button>`}</td>`:''}</tr>`).join('')+'</table></div>';
 }
 function onTime(arr,k){
   let n=0,on=0;const late=[];
@@ -4176,8 +4177,8 @@ function guide(){
   <li><b>Freight Trends</b>: filter by origin and destination country and port, nature of goods (DG or Non-DG), mode and volume (Air, LCL, 20FT, 40FT), group by any of them, and compare quoted and actual freight over time. Air and LCL show the rate per kg on the greater of actual weight and CBM &times; 167 kg; a shipment with no CBM uses actual weight and is flagged. 20FT and 40FT show the rate per container.</li>
   <li><b>Updating several milestones at once</b>: in Carrier Updates, Milestone Management and the shipment details, add one line per milestone. Mark what happened with its date, or give a new estimate with a reason. Overdue and due dates follow the latest estimate; on-time and delayed always use the original planned date.</li>
   <li><b>Delivery slots</b>: under Deliveries, Delivery Slot Requests lets Logistics and carriers book one of 8 one-hour slots a day (08:00 to 16:00 warehouse time) at the shipment's warehouse. Delivery Management is where the warehouse team approves, proposes a new slot or rejects, and blocks slots for holidays, audits and other reasons. Use Preview as, Warehouse Team to see the warehouse side.</li>
-  <li><b>Cancelling several shipments</b>: on the Control Tower Overview, tick the boxes in the shipment monitor (or the box in the heading for all open ones) and choose Cancel selected.</li>
-  <li><b>Cancelling a shipment</b>: open the shipment (from the Control Tower monitor or Track &amp; Trace) and choose Cancel this shipment, with a reason. It stays on record, can be found in Track &amp; Trace and in the monitor under Cancelled, and is left out of every dashboard, KPI, analytic and spend figure. Open delivery slots are cancelled and followers and the warehouse are emailed. Cancelling and reinstating is the Role access item Cancel and reinstate shipments.</li>
+  <li><b>Cancelling several shipments</b>: on the Control Tower Overview, tick the boxes in the shipment monitor (or the box in the heading for all the shipments shown) and choose Cancel selected. To remove demo shipments that are already delivered, set the status filter to Delivered first, use the reason Demo or test record, and Reinstate brings one back.</li>
+  <li><b>Cancelling a shipment</b>: open the shipment (from the Control Tower monitor or Track &amp; Trace) and choose Cancel this shipment, with a reason. It stays on record, can be found in Track &amp; Trace and in the monitor under Cancelled, and is left out of every dashboard, KPI, analytic and spend figure. Delivered shipments can be cancelled too, for example demo or test records. Open delivery slots are cancelled and followers and the warehouse are emailed. Cancelling and reinstating is the Role access item Cancel and reinstate shipments.</li>
   <li><b>Import and export</b>: Freight Commercials, Administration, Users and roles, and Administration, Warehouses each have Export (Excel or CSV) and Import. Export gives the template with the current data; edit it, import it back, review the result, and apply. In the user and warehouse files, Action = Delete removes a row. Users and warehouses can be searched by any field.</li>
   <li><b>Editing shipments</b>: open a shipment and choose Edit shipment to correct its details and item lines, or use Shipment Requests, Update existing to change many shipments through an Excel file. <b>Data Quality</b> lists gaps such as a missing CBM, a warehouse without a record, or a tracking number used twice, and the same checks warn you when you save a new shipment.</li>
   <li><b>My tasks</b>: the first page in Operations lists what needs your attention, for your role, with a count in the menu. Each line opens the page and filter that shows it.</li>
@@ -4607,6 +4608,7 @@ $('#modal').addEventListener('mousedown',e=>{if(e.target.id==='modal')closeModal
 /* ---------- boot ---------- */
 init();persistBoot();clockSync();
 $('#roleSel').innerHTML=ROLES.map(r=>`<option>${r}</option>`).join('');
+document.querySelector('.side').insertAdjacentHTML('beforeend','<div id="ver" class="ver">Version: '+APP_BUILD.replace('site build ','')+'</div>');
 applyBrand();
 render();if(!loginBoot())authBoot();setInterval(clockTick,20000);
 window.addEventListener('beforeunload',()=>{persistNow()});
