@@ -3,6 +3,7 @@
 window.ECT_LOGIN={
  "required": true,
  "storage": "browser",
+ "clock": "real",
  "reportTo": "cvlnarendran@gmail.com",
  "attempts": 5,
  "lockSeconds": 30,
@@ -49,6 +50,17 @@ window.ECT_LOGIN={
    "tools": false,
    "salt": "939e502ca1fff678471300c162c4316c",
    "hash": "ccb33f700e2394b48222497c6b2018122d010150d4e19660b1b22513aab44c2b",
+   "iter": 150000
+  },
+  {
+   "email": "vshastry@demo.com",
+   "name": "Vikram Shastry",
+   "role": "Logistics Manager",
+   "carrier": "",
+   "warehouses": "",
+   "tools": false,
+   "salt": "69c469b2c09098e00a2acbcdafe1702e",
+   "hash": "26411ea0a9b85a000bd6c5bbb8f68b1fe6828852475f0f0268898efda5414ff2",
    "iter": 150000
   }
  ]
