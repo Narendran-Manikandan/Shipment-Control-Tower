@@ -68,6 +68,20 @@ window.ECT_LOGIN={
    "salt": "d627fd57a1f9d3dca6499d3881e4ef8a",
    "hash": "395de79e059191ec3b5c19d75629305b309eb1e257946d643d157096fe47a665",
    "iter": 150000
+  },
+  {
+   "email": "anthony@demo.com",
+   "name": "Anthony Kiran",
+   "role": "Logistics Executive",
+   "carrier": "",
+   "warehouses": "",
+   "shippers": "",
+   "receivers": "",
+   "partner": "",
+   "tools": false,
+   "salt": "5f3ffbfc47786b7299da2b3d1530f0c0",
+   "hash": "a0617aeb954f1f0ec60066f2f2996c2c0e8c4f6250b2275a5c16be34892ebc50",
+   "iter": 150000
   }
  ]
 };
