@@ -13,6 +13,9 @@ table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:left;p
 .warn{background:#fff4e5;border:1px solid #f0c987;border-radius:8px;padding:10px 12px;font-size:14px}.err{background:#fdecea;border:1px solid #f1a9a2;border-radius:8px;padding:10px 12px;color:#8a1c14}
 textarea.out{width:100%;min-height:220px;font:12px/1.4 ui-monospace,Consolas,monospace}.chk{flex-direction:row;align-items:center;gap:8px;color:var(--ink);font-size:14px}
 .hide{display:none}
+.tiles{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}.tile{border:1px solid var(--line);border-radius:10px;padding:8px 14px;background:#fff;font:inherit;text-align:left;min-width:110px}.tile b{display:block;font-size:20px}.tile small{color:var(--muted)}
+.scroll{overflow:auto;max-height:360px;border:1px solid var(--line);border-radius:8px}.scroll table th{position:sticky;top:0;background:#f7f8f8}
+.bad{color:#8a1c14}.okc{color:#1b6b34}.sm{font-size:13px}.help td,.help th{padding:4px 8px;font-size:13px;vertical-align:top}
 </style></head><body><main>
 <h1>Create demo users</h1>
 <p class="mu">Give each person an email, a password and a role. Then download <b>users.js</b> and upload it to your GitHub repository, replacing the old one. Everything on this page runs on your own computer. Passwords are never sent anywhere.</p>
@@ -26,6 +29,10 @@ textarea.out{width:100%;min-height:220px;font:12px/1.4 ui-monospace,Consolas,mon
 <label>Email<input id="u_email" type="email" placeholder="name@yourcompany.com"></label>
 <label>Name<input id="u_name" placeholder="Shown in the app"></label>
 <label>Role<select id="u_role"></select></label>
+<label id="otherBox" class="hide">Profile name (exactly as in the app)<input id="u_other" placeholder="Finance"></label>
+<label id="rcvBox" class="hide">Receivers (separate with ;)<input id="u_rcv" placeholder="Receiver Ltd; Other Receiver"></label>
+<label id="prtBox" class="hide">Partner (the partner's email)<input id="u_prt" type="email" placeholder="partner@3pl.example"></label>
+<label id="shipBox" class="hide">Shippers (separate with ;)<input id="u_ship" placeholder="Acme Exports Ltd; Beta Trading"></label>
 <label id="carrierBox" class="hide">Carrier (must match a carrier in the shipments)<input id="u_carrier" list="carriers" placeholder="Dimerco"><datalist id="carriers"><option>Dimerco</option><option>Flex</option><option>CHR</option><option>Kerry Indev</option><option>Dahnay</option></datalist></label>
 <label>Password (at least 10 characters)<input id="u_pw" type="text" autocomplete="off" placeholder="Type one, or press Generate"></label>
 </div>
@@ -34,59 +41,232 @@ textarea.out{width:100%;min-height:220px;font:12px/1.4 ui-monospace,Consolas,mon
 <div class="row" style="margin-top:12px"><button id="genPw" type="button">Generate a strong password</button><button class="pri" id="addBtn" type="button">Add or change this user</button></div>
 <div id="msg" style="margin-top:12px"></div></div>
 
-<div class="card"><h2>3. Users in the list</h2><div id="tbl"></div></div>
+<div class="card"><h2>3. Add many users from a file</h2>
+<p class="mu">Download the template, fill it in with Excel (or any spreadsheet program), save it as CSV, and upload it here. You see every row checked before anything is added.</p>
+<div class="row"><button id="tplBtn" type="button" class="pri">Download the template (CSV)</button><button id="curBtn" type="button">Download the current users to edit</button><label class="btn" style="font-size:15px;color:var(--ink);font-weight:600;padding:9px 14px;border:1px solid var(--line);border-radius:8px;background:#fff;cursor:pointer;flex-direction:row">Upload the filled file<input type="file" id="impFile" accept=".csv,.txt,text/csv,text/plain" hidden></label></div>
+<details style="margin-top:12px"><summary style="cursor:pointer;font-weight:600">What to put in each column</summary>
+<table class="help" style="margin-top:8px"><tr><th>Email</th><td>Required. The person signs in with it. Not case sensitive.</td></tr>
+<tr><th>Name</th><td>Shown in the app. If empty, the email is used.</td></tr>
+<tr><th>Role</th><td>Required. One of: <span id="roleHelp"></span>. Or the name of a profile you created in the app (for example Finance).</td></tr>
+<tr><th>Shippers</th><td>Required for a External Logistics Partner: the shippers they work for, separated by a bar or semicolon, for example <i>Acme Exports Ltd | Beta Trading</i>. They work like a Logistics Executive, only for those shippers' shipments.</td></tr>
+<tr><th>Carrier</th><td>Required for a Carrier Partner, empty for everyone else. Known carriers: <span id="carHelp"></span>. It must match the carrier on the shipments.</td></tr>
+<tr><th>Warehouses</th><td>Required for a Warehouse Team user. Separate several with a bar, for example <i>RD - Fremont | RD - Germany</i>. Known warehouses: <span id="whHelp"></span></td></tr>
+<tr><th>Password</th><td>At least 10 characters. <b>Leave it empty</b> and a strong password is generated for a new user, or the current password is kept for a user who is already in the list.</td></tr>
+<tr><th>Show demo tools</th><td>Yes or No. Tick Yes only for yourself. Empty means No (or unchanged for an existing user).</td></tr></table>
+<p class="mu sm" style="margin-top:8px">A user whose email is already in the list is updated. Up to 300 rows per file. Do not email the filled file: it can contain passwords.</p></details>
+<div id="impOut" style="margin-top:12px"></div></div>
 
-<div class="card"><h2>4. Settings</h2><div class="g">
+<div class="card"><h2>4. Users in the list</h2><div id="tbl"></div></div>
+
+<div class="card"><h2>5. Settings</h2><div class="g">
 <label>Sign-in<select id="s_required"><option value="1">Required: nobody gets in without signing in</option><option value="0">Not required: anyone can open the demo</option></select></label>
-<label>Where each person's data is kept<select id="s_storage"><option value="browser">In their own browser, kept between visits</option><option value="demo">Not kept: resets when the page reloads</option></select></label>
+<label>Where each person's data is kept<select id="s_storage"><option value="browser">In their own browser, kept between visits</option><option value="demo">Not kept: resets when the page reloads</option><option value="shared">Shared: everyone on every device sees the same data (needs Supabase, step 5b)</option></select></label>
+<div class="warn" id="stHint" style="grid-column:1/-1"></div>
 <label>Date and time in the app<select id="s_clock"><option value="real">The real date and time (sample data moves with it)</option><option value="demo">A fixed demo date (17 October 2026)</option></select></label>
 <label>Send problem reports to (email, optional)<input id="s_report" type="email" placeholder="you@example.com"></label>
 <label>Wrong passwords allowed before a pause<input id="s_att" type="number" min="3" max="20" value="5"></label>
 <label>Length of the pause (seconds)<input id="s_lock" type="number" min="10" max="600" value="30"></label></div></div>
 
-<div class="card"><h2>5. Your users.js</h2>
+<div class="card hide" id="sharedCard"><h2>5b. Shared data (Supabase)</h2>
+<p class="mu">Browsers cannot share data by themselves, so the app saves it in a small free online database. Follow these steps once.</p>
+<ol class="sm" style="margin:0 0 12px 18px;line-height:1.7"><li>Go to <b>supabase.com</b>, sign up (free) and click <b>New project</b>. Choose any name and region and wait for it to finish.</li>
+<li>Open <b>SQL Editor</b>, click <b>New query</b>, paste the SQL below, and click <b>Run</b>.</li>
+<li>Open <b>Project Settings</b>, then <b>API</b> (or <b>API Keys</b>). Copy the <b>Project URL</b> and the <b>anon public</b> key (also called the publishable key). <b>Never use the secret or service_role key.</b></li>
+<li>Paste them below, download <code>users.js</code> and upload it to GitHub.</li></ol>
+<div class="row" style="margin-bottom:8px"><button id="sqlCopy" type="button">Copy the SQL</button></div>
+<pre id="sqlBox" style="background:#f7f8f8;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:12px;overflow:auto;max-height:220px;margin:0 0 12px"></pre>
+<div class="g"><label>Project URL<input id="sh_url" placeholder="https://abcdefgh.supabase.co"></label>
+<label>Public key (anon or publishable)<input id="sh_key" placeholder="eyJ... or sb_publishable_..." autocomplete="off"></label>
+<label>Room name (a different name gives a separate set of data)<input id="sh_room" value="main"></label>
+<label>How often a device checks for news (seconds)<input id="sh_poll" type="number" min="3" max="120" value="8"></label></div>
+<div id="sharedMsg" style="margin-top:10px"></div>
+<p class="mu sm" style="margin-top:8px">The public key is stored in users.js, so anyone who can open your site can read and change this data. Use sample data only. The free plan pauses a project after a week with no activity, so open the site now and then.</p></div>
+
+<div class="card"><h2>6. Your users.js</h2>
 <div class="row"><button class="pri" id="dlBtn" type="button">Download users.js</button><button id="cpBtn" type="button">Copy the text</button></div>
 <p class="mu">Upload the downloaded file to your repository, in the same place as index.html, replacing the old users.js. The change goes live in a minute or two.</p>
 <textarea class="out" id="out" readonly></textarea></div>
 </main>
 <script>
-const ROLES=['In Organization','Logistics Executive','Logistics Associate','Logistics Analyst','Logistics Manager','Carrier Partner','Warehouse Team'];
+const ROLES=['In Organization','Logistics Executive','Logistics Associate','Logistics Analyst','Logistics Manager','Carrier Partner','Warehouse Team','External Logistics Partner','Partner Executive'];
+const OTHER='Other (a profile you created in the app)';
+const okProfile=n=>/^[A-Za-z0-9 &.\-]{2,40}$/.test(n);
+const normShp=v=>[...new Set(String(v||'').split(/[;|]+/).map(x=>x.trim()).filter(Boolean))].join('; ');
 const WH=['RD - Fremont','RD - Germany','RD - Bangalore','RD - Petaluma','DC - US5 - Dallas','DC - CH1 - Flex Futian','MFG_SWDA'];
 const ITER=150000,$=id=>document.getElementById(id);
 let users=[];
-$('u_role').innerHTML=ROLES.map(r=>'<option>'+r+'</option>').join('');
+$('u_role').innerHTML=ROLES.concat([OTHER]).map(r=>'<option>'+r+'</option>').join('');
 $('whList').innerHTML=WH.map(w=>'<label class="chk"><input type="checkbox" value="'+w+'"> '+w+'</label>').join('');
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-function role(){const r=$('u_role').value;$('carrierBox').classList.toggle('hide',r!=='Carrier Partner');$('whBox').classList.toggle('hide',r!=='Warehouse Team')}
+function role(){const r=$('u_role').value;$('carrierBox').classList.toggle('hide',r!=='Carrier Partner');$('whBox').classList.toggle('hide',r!=='Warehouse Team');$('shipBox').classList.toggle('hide',r!=='External Logistics Partner');$('rcvBox').classList.toggle('hide',r!=='External Logistics Partner');$('prtBox').classList.toggle('hide',r!=='Partner Executive');$('otherBox').classList.toggle('hide',r!==OTHER)}
 $('u_role').addEventListener('change',role);role();
 function msg(t,bad){$('msg').innerHTML=t?'<div class="'+(bad?'err':'warn')+'">'+esc(t)+'</div>':''}
 const hex=b=>[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');
 async function hash(pw,saltBytes){const k=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveBits']);return hex(await crypto.subtle.deriveBits({name:'PBKDF2',hash:'SHA-256',salt:saltBytes,iterations:ITER},k,256))}
 $('genPw').onclick=()=>{const a='abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789',r=crypto.getRandomValues(new Uint8Array(14));$('u_pw').value=[...r].map(x=>a[x%a.length]).join('')};
 $('addBtn').onclick=async()=>{
-  const email=$('u_email').value.trim().toLowerCase(),name=$('u_name').value.trim(),r=$('u_role').value,pw=$('u_pw').value;
+  const email=$('u_email').value.trim().toLowerCase(),name=$('u_name').value.trim(),pw=$('u_pw').value;let r=$('u_role').value;
+  if(r===OTHER){r=$('u_other').value.replace(/\s+/g,' ').trim();if(!okProfile(r))return msg('Type the profile name: 2 to 40 letters, numbers, spaces and & . -',1)}
   if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))return msg('Enter a valid email address.',1);
   if(pw.length<10)return msg('The password needs at least 10 characters. Press Generate for a strong one.',1);
   const carrier=r==='Carrier Partner'?$('u_carrier').value.trim():'',wh=r==='Warehouse Team'?[...$('whList').querySelectorAll('input:checked')].map(x=>x.value).join('; '):'';
   if(r==='Carrier Partner'&&!carrier)return msg('Enter the carrier for a Carrier Partner.',1);
   if(r==='Warehouse Team'&&!wh)return msg('Tick at least one warehouse for a Warehouse Team user.',1);
-  const salt=crypto.getRandomValues(new Uint8Array(16)),h=await hash(pw,salt),u={email,name:name||email,role:r,carrier,warehouses:wh,tools:$('u_tools').checked,salt:hex(salt),hash:h,iter:ITER};
+  const shippers=r==='External Logistics Partner'?normShp($('u_ship').value):'',receivers=r==='External Logistics Partner'?normShp($('u_rcv').value):'',partner=r==='Partner Executive'?$('u_prt').value.trim().toLowerCase():'';if(r==='External Logistics Partner'&&!shippers&&!receivers)return msg('Enter at least one shipper or receiver for an External Logistics Partner.',1);if(r==='Partner Executive'&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(partner))return msg('Enter the email of the External Logistics Partner this executive works under.',1);
+  const salt=crypto.getRandomValues(new Uint8Array(16)),h=await hash(pw,salt),u={email,name:name||email,role:r,carrier,warehouses:wh,shippers,receivers,partner,tools:$('u_tools').checked,salt:hex(salt),hash:h,iter:ITER};
   const i=users.findIndex(x=>x.email===email);if(i>=0)users[i]=u;else users.push(u);
   msg('Saved '+email+' as '+r+'. Write the password down now: '+pw+'  (it cannot be shown again).');
   $('u_pw').value='';render();
 };
 function render(){
-  $('tbl').innerHTML=users.length?'<table><tr><th>Email</th><th>Name</th><th>Role</th><th>Carrier or warehouses</th><th>Tools</th><th></th></tr>'+users.map((u,i)=>'<tr><td>'+esc(u.email)+'</td><td>'+esc(u.name)+'</td><td>'+esc(u.role)+'</td><td>'+esc(u.carrier||u.warehouses||'-')+'</td><td>'+(u.tools?'Yes':'-')+'</td><td><button class="dan" data-i="'+i+'">Remove</button></td></tr>').join('')+'</table>':'<p class="mu">No users yet.</p>';
+  $('tbl').innerHTML=users.length?'<table><tr><th>Email</th><th>Name</th><th>Role</th><th>Carrier, warehouses or shippers</th><th>Tools</th><th></th></tr>'+users.map((u,i)=>'<tr><td>'+esc(u.email)+'</td><td>'+esc(u.name)+'</td><td>'+esc(u.role)+'</td><td>'+esc(u.carrier||u.warehouses||u.shippers||'-')+'</td><td>'+(u.tools?'Yes':'-')+'</td><td><button class="dan" data-i="'+i+'">Remove</button></td></tr>').join('')+'</table>':'<p class="mu">No users yet.</p>';
   $('tbl').querySelectorAll('button[data-i]').forEach(b=>b.onclick=()=>{users.splice(Number(b.dataset.i),1);render()});
-  const o={required:$('s_required').value==='1',storage:$('s_storage').value,clock:$('s_clock').value,reportTo:$('s_report').value.trim(),attempts:Math.max(3,Number($('s_att').value)||5),lockSeconds:Math.max(10,Number($('s_lock').value)||30),users};
+  const pr=sharedProblems();$('sharedCard').classList.toggle('hide',$('s_storage').value!=='shared');$('stHint').textContent=$('s_storage').value==='shared'?'Shared: every device and every person sees the same data. Fill in step 5b.':'Each device keeps its OWN copy of the data. A change made on one device is not seen on another. Choose Shared if you want everyone to see the same data.';$('sharedMsg').innerHTML=pr.length?'<div class="err">'+pr.map(esc).join('<br>')+'</div>':'';$('dlBtn').disabled=!!pr.length;$('cpBtn').disabled=!!pr.length;
+  const o={required:$('s_required').value==='1',storage:$('s_storage').value,clock:$('s_clock').value,reportTo:$('s_report').value.trim(),attempts:Math.max(3,Number($('s_att').value)||5),lockSeconds:Math.max(10,Number($('s_lock').value)||30)};
+  if($('s_storage').value==='shared'&&!pr.length)o.shared={url:$('sh_url').value.trim().replace(/\/+$/,''),key:$('sh_key').value.trim(),room:$('sh_room').value.trim()||'main',pollSeconds:Number($('sh_poll').value)||8};
+  o.users=users;
   $('out').value='/* Users for the demo sign-in. Create this file with make-users.html (open it on your own computer).\n   Passwords are stored only as salted hashes, but this file is public on GitHub, so use throwaway passwords. */\nwindow.ECT_LOGIN='+JSON.stringify(o,null,1)+';\n';
 }
-['s_required','s_storage','s_clock','s_report','s_att','s_lock'].forEach(id=>$(id).addEventListener('input',render));
+['s_required','s_storage','s_clock','s_report','s_att','s_lock','sh_url','sh_key','sh_room','sh_poll'].forEach(id=>$(id).addEventListener('input',render));
 $('loadFile').onchange=e=>{const f=e.target.files[0];if(!f)return;const fr=new FileReader();fr.onload=()=>{
   const m=/window\.ECT_LOGIN\s*=\s*(\{[\s\S]*\})\s*;?\s*$/.exec(String(fr.result).trim());
-  try{const o=JSON.parse(m[1]);users=(o.users||[]).filter(u=>u&&u.email&&u.hash&&u.salt);$('s_required').value=o.required===false?'0':'1';$('s_storage').value=o.storage==='demo'?'demo':'browser';$('s_clock').value=o.clock==='demo'?'demo':'real';$('s_report').value=o.reportTo||'';$('s_att').value=o.attempts||5;$('s_lock').value=o.lockSeconds||30;render();msg('Loaded '+users.length+' user(s). Their passwords stay as they were.')}
+  try{const o=JSON.parse(m[1]);users=(o.users||[]).filter(u=>u&&u.email&&u.hash&&u.salt);$('s_required').value=o.required===false?'0':'1';$('s_storage').value=['demo','shared'].includes(o.storage)?o.storage:'browser';if(o.shared){$('sh_url').value=o.shared.url||'';$('sh_key').value=o.shared.key||'';$('sh_room').value=o.shared.room||'main';$('sh_poll').value=o.shared.pollSeconds||8}$('s_clock').value=o.clock==='demo'?'demo':'real';$('s_report').value=o.reportTo||'';$('s_att').value=o.attempts||5;$('s_lock').value=o.lockSeconds||30;render();msg('Loaded '+users.length+' user(s). Their passwords stay as they were.')}
   catch(x){msg('That file is not a users.js made by this tool.',1)}};fr.readAsText(f)};
 $('dlBtn').onclick=()=>{render();const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([$('out').value],{type:'text/javascript'}));a.download='users.js';document.body.appendChild(a);a.click();a.remove()};
 $('cpBtn').onclick=()=>{render();$('out').select();document.execCommand('copy');msg('Copied.')};
+
+/* ---------- shared data settings ---------- */
+const SQL_TEXT=`-- Run this once: Supabase, SQL Editor, New query, paste, Run.
+create table if not exists public.ect_state (
+  id text primary key,
+  v bigint not null default 1,
+  t timestamptz not null default now(),
+  updated_by text not null default '',
+  d text not null default ''
+);
+alter table public.ect_state enable row level security;
+drop policy if exists "ect read" on public.ect_state;
+drop policy if exists "ect insert" on public.ect_state;
+drop policy if exists "ect update" on public.ect_state;
+create policy "ect read" on public.ect_state for select to anon using (true);
+create policy "ect insert" on public.ect_state for insert to anon with check (true);
+create policy "ect update" on public.ect_state for update to anon using (true) with check (true);
+grant usage on schema public to anon;
+grant select, insert, update on public.ect_state to anon;
+`;
+$('sqlBox').textContent=SQL_TEXT;
+$('sqlCopy').onclick=()=>{const ta=document.createElement('textarea');ta.value=SQL_TEXT;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();$('sqlCopy').textContent='Copied';setTimeout(()=>$('sqlCopy').textContent='Copy the SQL',1500)};
+function jwtRole(k){try{const p=String(k).split('.')[1].replace(/-/g,'+').replace(/_/g,'/');return JSON.parse(atob(p)).role||''}catch(e){return ''}}
+function sharedProblems(){
+  if($('s_storage').value!=='shared')return [];
+  const e=[],url=$('sh_url').value.trim(),key=$('sh_key').value.trim(),room=$('sh_room').value.trim(),poll=Number($('sh_poll').value);
+  if(!/^https:\/\/[A-Za-z0-9.-]+\.[A-Za-z]{2,}\/?$/.test(url))e.push('Enter the Project URL, for example https://abcdefgh.supabase.co');
+  if(!key)e.push('Paste the public (anon or publishable) key');
+  else if(/^sb_secret_/.test(key)||jwtRole(key)==='service_role')e.push('That is the SECRET key. Never put it in users.js. Use the anon (public or publishable) key');
+  else if(!/^sb_publishable_/.test(key)&&!/^eyJ[\w-]+\.[\w-]+\.[\w-]+$/.test(key))e.push('That does not look like a Supabase key');
+  if(!/^[A-Za-z0-9_-]{1,40}$/.test(room))e.push('The room name may only have letters, digits, - and _ (up to 40)');
+  if(!(poll>=3&&poll<=120))e.push('The check interval must be between 3 and 120 seconds');
+  return e;
+}
+
+/* ---------- add many users from a file ---------- */
+const CARRIERS=['Dimerco','Flex','CHR','Kerry Indev','Dahnay'];
+const TPL_HEAD=['Email','Name','Role','Carrier','Warehouses','Shippers','Receivers','Partner','Password','Show demo tools'];
+$('roleHelp').textContent=ROLES.join(', ');$('carHelp').textContent=CARRIERS.join(', ');$('whHelp').textContent=WH.join(', ');
+const ALIAS={email:['email','emailaddress','useremail','mail'],name:['name','username','displayname','fullname'],role:['role','roleassignment'],carrier:['carrier'],warehouses:['warehouses','warehouse'],shippers:['shippers','shipper'],receivers:['receivers','receiver'],partner:['partner','partneremail'],password:['password','pass'],tools:['demotools','showdemotools','tools']};
+const normH=x=>String(x).toLowerCase().replace(/[^a-z]/g,'');
+function parseCSV(text){
+  text=String(text).replace(/^\uFEFF/,'');
+  const first=text.split(/\r?\n/).find(l=>l.trim())||'';
+  const cnt=d=>{let n=0,q=false;for(const c of first){if(c==='"')q=!q;else if(!q&&c===d)n++}return n};
+  const best=[',',';','\t'].map(d=>[d,cnt(d)]).sort((a,b)=>b[1]-a[1])[0],D=best[1]>0?best[0]:',';
+  const rows=[];let row=[],cur='',q=false;
+  for(let i=0;i<text.length;i++){const c=text[i];
+    if(q){if(c==='"'){if(text[i+1]==='"'){cur+='"';i++}else q=false}else cur+=c}
+    else if(c==='"')q=true;
+    else if(c===D){row.push(cur);cur=''}
+    else if(c==='\n'||c==='\r'){if(c==='\r'&&text[i+1]==='\n')i++;row.push(cur);rows.push(row);row=[];cur=''}
+    else cur+=c}
+  if(cur!==''||row.length){row.push(cur);rows.push(row)}
+  return rows.filter(r=>r.some(x=>String(x).trim()!==''));
+}
+const csvCell=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
+const csvText=(head,rows)=>'\uFEFF'+[head].concat(rows).map(r=>r.map(csvCell).join(',')).join('\r\n')+'\r\n';
+function saveFile(name,text,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;document.body.appendChild(a);a.click();a.remove()}
+$('tplBtn').onclick=()=>saveFile('users-template.csv',csvText(TPL_HEAD,[
+  ['alex.logistics@yourcompany.com','Alex Analyst','Logistics Analyst','','','','','','',''],
+  ['sam.carrier@dimerco.example','Sam Driver','Carrier Partner','Dimerco','','','','','',''],
+  ['dana.dock@yourcompany.com','Dana Dock','Warehouse Team','','RD - Fremont | RD - Germany','','','','',''],
+  ['pat.partner@3pl.example','Pat Partner','External Logistics Partner','','','Acme Exports Ltd | Beta Trading','Gamma Imports','','',''],
+  ['eli.exec@3pl.example','Eli Executive','Partner Executive','','','','','pat.partner@3pl.example','',''],
+  ['fiona.finance@yourcompany.com','Fiona Finance','Finance','','','','','','','']]),'text/csv');
+$('curBtn').onclick=()=>saveFile('users-current.csv',csvText(TPL_HEAD,users.map(u=>[u.email,u.name,u.role,u.carrier||'',(u.warehouses||'').split(/\s*;\s*/).filter(Boolean).join(' | '),(u.shippers||'').split(/\s*;\s*/).filter(Boolean).join(' | '),(u.receivers||'').split(/\s*;\s*/).filter(Boolean).join(' | '),u.partner||'','',u.tools?'Yes':'No'])),'text/csv');
+const yes=v=>/^(y|yes|true|1|x|tick|ticked)$/i.test(String(v).trim());
+function checkImport(rows){
+  const head=rows[0].map(normH),col={};
+  for(const k in ALIAS){const i=head.findIndex(h=>ALIAS[k].includes(h));if(i>=0)col[k]=i}
+  if(col.email===undefined||col.role===undefined)return {fatal:'The first row must have the column names Email and Role (use the template).'};
+  const seen={},out=[],get=(r,k)=>col[k]===undefined?'':String(r[col[k]]==null?'':r[col[k]]).trim();
+  rows.slice(1).forEach((r,i)=>{
+    const n=i+2,e=[],w=[],email=get(r,'email').toLowerCase(),roleIn=get(r,'role').replace(/\s+/g,' '),roleB=ROLES.find(x=>x.toLowerCase()===roleIn.toLowerCase())||'',role=roleB||(okProfile(roleIn)?roleIn:'');
+    const cur=users.find(u=>u.email===email),name=get(r,'name'),pw=get(r,'password'),toolsIn=get(r,'tools');
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))e.push('Email is not valid');
+    else if(seen[email])e.push('Same email as row '+seen[email]);else seen[email]=n;
+    if(!roleIn)e.push('Role is required');else if(!role)e.push('Role is not valid: use one of the roles listed above, or a profile name of 2 to 40 letters, numbers, spaces and & . -');else if(!roleB)w.push('"'+roleIn+'" is not a built-in role, so it is used as a profile. Create it in the app under Administration, Role access');
+    let carrier='',wh='',shippers='',receivers='',partner='';
+    if(role==='Carrier Partner'){const c=get(r,'carrier');if(!c)e.push('Carrier is required for a Carrier Partner');else{const k=CARRIERS.find(x=>x.toLowerCase()===c.toLowerCase());carrier=k||c;if(!k)w.push('Carrier is not one of the known carriers')}}
+    else if(get(r,'carrier'))w.push('Carrier ignored: only for Carrier Partner');
+    if(role==='Warehouse Team'){const parts=get(r,'warehouses').split(/[|;,]+/).map(x=>x.trim()).filter(Boolean);if(!parts.length)e.push('Warehouses are required for a Warehouse Team user');else{const ok=[];parts.forEach(p=>{const k=WH.find(x=>x.toLowerCase()===p.toLowerCase());if(k)ok.push(k);else e.push('Unknown warehouse: '+p)});wh=[...new Set(ok)].join('; ')}}
+    else if(get(r,'warehouses'))w.push('Warehouses ignored: only for Warehouse Team');
+    if(role==='External Logistics Partner'){shippers=normShp(get(r,'shippers'));receivers=normShp(get(r,'receivers'));if(!shippers&&!receivers)e.push('A shipper or a receiver is required for an External Logistics Partner')}
+    else if(get(r,'shippers')||get(r,'receivers'))w.push('Shippers and receivers ignored: only for External Logistics Partner');
+    if(role==='Partner Executive'){partner=get(r,'partner').toLowerCase();if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(partner))e.push('Partner must be the email of an External Logistics Partner')}
+    if(pw&&pw.length<10)e.push('Password is shorter than 10 characters');
+    out.push({n,email,name:name||(cur?cur.name:email),role,carrier,warehouses:wh,shippers,receivers,partner,tools:toolsIn?yes(toolsIn):(cur?!!cur.tools:false),pw,action:cur?'Update':'Add',pwMode:pw?'file':(cur?'keep':'generate'),errs:e,warns:w});
+  });
+  return {rows:out,tooMany:out.length>300};
+}
+let imp=null;
+function showImport(){
+  const o=$('impOut');if(!imp){o.innerHTML='';return}
+  if(imp.fatal){o.innerHTML='<div class="err">'+esc(imp.fatal)+'</div>';return}
+  const R=imp.rows,okR=R.filter(r=>!r.errs.length),add=okR.filter(r=>r.action==='Add').length,upd=okR.filter(r=>r.action==='Update').length,bad=R.length-okR.length;
+  o.innerHTML='<p class="mu sm">File: '+esc(imp.file)+'</p><div class="tiles"><div class="tile"><small>Rows</small><b>'+R.length+'</b></div><div class="tile"><small>To add</small><b class="okc">'+add+'</b></div><div class="tile"><small>To update</small><b>'+upd+'</b></div><div class="tile"><small>Problems</small><b class="'+(bad?'bad':'')+'">'+bad+'</b></div></div>'+
+  (imp.tooMany?'<div class="err">The file has more than 300 rows. Split it into smaller files.</div>':'')+
+  '<div class="scroll"><table><tr><th>Row</th><th>Email</th><th>Role</th><th>Carrier, warehouses or shippers</th><th>Password</th><th>Demo tools</th><th>What happens</th></tr>'+
+  R.map(r=>'<tr><td>'+r.n+'</td><td>'+esc(r.email)+'</td><td>'+esc(r.role||'-')+'</td><td>'+esc(r.carrier||r.warehouses||r.shippers||'-')+'</td><td>'+(r.pwMode==='file'?'From your file':r.pwMode==='keep'?'Kept as it is':'Will be generated')+'</td><td>'+(r.tools?'Yes':'-')+'</td><td>'+(r.errs.length?'<span class="bad">'+esc(r.errs.join('. '))+'. This row is skipped.</span>':'<span class="okc">'+r.action+'</span>'+(r.warns.length?' <span class="mu">('+esc(r.warns.join('. '))+')</span>':''))+'</td></tr>').join('')+'</table></div>'+
+  '<div class="row" style="margin-top:12px"><button class="pri" id="impGo" type="button" '+((okR.length&&!imp.tooMany)?'':'disabled')+'>Add '+okR.length+' user'+(okR.length===1?'':'s')+(bad?' (skip the '+bad+' with problems)':'')+'</button><button id="impNo" type="button">Cancel</button><span id="impStat" class="mu"></span></div>';
+  $('impNo').onclick=()=>{imp=null;showImport()};
+  $('impGo').onclick=applyImport;
+}
+$('impFile').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;
+  if(f.size>500000){imp={fatal:'That file is over 500 KB, so it is not a users file.'};showImport();return}
+  const fr=new FileReader();fr.onload=()=>{
+    let rows;try{rows=parseCSV(fr.result)}catch(x){imp={fatal:'The file could not be read.'};showImport();return}
+    if(rows.length<2){imp={fatal:'The file has no users in it. Fill in the template and save it as CSV.'};showImport();return}
+    imp=checkImport(rows);imp.file=f.name;showImport()};
+  fr.readAsText(f)};
+function genPwd(){const a='abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789',r=crypto.getRandomValues(new Uint8Array(14));return [...r].map(x=>a[x%a.length]).join('')}
+async function applyImport(){
+  const todo=imp.rows.filter(r=>!r.errs.length),done=[];$('impGo').disabled=true;$('impNo').disabled=true;
+  for(let i=0;i<todo.length;i++){
+    const r=todo[i];$('impStat').textContent='Adding '+(i+1)+' of '+todo.length+'...';await new Promise(z=>setTimeout(z,0));
+    const idx=users.findIndex(x=>x.email===r.email);let pw=r.pw,gen=false,rec;
+    if(!pw&&idx<0){pw=genPwd();gen=true}
+    if(pw){const salt=crypto.getRandomValues(new Uint8Array(16));rec={salt:hex(salt),hash:await hash(pw,salt),iter:ITER}}
+    else{const o=users[idx];rec={salt:o.salt,hash:o.hash,iter:o.iter||ITER}}
+    const u=Object.assign({email:r.email,name:r.name,role:r.role,carrier:r.carrier,warehouses:r.warehouses,shippers:r.shippers||'',receivers:r.receivers||'',partner:r.partner||'',tools:r.tools},rec);
+    if(idx>=0)users[idx]=u;else users.push(u);
+    done.push({email:r.email,name:r.name,role:r.role,action:r.action,pw:gen?pw:'',how:gen?'Generated':r.pwMode==='file'?'From your file':'Unchanged'});
+  }
+  render();
+  const gens=done.filter(d=>d.pw);
+  $('impOut').innerHTML='<div class="warn"><b>Done.</b> '+done.length+' user'+(done.length===1?'':'s')+' added or updated. They are in the list below and in your users.js text. '+(gens.length?'<b>Write down or download the generated passwords now: they cannot be shown again.</b>':'')+'</div>'+
+  '<div class="scroll" style="margin-top:10px"><table><tr><th>Email</th><th>Role</th><th>What happened</th><th>Password</th></tr>'+done.map(d=>'<tr><td>'+esc(d.email)+'</td><td>'+esc(d.role)+'</td><td>'+d.action+'</td><td>'+(d.pw?'<code>'+esc(d.pw)+'</code>':'<span class="mu">'+d.how+'</span>')+'</td></tr>').join('')+'</table></div>'+
+  '<div class="row" style="margin-top:12px">'+(gens.length?'<button class="pri" id="pwDl" type="button">Download the generated passwords (CSV)</button>':'')+'<button id="impClose" type="button">Close</button></div><p class="mu sm">Next: go to step 6, download users.js and upload it to GitHub.</p>';
+  if(gens.length)$('pwDl').onclick=()=>saveFile('generated-passwords.csv',csvText(['Email','Name','Role','Password'],gens.map(d=>[d.email,d.name,d.role,d.pw])),'text/csv');
+  $('impClose').onclick=()=>{imp=null;showImport()};
+  imp=null;
+}
 render();
 </script></body></html>

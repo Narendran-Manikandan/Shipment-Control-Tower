@@ -281,7 +281,9 @@ button.slot.free:hover{border-color:var(--accent)}
 .gate-box{background:var(--panel);border-radius:14px;padding:26px;max-width:420px;width:100%}
 body.signed-in .demobar{display:none}
 .monbar{display:flex;align-items:center;gap:10px;min-height:36px;padding:4px 2px 8px}.monbar.on{background:var(--info-bg);border-radius:8px;padding:6px 10px;margin-bottom:8px;position:sticky;top:calc(var(--topH,92px) + 4px);z-index:4;box-shadow:0 2px 6px rgba(0,0,0,.12)}
+.uform{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;align-items:end}.uform .in,.uform select{width:100%!important;min-width:0}.uform .btn{align-self:end}
 .ver{padding:2px 18px 14px;font-size:11px;opacity:.65;color:var(--side-ink)}@media(max-width:820px){.ver{display:none}}
+.whol .shoff{font-size:11px;opacity:.8;text-decoration:none;cursor:default}
 .gate-brand{display:flex;align-items:center;gap:10px;margin-bottom:14px;font-size:15px}.gate-logo{height:38px;width:38px}
 .whol{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:2px}
 .lnk{background:none;border:0;padding:0;color:inherit;font:inherit;font-size:12px;text-decoration:underline;cursor:pointer;opacity:.85}.lnk:hover{opacity:1}
@@ -355,15 +357,15 @@ const MONL=['January','February','March','April','May','June','July','August','S
 const STAGES=['Booked','Picked up','In transit','Out for delivery','Delivered'];
 const MODES=['Sea','Air','Road'];
 const INCOS=['EXW','FCA','FOB','CIF','CIP','CPT','DAP','DDP'];
-const ROLES=['In Organization','Logistics Executive','Logistics Associate','Logistics Analyst','Logistics Manager','Carrier Partner','Warehouse Team'];
+const ROLES=['In Organization','Logistics Executive','Logistics Associate','Logistics Analyst','Logistics Manager','Carrier Partner','Warehouse Team','External Logistics Partner','Partner Executive'];
 const TYPES=['Raw Materials','Consumables','Finished Goods','Machineries','Others'];
 const NATURES=['DG','Non-DG'];
 const normNature=v=>{const x=String(v||'').toLowerCase().replace(/[^a-z]/g,'');if(['dg','dgr','dangerousgoods','hazardous','hazmat'].includes(x))return 'DG';if(['nondg','nodg','ndg','nondangerousgoods','nonhazardous','nonhazmat'].includes(x))return 'Non-DG';return ''};
 const TYPE_COL={'Raw Materials':'#8E5BD0','Consumables':'#2E8B57','Finished Goods':'#B8860B','Machineries':'#3B82C4','Others':'#6B7075','Not set':'#9AA2A7'};
 const TABS=[
  {id:'tasks',label:'My tasks'},{id:'track',label:'Track & Trace'},{id:'request',label:'Shipment Requests'},{id:'milestones',label:'Milestone Management'},{id:'dataquality',label:'Data Quality'},{id:'carrierupdates',label:'Carrier Updates'},{id:'slotreq',label:'Delivery Slot Requests'},{id:'slotmgmt',label:'Delivery Management'},{id:'warehouse',label:'Warehouse Operations'},
- {id:'dashboard',label:'Control Tower Overview'},{id:'carrier',label:'Carrier Performance'},{id:'transit',label:'Transit Analytics'},{id:'reports',label:'Scheduled reports'},{id:'commercial',label:'Freight Commercials'},{id:'freighttrends',label:'Freight Trends'},{id:'admin',label:'Administration'}];
-const ACCESS_ITEMS=[...TABS,{id:'invoices',label:'Invoices and pending invoices (sub-tabs of Freight Commercials)'},{id:'cancelship',label:'Cancel and reinstate shipments (monitor and shipment details)'},{id:'editship',label:'Edit shipments and item lines, update shipments by upload'},{id:'mfmaster',label:'Master file view: Master workbook'},{id:'mfcomm',label:'Master file view: Commercials workbook (restricted)'}];
+ {id:'dashboard',label:'Control Tower Overview'},{id:'carrier',label:'Carrier Performance'},{id:'transit',label:'Transit Analytics'},{id:'reports',label:'Scheduled reports'},{id:'commercial',label:'Freight Commercials'},{id:'freighttrends',label:'Freight Trends'},{id:'team',label:'My team'},{id:'admin',label:'Administration'}];
+const ACCESS_ITEMS=[...TABS,{id:'invoices',label:'Invoices and pending invoices (sub-tabs of Freight Commercials)'},{id:'usersview',label:'Users: open the Users and roles tab'},{id:'usersadd',label:'Users: create users'},{id:'usersedit',label:'Users: edit users and reset passwords'},{id:'usersdel',label:'Users: remove users'},{id:'settingsedit',label:'Settings: change roles, warehouses, branding, settings and restore backups'},{id:'cancelship',label:'Cancel and reinstate shipments (monitor and shipment details)'},{id:'editship',label:'Edit shipments and item lines, update shipments by upload'},{id:'mfmaster',label:'Master file view: Master workbook'},{id:'mfcomm',label:'Master file view: Commercials workbook (restricted)'}];
 const TAB_BY_LABEL=Object.assign(Object.fromEntries(TABS.map(t=>[t.label,t.id])),{'Shipment Tracking Site':'track','Shipment Request Form':'request','Shipment Milestone Updates':'milestones','Shipment Dashboard':'dashboard','Carrier Dashboard':'carrier','Transit Time Analysis':'transit','Shipment Quote + Commercials':'commercial','Admin':'admin'});
 const MS={Pickup:{plan:'PickupPlanned',act:'PickupActual',status:'Picked up',label:'Pickup'},ETD:{plan:'ETDPlanned',act:'ETDActual',status:'In transit',label:'ETD (departure)'},
  ETA:{plan:'ETA',act:'ETAActual',status:'Out for delivery',label:'ETA (arrival)'},Delivery:{plan:'',act:'DeliveredOn',status:'Delivered',label:'Delivery'}};
@@ -421,8 +423,8 @@ let S;
 function init(){
   clockRefresh();
   S={brand:clone(BRAND_DEFAULT),today:CLOCK.today,role:'Logistics Analyst',email:'demo.user@yourcompany.com',baseEmail:'demo.user@yourcompany.com',carrier:'',view:'track',
-     lines:clone(RAW.lines),events:clone(RAW.events),users:clone(RAW.users),access:{},subs:clone(RAW.subs),
-     quotes:[],invoices:[],remind:{},revisions:[],uf:null,warehouses:[],slots:[],slotBlocks:[],whTeam:'',whLog:[],whNotified:{},wh:{lead:1,weekDay:4,overdue:true},utcTime:CLOCK.utc,whFail:false,mf:{log:[],ver:{master:1,commercial:1},hl:{},dock:true,closed:false,file:'master',tab:'tblShipments',q:'',only:false},outbox:[],audit:[],settings:{domain:'yourcompany.com',strip:{track:true}},draft:[],lastSaved:null,bulkResult:null,msResult:null,
+     lines:clone(RAW.lines),events:clone(RAW.events),users:clone(RAW.users),access:{},customRoles:[],accounts:[],subs:clone(RAW.subs),
+     quotes:[],invoices:[],remind:{},revisions:[],uf:null,warehouses:[],slots:[],slotBlocks:[],whTeam:'',whLog:[],whNotified:{},wh:{lead:1,weekDay:4,overdue:true},utcTime:CLOCK.utc,whFail:false,mf:{log:[],ver:{master:1,commercial:1},hl:{},dock:true,closed:false,file:'master',tab:'tblShipments',q:'',only:false},outbox:[],audit:[],settings:{domain:'yourcompany.com',strip:{track:true},permV:2},draft:[],lastSaved:null,bulkResult:null,msResult:null,
      ui:{q:'',dash:{ym:CLOCK.today.slice(0,7),sel:CLOCK.today,mode:'All',ms:'Delivery',q:'',status:'All',overdueOnly:false,tile:null,type:'All',nature:'All',mm:{measure:'ships',basis:'pickup',dim:'mode',carrier:'All',sel:null}},
          carrier:{mode:'All',win:'All',type:'All',nature:'All',metric:'ontime',target:90,mm:{measure:'weight',basis:'pickup',dim:'carrier',carrier:'All',sel:null}},tr:{seg:'d2d',basis:'actual',group:'mode',pcts:[50,90,95],mode:'All',carrier:'All',stype:'All',nature:'All',oc:'All',dc:'All',op:'All',dp:'All',win:'All'},com:'quotes',invCarrier:'All',invStatus:'All',admin:'users',msFilter:'active',cu:{carrier:'',filter:'active',q:''},ft:{series:'both',metric:'avg',group:'none',oc:'All',op:'All',dc:'All',dp:'All',nature:'All',mode:'All',vol:'All'},kt:{},sp:{carrier:'All'},wh:{tab:'schedule',code:'All',days:14},per:{kind:'all',y:+CLOCK.today.slice(0,4),q:Math.ceil(+CLOCK.today.slice(5,7)/3),m:+CLOCK.today.slice(5,7),basis:'pickup'},sort:{},sl:{tab:'my',f:'All',ship:'',week:'',pick:'first',first:null,second:null,vehicle:'',driver:'',phone:'',note:''},dm:{tab:'review',f:'Open',code:'All',week:'',sel:[],prop:null}}};
   if(CLOCK.offset){shiftDates(S.lines,CLOCK.offset);shiftDates(S.events,CLOCK.offset);shiftDates(S.subs,CLOCK.offset)}
@@ -445,6 +447,8 @@ function init(){
   ['Logistics Executive','Logistics Associate','Logistics Analyst'].forEach(r=>S.access[r].push('warehouse'));
   ['Logistics Executive','Logistics Associate','Logistics Analyst','Logistics Manager'].forEach(r=>S.access[r].push('mfmaster'));
   ['Logistics Analyst','Logistics Manager'].forEach(r=>S.access[r].push('mfcomm'));
+  ['Logistics Analyst','Logistics Manager'].forEach(r=>S.access[r].push('usersview','usersadd','usersedit','usersdel','settingsedit'));
+  S.access['External Logistics Partner']=['tasks','track','request','milestones','editship','team'];S.access['Partner Executive']=['tasks','track','request','milestones','editship'];
   carriersList().forEach(c=>S.users.push({UserEmail:carrierEmail(c),DisplayName:c+' dispatch',Role:'Carrier Partner',Carrier:c}));
   [['fremont.logistics@yourcompany.com','Fremont site logistics','RD - Fremont'],['dallas.receiving@yourcompany.com','Dallas receiving team','DC - US5 - Dallas'],['germany.goodsin@yourcompany.com','Germany goods receipt','RD - Germany'],['bangalore.stores@yourcompany.com','Bangalore stores','RD - Bangalore']].forEach(([e,n,w])=>S.users.push({UserEmail:e,DisplayName:n,Role:'Warehouse Team',Carrier:'',Warehouses:w}));
   S.users.forEach(u=>{if(u.Warehouses===undefined)u.Warehouses=''});
@@ -460,9 +464,10 @@ function init(){
 const can=id=>(S.access[S.role]||[]).includes(id);
 
 /* ---------- shipments derived from item lines ---------- */
-const carriersList=()=>uniq(S.lines.map(l=>l.Carrier)).sort();
+const carriersList=()=>uniq(visLines().map(l=>l.Carrier)).sort();
 const carrierEmail=c=>{const u=(S.users||[]).find(u=>u.Role==='Carrier Partner'&&u.Carrier===c);return u?u.UserEmail:'dispatch@'+c.toLowerCase().replace(/[^a-z0-9]+/g,'')+'.example'};
-function shipsAll(){
+function shipsAll(){const a=shipsAll0(),sc=partnerScope();return sc?a.filter(s=>sc.has(s.shipper,s.consignee)):a}
+function shipsAll0(){
   const m=new Map();
   S.lines.forEach(l=>{if(!m.has(l.ShipmentRef))m.set(l.ShipmentRef,[]);m.get(l.ShipmentRef).push(l)});
   return [...m.entries()].map(([ref,ls])=>{
@@ -1061,6 +1066,7 @@ function slotCell(w,date,n){
 }
 const slotCanManage=code=>can('slotmgmt')&&(!isWT()||myWhCodes().some(c=>whKey(c)===whKey(code)));
 function slotVisible(r){
+  if(partnerScope())return !!getShip(r.ref);
   if(S.role==='Carrier Partner'){const sh=getShip(r.ref);return !!sh&&sh.carrier===S.carrier&&!!(sh.nominated||sh.freight==='Shipper')}
   if(isWT())return myWhCodes().some(c=>whKey(c)===whKey(r.code));
   return can('slotreq')||can('slotmgmt');
@@ -1500,10 +1506,10 @@ function fcApply(P){
 }
 const fcToolbar=()=>can('commercial')?`<div class="row" style="margin-bottom:12px"><button class="btn" data-act="fcExportX">Export freight costs (Excel)</button><button class="btn" data-act="fcExportCsv">Export (CSV)</button><label class="btn pri" style="cursor:pointer">Import freight costs<input type="file" id="fcFile" accept=".xlsx,.xls,.csv" hidden></label><span class="hint">The template holds ${can('invoices')?'quoted and actual freight':'quoted freight'} for every shipment where Your Company pays the freight. Edit the amounts and import it back.</span></div>`:'';
 /* ----- Administration: users ----- */
-const USER_COLS=['User Name','Email Address','Role Assignment','Carrier','Warehouses','Action'];
-const USER_ALIAS={name:['username','name','displayname'],email:['emailaddress','email','useremail'],role:['roleassignment','role'],car:['carrier'],wh:['warehouses','warehouse'],act:['action']};
-const USER_HELP=[['User Name','Display name.'],['Email Address','The key. Rows are matched on it.'],['Role Assignment','One of: '+'Logistics Executive, Logistics Associate, Logistics Analyst, Logistics Manager, Carrier Partner, Warehouse Team.'],['Carrier','Required for a Carrier Partner. Must be a carrier used on shipments.'],['Warehouses','Required for a Warehouse Team user. Warehouse codes separated by semicolons or commas.'],['Action','Empty, Add or Update saves the row (adds a new email, updates an existing one). Delete removes the user. Empty cells on an existing user keep the current value.']];
-const usersExportRows=()=>S.users.map(u=>({'User Name':u.DisplayName,'Email Address':u.UserEmail,'Role Assignment':u.Role,Carrier:u.Carrier||'',Warehouses:whList(u).join('; '),Action:''}));
+const USER_COLS=['User Name','Email Address','Role Assignment','Carrier','Warehouses','Shippers','Receivers','Partner','Phone','Location','Action'];
+const USER_ALIAS={name:['username','name','displayname'],email:['emailaddress','email','useremail'],role:['roleassignment','role'],car:['carrier'],wh:['warehouses','warehouse'],shp:['shippers','shipper'],rcv:['receivers','receiver'],prt:['partner','partneremail'],phn:['phone'],loc:['location'],act:['action']};
+const USER_HELP=[['User Name','Display name.'],['Email Address','The key. Rows are matched on it.'],['Role Assignment','One of: '+'Logistics Executive, Logistics Associate, Logistics Analyst, Logistics Manager, Carrier Partner, Warehouse Team, External Logistics Partner, or a profile you created.'],['Shippers','Required for a External Logistics Partner: the shipper names they work for, separated by a semicolon.'],['Carrier','Required for a Carrier Partner. A carrier used on shipments, or the name of a new carrier.'],['Warehouses','Required for a Warehouse Team user. Warehouse codes separated by semicolons or commas.'],['Action','Empty, Add or Update saves the row (adds a new email, updates an existing one). Delete removes the user. Empty cells on an existing user keep the current value.']];
+const usersExportRows=()=>S.users.map(u=>({'User Name':u.DisplayName,'Email Address':u.UserEmail,'Role Assignment':u.Role,Carrier:u.Carrier||'',Warehouses:whList(u).join('; '),Shippers:u.Role===PARTNER?normShippers(u.Shippers):'',Receivers:u.Role===PARTNER?normShippers(u.Receivers):'',Partner:u.Role===PEXEC?(u.Partner||''):'',Phone:u.Phone||'',Location:u.Location||'',Action:''}));
 const usersSheets=()=>[{name:'Users',headers:USER_COLS,rows:usersExportRows()},{name:'Help',headers:['Column','What to enter'],rows:USER_HELP.map(x=>({Column:x[0],'What to enter':x[1]}))}];
 function usersImportCheck(objs,hdr){
   const C=impCols(hdr,USER_ALIAS);if(!C.email)return {err:'The file needs an Email Address column. Export the users first to get the template.'};
@@ -1521,10 +1527,12 @@ function usersImportCheck(objs,hdr){
     const roleRaw=impVal(r,C,'role'),role=roleRaw?roles.find(x=>x.toLowerCase()===roleRaw.toLowerCase()):(cur?cur.Role:'');
     if(roleRaw&&!role)it.errs.push('Role Assignment "'+roleRaw+'" is not valid');else if(!role&&!cur)it.errs.push('Role Assignment is required for a new user');
     const name=impVal(r,C,'name')||(cur?cur.DisplayName:email);let car='',wh='';
-    if(role==='Carrier Partner'){const raw=impVal(r,C,'car');if(raw){const f=cars.find(x=>x.toLowerCase()===raw.toLowerCase());if(f)car=f;else it.errs.push('Carrier "'+raw+'" is not a carrier on any shipment')}else if(cur&&cur.Role==='Carrier Partner')car=cur.Carrier;else it.errs.push('Carrier is required for a Carrier Partner')}
+    if(role==='Carrier Partner'){const raw=impVal(r,C,'car');if(raw){const f=cars.find(x=>x.toLowerCase()===raw.toLowerCase());car=f||raw}else if(cur&&cur.Role==='Carrier Partner')car=cur.Carrier;else it.errs.push('Carrier is required for a Carrier Partner')}
     if(role==='Warehouse Team'){const raw=impVal(r,C,'wh');if(raw){const list=raw.split(/[;,|]+/).map(x=>x.trim()).filter(Boolean),bad=[],good=[];list.forEach(x=>{const f=codes.find(c=>whKey(c)===whKey(x));if(f)good.push(f);else bad.push(x)});if(bad.length)it.errs.push('Warehouse not found: '+bad.join(', '));wh=uniq(good).join('; ')}else if(cur&&cur.Role==='Warehouse Team')wh=cur.Warehouses;else it.errs.push('Warehouses are required for a Warehouse Team user')}
-    it.rec={UserEmail:email,DisplayName:name,Role:role,Carrier:car,Warehouses:wh};
-    if(cur){const ch=[];[['DisplayName','User Name'],['Role','Role'],['Carrier','Carrier'],['Warehouses','Warehouses']].forEach(([k,l])=>{if(String(cur[k]||'')!==String(it.rec[k]||''))ch.push(l+': '+(cur[k]||'none')+' to '+(it.rec[k]||'none'))});it.changes=ch;it.op=it.errs.length?'':ch.length?'update':'nochange'}
+    let shp='',rcv='',prt='';if(role===PARTNER){const raw=impVal(r,C,'shp'),rr=impVal(r,C,'rcv');if(raw)shp=normShippers(raw);else if(cur&&cur.Role===PARTNER)shp=cur.Shippers||'';if(rr)rcv=normShippers(rr);else if(cur&&cur.Role===PARTNER)rcv=cur.Receivers||'';if(!shp&&!rcv)it.errs.push('A shipper or a receiver is required for an External Logistics Partner')}
+    if(role===PEXEC){const raw=impVal(r,C,'prt')||(cur&&cur.Role===PEXEC?cur.Partner:'');const pu=S.users.find(x=>x.Role===PARTNER&&x.UserEmail.toLowerCase()===String(raw).toLowerCase());if(!pu)it.errs.push('Partner must be the email of an External Logistics Partner user');else prt=pu.UserEmail}
+    it.rec={UserEmail:email,DisplayName:name,Role:role,Type:roleType(role),Carrier:car,Warehouses:wh,Shippers:shp,Receivers:rcv,Partner:prt,Phone:impVal(r,C,'phn')||(cur?cur.Phone||'':''),Location:impVal(r,C,'loc')||(cur?cur.Location||'':'')};
+    if(cur){const ch=[];[['DisplayName','User Name'],['Role','Role'],['Carrier','Carrier'],['Warehouses','Warehouses'],['Shippers','Shippers'],['Receivers','Receivers'],['Partner','Partner'],['Phone','Phone'],['Location','Location']].forEach(([k,l])=>{if(String(cur[k]||'')!==String(it.rec[k]||''))ch.push(l+': '+(cur[k]||'none')+' to '+(it.rec[k]||'none'))});it.changes=ch;it.op=it.errs.length?'':ch.length?'update':'nochange'}
     else it.op=it.errs.length?'':'add';
     it.cells=[name,email,role||'-',car||'-',wh||'-'];items.push(it);
   });
@@ -1540,28 +1548,32 @@ function usersImportApply(P){
   audit('Users imported','',n('add')+' added, '+n('update')+' updated, '+n('delete')+' removed from '+P.fileName+(todo.length?' ('+todo.slice(0,6).map(x=>x.email).join(', ')+(todo.length>6?' and more':'')+')':''));
   return {ok:true,msg:n('add')+' added, '+n('update')+' updated, '+n('delete')+' removed',added:n('add'),updated:n('update'),removed:n('delete')};
 }
-function usersFiltered(){const q=String(S.ui.usq||'').toLowerCase().split(/\s+/).filter(Boolean);return S.users.map((u,i)=>({u,i})).filter(({u})=>{const h=[u.DisplayName,u.UserEmail,u.Role,u.Carrier,u.Warehouses].join(' ').toLowerCase();return q.every(t=>h.includes(t))})}
+function usersFiltered(){const q=String(S.ui.usq||'').toLowerCase().split(/\s+/).filter(Boolean);return S.users.map((u,i)=>({u,i})).filter(({u})=>{const h=[u.DisplayName,u.UserEmail,u.Role,u.Type,u.Carrier,u.Warehouses,u.Shippers,u.Receivers,u.Phone,u.Location].join(' ').toLowerCase();return q.every(t=>h.includes(t))})}
 function usersTableHTML(){
   const roles=ROLES.filter(r=>r!=='In Organization'),codes=S.warehouses.map(w=>w.code),list=usersFiltered();
-  return `<p class="hint" style="margin:0 0 8px">${S.ui.usq?'Showing '+list.length+' of '+S.users.length+' users.':S.users.length+' users.'}</p>${list.length?`<div class="tbw"><table class="tb"><tr><th>Email</th><th>Name</th><th>Role</th><th>Carrier</th><th>Warehouses</th><th></th></tr>
-  ${list.map(({u,i})=>`<tr><td>${esc(u.UserEmail)}</td><td>${esc(u.DisplayName)}</td><td><select data-ch="userRole" data-i="${i}" class="in" style="width:auto">${roles.map(r=>`<option ${r===u.Role?'selected':''}>${r}</option>`).join('')}</select></td>
-   <td>${u.Role==='Carrier Partner'?`<select data-ch="userCarrier" data-i="${i}" class="in" style="width:auto">${carriersList().map(c=>`<option ${c===u.Carrier?'selected':''}>${esc(c)}</option>`).join('')}</select>`:'<span class="mu">-</span>'}</td>
+  return `<p class="hint" style="margin:0 0 8px">${S.ui.usq?'Showing '+list.length+' of '+S.users.length+' users.':S.users.length+' users.'}</p>${list.length?`<div class="tbw"><table class="tb"><tr><th>Email</th><th>Name</th><th>Type</th><th>Role</th><th>Carrier</th><th>Warehouses</th><th>Shippers</th><th>Receivers</th><th>Partner</th><th>Phone</th><th>Location</th><th></th></tr>
+  ${list.map(({u,i})=>`<tr><td>${esc(u.UserEmail)}</td><td>${esc(u.DisplayName)}</td><td>${esc(u.Type||roleType(u.Role))}</td><td><select data-ch="userRole" data-i="${i}" class="in" style="width:auto">${roles.map(r=>`<option ${r===u.Role?'selected':''}>${r}</option>`).join('')}</select></td>
+   <td>${u.Role==='Carrier Partner'?`<select data-ch="userCarrier" data-i="${i}" class="in" style="width:auto">${uniq([...carriersList(),u.Carrier].filter(Boolean)).map(c=>`<option ${c===u.Carrier?'selected':''}>${esc(c)}</option>`).join('')}</select>`:'<span class="mu">-</span>'}</td>
    <td>${u.Role==='Warehouse Team'?`<select multiple size="3" data-ch="userWh" data-i="${i}" class="in" style="width:auto;min-width:170px" aria-label="Warehouses for ${esc(u.UserEmail)}">${codes.map(c=>`<option ${whList(u).some(x=>whKey(x)===whKey(c))?'selected':''}>${esc(c)}</option>`).join('')}</select>`:'<span class="mu">-</span>'}</td>
-   <td class="r"><button class="btn sm danger" data-act="userDel" data-i="${i}">Remove</button></td></tr>`).join('')}</table></div>`:'<div class="empty">No user matches the search.</div>'}`;
+   <td>${u.Role===PARTNER?`<input class="in" data-ch="userShippers" data-i="${i}" value="${esc(u.Shippers||'')}" list="dl_shp_users" style="min-width:230px" aria-label="Shippers for ${esc(u.UserEmail)}" placeholder="Shipper names, separated by ;">`:'<span class="mu">-</span>'}</td>
+   <td>${u.Role===PARTNER?`<input class="in" data-ch="userField" data-f="Receivers" data-i="${i}" value="${esc(u.Receivers||'')}" style="min-width:200px" aria-label="Receivers for ${esc(u.UserEmail)}" placeholder="Receiver names, separated by ;">`:'<span class="mu">-</span>'}</td>
+   <td>${u.Role===PEXEC?`<select class="in" data-ch="userPartner" data-i="${i}" style="width:auto"><option value="">Choose</option>${S.users.filter(x=>x.Role===PARTNER).map(x=>`<option value="${esc(x.UserEmail)}" ${x.UserEmail===u.Partner?'selected':''}>${esc(x.DisplayName)}</option>`).join('')}</select>`:'<span class="mu">-</span>'}</td>
+   <td><input class="in" data-ch="userField" data-f="Phone" data-i="${i}" value="${esc(u.Phone||'')}" style="width:130px" aria-label="Phone for ${esc(u.UserEmail)}"></td><td><input class="in" data-ch="userField" data-f="Location" data-i="${i}" value="${esc(u.Location||'')}" style="width:140px" aria-label="Location for ${esc(u.UserEmail)}"></td>
+   <td class="r">${typeof acctRowBtn==='function'?acctRowBtn(u):''}<button class="btn sm danger" data-act="userDel" data-i="${i}">Remove</button></td></tr>`).join('')}</table></div>`:'<div class="empty">No user matches the search.</div>'}`;
 }
 function usersPanel(){
   const roles=ROLES.filter(r=>r!=='In Organization'),codes=S.warehouses.map(w=>w.code);
   return `<div class="card"><div class="row" style="justify-content:space-between;margin-bottom:10px"><h3 style="margin:0">Users and roles</h3><span class="row"><button class="btn sm" data-act="usersExportX">Export (Excel)</button><button class="btn sm" data-act="usersExportCsv">Export (CSV)</button><label class="btn sm pri" style="cursor:pointer">Import users<input type="file" id="impUsers" accept=".xlsx,.xls,.csv" hidden></label></span></div>
   <div class="row" style="margin-bottom:10px"><input id="us_q" class="in grow" placeholder="Search by name, email, role, carrier or warehouse" value="${esc(S.ui.usq||'')}" aria-label="Search users"></div>
   <div id="usersTbl">${usersTableHTML()}</div>
-  <div class="row sec"><input id="u_email" class="in grow" placeholder="email@${esc(S.settings.domain)}"><input id="u_name" class="in grow" placeholder="Name"><select id="u_role" class="in" style="width:auto">${roles.map(r=>`<option>${r}</option>`).join('')}</select><select id="u_carrier" class="in" style="width:auto"><option value="">Carrier (Carrier Partner only)</option>${carriersList().map(c=>`<option>${esc(c)}</option>`).join('')}</select><select id="u_wh" multiple size="3" class="in" style="width:auto" aria-label="Warehouses (Warehouse Team only)">${codes.map(c=>`<option>${esc(c)}</option>`).join('')}</select><button class="btn pri" data-act="userAdd">Add user</button></div>
-  <p class="hint">Export the list, add, change or delete rows (Action = Delete) in Excel, and import it back to make many changes at once. Anyone with a company email who is not listed gets the In Organization role, which opens Track &amp; Trace only. A Carrier Partner opens Carrier Updates and Delivery Slot Requests, and sees only the shipments nominated to their carrier. A Warehouse Team user opens Delivery Management for the warehouses assigned to them (hold Ctrl or Cmd to pick several).</p></div>`;
+  <div class="row sec uform"><input id="u_email" class="in grow" placeholder="email@${esc(S.settings.domain)}"><input id="u_name" class="in grow" placeholder="Name">${userTypeFields()}<select id="u_role" class="in" style="width:auto" aria-label="Role (internal users)">${INTERNAL_ROLES().map(r=>`<option>${esc(r)}</option>`).join('')}</select><input id="u_carrier" class="in" list="dl_car_users" placeholder="Carrier (type a new name to add one)" style="width:290px" autocomplete="off"><datalist id="dl_car_users">${carriersList().map(c=>`<option value="${esc(c)}">`).join('')}</datalist><select id="u_wh" multiple size="3" class="in" style="width:auto" aria-label="Warehouses (Warehouse Team only)">${codes.map(c=>`<option>${esc(c)}</option>`).join('')}</select><input id="u_shippers" class="in" list="dl_shp_users" placeholder="Shippers (External Logistics Partner only), separated by ;" style="width:300px" autocomplete="off"><datalist id="dl_shp_users">${uniq(S.lines.map(l=>l.Shipper)).sort().map(x=>`<option value="${esc(x)}">`).join('')}</datalist>${typeof acctFormHTML==='function'?acctFormHTML():''}<button class="btn pri" data-act="userAdd">Add user</button></div>
+  <p class="hint">Export the list, add, change or delete rows (Action = Delete) in Excel, and import it back to make many changes at once. Anyone with a company email who is not listed gets the In Organization role, which opens Track &amp; Trace only. A Carrier Partner opens Carrier Updates and Delivery Slot Requests, and sees only the shipments nominated to their carrier. A Warehouse Team user opens Delivery Management for the warehouses assigned to them (hold Ctrl or Cmd to pick several). A External Logistics Partner works like a Logistics Executive, but only for the shippers registered under them: separate several shipper names with a semicolon. Profiles you create under Role access (for example Finance or SCM) can be assigned here too.</p></div>`;
 }
 /* ----- Administration: warehouses ----- */
-const WH_COLS=['Warehouse Code','Warehouse Name','City','Country','Address','Receiving Hours','Team Contact Name','Phone','Team email addresses (separate with commas)','Time zone','Delivery due notice at','Weekly updates on','Weekly update at local','Quiet Hours from (local)','Quiet Hours to (local)','Action'];
-const WH_ALIAS={code:['warehousecode','code'],name:['warehousename','name'],city:['city'],country:['country'],addr:['address'],hours:['receivinghours','hours'],contact:['teamcontactname','teamcontact','contact'],phone:['phone'],emails:['teamemailaddressesseparatewithcommas','teamemailaddresses','teamemails','emails'],tz:['timezone'],due:['deliveryduenoticeat','deliveryduenotice'],wday:['weeklyupdateson','weeklyupdateon','weeklyday'],wtime:['weeklyupdateatlocal','weeklyupdateat','weeklyupdatetime'],qfrom:['quiethoursfromlocal','quiethoursfrom'],qto:['quiethourstolocal','quiethoursto','quiethoursuntil'],act:['action']};
-const WH_HELP=[['Warehouse Code','The key. Letters, numbers, spaces and - _ . / (up to 40 characters). Used as the receiving warehouse on shipments.'],['Team email addresses (separate with commas)','The team that receives notices and slot requests.'],['Time zone','For example America/Chicago, or the Windows name such as Central Standard Time.'],['Delivery due notice at','Local time, hh:mm.'],['Weekly updates on','A day name, Monday to Sunday.'],['Weekly update at local','Local time, hh:mm.'],['Quiet Hours from (local)','Local time, hh:mm.'],['Quiet Hours to (local)','Local time, hh:mm.'],['Action','Empty, Add or Update saves the row. Delete removes the warehouse, only if no shipment, slot record or user uses it. Empty cells on an existing warehouse keep the current value; a new warehouse gets the standard defaults.']];
-const whExportRows=()=>S.warehouses.map(w=>({'Warehouse Code':w.code,'Warehouse Name':w.name,City:w.city,Country:w.country,Address:w.address,'Receiving Hours':w.hours,'Team Contact Name':w.contact,Phone:w.phone,'Team email addresses (separate with commas)':w.emails.join(', '),'Time zone':w.tz,'Delivery due notice at':w.dueTime,'Weekly updates on':WH_DAYS[w.weekDay],'Weekly update at local':w.weekTime,'Quiet Hours from (local)':w.quietFrom,'Quiet Hours to (local)':w.quietTo,Action:''}));
+const WH_COLS=['Warehouse Code','Warehouse Name','Warehouse Type','City','Country','Address','Receiving Hours','Team Contact Name','Phone','Team email addresses (separate with commas)','Time zone','Delivery due notice at','Weekly updates on','Weekly update at local','Quiet Hours from (local)','Quiet Hours to (local)','Action'];
+const WH_ALIAS={code:['warehousecode','code'],name:['warehousename','name'],type:['warehousetype','type'],city:['city'],country:['country'],addr:['address'],hours:['receivinghours','hours'],contact:['teamcontactname','teamcontact','contact'],phone:['phone'],emails:['teamemailaddressesseparatewithcommas','teamemailaddresses','teamemails','emails'],tz:['timezone'],due:['deliveryduenoticeat','deliveryduenotice'],wday:['weeklyupdateson','weeklyupdateon','weeklyday'],wtime:['weeklyupdateatlocal','weeklyupdateat','weeklyupdatetime'],qfrom:['quiethoursfromlocal','quiethoursfrom'],qto:['quiethourstolocal','quiethoursto','quiethoursuntil'],act:['action']};
+const WH_HELP=[['Warehouse Type','One of: Distribution Center, Manufacturing Site, Research Center, Supplier. Empty keeps the current type; a new warehouse gets a type guessed from its code.'],['Warehouse Code','The key. Letters, numbers, spaces and - _ . / (up to 40 characters). Used as the receiving warehouse on shipments.'],['Team email addresses (separate with commas)','The team that receives notices and slot requests.'],['Time zone','For example America/Chicago, or the Windows name such as Central Standard Time.'],['Delivery due notice at','Local time, hh:mm.'],['Weekly updates on','A day name, Monday to Sunday.'],['Weekly update at local','Local time, hh:mm.'],['Quiet Hours from (local)','Local time, hh:mm.'],['Quiet Hours to (local)','Local time, hh:mm.'],['Action','Empty, Add or Update saves the row. Delete removes the warehouse, only if no shipment, slot record or user uses it. Empty cells on an existing warehouse keep the current value; a new warehouse gets the standard defaults.']];
+const whExportRows=()=>S.warehouses.map(w=>({'Warehouse Code':w.code,'Warehouse Name':w.name,'Warehouse Type':w.type||whTypeGuess(w),City:w.city,Country:w.country,Address:w.address,'Receiving Hours':w.hours,'Team Contact Name':w.contact,Phone:w.phone,'Team email addresses (separate with commas)':w.emails.join(', '),'Time zone':w.tz,'Delivery due notice at':w.dueTime,'Weekly updates on':WH_DAYS[w.weekDay],'Weekly update at local':w.weekTime,'Quiet Hours from (local)':w.quietFrom,'Quiet Hours to (local)':w.quietTo,Action:''}));
 const whSheets=()=>[{name:'Warehouses',headers:WH_COLS,rows:whExportRows()},{name:'Help',headers:['Column','What to enter'],rows:WH_HELP.map(x=>({Column:x[0],'What to enter':x[1]}))}];
 const impTz=v=>{const x=String(v).trim().toLowerCase(),f=TZ_LIST.find(z=>z[0].toLowerCase()===x||z[1].toLowerCase()===x);return f?f[0]:null};
 const impTime=v=>{const s=String(v).trim();if(/^\d*\.?\d+$/.test(s)&&Number(s)>=0&&Number(s)<1&&s.includes('.')){const m=Math.round(Number(s)*1440);return pad(Math.floor(m/60))+':'+pad(m%60)}const m=/^(\d{1,2}):(\d{2})(?::\d{2})?$/.exec(s);if(!m||+m[1]>23||+m[2]>59)return null;return pad(+m[1])+':'+m[2]};
@@ -1583,12 +1595,13 @@ function whImportCheck(objs,hdr){
     }
     const def={name:'',city:'',country:'',address:'',hours:'',contact:'',phone:'',emails:[],tz:'UTC',dueTime:'07:30',weekDay:S.wh.weekDay,weekTime:'15:00',quietFrom:'19:00',quietTo:'06:00'},base=cur||def,rec=Object.assign({},cur?{code:cur.code}:{code});
     F.forEach(([k,f])=>{const raw=impVal(r,C,k);rec[f]=raw!==''?raw:base[f]||''});
+    {const tr=impVal(r,C,'type');if(tr!==''){const f=WH_TYPES.find(x=>x.toLowerCase()===tr.toLowerCase());if(f)rec.type=f;else it.errs.push('Warehouse Type must be one of: '+WH_TYPES.join(', '))}else rec.type=base.type||whTypeGuess({code:code,name:rec.name})}
     const em=impVal(r,C,'emails');if(em!==''){const list=em.split(/[\s,;]+/).map(x=>x.trim()).filter(Boolean),bad=list.filter(e=>!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e));if(bad.length)it.errs.push('Not a valid email address: '+bad.join(', '));rec.emails=uniq(list.map(e=>e.toLowerCase()))}else rec.emails=(base.emails||[]).slice();
     const tzr=impVal(r,C,'tz');if(tzr!==''){const z=impTz(tzr);if(z)rec.tz=z;else it.errs.push('Time zone "'+tzr+'" is not in the list')}else rec.tz=base.tz;
     [['due','dueTime','Delivery due notice at'],['wtime','weekTime','Weekly update at local'],['qfrom','quietFrom','Quiet Hours from (local)'],['qto','quietTo','Quiet Hours to (local)']].forEach(([k,f,l])=>{const raw=impVal(r,C,k);if(raw!==''){const x=impTime(raw);if(x)rec[f]=x;else it.errs.push(l+' must be a time like 07:30')}else rec[f]=base[f]});
     const dr=impVal(r,C,'wday');if(dr!==''){const x=impDay(dr);if(x!=null)rec.weekDay=x;else it.errs.push('Weekly updates on must be a day, Monday to Sunday')}else rec.weekDay=base.weekDay;
     it.rec=rec;
-    if(cur){const ch=[];[['name','Warehouse Name'],['city','City'],['country','Country'],['address','Address'],['hours','Receiving Hours'],['contact','Team Contact Name'],['phone','Phone'],['tz','Time zone'],['dueTime','Delivery due notice at'],['weekTime','Weekly update at local'],['quietFrom','Quiet Hours from'],['quietTo','Quiet Hours to']].forEach(([k,l])=>{if(String(cur[k]||'')!==String(rec[k]||''))ch.push(l+': '+(cur[k]||'none')+' to '+(rec[k]||'none'))});
+    if(cur){const ch=[];[['name','Warehouse Name'],['city','City'],['country','Country'],['address','Address'],['hours','Receiving Hours'],['contact','Team Contact Name'],['phone','Phone'],['tz','Time zone'],['type','Warehouse Type'],['dueTime','Delivery due notice at'],['weekTime','Weekly update at local'],['quietFrom','Quiet Hours from'],['quietTo','Quiet Hours to']].forEach(([k,l])=>{if(String(cur[k]||'')!==String(rec[k]||''))ch.push(l+': '+(cur[k]||'none')+' to '+(rec[k]||'none'))});
       if(cur.weekDay!==rec.weekDay)ch.push('Weekly updates on: '+WH_DAYS[cur.weekDay]+' to '+WH_DAYS[rec.weekDay]);if(cur.emails.join(',')!==rec.emails.join(','))ch.push('Team emails: '+cur.emails.length+' to '+rec.emails.length);
       it.changes=ch;it.op=it.errs.length?'':ch.length?'update':'nochange'}else it.op=it.errs.length?'':'add';
     it.cells=[code,rec.name||'-',rec.city||'-',rec.country||'-',rec.tz,rec.emails.join(', ')||'-'];items.push(it);
@@ -1608,14 +1621,14 @@ function whImportApply(P){
   audit('Warehouses imported','',n('add')+' added, '+n('update')+' updated, '+n('delete')+' removed from '+P.fileName+(todo.length?' ('+todo.slice(0,6).map(x=>x.code).join(', ')+(todo.length>6?' and more':'')+')':''));
   return {ok:true,msg:n('add')+' added, '+n('update')+' updated, '+n('delete')+' removed',added:n('add'),updated:n('update'),removed:n('delete')};
 }
-function whFiltered(){const q=String(S.ui.whq||'').toLowerCase().split(/\s+/).filter(Boolean);return S.warehouses.filter(w=>{const h=[w.code,w.name,w.city,w.country,w.address,w.hours,w.contact,w.phone,w.emails.join(' '),w.tz].join(' ').toLowerCase();return q.every(t=>h.includes(t))})}
+function whFiltered(){const q=String(S.ui.whq||'').toLowerCase().split(/\s+/).filter(Boolean);return S.warehouses.filter(w=>{if(S.ui.wht&&S.ui.wht!=='All'&&w.type!==S.ui.wht)return false;const h=[w.code,w.type,w.name,w.city,w.country,w.address,w.hours,w.contact,w.phone,w.emails.join(' '),w.tz].join(' ').toLowerCase();return q.every(t=>h.includes(t))})}
 function whTableHTML(){
   const list=whFiltered();
   const hint=`<p class="hint" style="margin:0 0 8px">${S.ui.whq?'Showing '+list.length+' of '+S.warehouses.length+' warehouses.':''}</p>`;
   if(!S.warehouses.length)return '<div class="empty">No warehouses yet.</div>';
   if(!list.length)return hint+'<div class="empty">No warehouse matches the search.</div>';
-  return hint+`<div class="tbw"><table class="tb"><tr><th>Warehouse code</th><th>Name and location</th><th>Team contact</th><th>Local schedule</th><th class="r">Shipments</th><th>Status</th><th></th></tr>
-  ${list.map(w=>`<tr><td><b>${esc(w.code)}</b></td><td>${esc(w.name||'-')}<br><small class="mu">${esc([w.city,w.country].filter(Boolean).join(', ')||'Location not set')}</small><br><small class="mu">${esc(w.hours||'Receiving hours not set')}</small></td>
+  return hint+`<div class="tbw"><table class="tb"><tr><th>Warehouse code</th><th>Type</th><th>Name and location</th><th>Team contact</th><th>Local schedule</th><th class="r">Shipments</th><th>Status</th><th></th></tr>
+  ${list.map(w=>`<tr><td><b>${esc(w.code)}</b></td><td>${esc(w.type||'-')}</td><td>${esc(w.name||'-')}<br><small class="mu">${esc([w.city,w.country].filter(Boolean).join(', ')||'Location not set')}</small><br><small class="mu">${esc(w.hours||'Receiving hours not set')}</small></td>
    <td>${w.emails.length?esc(w.contact||'')+(w.contact?'<br>':'')+'<small class="mu">'+esc(w.emails.join(', '))+(w.phone?', '+esc(w.phone):'')+'</small>':'<span class="late-t">No team contact</span>'}</td>
    <td>${esc(w.tz)}<br><small class="mu">${esc(tzWin(w.tz))}, now ${locTxt(w)}</small><br><small>Notice ${esc(w.dueTime)}, weekly ${DOWS[w.weekDay]} ${esc(w.weekTime)}<br>Quiet ${esc(w.quietFrom)} to ${esc(w.quietTo)}</small></td>
    <td class="r">${whLinked(w.code)}</td><td>${w.active?'<span class="pill ok">Active</span>':'<span class="pill chip">Inactive</span>'}</td>
@@ -1659,6 +1672,7 @@ function shipEditCheck(sh,h,ops,reason){
   const cur=shHeader(sh),errs=shipValidate(h,cur),changes=[],lineChanges=[];let planChanged=false;
   SH_FIELDS.forEach(([k,l,t,req,tag])=>{const a=String(cur[k]||''),b=String(h[k]==null?'':h[k]).trim();if(a!==b){changes.push(l+': '+(a||'blank')+' to '+(b||'blank'));if(tag==='plan')planChanged=true}});
   if(sh.cancelled)errs.push(sh.ref+' is cancelled and cannot be edited');
+  {const sc=partnerScope();if(sc&&!sc.has(h.Shipper,h.Consignee))errs.push('The shipper or receiver must stay assigned to your company')}
   if(sh.status==='Delivered')['Mode','Carrier','WarehouseDestination','PickupPlanned','ETDPlanned','ETA','ESTDelivery'].forEach(k=>{if(String(cur[k]||'')!==String(h[k]==null?'':h[k]).trim())errs.push(shF(k)[1]+' cannot be changed after delivery')});
   if(String(cur.WarehouseDestination||'')!==String(h.WarehouseDestination||'').trim()&&slotActive(sh.ref))errs.push('Cancel the delivery slot request for '+sh.ref+' before changing the warehouse');
   if(planChanged&&String(reason||'').trim().length<3)errs.push('Give a reason for changing the planned dates');
@@ -2179,31 +2193,31 @@ function dvLocate(){
   navigator.geolocation.getCurrentPosition(p=>{document.getElementById('dv_loc').value=p.coords.latitude.toFixed(4)+', '+p.coords.longitude.toFixed(4);out.textContent='Location added'},()=>{out.textContent='Location is switched off. Type where you are.'},{timeout:8000});
 }
 /* ========== go live: storage, sign-in and roles, flows ========== */
-const PERSIST_KEYS=['today','lines','events','users','access','subs','quotes','invoices','remind','revisions','warehouses','slots','slotBlocks','whLog','whNotified','wh','utcTime','whFail','outbox','audit','settings','brand','views','reports','whSince'];
+const PERSIST_KEYS=['today','lines','events','users','access','subs','quotes','invoices','remind','revisions','warehouses','slots','slotBlocks','whLog','whNotified','wh','utcTime','whFail','outbox','audit','settings','brand','views','reports','whSince','customRoles','accounts'];
 const Store={key:'ect.state.v1',modeKey:'ect.mode',last:null,err:'',
   available(){try{localStorage.setItem('ect.test','1');localStorage.removeItem('ect.test');return true}catch(e){return false}},
-  mode(){const d=window.ECT_LOGIN&&window.ECT_LOGIN.storage==='browser'?'browser':'demo';try{return localStorage.getItem(this.modeKey)||d}catch(e){return d}},
+  mode(){if(window.ECT_LOGIN&&window.ECT_LOGIN.storage==='shared'&&window.ECT_LOGIN.shared&&window.ECT_LOGIN.shared.url)return 'shared';const d=window.ECT_LOGIN&&window.ECT_LOGIN.storage==='browser'?'browser':'demo';try{return localStorage.getItem(this.modeKey)||d}catch(e){return d}},
   setMode(m){try{localStorage.setItem(this.modeKey,m);return true}catch(e){return false}},
   raw(){try{return localStorage.getItem(this.key)}catch(e){return null}},
   clear(){try{localStorage.removeItem(this.key);this.last=null;return true}catch(e){return false}}};
-function persistPayload(){const data={};PERSIST_KEYS.forEach(k=>{data[k]=S[k]});return {v:1,app:'ect',savedAt:new Date().toISOString(),data}}
+function persistPayload(){const data={};PERSIST_KEYS.forEach(k=>{data[k]=S[k]});return {v:1,schema:2,build:(typeof APP_BUILD!=='undefined'?APP_BUILD:'app'),app:'ect',savedAt:new Date().toISOString(),data}}
 function persistNow(){
   if(Store.mode()!=='browser')return false;
   try{const s=JSON.stringify(persistPayload());localStorage.setItem(Store.key,s);Store.last={at:new Date().toISOString(),kb:Math.round(s.length/1024)};Store.err='';return true}
   catch(e){Store.err=e.message||'Storage is full';if(!Store.warned){Store.warned=1;toast('Could not save to browser storage: '+Store.err,'bad')}return false}
 }
 let _ps=null;
-function persistSoon(){if(Store.mode()!=='browser')return;clearTimeout(_ps);_ps=setTimeout(persistNow,350)}
+function persistSoon(){if(Store.mode()==='shared'){sharedPushSoon();return}if(Store.mode()!=='browser')return;clearTimeout(_ps);_ps=setTimeout(persistNow,350)}
 function restoreCheck(o){
   if(!o||o.app!=='ect'||o.v!==1||!o.data||typeof o.data!=='object')return {ok:false,msg:'This is not a backup made by this app (or it is from a newer version).'};
   const d=o.data,arr=k=>Array.isArray(d[k]);
   if(!arr('lines')||!d.lines.every(l=>l&&l.ShipmentRef&&l.LineID))return {ok:false,msg:'The shipment rows in the backup are not valid.'};
-  if(!arr('events')||!arr('users')||!d.users.every(u=>u&&u.UserEmail&&ROLES.includes(u.Role)))return {ok:false,msg:'The users or history in the backup are not valid.'};
+  if(!arr('events')||!arr('users')||!d.users.every(u=>u&&u.UserEmail&&(ROLES.includes(u.Role)||u.Role==='Logistics Partner'||(Array.isArray(d.customRoles)&&d.customRoles.some(c=>c&&c.name===u.Role)))))return {ok:false,msg:'The users or history in the backup are not valid.'};
   if(!arr('warehouses')||!d.settings||typeof d.settings!=='object'||!d.access||typeof d.access!=='object')return {ok:false,msg:'The warehouses or settings in the backup are not valid.'};
   const refs=new Set(d.lines.map(l=>l.ShipmentRef));
   return {ok:true,savedAt:o.savedAt,counts:{shipments:refs.size,lines:d.lines.length,events:d.events.length,users:d.users.length,warehouses:d.warehouses.length,slots:(d.slots||[]).length,quotes:(d.quotes||[]).length,audit:(d.audit||[]).length}};
 }
-function persistFix(){const wt=S.users.find(u=>u.Role==='Warehouse Team');if(!S.users.some(u=>u.UserEmail===S.whTeam))S.whTeam=wt?wt.UserEmail:''}
+function persistFix(){const wt=S.users.find(u=>u.Role==='Warehouse Team');if(!S.users.some(u=>u.UserEmail===S.whTeam))S.whTeam=wt?wt.UserEmail:'';migrateData();syncRoles()}
 function persistLoad(){
   const raw=Store.raw();if(!raw)return {ok:false,msg:'Nothing saved yet'};
   try{const o=JSON.parse(raw),c=restoreCheck(o);if(!c.ok)return c;PERSIST_KEYS.forEach(k=>{if(o.data[k]!==undefined)S[k]=o.data[k]});persistFix();return {ok:true,savedAt:o.savedAt,counts:c.counts}}
@@ -2216,7 +2230,7 @@ function persistBoot(){
 }
 function restoreApply(o){
   const c=restoreCheck(o);if(!c.ok)return c;
-  PERSIST_KEYS.forEach(k=>{if(o.data[k]!==undefined)S[k]=clone(o.data[k])});persistFix();
+  PERSIST_KEYS.forEach(k=>{if(o.data[k]!==undefined)S[k]=clone(o.data[k])});if(o.data.customRoles===undefined)S.customRoles=[];persistFix();
   audit('Data restored','',c.counts.shipments+' shipments, '+c.counts.users+' users from a backup saved '+(o.savedAt||'').slice(0,10));
   persistNow();return {ok:true,msg:'Restored '+c.counts.shipments+' shipments and '+c.counts.users+' users from the backup.',counts:c.counts};
 }
@@ -2248,7 +2262,7 @@ function applySignIn(acc){
   S.signedIn={email:acc.username,role:r.role,reason:r.reason,at:new Date().toISOString()};
   audit('Signed in',acc.username,r.role+': '+r.reason);
   document.body.classList.add('signed-in');const g=document.getElementById('authGate');if(g)g.remove();
-  const allowed=TABS.find(t=>can(t.id));if(!can(S.view))S.view=allowed?allowed.id:'track';
+  const allowed=TABS.find(t=>canTab(t.id));if(!canTab(S.view))S.view=allowed?allowed.id:'track';
   render();return r;
 }
 function authGate(msg){
@@ -2341,8 +2355,8 @@ F7  Freight invoice reminders to carriers
 function readiness(){
   const A=authSet(),mode=Store.mode(),L=[];
   const add=(ok,label,detail)=>L.push({ok,label,detail});
-  add(mode==='browser','Data survives a reload',mode==='browser'?'Browser storage is on. It is private to this browser.':'Demo mode: all data resets when the page reloads. Choose Browser storage, or connect SharePoint.');
-  add(false,'Data is shared between users','Not connected. SharePoint storage needs your tenant. Until then each browser has its own copy.');
+  add(mode==='browser'||mode==='shared','Data survives a reload',mode==='shared'?'Saved in the shared database.':mode==='browser'?'Browser storage is on. It is private to this browser.':'Demo mode: all data resets when the page reloads. Choose Browser storage, or connect SharePoint.');
+  add(mode==='shared'&&Shared.status==='ok','Data is shared between users',mode==='shared'?(Shared.status==='ok'?'Connected: everyone sees the same data on every device.':'Shared data is on but not connected: '+(Shared.err||shLabel())):'Not connected. Set up shared data (Supabase) in users.js, or connect SharePoint. Until then each browser has its own copy.');
   add(A.mode==='microsoft'&&!authConfigCheck(A).length,'Sign-in with Microsoft',A.mode==='microsoft'?(authConfigCheck(A).join('. ')||'Configured. Not yet tested against your tenant.'):'Demo mode: anyone can pick any role with Preview as.');
   add(S.users.some(u=>u.Role==='Logistics Manager'),'At least one Logistics Manager',S.users.filter(u=>u.Role==='Logistics Manager').length+' listed');
   const sample=S.users.filter(u=>/\(sample\)|Replace with your own|^dispatch@|\.example$/i.test(u.DisplayName+' '+u.UserEmail));
@@ -2359,11 +2373,11 @@ function goLivePanel(){
   const A=authSet(),mode=Store.mode(),avail=Store.available(),R=readiness(),sc=schemaRows(),tabs=[...new Set(sc.map(x=>x.Table))],cur=S.ui.glTest||{email:'',groups:''},res=S.ui.glRes;
   const raw=Store.raw();
   return `<div class="card"><h3>Readiness</h3><div class="tbw"><table class="tb" data-sort="off"><tr><th style="width:36px"></th><th>Check</th><th>Detail</th></tr>${R.map(x=>`<tr><td>${x.ok?'<span class="pill ok">OK</span>':'<span class="pill warn">To do</span>'}</td><td><b>${esc(x.label)}</b></td><td>${esc(x.detail)}</td></tr>`).join('')}</table></div><p class="hint">${R.filter(x=>x.ok).length} of ${R.length} ready.</p></div>
-  <div class="card"><h3>Data storage</h3>
+  ${sharedCard()}<div class="card" ${Store.mode()==='shared'?'style="display:none"':''}><h3>Data storage</h3>
   <div class="row" style="gap:18px;flex-wrap:wrap"><label style="display:flex;gap:6px;align-items:center"><input type="radio" name="st_mode" value="demo" data-ch="storeMode" ${mode!=='browser'?'checked':''}> Demo: resets when the page reloads</label><label style="display:flex;gap:6px;align-items:center"><input type="radio" name="st_mode" value="browser" data-ch="storeMode" ${mode==='browser'?'checked':''} ${avail?'':'disabled'}> Browser storage: survives a reload on this computer</label><label style="display:flex;gap:6px;align-items:center;color:var(--muted)"><input type="radio" disabled> SharePoint: not connected</label></div>
   ${avail?'':'<div class="err" style="margin-top:10px">This browser does not allow storage for this page (private browsing, or a restricted file location). Open the app from the offline kit address or a web address.</div>'}
   <p class="mu" style="margin:10px 0">${mode==='browser'?(Store.last?'Last saved '+esc(Store.last.at.replace('T',' ').slice(0,19))+' UTC, '+Store.last.kb+' KB.':(raw?'Saved data exists ('+Math.round(raw.length/1024)+' KB).':'Nothing saved yet. It saves after your next action.'))+(Store.err?' <span class="late-t">Last save failed: '+esc(Store.err)+'</span>':''):'Nothing is stored.'}</p>
-  <div class="row"><button class="btn" data-act="storeBackup">Download backup (JSON)</button><label class="btn" style="cursor:pointer">Restore from backup<input type="file" id="restoreFile" accept=".json,application/json" hidden></label><button class="btn danger" data-act="storeClear" ${raw?'':'disabled'}>Clear saved data</button></div>
+  <div class="row"><button class="btn" data-act="storeBackup">Download backup (JSON)</button><label class="btn" style="cursor:pointer">Restore from backup<input type="file" id="restoreFile" accept=".json,.zip,application/json,application/zip" hidden></label><button class="btn danger" data-act="storeClear" ${raw?'':'disabled'}>Clear saved data</button></div>
   <p class="hint">Browser storage keeps one copy per browser on one computer. It is not shared between people and it is lost if the browser data is cleared, so download a backup regularly. Sharing data between users needs the SharePoint connection, which needs your Microsoft 365 tenant.</p></div>
   <div class="card"><h3>Sign-in and roles</h3>
   <div class="g3"><label class="f">Sign-in<select id="au_mode" class="in"><option value="demo" ${A.mode!=='microsoft'?'selected':''}>Demo: choose any role with Preview as</option><option value="microsoft" ${A.mode==='microsoft'?'selected':''}>Microsoft sign-in</option></select></label><label class="f">Tenant ID<input id="au_tenant" class="in" value="${esc(A.tenantId)}" placeholder="GUID"></label><label class="f">Application (client) ID<input id="au_client" class="in" value="${esc(A.clientId)}" placeholder="GUID"></label></div>
@@ -2375,10 +2389,360 @@ function goLivePanel(){
   <p class="hint">The Microsoft sign-in has not been run against a real tenant. The role rules above are tested here. Hiding pages in the app is a convenience, not security: real protection comes from SharePoint permissions.</p></div>
   <div class="card"><h3>Power Automate and SharePoint</h3><p class="mu" style="margin-bottom:10px">Everything the flows need: the tables and columns the app writes (${tabs.length} tables) and a written specification of each flow, using your current warehouse and report settings.</p>
   <div class="row"><button class="btn pri" data-act="flowSpecDl">Download flow specification (.txt)</button><button class="btn" data-act="schemaDl">Download table layout (.csv)</button><button class="btn" data-act="mfOpen">Open the master file view</button></div></div>
+  ${ghCard()}
   ${errCard()}`;
 }
+/* ========== profiles, logistics partners, warehouse types, complete backup ========== */
+const BASE_ROLES=ROLES.slice();
+const PARTNER='External Logistics Partner';
+const WH_TYPES=['Distribution Center','Manufacturing Site','Research Center','Supplier'];
+function whTypeGuess(w){const t=' '+String((w.code||'')+' '+(w.name||'')).toLowerCase();if(/[^a-z]mfg|manufactur|factory|plant/.test(t))return 'Manufacturing Site';if(/[^a-z]rd[^a-z]|r&d|research|[^a-z]lab[^a-z]/.test(t+' '))return 'Research Center';if(/supplier|vendor/.test(t))return 'Supplier';return 'Distribution Center'}
+const shipperKey=s=>String(s==null?'':s).trim().toLowerCase();
+const normShippers=v=>uniq(String(v||'').split(/[;|]+/).map(x=>x.trim()).filter(Boolean)).join('; ');
+const shippersOf=u=>normShippers(u&&u.Shippers).split('; ').filter(Boolean);
+function partnerUser(){const em=String(S.email||'').toLowerCase();return S.users.find(u=>u.Role===PARTNER&&String(u.UserEmail).toLowerCase()===em)||S.users.find(u=>u.Role===PARTNER)||null}
+function partnerShippers(){return S.role===PARTNER?shippersOf(partnerUser()):null}
+function visLines(){const sc=partnerScope();return sc?S.lines.filter(l=>sc.has(shipperKey(l.Shipper))):S.lines}
+function shipperFieldHTML(){const a=partnerShippers();return a?`<select id="f_shipper" class="in">${a.map(x=>`<option>${esc(x)}</option>`).join('')}</select>`:`<input id="f_shipper" class="in" list="dl_shipper" autocomplete="off">`}
+function defaultPartnerAccess(){return (S.access['Logistics Executive']||['track','tasks']).filter(x=>x!=='mfmaster')}
+function migrateData(){
+  (S.warehouses||[]).forEach(w=>{if(!WH_TYPES.includes(w.type))w.type=whTypeGuess(w)});
+  (S.users||[]).forEach(u=>{if(u.Shippers===undefined)u.Shippers=''});
+  if(!Array.isArray(S.customRoles))S.customRoles=[];
+  if(!Array.isArray(S.accounts))S.accounts=[];
+}
+function syncRoles(){
+  if(!Array.isArray(S.customRoles))S.customRoles=[];
+  ROLES.length=0;BASE_ROLES.forEach(r=>ROLES.push(r));S.customRoles.forEach(r=>{if(r&&r.name&&!ROLES.includes(r.name))ROLES.push(r.name)});
+  if(!S.access[PARTNER])S.access[PARTNER]=defaultPartnerAccess();
+  ROLES.forEach(r=>{if(!S.access[r])S.access[r]=['track']});
+  const sel=document.getElementById('roleSel');if(sel){const v=sel.value;sel.innerHTML=ROLES.map(r=>`<option>${esc(r)}</option>`).join('');sel.value=ROLES.includes(S.role)?S.role:v}
+  if(!ROLES.includes(S.role))S.role='In Organization';
+}
+{const i0=init;init=function(){i0.apply(this,arguments);
+  if(!S.users.some(u=>u.Role===PARTNER)){const c={};S.lines.forEach(l=>{c[l.Shipper]=(c[l.Shipper]||0)+1});const top=Object.keys(c).sort((a,b)=>c[b]-c[a])[0]||'';S.users.push({UserEmail:'logistics.partner@yourcompany.com',DisplayName:'Shipper logistics partner',Role:PARTNER,Carrier:'',Warehouses:'',Shippers:top})}
+  migrateData();syncRoles()}}
+/* ----- profiles (custom roles) ----- */
+const PROFILE_PRESETS={Finance:['tasks','track','dashboard','commercial','invoices','freighttrends','reports'],SCM:['tasks','track','request','milestones','dataquality','dashboard','carrier','transit','reports','slotreq','warehouse']};
+function roleNameCheck(n){
+  n=String(n||'').replace(/\s+/g,' ').trim();
+  if(n.length<2||n.length>40)return {err:'The profile name needs 2 to 40 characters'};
+  if(!/^[A-Za-z0-9 &.\-]+$/.test(n))return {err:'Use letters, numbers, spaces and & . - in the profile name'};
+  if(ROLES.some(r=>r.toLowerCase()===n.toLowerCase()))return {err:'A role or profile called '+n+' already exists'};
+  return {name:n};
+}
+function roleCreate(name,base,access){
+  const c=roleNameCheck(name);if(c.err)return {ok:false,msg:c.err};
+  S.customRoles.push({name:c.name,base:base||'',created:S.today,by:S.email});
+  S.access[c.name]=(access||(base&&S.access[base]?S.access[base].slice():['tasks','track'])).slice();
+  syncRoles();audit('Profile created','',c.name+(base?' (copied from '+base+')':''));
+  return {ok:true,msg:'Profile '+c.name+' created. Tick what it can open in the table below.',name:c.name};
+}
+function roleDelete(name){
+  const cr=S.customRoles.find(r=>r.name===name);if(!cr)return {ok:false,msg:'Only profiles you created can be deleted'};
+  const n=S.users.filter(u=>u.Role===name).length;if(n)return {ok:false,msg:n+' user(s) still have the profile '+name+'. Change their role first'};
+  S.customRoles=S.customRoles.filter(r=>r.name!==name);delete S.access[name];syncRoles();audit('Profile deleted','',name);
+  return {ok:true,msg:'Profile '+name+' deleted'};
+}
+function profilesCard(){
+  const used=r=>S.users.filter(u=>u.Role===r).length;
+  return `<div class="card"><h3>Profiles</h3><p class="mu" style="margin-bottom:10px">Create a profile such as Finance or SCM, then tick what it can open in the table below. A profile sees every shipment; it is not limited to one carrier, warehouse or shipper. Assign it to people in Users and roles.</p>
+  ${S.customRoles.length?`<div class="tbw"><table class="tb" data-sort="off"><tr><th>Profile</th><th>Users</th><th>Can open</th><th></th></tr>${S.customRoles.map(r=>`<tr><td><b>${esc(r.name)}</b></td><td>${used(r.name)}</td><td class="mu">${esc((S.access[r.name]||[]).map(id=>(ACCESS_ITEMS.find(t=>t.id===id)||{label:id}).label.replace(/ \(.*/,'')).join(', ')||'Nothing')}</td><td class="r"><button class="btn sm danger" data-act="roleDel" data-n="${esc(r.name)}">Delete</button></td></tr>`).join('')}</table></div>`:'<p class="mu">No profiles yet.</p>'}
+  <div class="row sec"><input id="cr_name" class="in grow" placeholder="Profile name, for example Finance" maxlength="40"><select id="cr_base" class="in" style="width:auto"><option value="">Start with Track &amp; Trace only</option>${ROLES.filter(r=>r!=='In Organization').map(r=>`<option>${esc(r)}</option>`).join('')}</select><button class="btn pri" data-act="roleAdd">Create profile</button></div>
+  <div class="row" style="margin-top:8px"><span class="mu sm">Quick start:</span>${Object.keys(PROFILE_PRESETS).filter(k=>!ROLES.includes(k)).map(k=>`<button class="btn sm" data-act="rolePreset" data-p="${k}">Add the ${k} profile</button>`).join('')||'<span class="mu sm">both are created</span>'}</div>
+  <p class="hint">Finance starts with Control Tower Overview, Freight Commercials with invoices, Freight Trends and Scheduled reports. SCM starts with requests, milestones, the dashboards, carrier and transit analysis, delivery slot requests and warehouse operations. Change either in the table below.</p></div>`;
+}
+/* ----- complete backup and Excel export ----- */
+function backupPayload(){const p=persistPayload(),cb=document.getElementById('bk_acc');if(cb&&!cb.checked)delete p.data.accounts;return p}
+function backupCard(){
+  const c={ship:new Set(S.lines.map(l=>l.ShipmentRef)).size,ev:S.events.length,sl:S.slots.length,us:S.users.length,wh:S.warehouses.length,q:S.quotes.length,inv:S.invoices.length};
+  return `<div class="card"><h3>Data backup</h3><p class="mu" style="margin-bottom:10px">One export holds everything: ${c.ship} shipments with their item lines, ${c.ev} milestones, ${c.sl} delivery slot requests and the blocks, ${c.us} users, ${S.customRoles.length} profiles and all role access, ${c.wh} warehouses, ${c.q} freight quotes, ${c.inv} freight invoices, subscriptions, report schedules, saved views, settings, branding and the audit log. Upload the file to a newer version of the app to bring everything back in one step.</p>
+  <div class="row"><label class="f" style="flex-direction:row;align-items:center;gap:8px">Format<select id="bk_fmt" class="in" style="width:auto"><option value="zip">ZIP (separate files)</option><option value="json">JSON (one file)</option></select></label><button class="btn pri" data-act="exportAll">Export all data</button><label class="btn" style="cursor:pointer">Upload dump<input type="file" id="restoreFile2" accept=".json,.zip,application/json,application/zip" hidden></label><button class="btn" data-act="exportAllX">Download everything as Excel</button></div>
+  ${(S.accounts||[]).length||window.ECT_LOGIN?`<label class="row" style="margin-top:10px;gap:8px"><input type="checkbox" id="bk_acc" checked style="width:auto"> Include the sign-in accounts (scrambled passwords) in the backup</label>`:''}
+  <p class="hint">The JSON file is the one to keep and to restore from. The Excel file is for reading and analysis: every table on its own sheet, plus carrier and monthly analysis. It cannot be uploaded back. Restoring replaces everything on screen. Keep the backup file private: it holds all shipment and cost data.</p></div>`;
+}
+function allSheets(){
+  const sh=shipsAll(),com=can('commercial')||can('mfcomm')||can('invoices'),keys=a=>{const k=[];a.forEach(r=>Object.keys(r).forEach(x=>{if(!k.includes(x))k.push(x)}));return k.length?k:['(empty)']};
+  const tbl=(name,rows)=>{const r=rows.map(x=>{const o={};Object.keys(x).forEach(k=>{const v=x[k];o[k]=v!==null&&typeof v==='object'?JSON.stringify(v):v});return o});return {name,headers:keys(r),rows:r}};
+  const S1=sh.map(s=>({Shipment:s.ref,Status:s.cancelled?'Cancelled':s.status,Shipper:s.shipper,Consignee:s.consignee,Carrier:s.carrier,Mode:s.mode,Route:s.route,'Warehouse':s.f.WarehouseDestination,'Pickup planned':s.f.PickupPlanned,'Pickup actual':s.f.PickupActual,ETA:s.f.ETA,'Due':s.due,'Delivered on':s.f.DeliveredOn,'PO numbers':s.pos.join('; '),'Packages':s.lines.reduce((a,l)=>a+num(l.Packages),0),'Weight kg':s.lines.reduce((a,l)=>a+num(l.WeightKg),0),'Freight by':s.f.Freight,'Cancelled on':s.f.CancelledOn||'','Cancel reason':s.f.CancelReason||''}));
+  const done=ships().filter(s=>s.status==='Delivered'&&s.f.DeliveredOn),byC={};
+  ships().forEach(s=>{const c=byC[s.carrier]=byC[s.carrier]||{Carrier:s.carrier,Shipments:0,Delivered:0,'On time':0,'Transit days':0,'With transit':0};c.Shipments++});
+  done.forEach(s=>{const c=byC[s.carrier];c.Delivered++;if(!s.due||s.f.DeliveredOn<=s.due)c['On time']++;if(s.f.PickupActual){c['Transit days']+=Math.max(0,diffDays(s.f.DeliveredOn,s.f.PickupActual));c['With transit']++}});
+  const A1=Object.values(byC).map(c=>({Carrier:c.Carrier,Shipments:c.Shipments,Delivered:c.Delivered,'On-time delivery %':c.Delivered?Math.round(100*c['On time']/c.Delivered):'','Average transit days':c['With transit']?Math.round(10*c['Transit days']/c['With transit'])/10:''}));
+  const byM={};ships().forEach(s=>{const m=String(s.f.PickupActual||s.f.PickupPlanned||'').slice(0,7)||'No date',r=byM[m]=byM[m]||{Month:m,Shipments:0,'Weight kg':0,'Freight spend':0};r.Shipments++;r['Weight kg']+=s.lines.reduce((a,l)=>a+num(l.WeightKg),0);if(com){try{const q=selQuote(s.ref);if(q)r['Freight spend']+=num(q.amount)}catch(e){}}});
+  const A2=Object.values(byM).sort((a,b)=>a.Month.localeCompare(b.Month)).map(r=>{if(!com)delete r['Freight spend'];return r});
+  const readme=[['Shipments','One row per shipment (cancelled ones included, marked).'],['Item lines','Every item line exactly as stored.'],['Milestones','The event history of every shipment.'],['Date revisions','Planned dates that were changed, with the reason.'],['Delivery slots','All delivery slot requests.'],['Slot blocks','Blocked delivery slots.'],['Users','The user list. No passwords.'],['Profiles and access','What each role and profile can open.'],['Warehouses','The warehouse list with type and team contacts.'],['Freight quotes / Freight invoices','Included only when your role can see commercial data.'],['Subscriptions','Email follow-ups.'],['Audit log','Who changed what.'],['Analysis - carriers','Delivered shipments, on-time delivery and transit days per carrier, at the time of export.'],['Analysis - monthly','Shipments, weight and freight spend per pickup month, at the time of export.'],['Note','This workbook is for reading. To restore everything use the JSON backup.']].map(x=>({Sheet:x[0],Content:x[1]}));
+  const acc=ROLES.map(r=>({Role:r,Custom:S.customRoles.some(c=>c.name===r)?'Yes':'','Can open':(S.access[r]||[]).join(', ')}));
+  const out=[{name:'Read me',headers:['Sheet','Content'],rows:readme},tbl('Shipments',S1),tbl('Item lines',S.lines),tbl('Milestones',S.events),tbl('Date revisions',S.revisions),tbl('Delivery slots',S.slots.map(r=>({ID:r.id,Shipment:r.ref,Warehouse:r.code,Date:r.date,Slot:r.slot,Status:r.status,'Requested by':r.by,Vehicle:r.vehicle,Driver:r.driver,Note:r.note,Flag:r.flag||''}))),tbl('Slot blocks',S.slotBlocks),tbl('Users',S.users),tbl('Profiles and access',acc),tbl('Warehouses',S.warehouses.map(w=>Object.assign({},w,{emails:(w.emails||[]).join('; ')})))];
+  if(com){out.push(tbl('Freight quotes',S.quotes));out.push(tbl('Freight invoices',S.invoices))}
+  out.push(tbl('Subscriptions',S.subs),tbl('Audit log',S.audit),tbl('Analysis - carriers',A1),tbl('Analysis - monthly',A2));
+  return out;
+}
+/* ========== external logistics partners, user types, my team ========== */
+const PEXEC='Partner Executive';
+const USER_TYPES=['Internal','Carrier','Warehouse','External Logistics Partner','Partner Executive'];
+const INTERNAL_ROLES=()=>ROLES.filter(r=>!['In Organization','Carrier Partner','Warehouse Team',PARTNER,PEXEC].includes(r));
+function roleType(role){return role==='Carrier Partner'?'Carrier':role==='Warehouse Team'?'Warehouse':role===PARTNER?'External Logistics Partner':role===PEXEC?'Partner Executive':'Internal'}
+const listOf=v=>normShippers(v).split('; ').filter(Boolean);
+function currentUserRec(){const em=String(S.email||'').toLowerCase();return S.users.find(u=>String(u.UserEmail).toLowerCase()===em)||null}
+function partnerOrg(u){if(!u)return null;if(u.Role===PARTNER)return u;if(u.Role===PEXEC)return S.users.find(x=>x.Role===PARTNER&&String(x.UserEmail).toLowerCase()===String(u.Partner||'').toLowerCase())||null;return null}
+function partnerCtx(){
+  if(S.role!==PARTNER&&S.role!==PEXEC)return null;
+  let u=currentUserRec();if(!u||u.Role!==S.role)u=S.users.find(x=>x.Role===S.role)||null;
+  return {user:u,org:partnerOrg(u)};
+}
+function partnerScope(){
+  const c=partnerCtx();if(!c)return null;const org=c.org,sh=new Set(listOf(org&&org.Shippers).map(shipperKey)),rc=new Set(listOf(org&&org.Receivers).map(shipperKey));
+  return {org,shippers:sh,receivers:rc,has:(shipper,consignee)=>sh.has(shipperKey(shipper))||rc.has(shipperKey(consignee))};
+}
+function partnerShippers(){const s=partnerScope();return s?listOf(s.org&&s.org.Shippers):null}
+function visLines(){const sc=partnerScope();return sc?S.lines.filter(l=>sc.has(l.Shipper,l.Consignee)):S.lines}
+function shipperFieldHTML(){const s=partnerScope();if(s&&s.shippers.size)return `<select id="f_shipper" class="in">${listOf(s.org.Shippers).map(x=>`<option>${esc(x)}</option>`).join('')}</select>`;return `<input id="f_shipper" class="in" list="dl_shipper" autocomplete="off">`}
+function consigneeFieldHTML(){const s=partnerScope();if(s&&s.receivers.size&&!s.shippers.size)return `<select id="f_consignee" class="in">${listOf(s.org.Receivers).map(x=>`<option>${esc(x)}</option>`).join('')}</select>`;return `<input id="f_consignee" class="in" list="dl_consignee" autocomplete="off">`}
+function defaultPartnerAccess(){return ['tasks','track','request','milestones','editship','team']}
+function defaultPexecAccess(){return ['tasks','track','request','milestones','editship']}
+function migrateData(){
+  (S.warehouses||[]).forEach(w=>{if(!WH_TYPES.includes(w.type))w.type=whTypeGuess(w)});
+  (S.users||[]).forEach(u=>{if(u.Role==='Logistics Partner')u.Role=PARTNER;['Shippers','Receivers','Partner','Phone','Location'].forEach(k=>{if(u[k]===undefined)u[k]=''});u.Type=roleType(u.Role)});
+  if(S.access&&S.access['Logistics Partner']){delete S.access['Logistics Partner']}
+  if(!Array.isArray(S.customRoles))S.customRoles=[];
+  if(!Array.isArray(S.accounts))S.accounts=[];
+}
+function syncRoles(){
+  if(!Array.isArray(S.customRoles))S.customRoles=[];
+  ROLES.length=0;BASE_ROLES.forEach(r=>ROLES.push(r));S.customRoles.forEach(r=>{if(r&&r.name&&!ROLES.includes(r.name))ROLES.push(r.name)});
+  if(!S.access[PARTNER])S.access[PARTNER]=defaultPartnerAccess();
+  if(!S.access[PEXEC])S.access[PEXEC]=defaultPexecAccess();
+  if(!S.access[PARTNER].includes('team'))S.access[PARTNER].push('team');
+  ROLES.forEach(r=>{if(!S.access[r])S.access[r]=['track']});
+  const sel=document.getElementById('roleSel');if(sel){const v=sel.value;sel.innerHTML=ROLES.map(r=>`<option>${esc(r)}</option>`).join('');sel.value=ROLES.includes(S.role)?S.role:v}
+  if(!ROLES.includes(S.role))S.role='In Organization';
+}
+function seedPartnerTeam(){
+  const p=S.users.find(u=>u.Role===PARTNER);if(!p)return;
+  if(!S.users.some(u=>u.Role===PEXEC))S.users.push({UserEmail:'partner.executive@yourcompany.com',DisplayName:'Partner logistics executive',Role:PEXEC,Type:'Partner Executive',Partner:p.UserEmail,Carrier:'',Warehouses:'',Shippers:'',Receivers:'',Phone:'',Location:''});
+}
+{const i1=init;init=function(){i1.apply(this,arguments);S.access[PARTNER]=defaultPartnerAccess();S.access[PEXEC]=defaultPexecAccess();seedPartnerTeam();migrateData();syncRoles()}}
+Object.assign(ICON,{team:ICON.admin||ICON.track});
+/* ----- adding and editing users ----- */
+const typeRole=(type,role)=>type==='Carrier'?'Carrier Partner':type==='Warehouse'?'Warehouse Team':type==='External Logistics Partner'?PARTNER:type==='Partner Executive'?PEXEC:role;
+function userAddFromForm(){
+  const em=val('u_email').toLowerCase(),type=val('u_type')||'Internal',role=typeRole(type,val('u_role'));
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em))return {msg:'Enter a valid email address'};
+  if(S.users.some(u=>u.UserEmail.toLowerCase()===em))return {msg:'That user already exists'};
+  if(!role)return {msg:'Choose a role for this user'};
+  const carrier=type==='Carrier'?val('u_carrier').trim():'',whSel=[...(document.getElementById('u_wh')||{selectedOptions:[]}).selectedOptions].map(o=>o.value),sh=normShippers(val('u_shippers')),rc=normShippers(val('u_receivers')),partner=val('u_partner');
+  if(type==='Carrier'&&!carrier)return {msg:'Enter the carrier this user belongs to'};
+  if(type==='Warehouse'&&!whSel.length)return {msg:'Choose at least one warehouse for this Warehouse user'};
+  if(type==='External Logistics Partner'&&!sh&&!rc)return {msg:'Enter at least one shipper or receiver for this logistics partner'};
+  if(type==='Partner Executive'&&!S.users.some(u=>u.Role===PARTNER&&u.UserEmail===partner))return {msg:'Choose the logistics partner this executive works under'};
+  const pe=typeof acctPreCheck==='function'?acctPreCheck():'';if(pe)return {msg:pe};
+  S.users.push({UserEmail:em,DisplayName:val('u_name')||em,Role:role,Type:roleType(role),Phone:val('u_phone').trim(),Location:val('u_loc').trim(),Carrier:carrier,Warehouses:type==='Warehouse'?whSel.join('; '):'',Shippers:type==='External Logistics Partner'?sh:'',Receivers:type==='External Logistics Partner'?rc:'',Partner:type==='Partner Executive'?partner:''});
+  audit('User added','',em+' as '+role);if(typeof acctOnAdd==='function')acctOnAdd(em);
+  return {ok:true,msg:'User added'};
+}
+function userTypeFields(){
+  const L=S.users.filter(u=>u.Role===PARTNER);
+  return `<select id="u_type" class="in" style="width:auto" aria-label="User type">${USER_TYPES.map(t=>`<option>${t}</option>`).join('')}</select>
+  <input id="u_phone" class="in" placeholder="Phone" style="width:150px" autocomplete="off"><input id="u_loc" class="in" placeholder="Location" style="width:170px" autocomplete="off">
+  <input id="u_receivers" class="in" placeholder="Receivers (partner only), separated by ;" style="width:280px" autocomplete="off">
+  <select id="u_partner" class="in" style="width:auto" aria-label="Logistics partner for a Partner Executive"><option value="">Partner (Partner Executive only)</option>${L.map(u=>`<option value="${esc(u.UserEmail)}">${esc(u.DisplayName)}</option>`).join('')}</select>`;
+}
+/* ----- My team: a logistics partner manages its own executives ----- */
+function teamList(){const c=partnerCtx(),me=c&&c.org;return me?S.users.filter(u=>u.Role===PEXEC&&String(u.Partner).toLowerCase()===String(me.UserEmail).toLowerCase()):[]}
+function viewTeam(){
+  const c=partnerCtx(),org=c&&c.org;
+  if(!org)return pageHead('My team','')+'<div class="card empty">Your company is not set up yet. Ask an administrator.</div>';
+  const L=teamList();
+  return pageHead('My team','Create the logistics executives of your company. They can add, update and view the shipments of your assigned shippers and receivers, and nothing else.')+
+  `<div class="card"><h3>${esc(org.DisplayName)}</h3><p class="mu">Shippers: ${esc(org.Shippers||'none')}<br>Receivers: ${esc(org.Receivers||'none')}</p></div>
+  <div class="card"><h3>Logistics executives</h3>${L.length?`<div class="tbw"><table class="tb" data-sort="off"><tr><th>Name</th><th>Email</th><th>Phone</th><th>Location</th><th></th></tr>${L.map(u=>`<tr><td>${esc(u.DisplayName)}</td><td>${esc(u.UserEmail)}</td><td>${esc(u.Phone||'-')}</td><td>${esc(u.Location||'-')}</td><td class="r">${typeof acctRowBtn==='function'?acctRowBtn(u,true):''}<button class="btn sm danger" data-act="teamDel" data-e="${esc(u.UserEmail)}">Remove</button></td></tr>`).join('')}</table></div>`:'<div class="empty">No executives yet.</div>'}
+  <div class="row sec"><input id="tm_name" class="in grow" placeholder="Name"><input id="tm_email" class="in grow" placeholder="Email"><input id="tm_phone" class="in" placeholder="Phone" style="width:150px"><input id="tm_loc" class="in" placeholder="Location" style="width:170px">${typeof acctFormHTML==='function'?acctFormHTML().replace('id="u_pw"','id="tm_pw"'):''}<button class="btn pri" data-act="teamAdd">Add executive</button></div>
+  <p class="hint">Executives see only the shipments of ${esc(org.DisplayName)}'s shippers and receivers. They cannot open Warehouse Operations, analysis, freight cost, Administration or Settings.</p></div>`;
+}
+function teamAdd(){
+  const c=partnerCtx(),org=c&&c.org;if(!org)return {msg:'Your company is not set up'};
+  const em=val('tm_email').toLowerCase();
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em))return {msg:'Enter a valid email address'};
+  if(S.users.some(u=>u.UserEmail.toLowerCase()===em))return {msg:'That user already exists'};
+  const pw=document.getElementById('tm_pw');if(pw&&pw.value&&pw.value.length<10)return {msg:'The initial password needs at least 10 characters'};
+  S.users.push({UserEmail:em,DisplayName:val('tm_name')||em,Role:PEXEC,Type:'Partner Executive',Partner:org.UserEmail,Phone:val('tm_phone').trim(),Location:val('tm_loc').trim(),Carrier:'',Warehouses:'',Shippers:'',Receivers:''});
+  audit('Partner executive added','',em+' under '+org.UserEmail);if(typeof acctOnAdd==='function')acctOnAdd(em,'tm_pw');
+  return {ok:true,msg:'Executive added'};
+}
+function teamDel(em){
+  const u=teamList().find(x=>x.UserEmail===em);if(!u)return {msg:'That person is not in your team'};
+  S.users=S.users.filter(x=>x!==u);if(typeof acctOnDel==='function')acctOnDel(em);audit('Partner executive removed','',em);return {ok:true,msg:'Removed'};
+}
+/* ========== module permissions: View / Create / Edit / Delete ========== */
+const MODULES=[
+ {id:'shipments',label:'Shipments',V:['track','tasks','dataquality'],C:['request'],E:['milestones','editship','carrierupdates'],D:['cancelship'],note:'View: Track & Trace, My tasks, Data Quality. Create: Shipment Requests. Edit: Milestone Management, Carrier Updates and editing shipments. Delete: cancel and reinstate.'},
+ {id:'warehouse',label:'Warehouse Operations',V:['warehouse'],C:['slotreq'],E:['slotmgmt'],D:[],note:'View: Warehouse Operations. Create: request delivery slots. Edit: Delivery Management (approve, propose, block).'},
+ {id:'freight',label:'Freight Cost',V:['commercial','freighttrends'],C:[],E:['invoices'],D:[],note:'View: Freight Commercials and Freight Trends. Edit: invoices and actual freight.'},
+ {id:'analysis',label:'Analysis',V:['dashboard','carrier','transit','reports'],C:[],E:[],D:[],note:'View: Control Tower Overview, Carrier Performance, Transit Analytics, Scheduled reports.'},
+ {id:'users',label:'Users',V:['usersview'],C:['usersadd'],E:['usersedit'],D:['usersdel'],note:'View: the Users and roles tab. Create, edit (including password reset) and remove users.'},
+ {id:'settings',label:'Settings',V:['admin'],C:[],E:['settingsedit'],D:[],note:'View: the other Administration tabs. Edit: change roles and access, warehouses, branding, settings and restore a backup.'}];
+const PERM_KEYS=[['V','View'],['C','Create'],['E','Edit'],['D','Delete']];
+const canTab=id=>can(id)||(id==='admin'&&can('usersview'));
+function denied(id){if(can(id))return false;toast('Your role is not allowed to do this','bad');return true}
+function permOn(role,m,k){const ids=m[k];if(!ids||!ids.length)return null;const a=S.access[role]||[];return ids.some(i=>a.includes(i))}
+function permPartial(role,m,k){const ids=m[k]||[];const a=S.access[role]||[];return ids.length>1&&ids.some(i=>a.includes(i))&&!ids.every(i=>a.includes(i))}
+function permSet(role,mid,k,on){
+  const m=MODULES.find(x=>x.id===mid);if(!m)return;const a=S.access[role]=S.access[role]||[];
+  const add=ids=>ids.forEach(i=>{if(!a.includes(i))a.push(i)}),del=ids=>ids.forEach(i=>{const j=a.indexOf(i);if(j>=0)a.splice(j,1)});
+  if(k==='V'){if(on)add(m.V);else['V','C','E','D'].forEach(x=>del(m[x]))}else{if(on){add(m.V);add(m[k])}else del(m[k])}
+  if(!a.includes('track'))a.push('track');
+}
+function accessFor(spec){const a=['track','tasks'],add=i=>{if(!a.includes(i))a.push(i)};Object.entries(spec).forEach(([mid,keys])=>{const m=MODULES.find(x=>x.id===mid);m.V.forEach(add);[...keys].forEach(k=>(m[k]||[]).forEach(add))});return a}
+Object.assign(PROFILE_PRESETS,{Finance:accessFor({shipments:'V',freight:'VE',analysis:'V'}),SCM:accessFor({shipments:'VCE',warehouse:'VC',analysis:'V'}),'Warehouse Manager':accessFor({shipments:'V',warehouse:'VCE'}),Admin:accessFor({shipments:'VCED',warehouse:'VCE',freight:'VE',analysis:'V',users:'VCED',settings:'VE'})});
+function adminTabsAllowed(tabs){return tabs.filter(([k])=>k==='users'?can('usersview'):can('admin'))}
+function adminTabCurrent(){const keys=adminTabsAllowed([['users'],['access'],['warehouses'],['outbox'],['audit'],['branding'],['settings'],['golive']]).map(x=>x[0]);if(!keys.includes(S.ui.admin))S.ui.admin=keys[0]||'users';return S.ui.admin}
+function permCard(){
+  const roles=ROLES.filter(r=>r!=='In Organization'),sel=S.ui.permRole&&roles.includes(S.ui.permRole)?S.ui.permRole:(S.customRoles[0]&&S.customRoles[0].name)||'Logistics Executive';S.ui.permRole=sel;
+  const lock=!can('settingsedit');
+  return `<div class="card"><h3>Roles and access: what each role can do</h3><p class="mu" style="margin-bottom:10px">Choose a role, then tick what it can do in each module. Create, Edit and Delete need View. A person with that role sees only the modules ticked here.</p>
+  <label class="f" style="max-width:340px">Role<select id="perm_role" class="in" data-ch="permRole">${roles.map(r=>`<option ${r===sel?'selected':''}>${esc(r)}</option>`).join('')}</select></label>
+  <div class="tbw" style="margin-top:10px"><table class="tb" data-sort="off"><tr><th>Module</th>${PERM_KEYS.map(([k,l])=>`<th class="c" style="text-align:center">${l}</th>`).join('')}</tr>
+  ${MODULES.map(m=>`<tr><td><b>${esc(m.label)}</b><br><small class="mu">${esc(m.note)}</small></td>${PERM_KEYS.map(([k,l])=>{const on=permOn(sel,m,k);return `<td style="text-align:center">${on===null?'<span class="mu" title="Not used in this module">&ndash;</span>':`<input type="checkbox" data-ch="perm" data-m="${m.id}" data-k="${k}" ${on?'checked':''} ${permPartial(sel,m,k)?'data-part="1" title="Some of the pages in this group are ticked. Click to tick them all."':''} ${(lock||(m.id==='shipments'&&k==='V'))?'disabled':''} aria-label="${esc(sel)}: ${l} ${esc(m.label)}" style="width:auto">`}</td>`}).join('')}</tr>`).join('')}</table></div>
+  <h3 class="sec" style="margin-top:14px">All roles at a glance</h3><div class="tbw"><table class="tb" data-sort="off"><tr><th>Role</th>${MODULES.map(m=>`<th>${esc(m.label)}</th>`).join('')}</tr>
+  ${roles.map(r=>`<tr><td><b>${esc(r)}</b></td>${MODULES.map(m=>`<td><code>${PERM_KEYS.map(([k])=>{const o=permOn(r,m,k);return o===null?'-':o?k:'-'}).join('')}</code></td>`).join('')}</tr>`).join('')}</table></div>
+  <p class="hint">V view, C create, E edit, D delete. The table further down gives tab-by-tab control for special cases.</p></div>`;
+}
+function permUi(){
+  const v=document.getElementById('view');if(!v)return;
+  v.querySelectorAll('input[data-part="1"]').forEach(e=>{e.indeterminate=true});
+  const dis=(sel,id)=>{if(can(id))return;v.querySelectorAll(sel).forEach(e=>{e.disabled=true;e.title='Your role is not allowed to do this';e.style.opacity='.5'})};
+  dis('[data-act=userAdd],#u_email,#u_name,#u_type,#u_role,#u_carrier,#u_wh,#u_phone,#u_loc,#u_shippers,#u_receivers,#u_partner,#u_pw','usersadd');
+  dis('[data-ch=userRole],[data-ch=userCarrier],[data-ch=userWh],[data-ch=userShippers],[data-ch=userField],[data-ch=userPartner]','usersedit');
+  if(S.view!=='team')dis('[data-act=acctReset],[data-act=acctLink]','usersedit');
+  dis('[data-act=userDel]','usersdel');
+  if(!can('usersadd')&&!can('usersedit')){v.querySelectorAll('#impUsers').forEach(e=>{e.disabled=true;if(e.parentElement)e.parentElement.style.opacity='.5'})}
+  dis('[data-act=saveDomain],[data-act=whSave],[data-act=whSetSave],[data-act=whToggle],[data-act=whDel],[data-act=brandSave],[data-act=roleAdd],[data-act=roleDel],[data-act=rolePreset],[data-ch=acc],[data-ch=strip],[data-ch=perm],[data-act=storeRestoreApply],#restoreFile2,#restoreFile,#impWh','settingsedit');
+}
+function migratePerms(){
+  S.settings=S.settings||{};if((S.settings.permV||0)>=2)return;
+  Object.keys(S.access||{}).forEach(r=>{const a=S.access[r];if(a.includes('admin'))['usersview','usersadd','usersedit','usersdel','settingsedit'].forEach(i=>{if(!a.includes(i))a.push(i)})});
+  S.settings.permV=2;
+}
+{const m0=migrateData;migrateData=function(){m0.apply(this,arguments);migratePerms()}}
+/* ========== export all data (ZIP or JSON) and restore from a dump ========== */
+const DATASETS=[
+ {id:'shipments',file:'shipments.json',label:'Shipment data',keys:['lines','subs','revisions']},
+ {id:'milestones',file:'milestones.json',label:'Milestones',keys:['events']},
+ {id:'slots',file:'delivery_slots.json',label:'Delivery slots',keys:['slots','slotBlocks']},
+ {id:'users',file:'user_list.json',label:'User list, roles and access',keys:['users','access','customRoles','accounts']},
+ {id:'warehouses',file:'warehouses.json',label:'Warehouses',keys:['warehouses','wh','whNotified','whLog','whSince']},
+ {id:'freight',file:'freight_cost.json',label:'Freight cost',keys:['quotes','invoices','remind']},
+ {id:'settings',file:'settings_and_logs.json',label:'Settings, saved views, reports and logs',keys:['settings','brand','views','reports','audit','outbox','today','utcTime','whFail']},
+ {id:'analysis',file:'analysis.json',label:'Analysis data',keys:[]}];
+const arrN=a=>Array.isArray(a)?a.length:0;
+function dsCounts(id,d){
+  const L=d.lines||[];
+  if(id==='shipments')return [['Shipments',new Set(L.map(l=>l.ShipmentRef)).size],['Item lines',arrN(L)],['Email subscriptions',arrN(d.subs)],['Date revisions',arrN(d.revisions)]];
+  if(id==='milestones')return [['Milestone events',arrN(d.events)]];
+  if(id==='slots')return [['Delivery slot requests',arrN(d.slots)],['Slot blocks',arrN(d.slotBlocks)]];
+  if(id==='users')return [['Users',arrN(d.users)],['Profiles you created',arrN(d.customRoles)],['Roles with access settings',d.access?Object.keys(d.access).length:0],['Sign-in accounts',arrN(d.accounts)]];
+  if(id==='warehouses')return [['Warehouses',arrN(d.warehouses)]];
+  if(id==='freight')return [['Freight quotes',arrN(d.quotes)],['Freight invoices',arrN(d.invoices)]];
+  if(id==='settings')return [['Saved views',arrN(d.views)],['Report schedules',arrN(d.reports)],['Audit log entries',arrN(d.audit)],['Emails in the outbox',arrN(d.outbox)]];
+  return [];
+}
+function dsPresent(ds,d){return ds.keys.length?ds.keys.some(k=>d[k]!==undefined):true}
+const CRC_T=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
+function crc32(u8){let c=0xFFFFFFFF;for(let i=0;i<u8.length;i++)c=CRC_T[(c^u8[i])&0xFF]^(c>>>8);return (c^0xFFFFFFFF)>>>0}
+function analysisSnapshot(){const s=allSheets(),pick=n=>(s.find(x=>x.name===n)||{rows:[]}).rows;return {note:'A snapshot of the analysis at the time of export. It is recalculated from the shipment data when you restore.',exported:new Date().toISOString(),carriers:pick('Analysis - carriers'),monthly:pick('Analysis - monthly')}}
+function dumpFiles(includeAccounts){
+  const P=persistPayload(),d=P.data;if(!includeAccounts)delete d.accounts;
+  const files=[],used=new Set(),counts={};
+  DATASETS.forEach(ds=>{const o={};ds.keys.forEach(k=>{if(d[k]!==undefined)o[k]=d[k]});if(ds.id==='analysis')Object.assign(o,analysisSnapshot());files.push({name:ds.file,text:JSON.stringify(o)});counts[ds.id]=dsCounts(ds.id,d).map(x=>x[0]+': '+x[1])});
+  files.unshift({name:'manifest.json',text:JSON.stringify({app:'ect',kind:'full-dump',v:1,schema:2,build:P.build,savedAt:P.savedAt,files:DATASETS.map(x=>x.file),counts})});
+  return files;
+}
+function zipStore(files){
+  const enc=new TextEncoder(),parts=[],cd=[];let off=0;const d=new Date(),dosT=(d.getHours()<<11)|(d.getMinutes()<<5)|(d.getSeconds()>>1),dosD=((d.getFullYear()-1980)<<9)|((d.getMonth()+1)<<5)|d.getDate();
+  files.forEach(f=>{const nm=enc.encode(f.name),data=f.data||enc.encode(f.text),crc=crc32(data),h=new DataView(new ArrayBuffer(30));
+    h.setUint32(0,0x04034b50,true);h.setUint16(4,20,true);h.setUint16(6,0x0800,true);h.setUint16(8,0,true);h.setUint16(10,dosT,true);h.setUint16(12,dosD,true);h.setUint32(14,crc,true);h.setUint32(18,data.length,true);h.setUint32(22,data.length,true);h.setUint16(26,nm.length,true);h.setUint16(28,0,true);
+    parts.push(new Uint8Array(h.buffer),nm,data);
+    const c=new DataView(new ArrayBuffer(46));c.setUint32(0,0x02014b50,true);c.setUint16(4,20,true);c.setUint16(6,20,true);c.setUint16(8,0x0800,true);c.setUint16(10,0,true);c.setUint16(12,dosT,true);c.setUint16(14,dosD,true);c.setUint32(16,crc,true);c.setUint32(20,data.length,true);c.setUint32(24,data.length,true);c.setUint16(28,nm.length,true);c.setUint32(42,off,true);
+    cd.push(new Uint8Array(c.buffer),nm);off+=30+nm.length+data.length});
+  const cdLen=cd.reduce((a,x)=>a+x.length,0),e=new DataView(new ArrayBuffer(22));e.setUint32(0,0x06054b50,true);e.setUint16(8,files.length,true);e.setUint16(10,files.length,true);e.setUint32(12,cdLen,true);e.setUint32(16,off,true);
+  const all=[...parts,...cd,new Uint8Array(e.buffer)],out=new Uint8Array(all.reduce((a,x)=>a+x.length,0));let p=0;all.forEach(x=>{out.set(x,p);p+=x.length});return out;
+}
+async function zipRead(u8){
+  const v=new DataView(u8.buffer,u8.byteOffset,u8.byteLength);let e=-1;
+  for(let i=u8.length-22;i>=Math.max(0,u8.length-65557);i--){if(v.getUint32(i,true)===0x06054b50){e=i;break}}
+  if(e<0)throw new Error('This is not a ZIP file');
+  const n=v.getUint16(e+10,true),cdOff=v.getUint32(e+16,true);if(n>60)throw new Error('The ZIP has too many files');
+  const out=[],dec=new TextDecoder();let p=cdOff;
+  for(let i=0;i<n;i++){
+    if(v.getUint32(p,true)!==0x02014b50)throw new Error('The ZIP file is damaged');
+    const method=v.getUint16(p+10,true),crc=v.getUint32(p+16,true),cs=v.getUint32(p+20,true),us=v.getUint32(p+24,true),fl=v.getUint16(p+28,true),xl=v.getUint16(p+30,true),cl=v.getUint16(p+32,true),lo=v.getUint32(p+42,true);
+    const name=dec.decode(u8.subarray(p+46,p+46+fl));p+=46+fl+xl+cl;
+    if(us>60e6)throw new Error(name+' is too large');
+    const lfl=v.getUint16(lo+26,true),lxl=v.getUint16(lo+28,true),ds=lo+30+lfl+lxl;let data=u8.subarray(ds,ds+cs);
+    if(method===8){if(typeof DecompressionStream==='undefined')throw new Error('This browser cannot open compressed ZIP files. Use the ZIP made by the app, or the JSON file');data=new Uint8Array(await new Response(new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer())}
+    else if(method!==0)throw new Error(name+' uses a ZIP method that is not supported');
+    if(crc32(data)!==crc)throw new Error(name+' is damaged (checksum does not match)');
+    out.push({name:name.split('/').pop(),data});
+  }
+  return out;
+}
+function dumpFromFiles(files){
+  const dec=new TextDecoder(),by={};files.forEach(f=>{by[f.name]=f});
+  if(!by['manifest.json'])return {err:'This ZIP has no manifest.json, so it is not a dump made by this app'};
+  let man;try{man=JSON.parse(dec.decode(by['manifest.json'].data))}catch(e){return {err:'manifest.json cannot be read'}}
+  if(!man||man.app!=='ect'||man.kind!=='full-dump')return {err:'This ZIP is not a dump made by this app'};
+  const data={};
+  for(const ds of DATASETS){const f=by[ds.file];if(!f||!ds.keys.length)continue;let o;try{o=JSON.parse(dec.decode(f.data))}catch(e){return {err:ds.file+' cannot be read'}}ds.keys.forEach(k=>{if(o[k]!==undefined)data[k]=o[k]})}
+  return {payload:{v:1,schema:man.schema||2,app:'ect',build:man.build||'',savedAt:man.savedAt,data},man};
+}
+function dumpSummary(payload){
+  const d=payload.data||{};
+  return DATASETS.map(ds=>{const inFile=dsPresent(ds,d),cur={};ds.keys.forEach(k=>{cur[k]=S[k]});
+    return {ds,inFile,file:inFile?dsCounts(ds.id,d):[],now:dsCounts(ds.id,cur)}});
+}
+function downloadBlob(name,u8,type){try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([u8],{type}));a.download=name;document.body.appendChild(a);a.click();a.remove();return true}catch(e){return false}}
+function exportAll(){
+  if(!can('admin')){toast('Your role is not allowed to do this','bad');return}
+  const fmt=(document.getElementById('bk_fmt')||{value:'zip'}).value,inc=(document.getElementById('bk_acc')||{checked:true}).checked,stamp=S.today;
+  let ok;
+  if(fmt==='json')ok=downloadText('control-tower-all-data-'+stamp+'.json',JSON.stringify(backupPayload()),'application/json');
+  else ok=downloadBlob('control-tower-all-data-'+stamp+'.zip',zipStore(dumpFiles(inc)),'application/zip');
+  audit('Export all data','',fmt.toUpperCase()+(inc?'':' without accounts'));
+  toast(ok?'Export downloaded':'The download was blocked by this browser','');
+}
+async function restorePick(input){
+  const f=input.files[0];input.value='';if(!f)return;
+  if(f.size>60e6){toast('That file is over 60 MB, so it is not a dump from this app','bad');return}
+  try{
+    const buf=new Uint8Array(await f.arrayBuffer());let payload,man=null;
+    if(buf[0]===0x50&&buf[1]===0x4b){const r=dumpFromFiles(await zipRead(buf));if(r.err){toast(r.err,'bad');return}payload=r.payload;man=r.man}
+    else{try{payload=JSON.parse(new TextDecoder().decode(buf).replace(/^\uFEFF/,''))}catch(e){toast('That file is neither a ZIP nor valid JSON','bad');return}}
+    const c=restoreCheck(payload);if(!c.ok){toast(c.msg,'bad');return}
+    S._restore=payload;restoreModal(payload,c,f.name);
+  }catch(e){toast(e.message||'The file could not be read','bad')}
+}
+function restoreModal(o,c,name){
+  const rows=dumpSummary(o),miss=rows.filter(r=>!r.inFile&&r.ds.id!=='analysis');
+  openModal(`<div class="mh"><h2>Restore from a dump</h2><button class="x" data-act="close" aria-label="Close">&times;</button></div>
+  <p class="mu" style="margin-bottom:8px">File: <b>${esc(name)}</b>. Saved ${esc((c.savedAt||'').replace('T',' ').slice(0,19))} UTC${o.build?' by '+esc(o.build):''}. Check the records below before you go on.</p>
+  <div class="tbw" style="max-height:300px;overflow:auto"><table class="tb" data-sort="off"><tr><th>Dataset</th><th>Record</th><th class="r">In the file</th><th class="r">In the app now</th><th>What happens</th></tr>
+  ${rows.map(r=>{const n=Math.max(r.file.length,r.now.length,1);return (r.file.length?r.file:[['(none)','']]).map((x,i)=>`<tr><td>${i===0?`<b>${esc(r.ds.label)}</b>`:''}</td><td>${esc(x[0])}</td><td class="r">${r.inFile&&r.ds.id!=='analysis'?x[1]:''}</td><td class="r">${(r.now[i]||[])[1]===undefined?'':r.now[i][1]}</td><td>${i===0?(r.ds.id==='analysis'?'<span class="mu">Recalculated from the shipments</span>':r.inFile?'<span class="late-t">Replaced</span>':'<span class="mu">Not in the file: kept as it is</span>'):''}</td></tr>`).join('')}).join('')}</table></div>
+  <div class="note" style="margin-top:10px">Restoring <b>replaces</b> ${rows.filter(r=>r.inFile&&r.ds.id!=='analysis').length} dataset(s) with the contents of this file${miss.length?', and keeps '+miss.map(r=>esc(r.ds.label)).join(', ')+' as they are':''}. Older dumps are upgraded to this version automatically. Download an export of your current data first if you may need it.</div>
+  <div class="row sec"><button class="btn danger" data-act="storeRestoreApply">Replace current data</button><button class="btn" data-act="close">Cancel</button></div>`);
+}
+function restoreResultModal(r,o){
+  const rows=dumpSummary(o),after={};DATASETS.forEach(ds=>{const cur={};ds.keys.forEach(k=>{cur[k]=S[k]});after[ds.id]=dsCounts(ds.id,cur)});
+  let total=0,bad=0;
+  const body=rows.filter(x=>x.inFile&&x.ds.id!=='analysis').map(x=>x.file.map((c,i)=>{const now=(after[x.ds.id][i]||[])[1];const ok=c[0]==='Audit log entries'?now>=c[1]:now===c[1];total+=c[1];if(!ok)bad++;return `<tr><td>${i===0?`<b>${esc(x.ds.label)}</b>`:''}</td><td>${esc(c[0])}</td><td class="r">${c[1]}</td><td class="r">${now}</td><td>${ok?'<span class="ok-t">Imported</span>':'<span class="late-t">Check</span>'}</td></tr>`}).join('')).join('');
+  openModal(`<div class="mh"><h2>${bad?'Restore finished, check the rows marked':'Restore complete'}</h2><button class="x" data-act="close" aria-label="Close">&times;</button></div>
+  <p class="mu" style="margin-bottom:8px">${total} records were imported. The app now holds what the file held.</p>
+  <div class="tbw" style="max-height:300px;overflow:auto"><table class="tb" data-sort="off"><tr><th>Dataset</th><th>Record</th><th class="r">Imported</th><th class="r">Now in the app</th><th></th></tr>${body}</table></div>
+  <div class="row sec"><button class="btn pri" data-act="close">Done</button></div>`);
+  return {total,bad};
+}
 /* ========== demo sign-in (email and password), problem log, report a problem ========== */
-const APP_BUILD='site build 2026-11-11 08:54 UTC';
+const APP_BUILD='site build 2026-11-12 03:07 UTC';
 const ErrLog={key:'ect.errors',max:60,
   add(kind,msg,src){try{const a=JSON.parse(localStorage.getItem(this.key)||'[]');a.push({t:new Date().toISOString(),kind,msg:String(msg==null?'':msg).slice(0,300),src:String(src||'').slice(0,160),view:(typeof S!=='undefined'&&S&&S.view)||'',role:(typeof S!=='undefined'&&S&&S.role)||''});while(a.length>this.max)a.shift();localStorage.setItem(this.key,JSON.stringify(a))}catch(e){}},
   list(){try{return JSON.parse(localStorage.getItem(this.key)||'[]')}catch(e){return []}},
@@ -2394,9 +2758,11 @@ async function pbkdf2Hex(pw,saltHex,iter){
 const sameHex=(a,b)=>{a=String(a);b=String(b);if(a.length!==b.length)return false;let d=0;for(let i=0;i<a.length;i++)d|=a.charCodeAt(i)^b.charCodeAt(i);return d===0};
 async function loginCheck(email,pw){
   const L=window.ECT_LOGIN;if(!L)return null;
-  const em=String(email||'').trim().toLowerCase(),u=(L.users||[]).find(x=>x&&String(x.email).toLowerCase()===em);
-  const h=await pbkdf2Hex(String(pw||''),u?u.salt:'00'.repeat(16),u?(u.iter||150000):150000);
-  return u&&sameHex(h,u.hash)?u:null;
+  if(typeof acctOn==='function'&&acctOn()){try{await sharedSync()}catch(e){}}
+  const em=String(email||'').trim().toLowerCase(),stat0=(L.users||[]).find(x=>x&&String(x.email).toLowerCase()===em),acc=(typeof acctOn==='function'&&acctOn())?acctFind(em):null,gone=((typeof S!=='undefined'&&S.settings&&S.settings.removedLogins)||[]).map(x=>String(x).toLowerCase()).includes(em),stat=gone?null:stat0,src=acc||stat;
+  const h=await pbkdf2Hex(String(pw||''),src?src.salt:'00'.repeat(16),src?(src.iter||150000):150000);
+  if(!(src&&sameHex(h,src.hash)))return null;
+  return acc?acctUser(acc):stat;
 }
 document.addEventListener('submit',e=>{if(e.target&&e.target.id==='loginForm'){e.preventDefault();loginSubmit()}});
 const loginLock=()=>{try{return JSON.parse(sessionStorage.getItem('ect.lg')||'{"fails":0,"until":0}')}catch(e){return {fails:0,until:0}}};
@@ -2424,22 +2790,24 @@ async function loginSubmit(){
 function loginApply(u){
   const role=ROLES.includes(u.role)?u.role:'In Organization',wh=String(u.warehouses||'').split(/[;,]+/).map(x=>x.trim()).filter(Boolean);
   const cur=S.users.find(x=>x.UserEmail.toLowerCase()===String(u.email).toLowerCase());
-  if(cur){cur.Role=role;cur.DisplayName=u.name||cur.DisplayName;cur.Carrier=role==='Carrier Partner'?(u.carrier||''):'';cur.Warehouses=role==='Warehouse Team'?wh.join('; '):''}
-  else S.users.push({UserEmail:u.email,DisplayName:u.name||u.email,Role:role,Carrier:role==='Carrier Partner'?(u.carrier||''):'',Warehouses:role==='Warehouse Team'?wh.join('; '):''});
+  if(cur){cur.Role=role;if(!cur.DisplayName||cur.DisplayName===cur.UserEmail)cur.DisplayName=u.name||cur.DisplayName;cur.Carrier=role==='Carrier Partner'?(u.carrier||''):'';cur.Warehouses=role==='Warehouse Team'?wh.join('; '):'';cur.Shippers=role===PARTNER?normShippers(u.shippers!==undefined?u.shippers:cur.Shippers):'';if(role===PARTNER&&u.receivers!==undefined)cur.Receivers=normShippers(u.receivers);if(role===PEXEC&&u.partner!==undefined&&u.partner)cur.Partner=u.partner;cur.Type=roleType(role)}
+  else S.users.push({UserEmail:u.email,DisplayName:u.name||u.email,Role:role,Carrier:role==='Carrier Partner'?(u.carrier||''):'',Warehouses:role==='Warehouse Team'?wh.join('; '):'',Shippers:role===PARTNER?normShippers(u.shippers):'',Receivers:role===PARTNER?normShippers(u.receivers):'',Partner:role===PEXEC?(u.partner||''):'',Phone:'',Location:'',Type:roleType(role)});
   S.email=u.email;S.baseEmail=u.email;S.role=role;S.carrier=role==='Carrier Partner'?(u.carrier||''):'';if(role==='Warehouse Team')S.whTeam=u.email;
-  S.signedIn={email:u.email,role,name:u.name||u.email,tools:!!u.tools,at:new Date().toISOString()};
+  S.signedIn={email:u.email,role,name:u.name||u.email,tools:!!u.tools,mustChange:!!u.mustChange,at:new Date().toISOString()};
   try{sessionStorage.setItem('ect.sess',JSON.stringify({email:u.email,t:Date.now()}))}catch(e){}
   document.body.classList.toggle('signed-in',!u.tools);
   const g=document.getElementById('authGate');if(g)g.remove();
-  const first=TABS.find(t=>can(t.id));if(!can(S.view))S.view=first?first.id:'track';
+  const first=TABS.find(t=>canTab(t.id));if(!canTab(S.view))S.view=first?first.id:'track';
   render();
+  if(u.mustChange&&typeof acctPwModal==='function')acctPwModal(true);
 }
 function loginBoot(){
   const L=window.ECT_LOGIN;
   if(!L){if(window.ECT_STRICT){S.role='In Organization';S.email='';render();loginGate('The user list (users.js) could not be loaded, so the app stays closed. Check that users.js is in the same folder as index.html.','',true);return true}return false}
   if(L.required===false)return false;
+  if(typeof resetBoot==='function'&&resetBoot())return true;
   if(!(L.users||[]).length){S.role='In Organization';S.email='';render();loginGate('No users are set up yet. Create users.js with make-users.html.','',true);return true}
-  try{const s=JSON.parse(sessionStorage.getItem('ect.sess')||'null');if(s){const u=(L.users||[]).find(x=>String(x.email).toLowerCase()===String(s.email).toLowerCase());if(u&&Date.now()-s.t<12*3600*1000){loginApply(u);return true}}}catch(e){}
+  try{const s=JSON.parse(sessionStorage.getItem('ect.sess')||'null');if(s){let u=(L.users||[]).find(x=>String(x.email).toLowerCase()===String(s.email).toLowerCase());if(typeof acctOn==='function'&&acctOn()){const a=acctFind(s.email);if(a)u=acctUser(a)}if(u&&Date.now()-s.t<12*3600*1000){loginApply(u);return true}}}catch(e){}
   S.role='In Organization';S.email='';render();loginGate('');return true;
 }
 function signOut(){try{sessionStorage.removeItem('ect.sess');sessionStorage.removeItem('ect.lg')}catch(e){}location.reload()}
@@ -2461,6 +2829,424 @@ function errCard(){
   ${L.length?`<div class="tbw"><table class="tb" data-sort="off"><tr><th>When (UTC)</th><th>Kind</th><th>Message</th><th>Where</th><th>Page</th><th>Role</th></tr>${L.slice().reverse().slice(0,25).map(e=>`<tr><td>${esc(e.t.replace('T',' ').slice(0,19))}</td><td>${esc(e.kind)}</td><td>${esc(e.msg)}</td><td>${esc(e.src)}</td><td>${esc(e.view)}</td><td>${esc(e.role)}</td></tr>`).join('')}</table></div>`:'<div class="okbox">No problems noticed in this browser.</div>'}
   <div class="row sec"><button class="btn" data-act="errDl" ${L.length?'':'disabled'}>Download the list</button><button class="btn danger" data-act="errClear" ${L.length?'':'disabled'}>Clear the list</button></div></div>`;
 }
+/* ========== shared data between devices (Supabase table ect_state) ========== */
+const SH_KEYS=PERSIST_KEYS.filter(k=>!['today','utcTime','whFail'].includes(k));
+const SH_ID={lines:'LineID',events:'EventID',users:'UserEmail',subs:'SubscriptionID',quotes:'id',invoices:'id',slots:'id',slotBlocks:'id',warehouses:'code',reports:'id',views:'id',customRoles:'name',accounts:'email'};
+const SH_APPEND=['revisions','whLog','outbox','audit'];
+const SH_OBJ=['access','remind','whNotified','wh','settings','brand'];
+const Shared={v:0,base:null,baseStr:null,status:'off',err:'',last:null,by:'',busy:false,again:false,force:false,merges:0,renames:[],conflicts:0,polls:0,pushes:0,hold:false,lateRender:false,lastToast:0,trace:[]};
+function shSetBase(o){Shared.baseStr=shJ(o);Shared.base=JSON.parse(Shared.baseStr)}
+const shTr=m=>{Shared.trace.push(new Date().toISOString().slice(11,19)+' '+m);if(Shared.trace.length>30)Shared.trace.shift()};
+const SC=()=>{const L=window.ECT_LOGIN||{},c=L.shared;return (L.storage==='shared'&&c&&c.url&&c.key&&!/^sb_secret_/.test(c.key))?c:null};
+Shared.enabled=()=>!!SC();
+const shRoom=()=>encodeURIComponent((SC().room||'main'));
+const shJ=x=>JSON.stringify(x===undefined?null:x);
+function shLabel(){
+  const t=Shared.last?new Date(Shared.last).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}):'';
+  if(Shared.status==='connecting')return 'Shared data: connecting...';
+  if(Shared.status==='saving')return 'Shared data: saving...';
+  if(Shared.status==='offline')return 'Shared data: offline, retrying';
+  if(Shared.status==='error')return 'Shared data: problem (click)';
+  return 'Shared data: saved'+(t?' '+t:'');
+}
+function shShow(){const b=document.getElementById('shst');if(b)b.textContent=shLabel()}
+function shSet(st,err){Shared.status=st;Shared.err=err||'';shShow()}
+async function shFetch(path,opt){
+  const c=SC(),url=c.url.replace(/\/+$/,'')+'/rest/v1/ect_state'+path,ctrl=new AbortController(),to=setTimeout(()=>ctrl.abort(),15000);
+  try{return await fetch(url,Object.assign({cache:'no-store',signal:ctrl.signal},opt,{headers:Object.assign(/^eyJ/.test(c.key)?{apikey:c.key,Authorization:'Bearer '+c.key}:{apikey:c.key},(opt&&opt.headers)||{})}))}finally{clearTimeout(to)}
+}
+async function shCheck(r){
+  if(r.ok)return r;
+  let msg='The shared database answered '+r.status;
+  if(r.status===401||r.status===403)msg='The shared database refused the key, or the access rules are missing. Check the key and run the set-up SQL again.';
+  else if(r.status===404)msg='The table ect_state was not found. Run the set-up SQL in Supabase.';
+  const e=new Error(r.status>=500?'The shared database is not available right now':msg);if(r.status<500)e.http=r.status;throw e;
+}
+const shMeta=async()=>{const r=await shCheck(await shFetch('?id=eq.'+shRoom()+'&select=v,t,updated_by'));const a=await r.json();return a[0]||null};
+const shFull=async()=>{const r=await shCheck(await shFetch('?id=eq.'+shRoom()+'&select=v,t,updated_by,d'));const a=await r.json();return a[0]||null};
+async function shCreate(str){
+  const r=await shFetch('',{method:'POST',headers:{'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify({id:decodeURIComponent(shRoom()),v:1,d:str,updated_by:S.email||''})});
+  if(r.status===409)return 'exists';await shCheck(r);return 'ok';
+}
+async function shCas(v,str){
+  const r=await shCheck(await shFetch('?id=eq.'+shRoom()+'&v=eq.'+v,{method:'PATCH',headers:{'Content-Type':'application/json',Prefer:'return=representation'},body:JSON.stringify({v:v+1,d:str,updated_by:S.email||'',t:new Date().toISOString()})}));
+  const a=await r.json();return a.length?a[0].v:null;
+}
+const shData=()=>{const d={};SH_KEYS.forEach(k=>{d[k]=S[k]});return d};
+const shPack=d=>JSON.stringify({fmt:1,data:d});
+function shUnpack(s){const o=JSON.parse(s);if(!o||o.fmt!==1||!o.data)throw new Error('The shared data is from a different version of the app');return o.data}
+const shDirty=()=>Shared.baseStr!==null&&JSON.stringify(shData())!==Shared.baseStr;
+/* ---- merge ---- */
+function shNextId(id,taken){
+  const m=/^(.*?)(\d+)$/.exec(String(id));if(!m)return id+'-2';
+  const pre=m[1],w=m[2].length;let mx=0;taken.forEach(t=>{const q=/^(.*?)(\d+)$/.exec(String(t));if(q&&q[1]===pre)mx=Math.max(mx,Number(q[2]))});
+  return pre+String(Math.max(mx,Number(m[2]))+1).padStart(w,'0');
+}
+function shRename(m,old,nw){
+  (m.lines||[]).forEach(l=>{if(l.ShipmentRef===old){l.ShipmentRef=nw;if(typeof l.LineID==='string'&&l.LineID.startsWith(old))l.LineID=nw+l.LineID.slice(old.length)}});
+  ['events','subs'].forEach(k=>(m[k]||[]).forEach(x=>{if(x.ShipmentRef===old)x.ShipmentRef=nw}));
+  ['quotes','invoices','slots','revisions'].forEach(k=>(m[k]||[]).forEach(x=>{if(x.ref===old)x.ref=nw}));
+  if(m.whNotified&&m.whNotified[old]!==undefined){m.whNotified[nw]=m.whNotified[old];delete m.whNotified[old]}
+}
+function shResolveRefs(base,m,t){
+  const bR=new Set((base.lines||[]).map(l=>l.ShipmentRef)),tR=new Set((t.lines||[]).map(l=>l.ShipmentRef)),used=new Set([...tR,...(m.lines||[]).map(l=>l.ShipmentRef)]);
+  [...new Set((m.lines||[]).filter(l=>!bR.has(l.ShipmentRef)).map(l=>l.ShipmentRef))].forEach(ref=>{
+    if(!tR.has(ref))return;
+    if(shJ((m.lines||[]).filter(l=>l.ShipmentRef===ref))===shJ((t.lines||[]).filter(l=>l.ShipmentRef===ref)))return;
+    const nr=shNextId(ref,[...used]);used.add(nr);shRename(m,ref,nr);Shared.renames.push({from:ref,to:nr});
+  });
+}
+function shById(b,m,t,key){
+  const ix=a=>{const o=new Map();a.forEach(x=>o.set(String(x[key]),x));return o},B=ix(b),M=ix(m),T=ix(t),ids=[],seen=new Set(),taken=new Set([...T.keys(),...M.keys(),...B.keys()]),out=[];
+  [...t,...m,...b].forEach(x=>{const i=String(x[key]);if(!seen.has(i)){seen.add(i);ids.push(i)}});
+  ids.forEach(id=>{
+    const Bv=B.get(id),Mv=M.get(id),Tv=T.get(id),mCh=Mv?(!Bv||shJ(Mv)!==shJ(Bv)):!!Bv,tCh=Tv?(!Bv||shJ(Tv)!==shJ(Bv)):!!Bv;let pick;
+    if(!mCh)pick=Tv;else if(!tCh)pick=Mv;
+    else if(Mv&&Tv){if(!Bv&&shJ(Mv)!==shJ(Tv)){out.push(Tv);const nid=shNextId(id,[...taken]);taken.add(nid);const c=JSON.parse(shJ(Mv));c[key]=nid;out.push(c);Shared.conflicts++;return}pick=Mv}
+    else pick=Mv||Tv;
+    if(pick)out.push(pick);
+  });
+  return out;
+}
+function shMerge(base,mine,theirs){
+  base=base||{};const m=JSON.parse(shJ(mine)),out={};shResolveRefs(base,m,theirs);
+  SH_KEYS.forEach(k=>{
+    const b=base[k],mi=m[k],t=theirs[k];
+    if(shJ(mi)===shJ(b))out[k]=t===undefined?mi:t;
+    else if(shJ(t)===shJ(b))out[k]=mi;
+    else if(SH_ID[k])out[k]=shById(b||[],mi||[],t||[],SH_ID[k]);
+    else if(SH_APPEND.includes(k)){const sb=new Set((b||[]).map(shJ)),st=new Set((t||[]).map(shJ));out[k]=(t||[]).concat((mi||[]).filter(x=>!sb.has(shJ(x))&&!st.has(shJ(x))))}
+    else if(SH_OBJ.includes(k)){const o=Object.assign({},t||{});new Set([...Object.keys(b||{}),...Object.keys(mi||{})]).forEach(key=>{const bv=(b||{})[key],mv=(mi||{})[key];if(shJ(mv)!==shJ(bv)){if(mv===undefined)delete o[key];else o[key]=mv}});out[k]=o}
+    else out[k]=mi;
+  });
+  return out;
+}
+/* ---- apply remote data and refresh the screen when it is safe ---- */
+const shBusyUI=()=>{const m=document.getElementById('modal'),a=document.activeElement;return (m&&!m.classList.contains('hidden'))||(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)&&a.type!=='checkbox'&&a.type!=='button'&&a.closest&&a.closest('#view'))};
+function shApply(d){
+  SH_KEYS.forEach(k=>{if(d[k]!==undefined)S[k]=JSON.parse(shJ(d[k]))});persistFix();
+  if(S.signedIn){const em=String(S.signedIn.email).toLowerCase(),u=((window.ECT_LOGIN&&ECT_LOGIN.users)||[]).find(x=>String(x.email).toLowerCase()===em);if(u&&!S.users.some(x=>String(x.UserEmail).toLowerCase()===em)){const role=ROLES.includes(u.role)?u.role:'In Organization';S.users.push({UserEmail:u.email,DisplayName:u.name||u.email,Role:role,Carrier:role==='Carrier Partner'?(u.carrier||''):'',Warehouses:role==='Warehouse Team'?String(u.warehouses||''):''})}}
+  try{applyBrand()}catch(e){}
+  if(S.ui&&S.ui.dash)S.ui.dash.chk=[];
+  if(shBusyUI()){Shared.lateRender=true}else{Shared.lateRender=false;try{render()}catch(e){ErrLog.add('error',e.message,'shared render')}}
+}
+/* ---- the sync cycle ---- */
+async function sharedSync(){
+  if(Shared.busy){Shared.again=true;return}
+  Shared.busy=true;const first=Shared.status==='connecting';if(!first)shSet(shDirty()?'saving':Shared.status==='offline'?'saving':Shared.status);
+  try{
+    for(let n=0;n<8;n++){
+      const mine=shData(),mineStr=shPack(mine),dirty=Shared.baseStr!==null&&shJ(mine)!==Shared.baseStr,rem=await shMeta();
+      if(!rem){const r=await shCreate(mineStr);shTr('create '+r);if(r==='exists')continue;Shared.v=1;shSetBase(mine);Shared.pushes++;break}
+      if(Shared.force){const v=await shCas(rem.v,mineStr);shTr('force '+rem.v+'->'+v);if(v===null)continue;Shared.v=v;shSetBase(mine);Shared.force=false;Shared.pushes++;break}
+      if(rem.v===Shared.v&&Shared.baseStr!==null){
+        if(!dirty)break;
+        const v=await shCas(Shared.v,mineStr);shTr('push '+Shared.v+'->'+v);if(v===null)continue;
+        Shared.v=v;shSetBase(mine);Shared.pushes++;break;
+      }
+      const full=await shFull();if(!full)continue;
+      const theirs=shUnpack(full.d),mineNow=shData(),dirtyNow=Shared.baseStr!==null&&shJ(mineNow)!==Shared.baseStr;shTr('remote v'+full.v+' (mine v'+Shared.v+', dirty='+dirtyNow+')');
+      if(Shared.baseStr===null||!dirtyNow){
+        Shared.v=full.v;shSetBase(theirs);shApply(theirs);Shared.by=full.updated_by||'';
+        if(!first&&Shared.by&&Shared.by!==S.email&&Date.now()-Shared.lastToast>15000){Shared.lastToast=Date.now();toast('Updated by '+Shared.by)}
+        break;
+      }
+      Shared.renames=[];const merged=shMerge(Shared.base,mineNow,theirs);Shared.merges++;
+      Shared.v=full.v;shSetBase(theirs);shApply(merged);
+      if(Shared.renames.length)toast('Another user created '+Shared.renames.map(r=>r.from).join(', ')+' at the same moment, so yours '+(Shared.renames.length>1?'were':'was')+' renumbered: '+Shared.renames.map(r=>r.to).join(', '),'bad');
+    }
+    Shared.last=new Date().toISOString();shSet('ok');
+  }catch(e){
+    if(e.http)shSet('error',e.message);else shSet('offline',e.name==='AbortError'?'The shared database did not answer in time':'Cannot reach the shared database');
+    ErrLog.add('shared',e.message||e.name,'sync');
+  }finally{
+    Shared.busy=false;
+    if(Shared.again){Shared.again=false;setTimeout(sharedSync,50)}
+  }
+}
+let _shp=null;
+function sharedPushSoon(){if(Shared.hold||!Shared.enabled()||Shared.baseStr===null)return;clearTimeout(_shp);_shp=setTimeout(()=>{if(shDirty()||Shared.force)sharedSync()},600)}
+async function sharedPoll(){
+  if(!Shared.enabled()||Shared.busy||Shared.hold||Shared.baseStr===null)return;
+  if(Shared.lateRender&&!shBusyUI()){Shared.lateRender=false;render()}
+  try{const rem=await shMeta();Shared.polls++;if(Shared.status==='offline'||Shared.status==='error')shSet('ok');if(rem&&rem.v!==Shared.v||shDirty())sharedSync()}
+  catch(e){shSet(e.http?'error':'offline',e.http?e.message:'Cannot reach the shared database')}
+}
+function sharedCover(msg,retry){
+  let g=document.getElementById('authGate');if(!g){g=document.createElement('div');g.id='authGate';g.setAttribute('role','dialog');g.setAttribute('aria-modal','true');document.body.appendChild(g)}
+  g.innerHTML='<div class="gate-box"><h2 style="margin:0 0 6px">Global Shipment Control Tower</h2><p class="mu" style="margin:0 0 12px">'+esc(msg)+'</p>'+(retry?'<button class="btn pri dvb" data-act="shRetry" style="margin-top:0">Try again</button>':'')+'</div>';
+}
+async function sharedBoot(){
+  shSet('connecting');sharedCover('Loading the shared data...');
+  for(;;){
+    try{
+      const rem=await shMeta();
+      if(!rem){const r=await shCreate(shPack(shData()));if(r==='exists')continue;const mine=shData();Shared.v=1;shSetBase(mine)}
+      else{const full=await shFull(),d=shUnpack(full.d);Shared.v=full.v;shSetBase(d);SH_KEYS.forEach(k=>{if(d[k]!==undefined)S[k]=JSON.parse(shJ(d[k]))});persistFix();try{applyBrand()}catch(e){}}
+      Shared.last=new Date().toISOString();shSet('ok');const g=document.getElementById('authGate');if(g)g.remove();return;
+    }catch(e){
+      shSet(e.http?'error':'offline',e.message);sharedCover((e.http?e.message:'Cannot reach the shared database. Check the internet connection.')+' Nothing is shown until it is reachable, so that nobody works on a stale copy.',true);
+      await new Promise(res=>{window.__shRetry=res});
+      sharedCover('Loading the shared data...');
+    }
+  }
+}
+function sharedCard(){
+  const c=SC();if(!c)return sharedOffCard();
+  const host=c.url.replace(/^https?:\/\//,'').replace(/\/.*$/,'');
+  return `<div class="card"><h3>Shared data</h3><p class="mu" style="margin-bottom:10px">Everyone who signs in sees the same data, on every device. Changes are saved a moment after you make them, and other devices pick them up within a few seconds. If two people change the same thing at once, the later save wins for that one record and everything else is merged.</p>
+  <div class="tbw"><table class="tb" data-sort="off"><tr><th>Database</th><td>${esc(host)}</td></tr><tr><th>Room</th><td>${esc(c.room||'main')}</td></tr><tr><th>State</th><td>${esc(shLabel())}${Shared.err?` <span class="late-t">${esc(Shared.err)}</span>`:''}</td></tr><tr><th>Version</th><td>${Shared.v} (last change by ${esc(Shared.by||'-')})</td></tr><tr><th>This session</th><td>${Shared.pushes} save(s), ${Shared.merges} merge(s), ${Shared.conflicts} id clash(es) resolved, ${Shared.polls} check(s)</td></tr></table></div>
+  <div class="row sec"><button class="btn" data-act="shNow">Sync now</button><button class="btn" data-act="shDiag">Test the shared database</button></div>
+  <p class="hint">Anyone who has the address and public key in users.js can read and change this data, so keep to sample data. Reset demo data resets it for everyone.</p></div>`;
+}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')sharedPoll()});
+window.addEventListener('beforeunload',e=>{if(Shared.enabled()&&Shared.baseStr!==null&&shDirty()){e.preventDefault();e.returnValue=''}});
+
+function sharedOffCard(){
+  const L=window.ECT_LOGIN||{};
+  return `<div class="card"><h3>Shared data</h3><div class="err"><b>Sharing is off.</b> Each device keeps its own copy of the data, so a change made on one device is not seen on another.</div><p class="mu" style="margin:10px 0">users.js currently says: where data is kept = <b>${esc(L.storage||'not set')}</b>. To turn sharing on, create users.js again with make-users.html: choose <b>Shared</b> in step 5, fill in step 5b with your Supabase address and public key, download users.js and upload it to GitHub, replacing the old one. Then reload this page.</p><div class="row"><button class="btn" data-act="shDiag">Check my settings</button></div></div>`;
+}
+async function shDiag(){
+  const out=[],add=(ok,step,detail)=>out.push({ok,step,detail}),L=window.ECT_LOGIN;
+  if(!L){add(false,'users.js was loaded','users.js did not load, so the app does not know any settings. Check that users.js is in the same folder as index.html.');return out}
+  add(true,'users.js was loaded','It says: where data is kept = "'+(L.storage||'not set')+'".');
+  if(L.storage!=='shared'){add(false,'Sharing is switched on','users.js says "'+(L.storage||'not set')+'", so each device keeps its own copy. Create users.js again with make-users.html: choose Shared in step 5, fill in step 5b, download users.js and upload it to GitHub.');return out}
+  const sh=L.shared||{},url=String(sh.url||'').trim(),key=String(sh.key||'').trim();
+  add(!!url&&(/^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/i.test(url)||/^https?:\/\/localhost/.test(url)),'The database address looks right',url?'Address in users.js: '+url+'. It should look like https://abcdefgh.supabase.co':'There is no address in users.js.');
+  if(!url)return out;
+  const kt=/^sb_secret_/.test(key)?'secret':/^sb_publishable_/.test(key)?'publishable':/^eyJ/.test(key)?'legacy anon':key?'other':'';
+  add(!!key&&kt!=='secret','The key is a public key',!key?'There is no key in users.js.':kt==='secret'?'This is a SECRET key and the app refuses it. Use the publishable key (or the legacy anon public key).':'Key type: '+kt+', starts with '+key.slice(0,14)+'...');
+  if(!key||kt==='secret')return out;
+  if(!SC()){add(false,'The app accepts these settings','The app does not accept the settings in users.js (check the address and key).');return out}
+  try{
+    const r=await shFetch('?select=id&limit=1');
+    if(r.status===404){add(false,'The table ect_state exists','Not found. In Supabase open SQL Editor, paste the contents of supabase-setup.sql and click Run.');return out}
+    if(r.status===401||r.status===403){add(false,'The database accepts the key','The database refused the key ('+r.status+'). Copy the publishable (or anon public) key of THIS project again, and run supabase-setup.sql again.');return out}
+    if(!r.ok){add(false,'The database answers normally','It answered '+r.status+'.');return out}
+    add(true,'The database accepts the key and the table exists','Reading works.');
+  }catch(e){add(false,'The database can be reached','Cannot reach '+url+'. Check the address (Supabase, Project Settings, API, Project URL) and the internet connection.');return out}
+  try{const m=await shMeta();add(true,'The shared record','Room "'+(sh.room||'main')+'": '+(m?'version '+m.v+', last saved by '+(m.updated_by||'nobody')+' at '+String(m.t).replace('T',' ').slice(0,19)+' UTC.':'not created yet. The first device that opens the site creates it.'))}catch(e){add(false,'The shared record can be read',e.message);return out}
+  try{
+    const id='diagnostic';
+    const ins=await shFetch('',{method:'POST',headers:{'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify({id,v:1,d:'',updated_by:S.email||'diagnostic'})});
+    if(ins.status===401||ins.status===403){add(false,'Saving is allowed','The database refused to save ('+ins.status+'). Run supabase-setup.sql again: it creates the save rules.');return out}
+    if(!ins.ok&&ins.status!==409){add(false,'Saving is allowed','Saving a test row answered '+ins.status+'.');return out}
+    const up=await shFetch('?id=eq.'+id,{method:'PATCH',headers:{'Content-Type':'application/json',Prefer:'return=representation'},body:JSON.stringify({updated_by:S.email||'diagnostic',t:new Date().toISOString()})});
+    const a=up.ok?await up.json():[];
+    add(up.ok&&a.length===1,'Saving is allowed',up.ok&&a.length===1?'A test save worked.':'A test save was refused ('+up.status+'). Run supabase-setup.sql again: it creates the update rule.');
+  }catch(e){add(false,'Saving is allowed','The test save failed: '+(e.message||e.name))}
+  const dirty=shDirty();add(Shared.status==='ok'||Shared.status==='saving','This device is in step with the database','Status: '+shLabel()+'. This device has version '+Shared.v+(dirty?' and has changes not saved yet.':'.')+(Shared.err?' Problem: '+Shared.err:''));
+  return out;
+}
+async function shDiagModal(){
+  const info='Site address: '+location.host+location.pathname.replace(/[^/]*$/,'')+'. Version: '+APP_BUILD.replace('site build ','')+'.';
+  openModal(`<div class="mh"><h2>Shared database check</h2><button class="x" data-act="close" aria-label="Close">&times;</button></div><p class="mu" style="margin-bottom:8px">${esc(info)}</p><div id="shDiagOut" class="mu">Checking...</div><div class="row sec"><button class="btn" data-act="close">Close</button></div>`);
+  let R;try{R=await shDiag()}catch(e){R=[{ok:false,step:'The check ran',detail:e.message||String(e)}]}
+  const bad=R.find(x=>!x.ok),el=document.getElementById('shDiagOut');if(!el)return;
+  el.className='';
+  el.innerHTML=`<div class="tbw"><table class="tb" data-sort="off"><tr><th style="width:34px"></th><th>Check</th><th>Result</th></tr>${R.map(x=>`<tr><td>${x.ok?'<span class="pill ok">OK</span>':'<span class="pill late">Fix</span>'}</td><td><b>${esc(x.step)}</b></td><td>${esc(x.detail)}</td></tr>`).join('')}</table></div>`+
+  (bad?`<div class="err" style="margin-top:10px"><b>Start here:</b> ${esc(bad.step)}. ${esc(bad.detail)}</div>`:`<div class="okbox" style="margin-top:10px">Everything checks out. If another device still shows different data, make sure both devices show the same Version (bottom of the menu) and the same site address, then press Sync now on each.</div>`);
+}
+/* ========== sign-in accounts kept with the shared data ========== */
+const acctOn=()=>typeof Shared!=='undefined'&&Shared.enabled();
+const acctFind=em=>(S.accounts||[]).find(a=>String(a.email).toLowerCase()===String(em||'').trim().toLowerCase());
+const acctPwOk=pw=>String(pw||'').length>=10;
+function acctUser(acc){
+  const p=S.users.find(u=>String(u.UserEmail).toLowerCase()===String(acc.email).toLowerCase());if(!p)return null;
+  const stat=((window.ECT_LOGIN&&ECT_LOGIN.users)||[]).find(x=>String(x.email).toLowerCase()===String(acc.email).toLowerCase());
+  return {email:p.UserEmail,name:p.DisplayName,role:p.Role,carrier:p.Carrier||'',warehouses:p.Warehouses||'',shippers:p.Shippers||'',receivers:p.Receivers||'',partner:p.Partner||'',tools:!!(stat&&stat.tools),mustChange:!!acc.mustChange};
+}
+async function acctHash(pw){const salt=crypto.getRandomValues(new Uint8Array(16)),hex=[...salt].map(b=>b.toString(16).padStart(2,'0')).join('');return {salt:hex,hash:await pbkdf2Hex(pw,hex,150000),iter:150000}}
+function acctGenPw(){const a='abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789',r=crypto.getRandomValues(new Uint8Array(12));return [...r].map(x=>a[x%a.length]).join('')}
+async function acctSet(email,pw,must,what){
+  const h=await acctHash(pw),em=String(email).toLowerCase(),a=acctFind(em),rec=Object.assign({email:em,mustChange:!!must,updated:S.today,by:S.email||''},h);
+  if(a){Object.assign(a,rec);['rtSalt','rtHash','rtIter','rtExp'].forEach(k=>delete a[k])}else S.accounts.push(rec);
+  audit(what||'Password set',em,must?'temporary password, to be changed at the first sign-in':'chosen by the person');
+  if(typeof sharedPushSoon==='function')sharedPushSoon();
+  if(typeof ghSoon==='function')ghSoon(what||'password');
+}
+function acctSnapshot(){
+  const ca=(S.accounts||[]).map(a=>String(a.email).toLowerCase()),st=((window.ECT_LOGIN&&ECT_LOGIN.users)||[]).map(x=>String(x.email).toLowerCase());
+  return {accounts:JSON.parse(JSON.stringify(S.accounts||[])),customRoles:JSON.parse(JSON.stringify(S.customRoles||[])),access:Object.fromEntries((S.customRoles||[]).map(r=>[r.name,(S.access[r.name]||[]).slice()])),users:S.users.filter(u=>{const e=String(u.UserEmail).toLowerCase();return ca.includes(e)||st.includes(e)}).map(u=>Object.assign({},u))};
+}
+function acctRestore(k){
+  S.accounts=k.accounts;S.customRoles=k.customRoles;Object.keys(k.access).forEach(r=>{S.access[r]=k.access[r]});
+  const em=new Set(k.users.map(u=>String(u.UserEmail).toLowerCase()));S.users=S.users.filter(u=>!em.has(String(u.UserEmail).toLowerCase())).concat(k.users);syncRoles();
+}
+function acctRowBtn(u,force){
+  if(!acctOn()||(!force&&!can('admin')))return '';const a=acctFind(u.UserEmail);
+  return `<button class="btn sm" data-act="acctReset" data-e="${esc(u.UserEmail)}" title="${a?(a.mustChange?'Has a temporary password':'Has a password'):'Has no password yet'}">${a?'Reset password':'Create sign-in'}</button> <button class="btn sm" data-act="acctLink" data-e="${esc(u.UserEmail)}" title="Make a one-time link the person uses to choose a new password">Reset link</button> `;
+}
+function acctFormHTML(){return acctOn()?'<input id="u_pw" class="in" type="text" autocomplete="off" placeholder="Initial password (empty = generate one)" style="width:270px">':''}
+function acctPreCheck(){if(!acctOn())return '';const p=val('u_pw');return p&&!acctPwOk(p)?'The initial password needs at least 10 characters':''}
+function acctOnAdd(em,pwId){if(!acctOn())return;const pw=val(pwId||'u_pw')||acctGenPw();acctSet(em,pw,true,'Sign-in created').then(()=>acctShowPw(em,pw,'Sign-in created'))}
+function acctOnDel(em){S.accounts=(S.accounts||[]).filter(a=>String(a.email).toLowerCase()!==String(em).toLowerCase())}
+async function acctResetDo(em){const pw=acctGenPw();await acctSet(em,pw,true,'Password reset');acctShowPw(em,pw,'Password reset')}
+function acctShowPw(em,pw,title){
+  window._pwc='Email: '+em+'\nTemporary password: '+pw;
+  openModal(`<div class="mh"><h2>${esc(title)}</h2><button class="x" data-act="close" aria-label="Close">&times;</button></div>
+  <div class="note"><b>Write this down now. It cannot be shown again.</b></div>
+  <p style="margin:12px 0 4px">Email: <b>${esc(em)}</b></p><p style="margin:0 0 12px">Temporary password: <code id="pw_show" style="font-size:18px">${esc(pw)}</code></p>
+  <p class="mu">Give both to the person. They must choose their own password the first time they sign in.</p>
+  <div class="row sec"><button class="btn pri" data-act="acctCopy">Copy email and password</button><button class="btn" data-act="close">Close</button></div>`);
+}
+function acctPwModal(forced){
+  openModal(`<div class="mh"><h2>${forced?'Choose your new password':'Change your password'}</h2>${forced?'':'<button class="x" data-act="close" aria-label="Close">&times;</button>'}</div>
+  <p class="mu" style="margin-bottom:8px">${forced?'You signed in with a temporary password. Choose your own to continue. It needs at least 10 characters.':'The new password needs at least 10 characters.'}</p>
+  <form id="pwForm"><input type="text" name="username" autocomplete="username" value="${esc((S.signedIn||{}).email||'')}" hidden>
+  ${forced?'':'<label class="f">Current password<input id="pw_cur" class="in" type="password" autocomplete="current-password"></label>'}
+  <label class="f" style="margin-top:8px">New password<input id="pw_new" class="in" type="password" autocomplete="new-password"></label>
+  <label class="f" style="margin-top:8px">Type it again<input id="pw_new2" class="in" type="password" autocomplete="new-password"></label>
+  <div id="pwMsg" class="err" style="margin-top:8px;display:none"></div>
+  <div class="row sec"><button class="btn pri" type="submit" id="pwGo">Save the new password</button>${forced?'':'<button class="btn" type="button" data-act="close">Cancel</button>'}</div></form>`);
+  setTimeout(()=>{const f=document.getElementById(forced?'pw_new':'pw_cur');if(f)f.focus()},40);
+}
+async function acctPwSubmit(){
+  const forced=!document.getElementById('pw_cur'),nw=val('pw_new'),n2=val('pw_new2'),em=S.signedIn&&S.signedIn.email,msg=t=>{const m=document.getElementById('pwMsg');if(m){m.textContent=t;m.style.display='block'}};
+  if(!em)return;
+  if(!forced&&!(await loginCheck(em,val('pw_cur')))){msg('The current password is not right');return}
+  if(!acctPwOk(nw)){msg('The new password needs at least 10 characters');return}
+  if(nw!==n2){msg('The two new passwords are not the same');return}
+  if(!forced&&nw===val('pw_cur')){msg('Choose a password that is different from the current one');return}
+  const go=document.getElementById('pwGo');if(go){go.disabled=true;go.textContent='Saving...'}
+  await acctSet(em,nw,false,'Password changed');if(S.signedIn)S.signedIn.mustChange=false;closeModal();toast('Your password was changed');
+}
+document.addEventListener('submit',e=>{if(e.target&&e.target.id==='pwForm'){e.preventDefault();acctPwSubmit()}});
+setInterval(()=>{if(S&&S.signedIn&&S.signedIn.mustChange&&document.getElementById('modal')&&document.getElementById('modal').classList.contains('hidden'))acctPwModal(true)},700);
+
+/* ----- reset link and profile ----- */
+const acctRandHex=n=>[...crypto.getRandomValues(new Uint8Array(n))].map(b=>b.toString(16).padStart(2,'0')).join('');
+async function acctLinkMake(em){
+  em=String(em).toLowerCase();const tok=acctRandHex(24),h=await acctHash(tok);let a=acctFind(em);
+  if(!a){await acctSet(em,acctGenPw(),true,'Sign-in created');a=acctFind(em)}
+  Object.assign(a,{mustChange:true,rtSalt:h.salt,rtHash:h.hash,rtIter:h.iter,rtExp:new Date(Date.now()+24*3600*1000).toISOString()});
+  audit('Reset link created',em,'valid for 24 hours, single use');if(typeof sharedPushSoon==='function')sharedPushSoon();if(typeof ghSoon==='function')ghSoon('reset link');
+  return location.origin+location.pathname+'#reset='+encodeURIComponent(em)+'~'+tok;
+}
+function acctLinkModal(em,link){
+  window._pwc=link;
+  const body='Hello,\n\nUse this link to choose a new password for the Global Shipment Control Tower. It works once and expires in 24 hours:\n\n'+link+'\n';
+  openModal(`<div class="mh"><h2>Reset link for ${esc(em)}</h2><button class="x" data-act="close" aria-label="Close">&times;</button></div>
+  <div class="note"><b>This link is shown only now.</b> Anyone who has it can set the password for ${esc(em)}, once, within 24 hours. The app cannot send email itself: copy the link, or open your email program with the message ready.</div>
+  <label class="f" style="margin-top:10px">Link<textarea id="pw_link" readonly style="min-height:70px;font-size:12px">${esc(link)}</textarea></label>
+  <div class="row sec"><button class="btn pri" data-act="acctCopy">Copy the link</button><a class="btn" id="pw_mail" href="mailto:${encodeURIComponent(em)}?subject=${encodeURIComponent('Choose a new password')}&body=${encodeURIComponent(body)}">Open in my email program</a><button class="btn" data-act="close">Close</button></div>
+  <p class="hint">After they choose a password, the link stops working. They are not asked to change it again.</p>`);
+}
+function resetParse(){const m=/^#reset=([^~]+)~([0-9a-f]{48})$/.exec(location.hash||'');return m?{email:decodeURIComponent(m[1]).toLowerCase(),token:m[2]}:null}
+async function resetValid(r){const a=acctFind(r.email);if(!a||!a.rtHash||!a.rtExp||new Date(a.rtExp)<new Date())return null;const h=await pbkdf2Hex(r.token,a.rtSalt,a.rtIter||150000);return sameHex(h,a.rtHash)?a:null}
+function resetGate(r,msg,bad){
+  let g=document.getElementById('authGate');if(!g){g=document.createElement('div');g.id='authGate';g.setAttribute('role','dialog');g.setAttribute('aria-modal','true');document.body.appendChild(g)}
+  const b=S.brand||{};
+  g.innerHTML=`<form class="gate-box" id="resetForm" autocomplete="on"><div class="gate-brand">${b.logo?`<img src="${esc(b.logo)}" alt="" class="gate-logo">`:''}<b>${esc(b.company||'')}</b></div><h2 style="margin:0 0 4px">Choose a new password</h2><p class="mu" style="margin:0 0 14px">For ${esc(r.email)}. At least 10 characters.</p>${msg?`<div class="err" role="alert" style="margin-bottom:12px">${esc(msg)}</div>`:''}
+  ${bad?'<button class="btn pri dvb" type="button" data-act="resetToLogin">Go to sign in</button>':`<input type="text" name="username" value="${esc(r.email)}" autocomplete="username" hidden><label class="f">New password<input id="rs_new" class="in" type="password" autocomplete="new-password" required></label><label class="f" style="margin-top:10px">Type it again<input id="rs_new2" class="in" type="password" autocomplete="new-password" required></label><button class="btn pri dvb" type="submit" id="rs_go">Save the new password</button>`}</form>`;
+  const f=g.querySelector('#rs_new');if(f)setTimeout(()=>f.focus(),30);
+}
+function resetBoot(){
+  const r=resetParse();if(!r||!acctOn())return false;S.role='In Organization';S.email='';render();
+  resetValid(r).then(a=>{if(a)resetGate(r,'');else resetGate(r,'This reset link is not valid. It may have been used already or may have expired. Ask an administrator for a new one.',true)});
+  resetGate(r,'Checking the link...',true);return true;
+}
+async function resetSubmit(){
+  const r=resetParse();if(!r)return;const nw=val('rs_new'),n2=val('rs_new2');
+  if(!acctPwOk(nw)){resetGate(r,'The new password needs at least 10 characters');return}
+  if(nw!==n2){resetGate(r,'The two passwords are not the same');return}
+  const go=document.getElementById('rs_go');if(go){go.disabled=true;go.textContent='Saving...'}
+  if(typeof sharedSync==='function'){try{await sharedSync()}catch(e){}}
+  const a=await resetValid(r);if(!a){resetGate(r,'This reset link is not valid any more. Ask an administrator for a new one.',true);return}
+  await acctSet(r.email,nw,false,'Password set from a reset link');
+  try{history.replaceState(null,'',location.pathname+location.search)}catch(e){location.hash=''}
+  loginGate('Your password was changed. Sign in with it.',r.email);
+}
+document.addEventListener('submit',e=>{if(e.target&&e.target.id==='resetForm'){e.preventDefault();resetSubmit()}});
+function profileModal(){
+  const u=currentUserRec();if(!u){toast('Your profile could not be found','bad');return}
+  openModal(`<div class="mh"><h2>My profile</h2><button class="x" data-act="close" aria-label="Close">&times;</button></div>
+  <div class="g2"><label class="f">Email<input class="in" value="${esc(u.UserEmail)}" disabled></label><label class="f">User type<input class="in" value="${esc(u.Type||roleType(u.Role))}" disabled></label>
+  <label class="f">Name<input id="pf_name" class="in" value="${esc(u.DisplayName)}"></label><label class="f">Role<input class="in" value="${esc(u.Role)}" disabled></label>
+  <label class="f">Phone<input id="pf_phone" class="in" value="${esc(u.Phone||'')}"></label><label class="f">Location<input id="pf_loc" class="in" value="${esc(u.Location||'')}"></label></div>
+  <div class="row sec"><button class="btn pri" data-act="profileSave">Save</button>${acctOn()?'<button class="btn" data-act="pwChange">Change password</button>':''}<button class="btn" data-act="close">Close</button></div>
+  <p class="hint">Your email, type and role are set by an administrator.</p>`);
+}
+function profileSave(){
+  const u=currentUserRec();if(!u)return;const n=val('pf_name').trim();
+  if(!n){toast('Enter your name','bad');return}
+  u.DisplayName=n;u.Phone=val('pf_phone').trim();u.Location=val('pf_loc').trim();if(S.signedIn)S.signedIn.name=n;
+  audit('Profile updated',u.UserEmail,'');closeModal();render();toast('Profile saved');
+}
+
+function acctAllowed(em){return can('usersedit')||(typeof teamList==='function'&&teamList().some(u=>String(u.UserEmail).toLowerCase()===String(em).toLowerCase()))}
+/* ========== publish users.js to GitHub from the app ========== */
+const GH={api:'https://api.github.com',repo:'',branch:'main',path:'users.js',token:'',connected:false,busy:false,err:'',last:'',count:0,sig:'',timer:null,login:''};
+try{const c=JSON.parse(localStorage.getItem('ect.gh')||'{}');['repo','branch','path'].forEach(k=>{if(c[k])GH[k]=c[k]})}catch(e){}
+function ghSaveCfg(){try{localStorage.setItem('ect.gh',JSON.stringify({repo:GH.repo,branch:GH.branch,path:GH.path}))}catch(e){}}
+function ghUsersList(){
+  const L=window.ECT_LOGIN||{},stat=new Map((L.users||[]).map(u=>[String(u.email).toLowerCase(),u])),removed=new Set(((S.settings&&S.settings.removedLogins)||[]).map(x=>String(x).toLowerCase())),out=[],seen=new Set();
+  S.users.forEach(u=>{const em=String(u.UserEmail).toLowerCase(),a=acctFind(em),st=stat.get(em),cred=a||(removed.has(em)?null:st);if(!cred)return;seen.add(em);
+    out.push({email:u.UserEmail,name:u.DisplayName,role:u.Role,carrier:u.Carrier||'',warehouses:u.Warehouses||'',shippers:u.Shippers||'',receivers:u.Receivers||'',partner:u.Partner||'',phone:u.Phone||'',location:u.Location||'',tools:!!(st&&st.tools),salt:cred.salt,hash:cred.hash,iter:cred.iter||150000,mustChange:!!(a&&a.mustChange)})});
+  stat.forEach((st,em)=>{if(!seen.has(em)&&!removed.has(em))out.push(Object.assign({},st))});
+  return out;
+}
+function ghUsersText(){
+  const L=window.ECT_LOGIN||{},o={};Object.keys(L).forEach(k=>{if(k!=='users')o[k]=L[k]});o.users=ghUsersList();
+  return '/* Users for the demo sign-in. Updated by the app ('+new Date().toISOString().slice(0,16)+' UTC). Passwords are stored only as salted hashes, but this file is public on GitHub, so use throwaway passwords. */\nwindow.ECT_LOGIN='+JSON.stringify(o,null,1)+';\n';
+}
+const ghSig=()=>JSON.stringify(ghUsersList());
+function ghErr(st,body){return new Error(st===401?'GitHub refused the token (it may be wrong, expired or revoked)':st===403?'The token is not allowed to write to this repository (it needs Contents: Read and write)':st===404?'The repository, branch or file path was not found, or the token cannot see it':st===409||st===422?'The file changed on GitHub while publishing':'GitHub answered '+st)}
+async function ghFetch(path,opt){
+  const c=new AbortController(),to=setTimeout(()=>c.abort(),15000);
+  try{return await fetch(GH.api+path,Object.assign({signal:c.signal,cache:'no-store'},opt,{headers:Object.assign({Authorization:'Bearer '+GH.token,Accept:'application/vnd.github+json','Content-Type':'application/json'},(opt||{}).headers||{})}))}
+  catch(e){throw new Error(e.name==='AbortError'?'GitHub did not answer in time':'Cannot reach GitHub')}finally{clearTimeout(to)}
+}
+async function ghConnect(repo,branch,path,token){
+  GH.repo=String(repo||'').trim().replace(/^https?:\/\/github\.com\//,'').replace(/\.git$/,'').replace(/\/$/,'');GH.branch=String(branch||'main').trim()||'main';GH.path=String(path||'users.js').trim().replace(/^\//,'')||'users.js';GH.token=String(token||'').trim();GH.err='';
+  if(!/^[\w.-]+\/[\w.-]+$/.test(GH.repo)){GH.err='Enter the repository as owner/name, for example myname/shipment-demo';GH.token='';return false}
+  if(GH.token.length<20){GH.err='Paste the access token';GH.token='';return false}
+  try{
+    const r=await ghFetch('/repos/'+GH.repo);if(r.status!==200)throw ghErr(r.status);
+    const j=await r.json();if(j.permissions&&j.permissions.push===false)throw ghErr(403);
+    GH.connected=true;ghSaveCfg();audit('GitHub publishing connected','',GH.repo+' '+GH.branch+' '+GH.path);return true;
+  }catch(e){GH.err=e.message;GH.connected=false;GH.token='';return false}
+}
+function ghDisconnect(){GH.token='';GH.connected=false;GH.err='';GH.sig='';clearTimeout(GH.timer)}
+async function ghPublish(why){
+  if(!GH.connected||GH.busy)return;
+  const users=ghUsersList();if(!users.length){GH.err='Not published: the list of users would be empty';ghShow();return}
+  GH.busy=true;GH.err='';ghShow();const text=ghUsersText(),b64=btoa(unescape(encodeURIComponent(text))),sig=ghSig();
+  try{
+    for(let i=0;i<3;i++){
+      const g=await ghFetch('/repos/'+GH.repo+'/contents/'+encodeURI(GH.path)+'?ref='+encodeURIComponent(GH.branch));let sha='';
+      if(g.status===200)sha=(await g.json()).sha;else if(g.status!==404)throw ghErr(g.status);
+      const body={message:'Update users from the app ('+users.length+' users)'+(why?': '+why:''),content:b64,branch:GH.branch};if(sha)body.sha=sha;
+      const r=await ghFetch('/repos/'+GH.repo+'/contents/'+encodeURI(GH.path),{method:'PUT',body:JSON.stringify(body)});
+      if(r.status===200||r.status===201){GH.last=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'});GH.sig=sig;GH.count=users.length;break}
+      if((r.status===409||r.status===422)&&i<2)continue;
+      throw ghErr(r.status);
+    }
+  }catch(e){GH.err=e.message}
+  finally{GH.busy=false;ghShow()}
+}
+function ghSoon(why){
+  if(!GH.connected)return;clearTimeout(GH.timer);
+  GH.timer=setTimeout(()=>{if(ghSig()!==GH.sig)ghPublish(why)},1800);
+}
+{const ps0=persistSoon;persistSoon=function(){ps0.apply(this,arguments);ghSoon()}}
+function ghShow(){const e=document.getElementById('ghStatus');if(e)e.innerHTML=ghStatusHTML()}
+function ghStatusHTML(){
+  if(!GH.connected)return GH.err?`<div class="err">${esc(GH.err)}</div>`:'<span class="mu">Not connected. Users changes are not published.</span>';
+  return `${GH.err?`<div class="err">${esc(GH.err)}</div>`:''}<span class="${GH.err?'late-t':'ok-t'}">Connected to ${esc(GH.repo)} (${esc(GH.branch)}, ${esc(GH.path)}).</span> ${GH.busy?'Publishing...':GH.last?'Last published at '+esc(GH.last)+', '+GH.count+' users.':'Nothing published yet in this session.'}`;
+}
+function ghCard(){
+  return `<div class="card"><h3>Publish users to GitHub</h3><p class="mu" style="margin-bottom:10px">Connect once and every change to users (new users, roles, passwords, resets, removals) is saved to <b>${esc(GH.path)}</b> in your repository for you. No file editing. GitHub Pages then takes 1 to 2 minutes to show it. Shared sign-in accounts work at once.</p>
+  <div class="g2"><label class="f">Repository (owner/name)<input id="gh_repo" class="in" value="${esc(GH.repo)}" placeholder="yourname/shipment-control-tower-demo" autocomplete="off"></label><label class="f">Branch<input id="gh_branch" class="in" value="${esc(GH.branch)}" autocomplete="off"></label>
+  <label class="f">File<input id="gh_path" class="in" value="${esc(GH.path)}" autocomplete="off"></label><label class="f">GitHub access token (kept in memory only)<input id="gh_token" class="in" type="password" autocomplete="off" placeholder="${GH.connected?'connected':'github_pat_...'}" ${GH.connected?'disabled':''}></label></div>
+  <div class="row sec">${GH.connected?`<button class="btn pri" data-act="ghPublish" ${can('usersedit')?'':'disabled'}>Publish now</button><button class="btn" data-act="ghDisconnect">Disconnect</button>`:'<button class="btn pri" data-act="ghConnect">Connect</button>'}</div>
+  <div id="ghStatus" style="margin-top:10px">${ghStatusHTML()}</div>
+  <p class="hint">Create the token at GitHub, Settings, Developer settings, Personal access tokens, Fine-grained tokens. Give it access to this one repository only, with Contents set to Read and write. The app never stores the token: it is forgotten when you close or reload the page, and it is not sent to the shared database. If the list of users would become empty, nothing is published.</p></div>`;
+}
+/* removed people can no longer sign in with an old users.js entry */
+function acctRemovedList(){S.settings=S.settings||{};if(!Array.isArray(S.settings.removedLogins))S.settings.removedLogins=[];return S.settings.removedLogins}
+{const d0=acctOnDel;acctOnDel=function(em){d0.apply(this,arguments);const L=acctRemovedList(),e=String(em).toLowerCase();if(!L.includes(e))L.push(e);ghSoon('user removed')};
+ const a0=acctOnAdd;acctOnAdd=function(em){const L=acctRemovedList(),e=String(em).toLowerCase(),i=L.indexOf(e);if(i>=0)L.splice(i,1);return a0.apply(this,arguments)}}
 /* ========== VIEWS ========== */
 const camel=h=>h.split(/\s+/).map(w=>w?w[0].toUpperCase()+w.slice(1):'').join('');
 function colx(h,f,v,r){return {h,f,v:v||(sh=>String(f(sh)).replace(/<[^>]*>/g,'')),r}}
@@ -2493,7 +3279,7 @@ function search(q){
   return out;
 }
 function examples(){
-  const L=S.lines,po=L.find(l=>l.PONumber),inv=L.find(l=>l.InvoiceNumber),it=L.find(l=>l.ItemNumber),tr=L.find(l=>l.HBL_HAWB_Tracking),cn=L.find(l=>l.ContainerNumber);
+  const L=visLines(),po=L.find(l=>l.PONumber),inv=L.find(l=>l.InvoiceNumber),it=L.find(l=>l.ItemNumber),tr=L.find(l=>l.HBL_HAWB_Tracking),cn=L.find(l=>l.ContainerNumber);
   return [po&&{label:'PO '+po.PONumber,q:po.PONumber},inv&&{label:'Invoice '+inv.InvoiceNumber,q:inv.InvoiceNumber},it&&{label:'Item '+it.ItemNumber,q:it.ItemNumber},tr&&{label:'Tracking '+tr.HBL_HAWB_Tracking,q:tr.HBL_HAWB_Tracking},cn&&{label:'Container '+cn.ContainerNumber,q:cn.ContainerNumber}].filter(Boolean);
 }
 function viewTrack(){
@@ -2520,7 +3306,7 @@ function resultsHTML(){
     <div class="row sec"><button class="btn sm" data-act="open" data-ref="${sh.ref}">Details and history</button>${sh.cancelled?'':`<button class="btn sm pri" data-act="subOpen" data-ref="${sh.ref}">Email me updates</button>`}</div></div>`).join('');
 }
 function mySubsHTML(){
-  const mine=S.subs.filter(s=>(s.Email||'').toLowerCase()===S.email||s.CreatedBy===S.email).filter(s=>s.Status!=='Ended');
+  const mine=S.subs.filter(s=>(s.Email||'').toLowerCase()===S.email||s.CreatedBy===S.email).filter(s=>s.Status!=='Ended').filter(s=>!partnerScope()||getShip(s.ShipmentRef));
   if(!mine.length)return '<div class="empty">You are not following any shipment by email yet. Search a shipment and choose "Email me updates".</div>';
   return `<div class="tbw"><table class="tb"><tr><th>Shipment</th><th>Email</th><th>How often</th><th>Include</th><th>Status</th><th></th></tr>`+mine.map(s=>`<tr>
     <td><a href="#" data-act="open" data-ref="${esc(s.ShipmentRef)}" style="color:inherit">${esc(s.ShipmentRef)}</a></td><td>${esc(s.Email)}</td><td>${esc(s.Frequency)}</td><td>${esc(s.Include)}</td>
@@ -2578,7 +3364,7 @@ function detailModal(ref){
 /* ----- 2. Request form ----- */
 const autoFreight=i=>['DAP','DDP','CIF','CIP','CPT'].includes(i)?'Shipper':'Your Company';
 const opts=(arr,sel)=>arr.map(o=>`<option ${o===sel?'selected':''}>${esc(o)}</option>`).join('');
-function dl(id,key){return `<datalist id="${id}">${uniq([...(key==='WarehouseDestination'?S.warehouses.filter(w=>w.active).map(w=>w.code):[]),...S.lines.map(l=>l[key])]).sort().map(v=>`<option value="${esc(v)}">`).join('')}</datalist>`}
+function dl(id,key){return `<datalist id="${id}">${uniq([...(key==='WarehouseDestination'?S.warehouses.filter(w=>w.active).map(w=>w.code):[]),...visLines().map(l=>l[key])]).sort().map(v=>`<option value="${esc(v)}"${key==='WarehouseDestination'&&whFind(v)?` label="${esc(whFind(v).type||'')}"`:''}>`).join('')}</datalist>`}
 function viewRequest(){
   return pageHead('Shipment Requests','Enter one shipment with as many item lines as needed. The shipment ID is created for you, and each item is saved as its own row.')+
   `<div class="tabs"><button class="${!['bulk','update'].includes(S.ui.reqTab)?'on':''}" data-act="reqTab" data-t="single">Single entry</button><button class="${S.ui.reqTab==='bulk'?'on':''}" data-act="reqTab" data-t="bulk">Bulk upload</button>${can('editship')?`<button class="${S.ui.reqTab==='update'?'on':''}" data-act="reqTab" data-t="update">Update existing</button>`:''}</div>`+
@@ -2591,8 +3377,8 @@ function singlePanel(){
   return saved+`<div id="formErr"></div>
   <div class="card"><h3>Shipment</h3><p class="hint" style="margin:-4px 0 10px">Reference <b>${nextRef()}</b> will be assigned when you save.</p>
    <div class="g3">
-   <label class="f">Shipper<input id="f_shipper" class="in" list="dl_shipper" autocomplete="off"></label>
-   <label class="f">Consignee<input id="f_consignee" class="in" list="dl_consignee" autocomplete="off"></label>
+   <label class="f">Shipper${shipperFieldHTML()}</label>
+   <label class="f">Consignee${consigneeFieldHTML()}</label>
    <label class="f">Carrier or forwarder<input id="f_carrier" class="in" list="dl_carrier" autocomplete="off"></label>
    <label class="f">Mode<select id="f_mode" data-ch="mode">${opts(MODES,'Sea')}</select></label>
    <label class="f">Shipment type (what is shipping)<select id="f_stype" class="in"><option value="">Select a type</option>${TYPES.map(x=>`<option>${x}</option>`).join('')}</select></label>
@@ -2602,7 +3388,7 @@ function singlePanel(){
    <label class="f">Movement type<select id="f_move">${opts(['Freight','Courier'],'Freight')}</select></label>
    <label class="f">Origin country<input id="f_ocountry" class="in" list="dl_oc"></label><label class="f">Loading port (origin)<input id="f_oport" class="in" list="dl_op"></label>
    <label class="f">Destination country<input id="f_dcountry" class="in" list="dl_dc"></label><label class="f">Destination port<input id="f_dport" class="in" list="dl_dp"></label>
-   <label class="f">Warehouse destination<input id="f_wh" class="in" list="dl_wh"></label></div>
+   <label class="f">Warehouse destination<input id="f_wh" class="in" list="dl_wh"><small id="f_wh_type" class="mu"></small></label></div>
    <div id="freightNote" class="note" style="display:none;margin:12px 0 0">Freight is arranged by the shipper, so no freight quote or carrier invoice is needed for this shipment.</div>
    ${dl('dl_shipper','Shipper')}${dl('dl_consignee','Consignee')}${dl('dl_carrier','Carrier')}${dl('dl_oc','OriginCountry')}${dl('dl_op','OriginPort')}${dl('dl_dc','DestinationCountry')}${dl('dl_dp','DestinationPort')}${dl('dl_wh','WarehouseDestination')}</div>
   <div class="card"><h3>Schedule and references</h3><div class="g4">
@@ -2643,6 +3429,7 @@ function saveShip(){
   const e=[],bad=new Set();
   const need=(id,label)=>{if(!val(id)){e.push(label+' is required');bad.add(id)}};
   [['f_stype','Shipment type'],['f_nature','Nature of goods'],['f_shipper','Shipper'],['f_consignee','Consignee'],['f_carrier','Carrier'],['f_ocountry','Origin country'],['f_oport','Origin port'],['f_dcountry','Destination country'],['f_dport','Destination port'],['f_wh','Warehouse destination'],['f_pickup','Pickup planned'],['f_eta','ETA']].forEach(([i,l])=>need(i,l));
+  {const sc=partnerScope();if(sc&&!sc.has(val('f_shipper'),val('f_consignee'))){e.push('The shipper or receiver must be one assigned to your company');bad.add('f_shipper');bad.add('f_consignee')}}
   if(val('f_pickup')&&val('f_eta')&&val('f_eta')<val('f_pickup')){e.push('ETA cannot be before the planned pickup');bad.add('f_eta')}
   if(val('f_etd')&&val('f_pickup')&&val('f_etd')<val('f_pickup')){e.push('ETD cannot be before the planned pickup');bad.add('f_etd')}
   if(!(num(val('f_pkgs'))>0)){e.push('Packages must be a number above 0');bad.add('f_pkgs')}
@@ -2763,7 +3550,8 @@ function readUpload(file,cb){
 }
 const GROUP_KEYS=['ShipmentType','NatureOfGoods','Shipper','Consignee','Carrier','Mode','IncoTerm','OriginPort','DestinationPort'];
 const BULK_DATE_COLS=['PickupPlanned','ETDPlanned','ETA','ESTDelivery','NominatedOn','PickupActual','ETDActual','ETAActual','DeliveredOn'];
-function bulkRowBasic(r){
+function bulkRowBasic(r){const e=bulkRowBasic0(r),sc=partnerScope();if(sc&&(r.Shipper||r.Consignee)&&!sc.has(r.Shipper,r.Consignee))e.push('Shipper "'+r.Shipper+'" and receiver "'+r.Consignee+'" are not assigned to your company');return e}
+function bulkRowBasic0(r){
   const e=[];
   ['Shipper','Consignee','Carrier','OriginCountry','OriginPort','DestinationCountry','DestinationPort','WarehouseDestination','PONumber','InvoiceNumber','ItemNumber'].forEach(c=>{if(!r[c])e.push(c+' is empty')});
   if(!r.ShipmentType)e.push('ShipmentType is empty');else if(!TYPES.includes(r.ShipmentType))e.push('ShipmentType "'+r.ShipmentType+'" must be Raw Materials, Consumables, Finished Goods, Machineries or Others');
@@ -3481,14 +4269,14 @@ function pendingPanel(){
 
 /* ----- 7. Administration ----- */
 function viewAdmin(){
-  const A=S.ui.admin;
-  const tabs=[['users','Users and roles'],['access','Role access'],['warehouses','Warehouses'],['outbox','Email outbox'],['audit','Audit log'],['branding','Branding'],['settings','Settings'],['golive','Go live']];
+  const A=adminTabCurrent();
+  const tabs=adminTabsAllowed([['users','Users and roles'],['access','Role access'],['warehouses','Warehouses'],['outbox','Email outbox'],['audit','Audit log'],['branding','Branding'],['settings','Settings'],['golive','Go live']]);
   return pageHead('Administration','Assign roles, control which tabs each role can open, manage warehouses and their team contacts, and review emails and changes.')+
   `<div class="tabs">${tabs.map(([k,l])=>`<button class="${A===k?'on':''}" data-act="adminTab" data-t="${k}">${l}</button>`).join('')}</div>`+
   ({users:usersPanel,access:accessPanel,warehouses:warehousesPanel,outbox:outboxPanel,audit:auditPanel,branding:brandingPanel,settings:settingsPanel,golive:goLivePanel}[A])();
 }
 function accessPanel(){
-  return `<div class="card"><h3>Which tabs each role can open</h3><div class="tbw"><table class="tb"><tr><th>Tab</th>${ROLES.map(r=>`<th>${r}</th>`).join('')}</tr>
+  return profilesCard()+permCard()+`<div class="card"><h3>Advanced: tab and action level, role by role</h3><div class="tbw"><table class="tb"><tr><th>Tab</th>${ROLES.map(r=>`<th>${r}</th>`).join('')}</tr>
   ${ACCESS_ITEMS.map(t=>`<tr><td>${esc(t.label)}</td>${ROLES.map(r=>`<td><input type="checkbox" data-ch="acc" data-role="${esc(r)}" data-id="${t.id}" ${(S.access[r]||[]).includes(t.id)?'checked':''} ${t.id==='track'?'disabled':''} aria-label="${esc(r)} can open ${esc(t.label)}" style="width:auto"></td>`).join('')}</tr>`).join('')}</table></div>
   <p class="hint">Changes apply at once. Use "Preview as" at the top to see the app as another role. Hiding a tab is a convenience; real protection comes from file permissions in the production version.</p></div>`;
 }
@@ -3501,7 +4289,7 @@ function auditPanel(){
 }
 const STRIP_PAGES=['track','request','milestones','warehouse','carrier','transit','commercial','freighttrends','admin'];
 function settingsPanel(){
-  return `<div class="card"><h3>Network status strip</h3><p class="mu" style="margin-bottom:10px">The strip with active, delayed, due and on-time figures appears only on the pages you tick. It is shown to roles that can open the Control Tower Overview, which already has its own tiles.</p>${STRIP_PAGES.map(id=>`<label class="row" style="margin-bottom:6px;gap:8px"><input type="checkbox" data-ch="strip" data-id="${id}" ${(S.settings.strip||{})[id]?'checked':''} style="width:auto"> ${esc(TABS.find(x=>x.id===id).label)}</label>`).join('')}</div>
+  return backupCard()+`<div class="card"><h3>Network status strip</h3><p class="mu" style="margin-bottom:10px">The strip with active, delayed, due and on-time figures appears only on the pages you tick. It is shown to roles that can open the Control Tower Overview, which already has its own tiles.</p>${STRIP_PAGES.map(id=>`<label class="row" style="margin-bottom:6px;gap:8px"><input type="checkbox" data-ch="strip" data-id="${id}" ${(S.settings.strip||{})[id]?'checked':''} style="width:auto"> ${esc(TABS.find(x=>x.id===id).label)}</label>`).join('')}</div>
   <div class="card"><h3>Settings</h3><div class="row"><label class="f grow">Allowed email domain for subscriptions<input id="s_domain" class="in" value="${esc(S.settings.domain)}"></label><button class="btn pri" data-act="saveDomain" style="align-self:flex-end">Save</button></div>
   <p class="hint">Only addresses ending in @${esc(S.settings.domain)} can subscribe. Other addresses are blocked and logged.</p></div>
   <div class="card"><h3>Free time and risk rules</h3><p class="mu" style="margin-bottom:10px">Free days start on the day a shipment arrives (the actual ETA) and end at gate-out or delivery. A shipment can override its free days when you edit it. A shipment is flagged as stale when it has had no update for the number of days below.</p>
@@ -3566,7 +4354,7 @@ function whInfoHTML(sh){
   const c=whCodeOf(sh),w=whFind(c);let h=esc(c||'-');
   if(c&&!w)return h+' <span class="late-t">not in warehouse master</span>';
   if(w){
-    h+=`<br><small class="mu">${esc([w.name,w.city].filter(Boolean).join(', '))}</small>`;
+    h+=`<br><small class="mu">${esc([w.name,w.city].filter(Boolean).join(', '))}</small><br><small class="mu">${esc(w.type||'')}</small>`;
     if(can('warehouse')){const n=S.whNotified[sh.ref];h+=`<br><small class="${n?(n.due===sh.dueL?'ok-t':'late-t'):'mu'}">${n?(n.due===sh.dueL?'Warehouse notified '+fmtS(n.on):'Delivery date changed since the notice'):(w.emails.length?'Warehouse not notified yet':'No team contact')}</small>`}
   }
   return h;
@@ -3651,7 +4439,7 @@ function whMarkMissed(m){
   S.whLog.unshift(whLogRow({w:m.w,row:{key:m.key,type:m.type,covers:m.covers,schedLocal:m.schedLocal,schedUtc:m.schedUtc,status:'Missed',to:'',subject:'',count:m.rows.length,refs:m.rows.map(s=>s.ref).join(', '),attempts:0,error:m.type==='Weekly update'?'The week started before the weekly update was sent. Recorded as missed.':'Due date passed without a notice. Recorded as missed.',runId:''}}));
   audit('Warehouse notice missed',m.rows.map(s=>s.ref).join(', '),m.w.code);
 }
-function whScope(){const F=S.ui.wh;return ships().filter(s=>s.status!=='Delivered'&&(F.code==='All'||whKey(whCodeOf(s))===whKey(F.code)))}
+function whScope(){const F=S.ui.wh;return ships().filter(s=>s.status!=='Delivered'&&(F.code==='All'||whKey(whCodeOf(s))===whKey(F.code))&&(!F.type||F.type==='All'||(whFind(whCodeOf(s))||{}).type===F.type))}
 function viewWarehouse(){
   const F=S.ui.wh,plan=whPlan(),ready=plan.filter(m=>!m.blocked&&m.status==='Ready').length;
   return pageHead('Warehouse Operations','See what is arriving at each warehouse, and notify the warehouse team when a delivery is due and with a weekly plan for the following week.')+
@@ -3677,7 +4465,8 @@ function whSchedulePanel(plan,ready){
      <div class="tbw"><table class="tb"><tr><th>Expected</th><th>Shipment</th><th>Carrier</th><th>Packages</th><th class="r">Weight</th><th>Containers</th><th>PO numbers</th><th>Goods</th><th>Status</th><th>Delivery slot</th><th>Warehouse notice</th></tr>
      ${rows.map(s=>`<tr class="click${s.dueL<S.today?' tr-pend':''}" data-act="open" data-ref="${s.ref}"><td><b>${dayLab(s.dueL)}</b>${s.dueRev?`<br><small class="rv">Revised from ${fmtS(s.due)}</small>`:''}${s.dueL<S.today?`<br><small class="late-t">${diffDays(S.today,s.dueL)} day(s) overdue</small>`:''}</td><td><b>${s.ref}</b><br><small class="mu">${esc(s.route)}</small></td><td>${esc(s.carrier)}<br>${modeBadge(s.mode)}</td><td>${s.packages||'-'}</td><td class="r">${s.weight?kg(s.weight):'-'}</td><td>${esc(s.containers.filter(Boolean).join(', ')||'-')}${s.f.ContainerType?'<br><small class="mu">'+esc(s.f.ContainerType)+'</small>':''}</td><td>${esc(s.pos.join(', ')||'-')}</td><td>${typeBadge(s.stype)}${dgTag(s.nature)}</td><td>${pill(s)}</td><td>${slotInfoHTML(s)}</td><td>${noteRow(s)}</td></tr>`).join('')}</table></div></div>`};
   return `<div class="card"><div class="row"><label class="f">Warehouse<select data-ch="wh" data-f="code"><option value="All">All warehouses</option>${allCodes.map(c=>`<option value="${esc(c)}" ${c===F.code?'selected':''}>${esc(c)}</option>`).join('')}</select></label>
-   <label class="f">Show deliveries due within<select data-ch="wh" data-f="days">${[7,14,30].map(n=>`<option value="${n}" ${n===F.days?'selected':''}>${n} days</option>`).join('')}</select></label>
+   <label class="f">Warehouse type<select data-ch="wh" data-f="type"><option value="All">All types</option>${WH_TYPES.map(x=>`<option ${x===F.type?'selected':''}>${x}</option>`).join('')}</select></label>
+    <label class="f">Show deliveries due within<select data-ch="wh" data-f="days">${[7,14,30].map(n=>`<option value="${n}" ${n===F.days?'selected':''}>${n} days</option>`).join('')}</select></label>
    <span class="hint" style="align-self:flex-end">Dates follow the latest delivery estimate. Overdue arrivals stay at the top until they are delivered.</span></div></div>
   ${kt('wh',defs)}
   ${ready||plan.some(m=>m.status==='Missed')?`<div class="note"><b>${ready} notification(s) ready to send${plan.filter(m=>m.status==='Missed').length?', '+plan.filter(m=>m.status==='Missed').length+' missed':''}.</b> <button class="btn sm pri" data-act="whTab" data-t="notify" style="margin-left:8px">Review and send</button></div>`:''}
@@ -3721,16 +4510,16 @@ function warehousesPanel(){
   <div class="row sec"><button class="btn pri" data-act="whSetSave">Save settings</button></div>
   <p class="hint">Each warehouse has its own time zone, notice time, weekly day and time, and quiet hours below, so every team is notified in its own local time. A delivery due notice goes out before a shipment is due. A change of date after that is sent as a separate notice outside quiet hours. The weekly update lists deliveries expected from the following Monday to Sunday.</p></div>
   <div class="card"><div class="row" style="justify-content:space-between;margin-bottom:10px"><h3 style="margin:0">Warehouses (${S.warehouses.length})</h3><span class="row"><button class="btn sm" data-act="whExportX">Export (Excel)</button><button class="btn sm" data-act="whExportCsv">Export (CSV)</button><label class="btn sm" style="cursor:pointer">Import warehouses<input type="file" id="impWh" accept=".xlsx,.xls,.csv" hidden></label><button class="btn pri" data-act="whEdit" data-c="">Add warehouse</button></span></div>
-  <div class="row" style="margin-bottom:10px"><input id="wh_q" class="in grow" placeholder="Search by code, name, city, country, contact, phone or email" value="${esc(S.ui.whq||'')}" aria-label="Search warehouses"></div>
+  <div class="row" style="margin-bottom:10px"><input id="wh_q" class="in grow" placeholder="Search by code, name, city, country, contact, phone or email" value="${esc(S.ui.whq||'')}" aria-label="Search warehouses"><select class="in" style="width:auto" data-ch="whTypeF" aria-label="Filter by warehouse type"><option value="All">All types</option>${WH_TYPES.map(x=>`<option ${x===S.ui.wht?'selected':''}>${x}</option>`).join('')}</select></div>
   <div id="whTbl">${whTableHTML()}</div>
   <p class="hint">The warehouse code is the value used as the receiving warehouse on a shipment. Notifications go to the team emails of the matching code. Inactive warehouses are not notified. The Windows time zone name is what the scheduled flows use.</p></div>
   ${un.length?`<div class="card"><h3>Warehouse codes without a record</h3><p class="mu" style="margin-bottom:8px">These codes are used on shipments but are not in the list above, so their teams cannot be notified.</p><div class="tbw"><table class="tb"><tr><th>Code on shipments</th><th class="r">Shipments</th><th></th></tr>${un.map(c=>`<tr><td><b>${esc(c)}</b></td><td class="r">${whLinked(c)}</td><td class="r"><button class="btn sm pri" data-act="whEdit" data-c="" data-pre="${esc(c)}">Add</button></td></tr>`).join('')}</table></div></div>`:''}`;
 }
 function whModal(code,pre){
-  const w=code?whFind(code):null,v=w||{code:pre||'',name:'',city:'',country:'',address:'',hours:'',contact:'',emails:[],phone:'',active:true,notes:'',tz:'UTC',dueTime:'07:30',weekDay:S.wh.weekDay,weekTime:'15:00',quietFrom:'19:00',quietTo:'06:00'};
+  const w=code?whFind(code):null,v=w||{code:pre||'',type:'Distribution Center',name:'',city:'',country:'',address:'',hours:'',contact:'',emails:[],phone:'',active:true,notes:'',tz:'UTC',dueTime:'07:30',weekDay:S.wh.weekDay,weekTime:'15:00',quietFrom:'19:00',quietTo:'06:00'};
   openModal(`<div class="mh"><h2>${w?'Edit warehouse':'Add warehouse'}</h2><button class="x" data-act="close" aria-label="Close">&times;</button></div>
   <div class="g2"><label class="f">Warehouse code<input id="w_code" class="in" value="${esc(v.code)}" ${w?'readonly':''} placeholder="for example RD - Fremont"></label><label class="f">Warehouse name<input id="w_name" class="in" value="${esc(v.name)}"></label>
-   <label class="f">City<input id="w_city" class="in" value="${esc(v.city)}"></label><label class="f">Country<input id="w_country" class="in" value="${esc(v.country)}"></label>
+   <label class="f">Warehouse type<select id="w_type" class="in">${WH_TYPES.map(x=>`<option ${x===(v.type||whTypeGuess(v))?'selected':''}>${x}</option>`).join('')}</select></label><label class="f">City<input id="w_city" class="in" value="${esc(v.city)}"></label><label class="f">Country<input id="w_country" class="in" value="${esc(v.country)}"></label>
    <label class="f">Address<input id="w_addr" class="in" value="${esc(v.address)}"></label><label class="f">Receiving hours<input id="w_hours" class="in" value="${esc(v.hours)}" placeholder="Mon-Fri 08:00-17:00"></label>
    <label class="f">Team contact name<input id="w_contact" class="in" value="${esc(v.contact)}"></label><label class="f">Phone<input id="w_phone" class="in" value="${esc(v.phone)}"></label></div>
   <label class="f" style="margin-top:10px">Team email addresses (separate with commas)<input id="w_emails" class="in" value="${esc(v.emails.join(', '))}"></label>
@@ -4106,15 +4895,15 @@ function brandingPanel(){
 }
 
 /* ========== render ========== */
-const NAV_GROUPS=[['Operations',['tasks','track','request','milestones','dataquality','carrierupdates']],['Deliveries',['slotreq','slotmgmt','warehouse']],['Insights',['dashboard','carrier','transit','reports']],['Commercial and access',['commercial','freighttrends','admin']]];
+const NAV_GROUPS=[['Operations',['tasks','track','request','milestones','dataquality','carrierupdates','team']],['Deliveries',['slotreq','slotmgmt','warehouse']],['Insights',['dashboard','carrier','transit','reports']],['Commercial and access',['commercial','freighttrends','admin']]];
 function renderNav(){
   window._tasks=can('tasks')?taskList():[];
   let h='';
-  NAV_GROUPS.forEach(([g,ids])=>{const items=TABS.filter(t=>ids.includes(t.id)&&can(t.id));if(!items.length)return;
+  NAV_GROUPS.forEach(([g,ids])=>{const items=TABS.filter(t=>ids.includes(t.id)&&canTab(t.id));if(!items.length)return;
     h+=`<div class="nav-g">${g}</div>`+items.map(t=>`<button class="nav-i ${S.view===t.id?'on':''}" data-act="nav" data-id="${t.id}" ${S.view===t.id?'aria-current="page"':''}>${ICON[t.id]}<span>${esc(t.label)}</span>${t.id==='commercial'&&can('invoices')&&pendingList().length?`<span class="nav-badge" title="Delivered shipments waiting for a carrier invoice">${pendingList().length}</span>`:''}${t.id==='tasks'?taskBadge():''}</button>`).join('')});
   $('#nav').innerHTML=h;
   const ini=(S.role==='Carrier Partner'?S.carrier.slice(0,2):(S.email.split('@')[0].split(/[._-]/).map(x=>x[0]||'').join('').slice(0,2)||'U')).toUpperCase();
-  $('#who').innerHTML=`<div class="av">${esc(ini)}</div><div><b>${esc(S.role)}</b><span>${esc(S.role==='Carrier Partner'?S.carrier+', '+S.email:S.email)}</span></div><div class="whol"><button class="lnk" data-act="probOpen">Report a problem</button>${S.signedIn?'<button class="lnk" data-act="resetMine">Reset my data</button><button class="lnk" data-act="signOut">Sign out</button>':''}</div>`;
+  $('#who').innerHTML=`<div class="av">${esc(ini)}</div><div><b>${esc(S.role)}</b><span>${esc(S.role==='Carrier Partner'?S.carrier+', '+S.email:S.email)}</span></div><div class="whol"><button class="lnk" data-act="probOpen">Report a problem</button>${Store.mode()==='shared'?'<button class="lnk" data-act="shNow" id="shst">'+esc(shLabel())+'</button>':'<span class="lnk shoff" title="Sharing is not switched on, so this device keeps its own copy of the data. Changes made here are not seen on other devices.">'+(Store.mode()==='demo'?'Data: resets on reload':'Data: this device only')+'</span>'}${S.signedIn?(Store.mode()==='shared'?'':'<button class="lnk" data-act="resetMine">Reset my data</button>')+'<button class="lnk" data-act="profileOpen">My profile</button>'+(acctOn()?'<button class="lnk" data-act="pwChange">Change password</button>':'')+'<button class="lnk" data-act="signOut">Sign out</button>':''}</div>`;
 }
 function towerStrip(){
   if(!can('dashboard')||S.view==='dashboard'||!(S.settings.strip||{})[S.view])return '';
@@ -4133,19 +4922,20 @@ function inkFor(hex){
   const L=0.2126*r+0.7152*g+0.0722*b;return (1.05/(L+0.05))>=((L+0.05)/0.0587)?'#FFFFFF':'#14171A';
 }
 function render(){
-  if(!can(S.view)){const f=TABS.find(x=>can(x.id));S.view=f?f.id:'track'}
+  if(!canTab(S.view)){const f=TABS.find(x=>canTab(x.id));S.view=f?f.id:'track'}
   renderNav();
   $('#crumb').innerHTML=`<span class="mu">${esc(S.brand.title)}</span><span class="sep">/</span><b>${esc(TABS.find(t=>t.id===S.view).label)}</b>`;
   clockShow();
   $('#demoDate').value=S.today;$('#roleSel').value=S.role;{const dl=$('#demoDate').closest('label');if(dl)dl.style.display=CLOCK.mode==='real'?'none':''}
   {const isC=S.role==='Carrier Partner';$('#carrierLbl').style.display=isC?'':'none';if(isC)$('#carrierSel').innerHTML=carriersList().map(c=>`<option ${c===S.carrier?'selected':''}>${esc(c)}</option>`).join('')}
   {const isW=S.role==='Warehouse Team';$('#whTeamLbl').style.display=isW?'':'none';if(isW)$('#whTeamSel').innerHTML=S.users.filter(u=>u.Role==='Warehouse Team').map(u=>`<option value="${esc(u.UserEmail)}" ${u.UserEmail===S.whTeam?'selected':''}>${esc(u.DisplayName)} (${esc(u.Warehouses||'no warehouse')})</option>`).join('')}
-  const V={track:viewTrack,request:viewRequest,milestones:viewMilestones,carrierupdates:viewCarrierUpdates,warehouse:viewWarehouse,dataquality:viewDataQuality,tasks:viewTasks,reports:viewReports,slotreq:viewSlotReq,slotmgmt:viewSlotMgmt,freighttrends:viewFreightTrends,dashboard:viewDash,carrier:viewCarrier,transit:viewTransit,commercial:viewCommercial,admin:viewAdmin};
+  const V={track:viewTrack,request:viewRequest,milestones:viewMilestones,carrierupdates:viewCarrierUpdates,warehouse:viewWarehouse,dataquality:viewDataQuality,tasks:viewTasks,reports:viewReports,slotreq:viewSlotReq,slotmgmt:viewSlotMgmt,freighttrends:viewFreightTrends,dashboard:viewDash,carrier:viewCarrier,transit:viewTransit,commercial:viewCommercial,admin:viewAdmin,team:viewTeam};
   $('#sampleFlag').innerHTML=hasSample()?'<span class="pill warn">Sample history loaded</span><button class="btn sm" data-act="sampleRemove">Remove</button>':'';
   $('#view').innerHTML=towerStrip()+V[S.view]();
   if(S.view==='request'&&S.ui.reqTab!=='bulk')syncForm();
   sortEnhance($('#view'));
   mfRender();
+  permUi();
   persistSoon();
   try{document.documentElement.style.setProperty('--topH',((document.querySelector('.top')||{}).offsetHeight||0)+'px')}catch(e){}
 }
@@ -4153,7 +4943,10 @@ function syncForm(){
   const inco=$('#f_inco'),fr=$('#f_freight'),mode=$('#f_mode');if(!inco)return;
   const note=$('#freightNote');note.style.display=fr.value==='Shipper'?'block':'none';
   $('#seaBox').style.display=mode.value==='Sea'?'grid':'none';
+  whTypeHint();
 }
+function whTypeHint(){const i=document.getElementById('f_wh'),s=document.getElementById('f_wh_type');if(!i||!s)return;const w=whFind(i.value.trim());s.textContent=w?'Type: '+(w.type||'-')+(w.city?', '+w.city:''):(i.value.trim()?'Not in the warehouse list':'')}
+document.addEventListener('input',e=>{if(e.target&&e.target.id==='f_wh')whTypeHint()});
 function guide(){
   openModal(`<div class="mh"><h2>Demo guide</h2><button class="x" data-act="close" aria-label="Close">&times;</button></div>
   <ol style="margin:0 0 0 18px;padding:0;line-height:1.8">
@@ -4244,9 +5037,9 @@ document.addEventListener('click',e=>{
    case 'dvConfirm':dvConfirm();break;
    case 'dvLocate':dvLocate();break;
    case 'demoToggle':{const b=document.querySelector('.demobar'),o=b.classList.toggle('open');const t0=document.getElementById('demoToggle');if(t0)t0.setAttribute('aria-expanded',String(o));break}
-   case 'storeBackup':{const ok=downloadText('YourCompany-control-tower-backup-'+S.today+'.json',JSON.stringify(persistPayload()),'application/json');toast(ok?'Backup downloaded. If nothing happened, your browser blocked the download.':'Download is blocked here.',ok?'':'bad');break}
+   case 'storeBackup':{const ok=downloadText('YourCompany-control-tower-backup-'+S.today+'.json',JSON.stringify(backupPayload()),'application/json');toast(ok?'Backup downloaded. If nothing happened, your browser blocked the download.':'Download is blocked here.',ok?'':'bad');break}
    case 'storeClear':{if(!confirm('Delete the data saved in this browser? The app keeps working with what is on screen until you reload.'))break;Store.clear();render();toast('Saved data cleared');break}
-   case 'storeRestoreApply':{const r=restoreApply(S._restore);S._restore=null;closeModal();render();toast(r.msg,r.ok?'':'bad');break}
+   case 'storeRestoreApply':{if(denied('settingsedit'))break;const o=S._restore,r=restoreApply(o);S._restore=null;closeModal();render();if(r.ok)restoreResultModal(r,o);else toast(r.msg,'bad');break}
    case 'authAddGroup':{authCollect();authSet().groupRoles.push({group:'',label:'',role:'Logistics Executive'});render();break}
    case 'authDelGroup':{authCollect();authSet().groupRoles.splice(Number(d.i),1);render();break}
    case 'authSave':{authCollect();const A=authSet(),e=authGroupCheck(A.groupRoles);
@@ -4269,11 +5062,29 @@ document.addEventListener('click',e=>{
      if(rows.length===1){T.sev=null;rows[0].go();break}
      T.sev=d.s;render();break}
    case 'impTile':{if(S.imp){S.imp.f=S.imp.f===d.id?'all':d.id;impModal()}break}
+   case 'roleAdd':{if(denied('settingsedit'))break;const r=roleCreate(val('cr_name'),val('cr_base'));toast(r.msg,r.ok?'':'bad');if(r.ok)render();break}
+   case 'rolePreset':{if(denied('settingsedit'))break;const k=d.p,r=roleCreate(k,'',PROFILE_PRESETS[k]);toast(r.msg,r.ok?'':'bad');if(r.ok)render();break}
+   case 'roleDel':{if(denied('settingsedit'))break;if(!confirm('Delete the profile '+d.n+'?'))break;const r=roleDelete(d.n);toast(r.msg,r.ok?'':'bad');render();break}
+   case 'exportAllX':{const ok=xlsxSave('Control-Tower-complete-export-'+S.today+'.xlsx',allSheets());if(ok)toast('Excel file downloaded');break}
+   case 'exportAll':exportAll();break
    case 'probOpen':problemModal();break;
    case 'probCopy':{const v=document.getElementById('pr_diag').value;const done=()=>toast('Copied. Paste it into your message.');if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(v).then(done,()=>{const a=document.getElementById('pr_diag');a.select();document.execCommand('copy');done()});else{const a=document.getElementById('pr_diag');a.select();document.execCommand('copy');done()}break}
    case 'probMail':{const v=document.getElementById('pr_diag').value;location.href='mailto:'+encodeURIComponent(window.ECT_LOGIN.reportTo)+'?subject='+encodeURIComponent('Problem report: Global Shipment Control Tower')+'&body='+encodeURIComponent(v.slice(0,1800));break}
    case 'signOut':signOut();break;
-   case 'resetMine':{if(!confirm('This replaces your sample data, and anything you changed, with fresh sample data dated from today. You stay signed in. Continue?'))break;
+   case 'pwChange':acctPwModal(false);break;
+   case 'ghConnect':{if(denied('settingsedit'))break;toast('Connecting to GitHub...');ghConnect(val('gh_repo'),val('gh_branch'),val('gh_path'),val('gh_token')).then(ok=>{render();if(ok){toast('Connected');ghPublish('first publish')}else toast(GH.err,'bad')});break}
+   case 'ghPublish':{if(denied('usersedit'))break;ghPublish('published by hand').then(()=>{render();toast(GH.err?GH.err:'Published',GH.err?'bad':'')});break}
+   case 'ghDisconnect':{ghDisconnect();render();toast('Disconnected. The token was forgotten.');break}
+   case 'profileOpen':profileModal();break;
+   case 'profileSave':profileSave();break;
+   case 'resetToLogin':{try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}loginGate('');break}
+   case 'acctLink':{if(!acctAllowed(d.e)){toast('Your role is not allowed to do this','bad');break}acctLinkMake(d.e).then(l=>acctLinkModal(d.e,l));break}
+   case 'acctReset':{if(!acctAllowed(d.e)){toast('Your role is not allowed to do this','bad');break}if(!confirm('Reset the password of '+d.e+'? They will need the new temporary password to sign in.'))break;acctResetDo(d.e);break}
+   case 'acctCopy':{const v=window._pwc||'';const done=()=>toast('Copied');if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(v).then(done,done);else done();break}
+   case 'shDiag':shDiagModal();break;
+   case 'shRetry':if(window.__shRetry)window.__shRetry();break;
+   case 'shNow':{sharedSync().then(()=>{shShow();toast(shLabel())});break}
+   case 'resetMine':{if(Store.mode()==='shared'){toast('The data is shared, so it cannot be reset for one person. Ask the person running the demo to reset it.','bad');break}if(!confirm('This replaces your sample data, and anything you changed, with fresh sample data dated from today. You stay signed in. Continue?'))break;
      const em=S.signedIn&&S.signedIn.email,kb=S.brand;init();S.brand=kb;clockSync();
      const u=((window.ECT_LOGIN&&ECT_LOGIN.users)||[]).find(x=>String(x.email).toLowerCase()===String(em).toLowerCase());
      if(u)loginApply(u);closeModal();render();persistNow();toast('Your sample data was reset');break}
@@ -4282,7 +5093,7 @@ document.addEventListener('click',e=>{
    case 'csvXlsx':{const x=window._csv&&window._csv.xl;if(x)xlsxSave(x.name,x.sheets);break}
    case 'close':closeModal();break;
    case 'guide':guide();break;
-   case 'reset':{if(Store.mode()==='browser'&&!confirm('Browser storage is on. This replaces the saved data with the demo data. Continue?'))break;const keep=S.role,kb=S.brand,kc=S.mf.closed;init();S.role=keep;S.brand=kb;S.mf.closed=kc;closeModal();render();toast('Demo data restored');break}
+   case 'reset':{if(Store.mode()==='shared'){if(!confirm('This resets the shared demo data for everyone, on every device. Continue?'))break;Shared.force=true}if(Store.mode()==='browser'&&!confirm('Browser storage is on. This replaces the saved data with the demo data. Continue?'))break;const keep=S.role,kb=S.brand,kc=S.mf.closed,si=S.signedIn,kAcct=acctSnapshot();init();acctRestore(kAcct);S.role=keep;S.brand=kb;S.mf.closed=kc;if(si){const u=((window.ECT_LOGIN&&ECT_LOGIN.users)||[]).find(x=>String(x.email).toLowerCase()===String(si.email).toLowerCase());if(u){loginApply(u);S.role=keep}}closeModal();render();toast('Demo data restored');break}
    case 'search':S.ui.q=val('q');$('#results').innerHTML=resultsHTML();break;
    case 'try':S.ui.q=d.q;render();break;
    case 'open':closeModal();detailModal(d.ref);break;
@@ -4415,7 +5226,7 @@ document.addEventListener('click',e=>{
      showCsv('Transit time percentiles','transit-percentiles-'+S.today+'.csv',toCSV(['Group','LoadingPorts','DestinationPorts','Shipments','MinDays','AverageDays',...ps.map(p=>'P'+p),'MaxDays'],rows));break}
    case 'sampleAdd':{const n=addSampleHistory();render();toast(n?n+' sample shipments loaded':'Sample history is already loaded');break}
    case 'sampleRemove':{const n=removeSampleHistory();render();toast(n+' sample row(s) removed');break}
-   case 'brandSave':{const hex=val('b_accent_t')||val('b_accent');if(!/^#[0-9a-f]{6}$/i.test(hex)){toast('Enter the accent colour as a hex code such as #F37021','bad');break}
+   case 'brandSave':{if(denied('settingsedit'))break;const hex=val('b_accent_t')||val('b_accent');if(!/^#[0-9a-f]{6}$/i.test(hex)){toast('Enter the accent colour as a hex code such as #F37021','bad');break}
      S.brand.company=val('b_company')||S.brand.company;S.brand.title=val('b_title')||S.brand.title;S.brand.accent=hex;applyBrand();render();toast('Branding applied');break}
    case 'logoRemove':S.brand.logo='';applyBrand();render();break;
    case 'brandDownload':{const ok=downloadText('global-shipment-control-tower.html',brandedHTML(),'text/html');toast(ok?'A copy with your branding was downloaded. If nothing happened, your browser blocked it.':'Download is blocked here.',ok?'':'bad');break}
@@ -4479,9 +5290,9 @@ document.addEventListener('click',e=>{
    case 'whResend':{const n=whResend(d.id);render();toast(n?'Resent to '+n+' address(es)':'Only a sent notification can be resent',n?'':'bad');break}
    case 'whMissed':{const m=whPlan().find(x=>x.key===d.k);if(m){whMarkMissed(m);render();toast('Recorded as missed for '+m.w.code)}break}
    case 'whExport':showCsv('Warehouse notification log','warehouse-notifications-'+S.today+'.csv',toCSV(['NotificationID','DedupeKey','Warehouse','TimeZone','Notification','Covers','ScheduledLocal','ScheduledUTC','Status','SentLocal','SentUTC','SentTo','Subject','Shipments','Attempts','Error','FlowRunID','ResentFrom'],S.whLog.map(l=>({NotificationID:l.id,DedupeKey:l.key,Warehouse:l.code,TimeZone:l.tz,Notification:l.type,Covers:l.covers,ScheduledLocal:l.schedLocal,ScheduledUTC:l.schedUtc,Status:l.status,SentLocal:l.status==='Missed'?'':l.sentLocal,SentUTC:l.status==='Missed'?'':l.sentUtc,SentTo:l.to,Subject:l.subject,Shipments:l.refs,Attempts:l.attempts,Error:l.error,FlowRunID:l.runId,ResentFrom:l.resentFrom}))));break
-   case 'whSetSave':{S.wh.lead=Number(val('ws_lead'));S.wh.weekDay=Number(val('ws_day'));S.wh.overdue=document.getElementById('ws_overdue').checked;audit('Warehouse settings changed','','Notice '+(S.wh.lead===0?'on the due date':S.wh.lead+' day(s) before')+', default weekly day '+WH_DAYS[S.wh.weekDay]);render();toast('Settings saved');break}
+   case 'whSetSave':{if(denied('settingsedit'))break;S.wh.lead=Number(val('ws_lead'));S.wh.weekDay=Number(val('ws_day'));S.wh.overdue=document.getElementById('ws_overdue').checked;audit('Warehouse settings changed','','Notice '+(S.wh.lead===0?'on the due date':S.wh.lead+' day(s) before')+', default weekly day '+WH_DAYS[S.wh.weekDay]);render();toast('Settings saved');break}
    case 'whEdit':whModal(d.c,d.pre);break;
-   case 'whSave':{const edit=d.c,code=val('w_code').trim();
+   case 'whSave':{if(denied('settingsedit'))break;const edit=d.c,code=val('w_code').trim();
      if(!code){toast('Enter the warehouse code','bad');break}
      if(!/^[A-Za-z0-9 _.\/-]{1,40}$/.test(code)){toast('The code can use letters, numbers, spaces and - _ . / (up to 40 characters)','bad');break}
      if(!edit&&whFind(code)){toast('A warehouse with code '+code+' already exists','bad');break}
@@ -4490,19 +5301,17 @@ document.addEventListener('click',e=>{
      const tms=[['w_due','notice time'],['w_wtime','weekly update time'],['w_qfrom','quiet hours start'],['w_qto','quiet hours end']],badT=tms.find(([id])=>!validTime(val(id)));
      if(badT){toast('Enter a valid '+badT[1]+' (hh:mm)','bad');break}
      if(!TZ_LIST.some(x=>x[0]===val('w_tz'))){toast('Choose a time zone','bad');break}
-     const rec={code:edit||code,name:val('w_name'),city:val('w_city'),country:val('w_country'),address:val('w_addr'),hours:val('w_hours'),contact:val('w_contact'),emails:uniq(emails.map(e=>e.toLowerCase())),phone:val('w_phone'),active:document.getElementById('w_active').checked,notes:val('w_notes'),tz:val('w_tz'),dueTime:val('w_due'),weekDay:Number(val('w_wday')),weekTime:val('w_wtime'),quietFrom:val('w_qfrom'),quietTo:val('w_qto')};
+     const rec={code:edit||code,name:val('w_name'),type:WH_TYPES.includes(val('w_type'))?val('w_type'):'Distribution Center',city:val('w_city'),country:val('w_country'),address:val('w_addr'),hours:val('w_hours'),contact:val('w_contact'),emails:uniq(emails.map(e=>e.toLowerCase())),phone:val('w_phone'),active:document.getElementById('w_active').checked,notes:val('w_notes'),tz:val('w_tz'),dueTime:val('w_due'),weekDay:Number(val('w_wday')),weekTime:val('w_wtime'),quietFrom:val('w_qfrom'),quietTo:val('w_qto')};
      const cur=edit?whFind(edit):null;if(cur)Object.assign(cur,rec);else S.warehouses.push(rec);
      audit(edit?'Warehouse updated':'Warehouse added','',rec.code+(rec.emails.length?' ('+rec.emails.length+' team email(s))':' (no team email yet)')+', '+rec.tz);
      closeModal();render();toast(rec.emails.length?'Warehouse saved':'Warehouse saved. Add a team email so it can be notified.',rec.emails.length?'':'bad');break}
-   case 'whToggle':{const w=whFind(d.c);if(w){w.active=!w.active;audit('Warehouse '+(w.active?'activated':'deactivated'),'',w.code);render()}break}
-   case 'whDel':{const w=whFind(d.c);if(!w)break;const n=whLinked(w.code);if(n){toast(n+' shipment(s) use '+w.code+'. Deactivate it instead of removing it.','bad');break}S.warehouses=S.warehouses.filter(x=>x!==w);audit('Warehouse removed','',w.code);render();toast('Warehouse removed');break}
+   case 'whToggle':{if(denied('settingsedit'))break;const w=whFind(d.c);if(w){w.active=!w.active;audit('Warehouse '+(w.active?'activated':'deactivated'),'',w.code);render()}break}
+   case 'whDel':{if(denied('settingsedit'))break;const w=whFind(d.c);if(!w)break;const n=whLinked(w.code);if(n){toast(n+' shipment(s) use '+w.code+'. Deactivate it instead of removing it.','bad');break}S.warehouses=S.warehouses.filter(x=>x!==w);audit('Warehouse removed','',w.code);render();toast('Warehouse removed');break}
    case 'adminTab':S.ui.admin=d.t;render();break;
-   case 'userAdd':{const em=val('u_email').toLowerCase();if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){toast('Enter a valid email address','bad');break}
-     if(S.users.some(u=>u.UserEmail.toLowerCase()===em)){toast('That user already exists','bad');break}
-     if(val('u_role')==='Carrier Partner'&&!val('u_carrier')){toast('Choose the carrier for this Carrier Partner user','bad');break}
-     const whSel=[...(document.getElementById('u_wh')||{selectedOptions:[]}).selectedOptions].map(o=>o.value);if(val('u_role')==='Warehouse Team'&&!whSel.length){toast('Choose at least one warehouse for this Warehouse Team user','bad');break}
-     S.users.push({UserEmail:em,DisplayName:val('u_name')||em,Role:val('u_role'),Carrier:val('u_role')==='Carrier Partner'?val('u_carrier'):'',Warehouses:val('u_role')==='Warehouse Team'?whSel.join('; '):''});audit('User added','',em+' as '+val('u_role'));render();toast('User added');break}
-   case 'userDel':{const u=S.users[Number(d.i)];if(u){S.users.splice(Number(d.i),1);audit('User removed','',u.UserEmail);render()}break}
+   case 'userAdd':{if(denied('usersadd'))break;const r=userAddFromForm();toast(r.msg,r.ok?'':'bad');if(r.ok)render();break}
+   case 'teamAdd':{const r=teamAdd();toast(r.msg,r.ok?'':'bad');if(r.ok)render();break}
+   case 'teamDel':{if(!confirm('Remove '+d.e+'?'))break;const r=teamDel(d.e);toast(r.msg,r.ok?'':'bad');render();break}
+   case 'userDel':{if(denied('usersdel'))break;const u=S.users[Number(d.i)];if(u){S.users.splice(Number(d.i),1);if(typeof acctOnDel==='function')acctOnDel(u.UserEmail);audit('User removed','',u.UserEmail);render()}break}
    case 'digest':{const f=d.f;const by={};
      S.subs.filter(s=>s.Status==='Active'&&s.Frequency===f).forEach(s=>{(by[s.Email]=by[s.Email]||[]).push(s.ShipmentRef)});
      const keys=Object.keys(by);if(!keys.length){toast('No active '+f.toLowerCase()+' subscribers');break}
@@ -4510,7 +5319,7 @@ document.addEventListener('click',e=>{
      render();toast(keys.length+' '+f.toLowerCase()+' email(s) queued');break}
    case 'outClear':S.outbox=[];render();break;
    case 'mailOpen':{const m=S.outbox.find(x=>x.id===Number(d.id));if(m)openModal(`<div class="mh"><h2>${esc(m.subject)}</h2><button class="x" data-act="close" aria-label="Close">&times;</button></div><p class="mu">To: ${esc(m.to)}, ${esc(m.type)}</p><pre style="white-space:pre-wrap;font:inherit;margin:12px 0 0">${esc(m.body)}</pre>`);break}
-   case 'saveDomain':{const v=val('s_domain').toLowerCase().replace(/^@/,'');if(!v.includes('.')){toast('Enter a domain such as yourcompany.com','bad');break}S.settings.domain=v;render();toast('Domain saved');break}
+   case 'saveDomain':{if(denied('settingsedit'))break;const v=val('s_domain').toLowerCase().replace(/^@/,'');if(!v.includes('.')){toast('Enter a domain such as yourcompany.com','bad');break}S.settings.domain=v;render();toast('Domain saved');break}
    case 'csvCopy':{const b=$('#csvBox');b.select();let ok=false;try{ok=document.execCommand('copy')}catch(x){}toast(ok?'Copied':'Press Ctrl+C to copy the selected text');break}
    case 'csvDownload':{try{const b=new Blob([window._csv.text],{type:'text/csv'});const u=URL.createObjectURL(b);const l=document.createElement('a');l.href=u;l.download=window._csv.filename;document.body.appendChild(l);l.click();l.remove();toast('Download started. If nothing happens, use Copy instead.')}catch(x){toast('Download is blocked here. Use Copy instead.','bad')}break}
   }
@@ -4540,11 +5349,7 @@ document.addEventListener('change',e=>{
     delete U.errs[i];ufRender();return}
   if(t.id==='impUsers'||t.id==='impWh'||t.id==='fcFile'||t.id==='impShip'){const f=t.files[0];if(!f)return;const kind=t.id==='impUsers'?'users':t.id==='impWh'?'wh':t.id==='impShip'?'ship':'fc';
     readUpload(f,(err,o)=>{if(err||o.err){toast(err||o.err,'bad');return}const P=(kind==='users'?usersImportCheck:kind==='wh'?whImportCheck:kind==='ship'?shipImportCheck:fcCheck)(o.objs,o.hdr);if(P.err){toast(P.err,'bad');return}P.fileName=f.name;P.hdr=o.hdr;S.imp=P;impModal()});t.value='';return}
-  if(t.id==='restoreFile'){const f=t.files[0];if(!f)return;if(f.size>4000000){toast('That file is over 4 MB, so it is not one of these backups','bad');return}
-    const fr=new FileReader();fr.onload=()=>{let o=null;try{o=JSON.parse(String(fr.result).replace(/^\uFEFF/,''))}catch(e){toast('That file is not valid JSON','bad');return}
-      const c=restoreCheck(o);if(!c.ok){toast(c.msg,'bad');return}S._restore=o;
-      openModal(`<div class="mh"><h2>Restore from backup</h2><button class="x" data-act="close" aria-label="Close">&times;</button></div><p class="mu" style="margin-bottom:8px">Backup saved ${esc((c.savedAt||'').replace('T',' ').slice(0,19))} UTC. It holds ${c.counts.shipments} shipments (${c.counts.lines} item rows), ${c.counts.users} users, ${c.counts.warehouses} warehouses, ${c.counts.slots} delivery slot requests, ${c.counts.quotes} quotes and ${c.counts.audit} audit entries.</p><div class="note">Restoring replaces everything on screen and in browser storage with the backup. Download a backup of the current data first if you may need it.</div><div class="row sec"><button class="btn danger" data-act="storeRestoreApply">Replace current data</button><button class="btn" data-act="close">Cancel</button></div>`)};
-    fr.readAsText(f);t.value='';return}
+  if(t.id==='restoreFile'||t.id==='restoreFile2'){restorePick(t);return}
   if(t.id==='bulkFile'){const f=t.files[0];if(!f)return;readUpload(f,(err,o)=>{if(err||o.err){toast(err||o.err,'bad');return}if(bulkCheck(o.objs,o.hdr,f.name))render()});t.value='';return}
   if(t.id==='msFile'){const f=t.files[0];if(!f)return;readUpload(f,(err,o)=>{if(err||o.err){toast(err||o.err,'bad');return}$('#msText').value=toCSV(o.hdr,o.objs)});t.value='';return}
   if(t.id==='logoFile'){const f=t.files[0];if(!f)return;if(f.size>1000000){toast('The logo file is over 1 MB. Use a smaller image.','bad');return}const r=new FileReader();r.onload=()=>{S.brand.logo=r.result;applyBrand();render();toast('Logo added')};r.readAsDataURL(f);return}
@@ -4566,7 +5371,7 @@ document.addEventListener('change',e=>{
    case 'wh':{S.ui.wh[t.dataset.f]=t.dataset.f==='days'?Number(t.value):t.value;render();break}
    case 'slShip':{slCollect();const U=S.ui.sl;U.ship=t.value;U.week='';U.first=null;U.second=null;U.pick='first';render();break}
    case 'dmCode':{S.ui.dm.code=t.value;S.ui.dm.week='';render();break}
-   case 'userWh':{const u=S.users[Number(t.dataset.i)];u.Warehouses=[...t.selectedOptions].map(o=>o.value).join('; ');audit('Warehouses assigned','',u.UserEmail+': '+(u.Warehouses||'none'));toast('Warehouses saved');break}
+   case 'userWh':{if(denied('usersedit'))break;const u=S.users[Number(t.dataset.i)];u.Warehouses=[...t.selectedOptions].map(o=>o.value).join('; ');audit('Warehouses assigned','',u.UserEmail+': '+(u.Warehouses||'none'));toast('Warehouses saved');break}
    case 'viewSel':viewApply(t.value);break;
    case 'storeMode':{const m=t.value;if(m==='browser'&&!Store.available()){toast('This browser does not allow storage for this page','bad');render();break}Store.setMode(m);if(m==='browser'){Store.warned=0;persistNow();toast('Browser storage is on. Your data now survives a reload.')}else{toast('Demo mode: data resets on reload. Saved data is kept until you clear it.')}render();break}
    case 'dqCheck':{S.ui.dq=S.ui.dq||{sev:'All',check:'All'};S.ui.dq.check=t.value;render();break}
@@ -4578,7 +5383,7 @@ document.addEventListener('change',e=>{
    case 'trbasis':S.ui.tr.basis=t.value;render();break;
    case 'trgroup':S.ui.tr.group=t.value;render();break;
    case 'trmode':S.ui.tr.mode=t.value;render();break;
-   case 'strip':S.settings.strip[t.dataset.id]=t.checked;render();break;
+   case 'strip':if(denied('settingsedit'))break;S.settings.strip[t.dataset.id]=t.checked;render();break;
    case 'trtype':S.ui.tr.stype=t.value;render();break;
    case 'trnature':S.ui.tr.nature=t.value;render();break;
    case 'troc':S.ui.tr.oc=t.value;trSanitize();render();break;
@@ -4598,19 +5403,27 @@ document.addEventListener('change',e=>{
    case 'cwin':S.ui.carrier.win=t.value;render();break;
    case 'invCarrier':S.ui.invCarrier=t.value;render();break;
    case 'invStatus':S.ui.invStatus=t.value;render();break;
-   case 'userRole':{const u=S.users[Number(t.dataset.i)];u.Role=t.value;u.Carrier=t.value==='Carrier Partner'?(u.Carrier||carriersList()[0]||''):'';audit('Role changed','',u.UserEmail+' to '+t.value);render();toast('Role updated');break}
-   case 'userCarrier':{const u=S.users[Number(t.dataset.i)];u.Carrier=t.value;audit('Carrier assigned','',u.UserEmail+' to '+t.value);toast('Carrier assigned');break}
-   case 'acc':{const r=t.dataset.role,id=t.dataset.id,a=S.access[r];const i=a.indexOf(id);if(t.checked&&i<0)a.push(id);if(!t.checked&&i>=0)a.splice(i,1);audit('Access changed','',r+(t.checked?' can open ':' cannot open ')+id);renderNav();if(!can(S.view)){S.view='track';render()}break}
+   case 'userRole':{if(denied('usersedit'))break;const u=S.users[Number(t.dataset.i)];u.Role=t.value;u.Type=roleType(t.value);u.Carrier=t.value==='Carrier Partner'?(u.Carrier||carriersList()[0]||''):'';audit('Role changed','',u.UserEmail+' to '+t.value);render();toast('Role updated');break}
+   case 'userField':{if(denied('usersedit'))break;const u=S.users[Number(t.dataset.i)];if(!u)break;const f=t.dataset.f;u[f]=(f==='Receivers')?normShippers(t.value):t.value.trim();if(f==='Receivers')t.value=u[f];audit('User details changed','',u.UserEmail+': '+f);toast('Saved');break}
+   case 'userPartner':{if(denied('usersedit'))break;const u=S.users[Number(t.dataset.i)];if(u){u.Partner=t.value;audit('Partner assigned','',u.UserEmail+' under '+(t.value||'none'));toast('Saved')}break}
+   case 'whTypeF':{S.ui.wht=t.value;render();break}
+   case 'permRole':{S.ui.permRole=t.value;render();break}
+   case 'perm':{if(denied('settingsedit')){render();break}permSet(S.ui.permRole,t.dataset.m,t.dataset.k,t.checked);audit('Permission changed','',S.ui.permRole+': '+t.dataset.m+' '+t.dataset.k+' '+(t.checked?'on':'off'));render();break}
+   case 'userShippers':{if(denied('usersedit'))break;const u=S.users[Number(t.dataset.i)];u.Shippers=normShippers(t.value);t.value=u.Shippers;audit('Shippers assigned','',u.UserEmail+': '+(u.Shippers||'none'));toast('Shippers saved');break}
+   case 'userCarrier':{if(denied('usersedit'))break;const u=S.users[Number(t.dataset.i)];u.Carrier=t.value;audit('Carrier assigned','',u.UserEmail+' to '+t.value);toast('Carrier assigned');break}
+   case 'acc':{if(denied('settingsedit'))break;const r=t.dataset.role,id=t.dataset.id,a=S.access[r];const i=a.indexOf(id);if(t.checked&&i<0)a.push(id);if(!t.checked&&i>=0)a.splice(i,1);audit('Access changed','',r+(t.checked?' can open ':' cannot open ')+id);renderNav();if(!canTab(S.view)){S.view='track';render()}break}
   }
 });
 $('#modal').addEventListener('mousedown',e=>{if(e.target.id==='modal')closeModal()});
 
 /* ---------- boot ---------- */
-init();persistBoot();clockSync();
+init();persistBoot();clockSync();migrateData();syncRoles();
 $('#roleSel').innerHTML=ROLES.map(r=>`<option>${r}</option>`).join('');
 document.querySelector('.side').insertAdjacentHTML('beforeend','<div id="ver" class="ver">Version: '+APP_BUILD.replace('site build ','')+'</div>');
 applyBrand();
-render();if(!loginBoot())authBoot();setInterval(clockTick,20000);
+function bootGo(){render();if(!loginBoot())authBoot();setInterval(clockTick,20000);if(Shared.enabled())setInterval(()=>{if(document.visibilityState==='visible')sharedPoll()},Math.max(1,Number((SC()||{}).pollSeconds)||8)*1000)}
+if(window.ECT_LOGIN&&window.ECT_LOGIN.storage==='shared'&&!Shared.enabled())sharedCover('Shared data is switched on, but the database address or key in users.js is missing or not valid.');
+else if(Shared.enabled())sharedBoot().then(bootGo);else bootGo();
 window.addEventListener('beforeunload',()=>{persistNow()});
 window.addEventListener('resize',fitBrand);
 if(window.matchMedia)window.matchMedia('(max-width:620px)').addEventListener('change',()=>{if(S.view==='carrierupdates'&&S.ui.cu.driver===undefined)render()});
