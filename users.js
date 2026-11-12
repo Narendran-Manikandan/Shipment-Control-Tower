@@ -2,11 +2,17 @@
    Passwords are stored only as salted hashes, but this file is public on GitHub, so use throwaway passwords. */
 window.ECT_LOGIN={
  "required": true,
- "storage": "browser",
+ "storage": "shared",
  "clock": "real",
  "reportTo": "cvlnarendran@gmail.com",
  "attempts": 5,
  "lockSeconds": 30,
+ "shared": {
+  "url": "https://owzgjblipiqnqjsbxwkh.supabase.co",
+  "key": "sb_publishable_hWJzmHbgqHsPX-2ZcxvO1g_4f9w0ay_",
+  "room": "main",
+  "pollSeconds": 4
+ },
  "users": [
   {
    "email": "hussain0101@gmail.com",
