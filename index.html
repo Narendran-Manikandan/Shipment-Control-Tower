@@ -510,7 +510,7 @@ let S;
 function init(){
   clockRefresh();
   S={brand:clone(BRAND_DEFAULT),today:CLOCK.today,role:'Logistics Analyst',email:'demo.user@yourcompany.com',baseEmail:'demo.user@yourcompany.com',carrier:'',view:'track',
-     lines:clone(RAW.lines),events:clone(RAW.events),users:clone(RAW.users),access:{},customRoles:[],accounts:[],docs:[],rg:{},subs:clone(RAW.subs),
+     lines:clone(RAW.lines),events:clone(RAW.events),users:clone(RAW.users),access:{},customRoles:[],accounts:[],docs:[],rg:{},rgs:[],subs:clone(RAW.subs),
      quotes:[],invoices:[],remind:{},revisions:[],uf:null,warehouses:[],slots:[],slotBlocks:[],whTeam:'',whLog:[],whNotified:{},wh:{lead:1,weekDay:4,overdue:true},utcTime:CLOCK.utc,whFail:false,mf:{log:[],ver:{master:1,commercial:1},hl:{},dock:false,closed:false,file:'master',tab:'tblShipments',q:'',only:false},outbox:[],audit:[],settings:{domain:'yourcompany.com',strip:{track:true},permV:2},draft:[],lastSaved:null,bulkResult:null,msResult:null,
      ui:{q:'',dash:{ym:CLOCK.today.slice(0,7),sel:CLOCK.today,mode:'All',ms:'Delivery',q:'',status:'All',overdueOnly:false,tile:null,type:'All',nature:'All',mm:{measure:'ships',basis:'pickup',dim:'mode',carrier:'All',sel:null}},
          carrier:{mode:'All',win:'All',type:'All',nature:'All',metric:'ontime',target:90,mm:{measure:'weight',basis:'pickup',dim:'carrier',carrier:'All',sel:null}},tr:{seg:'d2d',basis:'actual',group:'mode',pcts:[50,90,95],mode:'All',carrier:'All',stype:'All',nature:'All',oc:'All',dc:'All',op:'All',dp:'All',win:'All'},com:'quotes',invCarrier:'All',invStatus:'All',admin:'users',msFilter:'active',cu:{carrier:'',filter:'active',q:''},ft:{series:'both',metric:'avg',group:'none',oc:'All',op:'All',dc:'All',dp:'All',nature:'All',mode:'All',vol:'All'},kt:{},sp:{carrier:'All'},wh:{tab:'schedule',code:'All',days:14},per:{kind:'all',y:+CLOCK.today.slice(0,4),q:Math.ceil(+CLOCK.today.slice(5,7)/3),m:+CLOCK.today.slice(5,7),basis:'pickup'},sort:{},sl:{tab:'my',f:'All',ship:'',week:'',pick:'first',first:null,second:null,vehicle:'',driver:'',phone:'',note:''},dm:{tab:'review',f:'Open',code:'All',week:'',sel:[],prop:null}}};
@@ -2290,7 +2290,7 @@ function dvLocate(){
   navigator.geolocation.getCurrentPosition(p=>{document.getElementById('dv_loc').value=p.coords.latitude.toFixed(4)+', '+p.coords.longitude.toFixed(4);out.textContent='Location added'},()=>{out.textContent='Location is switched off. Type where you are.'},{timeout:8000});
 }
 /* ========== go live: storage, sign-in and roles, flows ========== */
-const PERSIST_KEYS=['today','lines','events','users','access','subs','quotes','invoices','remind','revisions','warehouses','slots','slotBlocks','whLog','whNotified','wh','utcTime','whFail','outbox','audit','settings','brand','views','reports','whSince','customRoles','accounts','docs','rg'];
+const PERSIST_KEYS=['today','lines','events','users','access','subs','quotes','invoices','remind','revisions','warehouses','slots','slotBlocks','whLog','whNotified','wh','utcTime','whFail','outbox','audit','settings','brand','views','reports','whSince','customRoles','accounts','docs','rg','rgs'];
 const Store={key:'ect.state.v1',modeKey:'ect.mode',last:null,err:'',
   available(){try{localStorage.setItem('ect.test','1');localStorage.removeItem('ect.test');return true}catch(e){return false}},
   mode(){if(window.ECT_LOGIN&&window.ECT_LOGIN.storage==='shared'&&window.ECT_LOGIN.shared&&window.ECT_LOGIN.shared.url)return 'shared';const d=window.ECT_LOGIN&&window.ECT_LOGIN.storage==='browser'?'browser':'demo';try{return localStorage.getItem(this.modeKey)||d}catch(e){return d}},
@@ -2725,7 +2725,7 @@ function migratePerms(){
 {const m0=migrateData;migrateData=function(){m0.apply(this,arguments);migratePerms()}}
 /* ========== export all data (ZIP or JSON) and restore from a dump ========== */
 const DATASETS=[
- {id:'shipments',file:'shipments.json',label:'Shipment data',keys:['lines','subs','revisions','docs','rg']},
+ {id:'shipments',file:'shipments.json',label:'Shipment data',keys:['lines','subs','revisions','docs','rg','rgs']},
  {id:'milestones',file:'milestones.json',label:'Milestones',keys:['events']},
  {id:'slots',file:'delivery_slots.json',label:'Delivery slots',keys:['slots','slotBlocks']},
  {id:'users',file:'user_list.json',label:'User list, roles and access',keys:['users','access','customRoles','accounts']},
@@ -2957,7 +2957,7 @@ function monBarHTML(){
 {const s0=addSampleHistory;addSampleHistory=function(){const r=s0.apply(this,arguments);S.lines.forEach(l=>{if(l.Mode)l.Mode=normMode(l.Mode);if(l.ContainerType)l.ContainerType=normCtype(l.ContainerType)});return r}}
 document.addEventListener('change',e=>{if(e.target&&e.target.id==='f_ctype'){const b=document.getElementById('setptBox');if(b){b.style.display=isReefer(e.target.value)?'':'none';if(!isReefer(e.target.value)){const i=document.getElementById('f_setpt');if(i)i.value=''}}}});
 /* ========== demo sign-in (email and password), problem log, report a problem ========== */
-const APP_BUILD='site build 2026-11-13 15:38 UTC';
+const APP_BUILD='site build 2026-11-13 18:51 UTC';
 const ErrLog={key:'ect.errors',max:60,
   add(kind,msg,src){try{const a=JSON.parse(localStorage.getItem(this.key)||'[]');a.push({t:new Date().toISOString(),kind,msg:String(msg==null?'':msg).slice(0,300),src:String(src||'').slice(0,160),view:(typeof S!=='undefined'&&S&&S.view)||'',role:(typeof S!=='undefined'&&S&&S.role)||''});while(a.length>this.max)a.shift();localStorage.setItem(this.key,JSON.stringify(a))}catch(e){}},
   list(){try{return JSON.parse(localStorage.getItem(this.key)||'[]')}catch(e){return []}},
@@ -3046,7 +3046,7 @@ function errCard(){
 }
 /* ========== shared data between devices (Supabase table ect_state) ========== */
 const SH_KEYS=PERSIST_KEYS.filter(k=>!['today','utcTime','whFail'].includes(k));
-const SH_ID={lines:'LineID',events:'EventID',users:'UserEmail',subs:'SubscriptionID',quotes:'id',invoices:'id',slots:'id',slotBlocks:'id',warehouses:'code',reports:'id',views:'id',customRoles:'name',accounts:'email',docs:'id'};
+const SH_ID={lines:'LineID',events:'EventID',users:'UserEmail',subs:'SubscriptionID',quotes:'id',invoices:'id',slots:'id',slotBlocks:'id',warehouses:'code',reports:'id',views:'id',customRoles:'name',accounts:'email',docs:'id',rgs:'id'};
 const SH_APPEND=['revisions','whLog','outbox','audit'];
 const SH_OBJ=['access','remind','whNotified','wh','settings','brand'];
 const Shared={v:0,base:null,baseStr:null,status:'off',err:'',last:null,by:'',busy:false,again:false,force:false,merges:0,renames:[],conflicts:0,polls:0,pushes:0,hold:false,lateRender:false,lastToast:0,trace:[]};
@@ -5170,97 +5170,6 @@ function dsrBuild(o){
   rows.sort((a,b)=>a.ShipmentID.localeCompare(b.ShipmentID)||0);
   return {headers:DSR_COLS,rows,sheet:'DSR',name:'DSR_'+dsrPeriodLabel(o)+'_'+(o.statuses.length&&o.statuses.length<3?o.statuses.join('+').replace(/ /g,''):'AllStatus')+'_By'+(o.basis==='pickup'?'Pickup':'Delivery')};
 }
-/* ----- receipt of goods (RG) ----- */
-const RG_ONE=['DAP','DDP'];
-const rgRec=ref=>(S.rg||{})[ref]||{};
-function rgNeeds(sh){const one=RG_ONE.includes(String(sh.inco||'').toUpperCase());return {one,it:!one&&!!sh.f.PickupActual,fin:sh.status==='Delivered'}}
-const rgDone=(r,st)=>st==='it'?!!(r.itNo&&r.itDate):!!(r.finNo&&r.finDate);
-function rgState(sh){const n=rgNeeds(sh),r=rgRec(sh.ref),pend=[];if(n.it&&!rgDone(r,'it'))pend.push('In-Transit RG');if(n.fin&&!rgDone(r,'fin'))pend.push('Final RG');return {n,r,pend}}
-const rgPending=sh=>!sh.cancelled&&rgState(sh).pend.length>0;
-function rgCheck(sh,f){
-  const e=[],n=rgNeeds(sh),d=x=>String(x||'').trim();
-  if(sh.cancelled)e.push(sh.ref+' is cancelled');
-  const hasIt=d(f.itNo)||d(f.itDate)||d(f.to)||d(f.pl),hasFin=d(f.finNo)||d(f.finDate);
-  if(hasIt&&n.one)e.push('DAP and DDP shipments take only a Final RG');
-  else if(hasIt&&!n.it)e.push('The In-Transit RG can be recorded once the shipment is in transit');
-  if(hasFin&&!n.fin)e.push('The Final RG can be recorded after delivery');
-  if((d(f.itNo)&&!d(f.itDate))||(!d(f.itNo)&&d(f.itDate)))e.push('Enter both the In-Transit RG number and date');
-  if((d(f.finNo)&&!d(f.finDate))||(!d(f.finNo)&&d(f.finDate)))e.push('Enter both the Final RG number and date');
-  if((d(f.to)||d(f.pl))&&!d(f.itNo))e.push('TO and PL# belong to the In-Transit RG: enter its number and date first');
-  [['itDate','In-Transit RG date'],['finDate','Final RG date']].forEach(([k,l])=>{if(d(f[k])){if(!isoOK(d(f[k])))e.push(l+' must be a date (yyyy-mm-dd)');else if(d(f[k])>S.today)e.push(l+' cannot be in the future')}});
-  return e;
-}
-function rgSave(ref,f){
-  if(!can('rgedit'))return {ok:false,msg:'Your role cannot record RG'};
-  const sh=getShip(ref);if(!sh)return {ok:false,msg:'Shipment not found'};
-  const e=rgCheck(sh,f);if(e.length)return {ok:false,msg:e[0],errs:e};
-  const t=x=>String(x||'').trim();S.rg=S.rg||{};
-  const r={itNo:t(f.itNo),itDate:t(f.itDate),to:t(f.to),pl:t(f.pl),finNo:t(f.finNo),finDate:t(f.finDate),by:S.email,on:S.today};
-  if(!r.itNo&&!r.finNo&&!r.to&&!r.pl)delete S.rg[ref];else S.rg[ref]=r;
-  audit('RG recorded',ref,[r.itNo?'In-Transit '+r.itNo+' '+r.itDate:'',r.finNo?'Final '+r.finNo+' '+r.finDate:''].filter(Boolean).join('; ')||'cleared');
-  return {ok:true,msg:ref+': RG saved'+(rgPending(getShip(ref))?'. Still pending: '+rgState(getShip(ref)).pend.join(', '):'. Nothing pending')};
-}
-const RG_COLS=['Shipment','RG Stage Pending','Incoterm','Carrier','Shipper','Consignee','Warehouse','PO Numbers','Invoice Numbers','Status','Pickup Actual','Delivered On','In-Transit RG Number','In-Transit RG Date','TO','PL#','Final RG Number','Final RG Date'];
-function rgRow(sh){const r=rgRec(sh.ref),st=rgState(sh);return {'Shipment':sh.ref,'RG Stage Pending':st.pend.join(' and ')||'None',Incoterm:sh.inco||'',Carrier:sh.carrier,Shipper:sh.shipper,Consignee:sh.consignee,Warehouse:sh.f.WarehouseDestination||'','PO Numbers':sh.pos.join('; '),'Invoice Numbers':shipInvNos(sh),Status:dsrStatus(sh),'Pickup Actual':sh.f.PickupActual||'','Delivered On':sh.f.DeliveredOn||'','In-Transit RG Number':r.itNo||'','In-Transit RG Date':r.itDate||'',TO:r.to||'','PL#':r.pl||'','Final RG Number':r.finNo||'','Final RG Date':r.finDate||''}}
-const rgBuildPending=()=>({headers:RG_COLS,rows:ships().filter(rgPending).sort((a,b)=>a.ref.localeCompare(b.ref)).map(rgRow),sheet:'RG Pending',name:'RG_Pending_'+S.today,help:[['Shipment','Do not change.'],['In-Transit RG Number and Date','Fill both. Not used for DAP and DDP shipments.'],['TO and PL#','Optional. Oracle transfer order and packing list number, with the In-Transit RG.'],['Final RG Number and Date','Fill both, after delivery.'],['Empty cells','Keep what is already recorded. Upload the file back on the RG page.']]});
-function rgBuildAccrual(o){
-  const mo=(o&&o.month)||S.today.slice(0,7),rows=[];
-  Object.entries(S.rg||{}).forEach(([ref,r])=>{const sh=getShip(ref);if(!sh)return;const base=x=>({Month:mo,Shipment:ref,Stage:x,Incoterm:sh.inco||'',Carrier:sh.carrier,Shipper:sh.shipper,Consignee:sh.consignee,Warehouse:sh.f.WarehouseDestination||'','PO Numbers':sh.pos.join('; '),'Invoice Numbers':shipInvNos(sh),'Pickup Actual':sh.f.PickupActual||'','Delivered On':sh.f.DeliveredOn||'',Status:dsrStatus(sh)});
-    if(r.itNo&&r.itDate&&r.itDate.slice(0,7)===mo)rows.push(Object.assign(base('In-Transit RG'),{'RG Number':r.itNo,'RG Date':r.itDate,TO:r.to||'','PL#':r.pl||''}));
-    if(r.finNo&&r.finDate&&r.finDate.slice(0,7)===mo)rows.push(Object.assign(base('Final RG'),{'RG Number':r.finNo,'RG Date':r.finDate,TO:'','PL#':''}))});
-  rows.sort((a,b)=>a['RG Date'].localeCompare(b['RG Date'])||a.Shipment.localeCompare(b.Shipment));
-  return {headers:['Month','Shipment','Stage','RG Number','RG Date','TO','PL#','Incoterm','Carrier','Shipper','Consignee','Warehouse','PO Numbers','Invoice Numbers','Pickup Actual','Delivered On','Status'],rows,sheet:'RG Accrual',name:'RG_Accrual_'+mo};
-}
-function rgImportCheck(objs,hdr){
-  const C=impCols(hdr,{ref:['shipment','shipmentref','shipmentid'],itNo:['intransitrgnumber','intransitrgno'],itDate:['intransitrgdate'],to:['to','transferorder'],pl:['pl','plnumber','packinglistnumber'],finNo:['finalrgnumber','finalrgno'],finDate:['finalrgdate']});
-  if(!C.ref)return {err:'The file needs a Shipment column. Download the RG Pending Report to get the template.'};
-  const items=[],seen={};
-  objs.forEach(r=>{
-    const v=k=>C[k]?impVal(r,C,k):'',ref=v('ref'),sh=ref?getShip(ref):null,it={row:r._row,ref,errs:[],changes:[],f:null};
-    if(!sh)it.errs.push(ref?'Shipment '+ref+' not found':'Shipment is empty');
-    else{if(seen[ref])it.errs.push('Same shipment as row '+seen[ref]);else seen[ref]=r._row;
-      const cur=rgRec(ref),f={itNo:cur.itNo||'',itDate:cur.itDate||'',to:cur.to||'',pl:cur.pl||'',finNo:cur.finNo||'',finDate:cur.finDate||''};
-      ['itNo','itDate','to','pl','finNo','finDate'].forEach(k=>{const x=v(k);if(x!==''&&x!==f[k]){it.changes.push(k+': '+(f[k]||'blank')+' to '+x);f[k]=x}});
-      rgCheck(sh,f).forEach(e=>it.errs.push(e));it.f=f}
-    items.push(it)});
-  return {items,counts:{rows:items.length,update:items.filter(x=>!x.errs.length&&x.changes.length).length,nochange:items.filter(x=>!x.errs.length&&!x.changes.length).length,problems:items.filter(x=>x.errs.length).length}};
-}
-function rgPreview(P){
-  S.rgImp=P;const c=P.counts;
-  openModal(`<div class="mh"><div><h2>Upload RG Details</h2><div class="mu">File: ${esc(P.fileName)}. Nothing is saved until you click Apply.</div></div><button class="x" data-act="close" aria-label="Close">&times;</button></div>
-  <div class="kpis" style="margin-bottom:12px"><div class="kpi"><small>Rows in File</small><b>${c.rows}</b></div><div class="kpi"><small>To Update</small><b>${c.update}</b></div><div class="kpi"><small>No Change</small><b>${c.nochange}</b></div><div class="kpi ${c.problems?'late':''}"><small>Problems</small><b>${c.problems}</b></div></div>
-  <div class="tbw" style="max-height:44vh;overflow:auto"><table class="tb" data-sort="off"><tr><th>Row</th><th>Shipment</th><th>Result</th></tr>${P.items.slice(0,300).map(x=>`<tr class="${x.errs.length?'tr-pend':''}"><td>${x.row}</td><td>${esc(x.ref||'-')}</td><td>${x.errs.length?`<span class="late-t">${esc(x.errs.join('; '))}</span>`:x.changes.length?`<span class="ok-t">Will update</span><br><small>${esc(x.changes.join('; '))}</small>`:'<span class="mu">No change</span>'}</td></tr>`).join('')}</table></div>
-  <div class="row sec"><button class="btn pri" data-act="rgImpApply" ${c.update?'':'disabled'}>Apply ${c.update} Update(s)</button><button class="btn" data-act="close">Cancel</button></div>${c.problems?'<p class="hint">Rows with problems are skipped.</p>':''}`);
-}
-function rgImpApply(){
-  const P=S.rgImp;if(!P||!can('rgedit'))return {ok:false,msg:'Nothing to apply'};let n=0;
-  P.items.filter(x=>!x.errs.length&&x.changes.length).forEach(x=>{const r=rgSave(x.ref,x.f);if(r.ok)n++});
-  audit('RG imported','',n+' shipment(s) from '+P.fileName);S.rgImp=null;return {ok:true,msg:n+' shipment(s) updated',n};
-}
-function viewRG(){
-  const F=S.ui.rg=S.ui.rg||{f:'Pending',q:''},act=ships(),may=can('rgedit'),pend=act.filter(rgPending);
-  const itP=pend.filter(s=>rgState(s).pend.includes('In-Transit RG')),finP=pend.filter(s=>rgState(s).pend.includes('Final RG'));
-  const closed=act.filter(s=>{const n=rgNeeds(s);return (n.it||n.fin)&&!rgPending(s)});
-  const q=String(F.q||'').toLowerCase(),list=(F.f==='Pending'?pend:F.f==='It'?itP:F.f==='Fin'?finP:closed).filter(s=>!q||[s.ref,s.carrier,s.pos.join(' '),shipInvNos(s)].join(' ').toLowerCase().includes(q));
-  const tile=(id,l,v,cls)=>`<button class="kpi tile ${cls||''} ${F.f===id?'sel':''}" data-act="rgTile" data-id="${id}" aria-pressed="${F.f===id}"><small>${l}</small><b>${v}</b></button>`;
-  return pageHead('RG Pending','Receipt of Goods in Oracle. DAP and DDP shipments need only a Final RG after delivery. All other terms need an In-Transit RG once the shipment is in transit, then a Final RG after delivery. A shipment leaves the list when its required RG numbers and dates are recorded.')+
-  `<div class="kpis">${tile('Pending','All Pending',pend.length,pend.length?'late':'')}${tile('It','In-Transit RG Pending',itP.length,itP.length?'acc':'')}${tile('Fin','Final RG Pending',finP.length,finP.length?'acc':'')}${tile('Done','RG Complete',closed.length,'ok')}</div>
-  <div class="card"><div class="row"><label class="f grow">Search<input id="rg_q" class="in" value="${esc(F.q||'')}" placeholder="Shipment, carrier, PO or invoice number"></label>
-  <span class="row" style="align-self:flex-end;gap:6px"><button class="btn" data-act="rdQuick" data-id="rgpending">Download RG Pending Report</button>${may?'<label class="btn pri" style="cursor:pointer">Upload RG Details<input type="file" id="rgFile" accept=".xlsx,.xls,.csv" hidden></label>':''}</span></div></div>
-  <div class="card" style="padding:0"><div class="tbw"><table class="tb"><tr><th>Shipment</th><th>Incoterm</th><th>Carrier</th><th>Status</th><th>RG Pending</th><th>In-Transit RG</th><th>TO / PL#</th><th>Final RG</th><th></th></tr>
-  ${list.map(s=>{const st=rgState(s),r=st.r;return `<tr><td><b>${esc(s.ref)}</b><br><small class="mu">${esc(s.route)}</small></td><td>${esc(s.inco||'-')}${st.n.one?'<br><small class="mu">Final RG only</small>':''}</td><td>${esc(s.carrier)}</td><td>${esc(dsrStatus(s))}</td><td>${st.pend.length?st.pend.map(p=>`<span class="pill warn">${p}</span>`).join(' '):'<span class="pill ok">Complete</span>'}</td><td>${st.n.one?'<span class="mu">Not required</span>':r.itNo?esc(r.itNo)+'<br><small class="mu">'+fmt(r.itDate)+'</small>':'-'}</td><td>${esc([r.to,r.pl].filter(Boolean).join(' / ')||'-')}</td><td>${r.finNo?esc(r.finNo)+'<br><small class="mu">'+fmt(r.finDate)+'</small>':'-'}</td><td class="r">${may?`<button class="btn sm pri" data-act="rgOpen" data-ref="${esc(s.ref)}">Record RG</button>`:''}</td></tr>`}).join('')||'<tr><td colspan="9" class="empty">Nothing here.</td></tr>'}</table></div></div>
-  <p class="hint">RG numbers are optional. Download the pending report, fill in the RG details in Excel and upload it back, or record them one shipment at a time. The Monthly RG Accrual report is on the Reports page.</p>`;
-}
-function rgModal(ref){
-  const sh=getShip(ref);if(!sh)return;const st=rgState(sh),r=st.r,n=st.n;
-  openModal(`<div class="mh"><div><h2>Record RG: ${esc(ref)}</h2><div class="mu">${esc(sh.inco||'-')}, ${esc(sh.carrier)}, ${esc(dsrStatus(sh))}</div></div><button class="x" data-act="close" aria-label="Close">&times;</button></div>
-  <div id="rg_err"></div>
-  <h3 class="sec">In-Transit RG</h3>${n.one?'<div class="note">DAP and DDP shipments take only a Final RG.</div>':!n.it?'<div class="note">Available once the shipment is in transit.</div>':''}
-  <div class="g4"><label class="f">RG Number<input id="rg_itno" class="in" value="${esc(r.itNo||'')}" ${n.it?'':'disabled'}></label><label class="f">RG Date<input type="date" id="rg_itdate" class="in" max="${S.today}" value="${esc(r.itDate||'')}" ${n.it?'':'disabled'}></label><label class="f">TO (Optional)<input id="rg_to" class="in" value="${esc(r.to||'')}" ${n.it?'':'disabled'}></label><label class="f">PL# (Optional)<input id="rg_pl" class="in" value="${esc(r.pl||'')}" ${n.it?'':'disabled'}></label></div>
-  <h3 class="sec">Final RG</h3>${n.fin?'':'<div class="note">Available after delivery.</div>'}
-  <div class="g4"><label class="f">RG Number<input id="rg_finno" class="in" value="${esc(r.finNo||'')}" ${n.fin?'':'disabled'}></label><label class="f">RG Date<input type="date" id="rg_findate" class="in" max="${S.today}" value="${esc(r.finDate||'')}" ${n.fin?'':'disabled'}></label></div>
-  <div class="row sec"><button class="btn pri" data-act="rgSave" data-ref="${esc(ref)}">Save</button><button class="btn" data-act="close">Cancel</button></div>`);
-}
 /* ----- reports page: every report, with per-role access ----- */
 const RPT=[
  {id:'dsr',label:'Daily Status Report',desc:'Every item line in the Daily Status Report layout, with the three statuses. Choose several years, quarters, months or statuses, and whether the period follows the pickup date or the delivery date.',opts:'dsr',build:dsrBuild},
@@ -5275,7 +5184,7 @@ const RPT=[
  {id:'invpend',label:'Pending Invoices Report',desc:'Delivered shipments still waiting for a carrier invoice.',money:true,build:()=>({headers:['Shipment','Carrier','Delivered On','Days Since Delivery','Quote (Est.)','Quotation ID','Remarks'],rows:faScope().filter(s=>faState(s)==='Invoice Pending').sort((a,b)=>(a.f.DeliveredOn||'').localeCompare(b.f.DeliveredOn||'')).map(s=>{const q=selQuote(s.ref),i=faPrimary(s.ref);return {Shipment:s.ref,Carrier:s.carrier,'Delivered On':s.f.DeliveredOn||'','Days Since Delivery':s.f.DeliveredOn?diffDays(S.today,s.f.DeliveredOn):'','Quote (Est.)':q?q.amount:'','Quotation ID':q&&q.qid||'',Remarks:i&&i.remarks||''}}),sheet:'Pending Invoices',name:'Pending_Invoices_'+S.today})},
  {id:'paypend',label:'Payment Pending Report',desc:'Invoiced shipments that are not yet paid.',money:true,build:()=>({headers:['Shipment','Carrier','Carrier Invoice No.','Actual Freight (USD)','Delivered On','Days Since Delivery','Remarks'],rows:faScope().filter(s=>faState(s)==='Payment Pending').map(s=>{const i=faPrimary(s.ref);return {Shipment:s.ref,Carrier:s.carrier,'Carrier Invoice No.':invList(s.ref).map(x=>x.invRef).filter(Boolean).join('; '),'Actual Freight (USD)':invTotal(s.ref),'Delivered On':s.f.DeliveredOn||'','Days Since Delivery':s.f.DeliveredOn?diffDays(S.today,s.f.DeliveredOn):'',Remarks:i&&i.remarks||''}}),sheet:'Payment Pending',name:'Payment_Pending_'+S.today})},
  {id:'spend',label:'Freight Spend by Carrier',desc:'Quoted and invoiced freight for each carrier.',money:true,std:'spend'},
- {id:'rgpending',label:'RG Pending Report',desc:'Shipments waiting for an In-Transit or Final RG, ready to fill in and upload back on the RG page.',build:rgBuildPending},
+ {id:'rgpending',label:'RG Pending Report',desc:'Item lines (PO and item) waiting for an In-Transit or Final RG, one row per line, ready to fill in and upload back on the RG page.',build:rgBuildPending},
  {id:'rgaccrual',label:'Monthly RG Accrual',desc:'RG records with an RG date in the chosen month, for financial accrual.',opts:'month',build:rgBuildAccrual}];
 RPT.forEach(r=>{if(r.std&&!r.build){const k=r.std;r.build=()=>{const d=REPORTS[k].build();return {headers:d.headers,rows:d.rows.map(x=>Object.fromEntries(d.headers.map((h,i)=>[h,x[i]]))),sheet:r.label.slice(0,30),name:r.label.replace(/[^A-Za-z0-9]+/g,'_')+'_'+S.today}}}});
 const rptOk=r=>can('rpt_'+r.id)&&(!r.money||can('commercial'));
@@ -5345,14 +5254,9 @@ document.addEventListener('click',e=>{
   const t=e.target.closest&&e.target.closest('[data-act]');if(!t)return;const a=t.dataset.act,d=t.dataset;
   if(a==='rdDl'||a==='rdQuick'){const r=rptRun(d.id,d.fmt||'xlsx');toast(r.msg,r.ok?'':'bad');e.stopPropagation();return}
   if(a==='rdAll'||a==='rdNone'){const R=rdState();R.dsr[RD_KEY[d.f]]=a==='rdAll'?RD_ALL[d.f]():[];render();return}
-  if(a==='rgTile'){const F=S.ui.rg=S.ui.rg||{f:'Pending',q:''};F.f=d.id;render();return}
-  if(a==='rgOpen'){if(!can('rgedit')){toast('Your role is not allowed to do this','bad');return}rgModal(d.ref);return}
-  if(a==='rgSave'){const r=rgSave(d.ref,{itNo:val('rg_itno'),itDate:val('rg_itdate'),to:val('rg_to'),pl:val('rg_pl'),finNo:val('rg_finno'),finDate:val('rg_findate')});if(!r.ok){const x=document.getElementById('rg_err');if(x)x.innerHTML=`<div class="err" role="alert" style="margin-bottom:10px">${esc(r.msg)}</div>`;return}closeModal();render();toast(r.msg);return}
-  if(a==='rgImpApply'){const r=rgImpApply();closeModal();render();toast(r.msg,r.ok?'':'bad');return}
 },true);
 document.addEventListener('change',e=>{
   const t=e.target;if(!t)return;
-  if(t.id==='rgFile'){const f=t.files[0];if(!f)return;if(!can('rgedit')){toast('Your role is not allowed to do this','bad');return}readUpload(f,(err,o)=>{if(err||o.err){toast(err||o.err,'bad');return}const P=rgImportCheck(o.objs,o.hdr);if(P.err){toast(P.err,'bad');return}P.fileName=f.name;rgPreview(P)});t.value='';return}
   if(t.dataset&&t.dataset.ch==='rdOpt'){const R=rdState(),f=t.dataset.f;if(f==='dk')R.dsr.kind=t.value;if(f==='db')R.dsr.basis=t.value;if(f==='do')R.dsr.openAlways=t.checked;render();return}
   if(t.dataset&&t.dataset.ch==='rdMulti'){const R=rdState(),f=t.dataset.f,k=RD_KEY[f],v=f==='s'?t.dataset.v:Number(t.dataset.v),a=R.dsr[k],i=a.indexOf(v);if(t.checked&&i<0)a.push(v);if(!t.checked&&i>=0)a.splice(i,1);if(f!=='s')a.sort((x,y)=>x-y);render();return}
   if(t.id==='rd_month'){if(/^\d{4}-\d{2}$/.test(t.value)){rdState().month=t.value;render()}return}
@@ -5708,6 +5612,256 @@ document.addEventListener('change',e=>{
   if(!can('auditedit')){toast('Your role is not allowed to do this','bad');t.value='';return}
   readUpload(f,(err,o)=>{if(err||o.err){toast(err||o.err,'bad');return}const P=faImportCheck(o.objs,o.hdr);if(P.err){toast(P.err,'bad');return}P.fileName=f.name;faImportPreview(P)});t.value='';
 });
+/* ========== receipt of goods (RG): several RG numbers per shipment, line level, partial quantities, NA ========== */
+const RG_ONE=['DAP','DDP'],RG_ST={it:'In-Transit RG',fin:'Final RG'};
+const nk=s=>String(s==null?'':s).toLowerCase().replace(/[\s\-\/.]/g,'');
+const rgRecs=ref=>(S.rgs||[]).filter(r=>r.ref===ref);
+const qtyTxt=n=>Number(n||0).toLocaleString('en-US',{maximumFractionDigits:3});
+const rgHbl=(sh,l)=>String(l.HBL_HAWB_Tracking||'').trim()||faHblOf(sh);
+const rgCont=(sh,l)=>String(l.ContainerNumber||'').trim()||sh.containers.join('; ');
+function rgNeeds(sh){const one=RG_ONE.includes(String(sh.inco||'').toUpperCase());return {one,it:!one&&!!sh.f.PickupActual,fin:sh.status==='Delivered'}}
+function rgLineInfo(sh,l,st,exceptId){
+  const ordered=num(l.ItemQty)||0,recs=rgRecs(sh.ref).filter(r=>r.stage===st&&r.id!==exceptId&&r.lines.some(x=>x.id===l.LineID));
+  const na=recs.find(r=>r.na)||null,got=recs.filter(r=>!r.na).reduce((a,r)=>a+(Number(r.lines.find(x=>x.id===l.LineID).qty)||0),0);
+  return {ordered,got,na,recs,done:!!na||(ordered>0?got>=ordered-1e-9:got>0),remaining:Math.max(0,ordered-got)};
+}
+function rgLines(sh){const n=rgNeeds(sh);return sh.lines.map(l=>{const it=rgLineInfo(sh,l,'it'),fin=rgLineInfo(sh,l,'fin'),pend=[];if(n.it&&!it.done)pend.push('it');if(n.fin&&!fin.done)pend.push('fin');return {sh,l,n,it,fin,pend,key:sh.ref+'|'+l.LineID}})}
+function rgState(sh){const L=rgLines(sh),pend=[];if(L.some(x=>x.pend.includes('it')))pend.push('In-Transit RG');if(L.some(x=>x.pend.includes('fin')))pend.push('Final RG');return {n:rgNeeds(sh),L,pend}}
+const rgPending=sh=>!sh.cancelled&&rgState(sh).pend.length>0;
+const rgNextId=()=>'RGR-'+String(Math.max(0,...(S.rgs||[]).map(r=>Number(String(r.id).split('-').pop())||0))+1).padStart(5,'0');
+function rgMigrate(){
+  if(!Array.isArray(S.rgs))S.rgs=[];
+  if(S.rg&&typeof S.rg==='object'&&!Array.isArray(S.rg)){
+    Object.entries(S.rg).forEach(([ref,r])=>{const sh=getShip(ref);if(!sh)return;const lines=sh.lines.map(l=>({id:l.LineID,qty:num(l.ItemQty)>0?num(l.ItemQty):1}));
+      if(r.itNo)S.rgs.push({id:rgNextId(),ref,stage:'it',no:r.itNo,date:r.itDate||'',to:r.to||'',pl:r.pl||'',na:false,remark:'',lines,by:r.by||'',on:r.on||''});
+      if(r.finNo)S.rgs.push({id:rgNextId(),ref,stage:'fin',no:r.finNo,date:r.finDate||'',to:'',pl:'',na:false,remark:'',lines:lines.map(x=>Object.assign({},x)),by:r.by||'',on:r.on||''})});
+    S.rg={};
+  }
+}
+{const m1=migrateData;migrateData=function(){m1.apply(this,arguments);rgMigrate()}}
+/* ----- recording ----- */
+function rgRecCheck(sh,f){
+  const e=[],n=rgNeeds(sh),t=x=>String(x==null?'':x).trim();
+  if(!can('rgedit'))return ['Your role cannot record RG'];
+  if(sh.cancelled)return [sh.ref+' is cancelled'];
+  if(!['it','fin'].includes(f.stage))return ['Choose In-Transit RG or Final RG'];
+  if(f.stage==='it'&&n.one)e.push('DAP and DDP shipments take only a Final RG');
+  if(!Array.isArray(f.lines)||!f.lines.length)return e.concat(['Tick at least one item line']);
+  const ids=new Set(sh.lines.map(l=>l.LineID));if(f.lines.some(x=>!ids.has(x.id)))e.push('A selected line does not belong to this shipment');
+  if(f.na){
+    if(t(f.remark).length<3)e.push('Give a remark for the lines marked NA');
+    if(t(f.no)||t(f.date)||t(f.to)||t(f.pl))e.push('NA needs no RG number, date, TO or PL#. Clear them, or untick NA');
+    f.lines.forEach(x=>{const l=sh.lines.find(y=>y.LineID===x.id);if(!l)return;const i=rgLineInfo(sh,l,f.stage,f.id);if(i.got>0)e.push((l.PONumber||'No PO')+' / '+l.ItemNumber+' already has '+qtyTxt(i.got)+' received for this stage, so it cannot be NA')});
+  }else{
+    if(f.stage==='it'&&!n.it&&!n.one)e.push('The In-Transit RG can be recorded once the shipment is in transit');
+    if(f.stage==='fin'&&!n.fin)e.push('The Final RG can be recorded after delivery');
+    if(!t(f.no))e.push('Enter the RG number');
+    if(!t(f.date))e.push('Enter the RG date');else if(!isoOK(t(f.date)))e.push('The RG date must be a date (yyyy-mm-dd)');else if(t(f.date)>S.today)e.push('The RG date cannot be in the future');
+    if(t(f.to)||t(f.pl)){if(f.stage!=='it')e.push('TO and PL# belong to the In-Transit RG')}
+    f.lines.forEach(x=>{const l=sh.lines.find(y=>y.LineID===x.id);if(!l)return;if(!(Number(x.qty)>0))e.push((l.PONumber||'No PO')+' / '+l.ItemNumber+': enter a quantity above 0');if(rgLineInfo(sh,l,f.stage,f.id).na)e.push((l.PONumber||'No PO')+' / '+l.ItemNumber+' is marked NA for this stage. Remove the NA first')});
+    if(t(f.no)&&rgRecs(sh.ref).some(r=>!r.na&&r.stage===f.stage&&r.id!==f.id&&nk(r.no)===nk(f.no)))e.push('RG number '+t(f.no)+' is already recorded on this shipment for this stage. Use Edit on that record to add lines');
+  }
+  return e;
+}
+function rgWarns(sh,f){
+  const w=[],t=x=>String(x||'').trim();
+  if(!f.na){f.lines.forEach(x=>{const l=sh.lines.find(y=>y.LineID===x.id);if(!l)return;const i=rgLineInfo(sh,l,f.stage,f.id);if(i.ordered>0&&i.got+Number(x.qty)>i.ordered+1e-9)w.push((l.PONumber||'No PO')+' / '+l.ItemNumber+': received '+qtyTxt(i.got+Number(x.qty))+' of '+qtyTxt(i.ordered)+' ordered')});
+    const o=(S.rgs||[]).find(r=>!r.na&&r.ref!==sh.ref&&nk(r.no)===nk(f.no));if(o){const s2=getShip(o.ref);w.push('RG number '+t(f.no)+' is also recorded on '+(s2&&faHblOf(s2)?'HBL '+faHblOf(s2)+' (ref '+o.ref+')':o.ref))}}
+  return w;
+}
+function rgSaveRec(ref,f){
+  const sh=getShip(ref);if(!sh)return {ok:false,msg:'Shipment not found'};
+  const e=rgRecCheck(sh,f);if(e.length)return {ok:false,msg:e[0],errs:e};
+  const t=x=>String(x==null?'':x).trim(),w=rgWarns(sh,f);S.rgs=S.rgs||[];
+  let r=f.id?S.rgs.find(x=>x.id===f.id&&x.ref===ref):null,isNew=!r;
+  if(!r){r={id:rgNextId(),ref};S.rgs.push(r)}
+  Object.assign(r,{stage:f.stage,no:f.na?'':t(f.no),date:f.na?'':t(f.date),to:f.na||f.stage!=='it'?'':t(f.to),pl:f.na||f.stage!=='it'?'':t(f.pl),na:!!f.na,remark:f.na?t(f.remark):'',lines:f.lines.map(x=>({id:x.id,qty:f.na?0:Number(x.qty)})),by:S.email,on:S.today});
+  audit('RG recorded',ref,RG_ST[f.stage]+' '+(f.na?'NA ('+r.remark+')':r.no+' '+r.date)+': '+r.lines.length+' line(s)');
+  const st=rgState(getShip(ref));
+  return {ok:true,isNew,warns:w,rec:r,msg:ref+': '+RG_ST[f.stage]+(f.na?' marked NA':' '+r.no+' saved')+(st.pend.length?'. Still pending: '+st.pend.join(', '):'. Nothing pending')+(w.length?'. Note: '+w[0]:'')};
+}
+function rgRemove(ref,id){
+  if(!can('rgedit'))return {ok:false,msg:'Your role cannot record RG'};
+  const r=(S.rgs||[]).find(x=>x.id===id&&x.ref===ref);if(!r)return {ok:false,msg:'RG record not found'};
+  S.rgs=S.rgs.filter(x=>x!==r);audit('RG removed',ref,RG_ST[r.stage]+' '+(r.na?'NA':r.no));return {ok:true,msg:'RG record removed'};
+}
+/* ----- reports ----- */
+const RG_FILL=['In-Transit RG Number','In-Transit RG Date','In-Transit RG Qty','TO','PL#','In-Transit RG Remarks','Final RG Number','Final RG Date','Final RG Qty','Final RG Remarks'];
+const RG_COLS=['HBL / HAWB / Tracking','MBL / MAWB','Internal Reference','Invoice Number','Container Number','PO Number','Item Number','Quantity','Required Milestone','Incoterm','Carrier','Status','Delivered On','Received In-Transit','Received Final',...RG_FILL];
+function rgRowObj(x){
+  const sh=x.sh,l=x.l,o={'HBL / HAWB / Tracking':rgHbl(sh,l),'MBL / MAWB':faMblOf(sh),'Internal Reference':sh.ref,'Invoice Number':l.InvoiceNumber||'','Container Number':rgCont(sh,l),'PO Number':l.PONumber||'','Item Number':l.ItemNumber||'',Quantity:num(l.ItemQty)||'','Required Milestone':x.pend.map(s=>RG_ST[s]).join(' and ')||'Complete',Incoterm:sh.inco||'',Carrier:sh.carrier,Status:dsrStatus(sh),'Delivered On':sh.f.DeliveredOn||'','Received In-Transit':x.n.it?(x.it.na?'NA':x.it.got):'','Received Final':x.n.fin?(x.fin.na?'NA':x.fin.got):''};
+  RG_FILL.forEach(c=>o[c]='');return o;
+}
+function rgBuildPending(){return ({headers:RG_COLS,rows:ships().flatMap(rgLines).filter(x=>x.pend.length).sort((a,b)=>a.sh.ref.localeCompare(b.sh.ref)).map(rgRowObj),sheet:'RG Pending',name:'RG_Pending_'+S.today,help:[['HBL / HAWB / Tracking, MBL / MAWB, Internal Reference, PO Number, Item Number','Do not change. The upload finds the shipment by HBL, then MBL, then the internal reference, and the line by PO number and item number.'],['Required Milestone','Which RG is still needed for the line: In-Transit RG, Final RG, or both. DAP and DDP shipments need only the Final RG.'],['In-Transit RG Number / Final RG Number','Type the RG number from Oracle. Type NA if no RG is needed for that stage, and give the reason in the Remarks column. NA needs no date.'],['RG Date','Required with an RG number, for example 2026-11-13 or 13-Nov-2026. Not needed for NA.'],['RG Qty','The quantity received on this RG for the line. Leave blank to receive the full remaining quantity. For a partial receipt, enter the quantity received on this RG, then use a new RG number for the next receipt of the same line. Uploading the same RG number again replaces its quantity.'],['One RG for several lines or POs','Repeat the same RG number and date on each line it covers.'],['TO and PL#','Optional. Oracle transfer order and packing list number, with the In-Transit RG.'],['Empty cells','Rows with nothing entered are ignored.']]})}
+function rgBuildAccrual(o){
+  const mo=(o&&o.month)||S.today.slice(0,7),rows=[];
+  (S.rgs||[]).filter(r=>!r.na&&r.date&&r.date.slice(0,7)===mo).forEach(r=>{const sh=getShip(r.ref);if(!sh)return;r.lines.forEach(x=>{const l=sh.lines.find(y=>y.LineID===x.id);if(!l)return;
+    rows.push({Month:mo,'HBL / HAWB / Tracking':rgHbl(sh,l),'MBL / MAWB':faMblOf(sh),'Internal Reference':sh.ref,Stage:RG_ST[r.stage],'RG Number':r.no,'RG Date':r.date,'PO Number':l.PONumber||'','Item Number':l.ItemNumber||'','Ordered Qty':num(l.ItemQty)||'','RG Qty':x.qty,'Invoice Number':l.InvoiceNumber||'','Container Number':rgCont(sh,l),TO:r.to||'','PL#':r.pl||'',Incoterm:sh.inco||'',Carrier:sh.carrier,Shipper:sh.shipper,Consignee:sh.consignee,Warehouse:sh.f.WarehouseDestination||'','Pickup Actual':sh.f.PickupActual||'','Delivered On':sh.f.DeliveredOn||'',Status:dsrStatus(sh)})})});
+  rows.sort((a,b)=>a['RG Date'].localeCompare(b['RG Date'])||a['RG Number'].localeCompare(b['RG Number'])||a['PO Number'].localeCompare(b['PO Number']));
+  return {headers:['Month','HBL / HAWB / Tracking','MBL / MAWB','Internal Reference','Stage','RG Number','RG Date','PO Number','Item Number','Ordered Qty','RG Qty','Invoice Number','Container Number','TO','PL#','Incoterm','Carrier','Shipper','Consignee','Warehouse','Pickup Actual','Delivered On','Status'],rows,sheet:'RG Accrual',name:'RG_Accrual_'+mo};
+}
+/* ----- upload ----- */
+const RG_ALIAS={hbl:FA_ALIAS.hbl,mbl:FA_ALIAS.mbl,ref:['internalreference','shipmentreference','shipmentref','shipmentid','shipment','reference','ref'],po:['ponumber','po','purchaseorder','pono'],item:['itemnumber','item','itemno','itemcode'],itNo:['intransitrgnumber','intransitrgno'],itDate:['intransitrgdate'],itQty:['intransitrgqty','intransitrgquantity'],itRem:['intransitrgremarks','intransitrgremark'],to:['to','transferorder'],pl:['pl','plnumber','packinglistnumber'],finNo:['finalrgnumber','finalrgno'],finDate:['finalrgdate'],finQty:['finalrgqty','finalrgquantity'],finRem:['finalrgremarks','finalrgremark'],rem:['rgremarks','remarks','remark']};
+const rgIsNA=x=>/^(na|n\/a|not applicable|not required)$/i.test(String(x||'').trim());
+function rgResolve(hbl,mbl,ref){
+  const all=ships(),has=(sh,v,f)=>f==='h'?(uniq(sh.lines.map(l=>l.HBL_HAWB_Tracking)).join(';').split(';').some(x=>nk(x)===nk(v))):(uniq(sh.lines.map(l=>l.MBL_MAWB)).join(';').split(';').some(x=>nk(x)===nk(v)));
+  let hits=[],key='';
+  if(hbl){hits=all.filter(s=>has(s,hbl,'h'));key='HBL '+hbl}else if(mbl){hits=all.filter(s=>has(s,mbl,'m'));key='MBL '+mbl}else if(ref){hits=all.filter(s=>s.ref.toLowerCase()===ref.toLowerCase());key='reference '+ref}else return {err:'Enter the HBL, MBL or internal reference'};
+  if(!hits.length)return {err:'No shipment found for '+key};
+  if(hits.length>1)return {err:key+' matches '+hits.length+' shipments ('+hits.slice(0,4).map(s=>s.ref).join(', ')+'). Use the internal reference'};
+  if(hbl&&mbl&&!has(hits[0],mbl,'m'))return {err:'MBL '+mbl+' does not match HBL '+hbl};
+  return {sh:hits[0]};
+}
+function rgFindLine(sh,po,item){
+  let c=sh.lines;
+  if(item!=='')c=c.filter(l=>nk(l.ItemNumber)===nk(item));
+  if(po!=='')c=c.filter(l=>nk(l.PONumber)===nk(po));else if(c.length>1){const b=c.filter(l=>!String(l.PONumber||'').trim());if(b.length===1)c=b}
+  if(item===''&&po===''&&sh.lines.length>1)return [];
+  return c;
+}
+function rgImportCheck(objs,hdr){
+  const C=impCols(hdr,RG_ALIAS);
+  if(!C.hbl&&!C.mbl&&!C.ref)return {err:'The file needs an HBL / HAWB / Tracking, MBL / MAWB or Internal Reference column. Download the RG Pending Report to get the template.'};
+  if(!C.itNo&&!C.finNo)return {err:'The file has no In-Transit RG Number or Final RG Number column. Download the RG Pending Report to get the template.'};
+  const items=[],groups=new Map();
+  objs.forEach(r=>{
+    const g=k=>C[k]?faStr(r[C[k]]):'',base={row:r._row,hbl:g('hbl'),mbl:g('mbl'),ref:'',po:g('po'),item:g('item')};
+    const stages=[['it',g('itNo'),g('itDate'),g('itQty'),g('itRem')||g('rem')],['fin',g('finNo'),g('finDate'),g('finQty'),g('finRem')||g('rem')]].filter(s=>s[1]||s[2]||s[3]);
+    if(!stages.length){items.push(Object.assign({kind:'blank',errs:[],warns:[]},base));return}
+    const f0=rgResolve(base.hbl,base.mbl,g('ref'));
+    if(f0.err){items.push(Object.assign({kind:'x',errs:[f0.err],warns:[]},base));return}
+    const sh=f0.sh;base.ref=sh.ref;base.hbl=base.hbl||faHblOf(sh);
+    const lines=rgFindLine(sh,base.po,base.item);
+    if(lines.length!==1){items.push(Object.assign({kind:'x',errs:[lines.length?'PO '+(base.po||'(blank)')+' item '+(base.item||'(blank)')+' matches '+lines.length+' lines on this shipment':'No line with PO '+(base.po||'(blank)')+' and item '+(base.item||'(blank)')+' on this shipment'],warns:[]},base));return}
+    const l=lines[0];
+    stages.forEach(([st,no,date,qty,rem])=>{
+      const it=Object.assign({kind:'rg',stage:st,errs:[],warns:[],text:''},base,{po:l.PONumber||'',item:l.ItemNumber||''}),na=rgIsNA(no);
+      if(!no&&!na){it.errs.push(RG_ST[st]+': enter the RG number, or NA with a remark');items.push(it);return}
+      let dd='';
+      if(na){if(date)it.errs.push('RG date is not needed when the RG is NA');if(String(rem).trim().length<3)it.errs.push('Give a remark for the line marked NA')}
+      else{dd=faDate(date);if(!date)it.errs.push('Enter the RG date');else if(dd===null)it.errs.push('RG date "'+date+'" is not a valid date')}
+      let q=null;if(!na&&qty!==''){q=faNum(qty);if(q===null||Number.isNaN(q)||!(q>0))it.errs.push('RG qty must be a number above 0')}
+      if(it.errs.length){items.push(it);return}
+      const key=sh.ref+'|'+st+'|'+(na?'NA|'+nk(rem):nk(no));
+      let G=groups.get(key);const ex=G?G.ex:(na?null:rgRecs(sh.ref).find(x=>!x.na&&x.stage===st&&nk(x.no)===nk(no)));
+      if(!na&&G&&G.date&&dd&&G.date!==dd)it.errs.push('RG '+no+' has two different dates in the file');
+      else if(!na&&ex&&dd&&ex.date!==dd)it.errs.push('RG '+no+' is already recorded with date '+fmt(ex.date)+'. Use that date');
+      if(G&&G.lines.some(x=>x.id===l.LineID))it.errs.push('The same line appears twice for this RG');
+      if(it.errs.length){items.push(it);return}
+      if(!G){G={ref:sh.ref,sh,stage:st,na,no:na?'':no,date:dd||'',remark:na?rem:'',to:g('to'),pl:g('pl'),ex,lines:[],items:[]};groups.set(key,G)}
+      const rem_=rgLineInfo(sh,l,st,G.ex&&G.ex.id).remaining;
+      G.lines.push({id:l.LineID,qty:na?0:(q!=null?q:(rem_>0?rem_:(num(l.ItemQty)||1)))});G.items.push(it);it.group=G;items.push(it);
+    });
+  });
+  // validate each group as a whole
+  groups.forEach(G=>{
+    const f={id:G.ex?G.ex.id:undefined,stage:G.stage,na:G.na,no:G.no,date:G.date,remark:G.remark,to:G.to,pl:G.pl,lines:G.ex&&!G.na?[...G.ex.lines.filter(x=>!G.lines.some(y=>y.id===x.id)).map(x=>Object.assign({},x)),...G.lines]:G.lines};
+    G.form=f;const e=rgRecCheck(G.sh,f);
+    if(e.length){G.items.forEach(it=>it.errs.push(...e))}else{const w=rgWarns(G.sh,f);G.items.forEach(it=>{it.warns.push(...w);it.text=RG_ST[G.stage]+' '+(G.na?'NA ('+G.remark+')':G.no+' dated '+fmt(G.date))+(G.ex?' (update)':' (new)')+': '+qtyTxt((G.na?0:G.lines.find(x=>x.id===(G.sh.lines.find(l=>nk(l.PONumber)===nk(it.po)&&nk(l.ItemNumber)===nk(it.item))||{}).LineID)?.qty)||0)+(G.na?'':' units')})}
+  });
+  const ok=items.filter(i=>i.kind==='rg'&&!i.errs.length),valid=[...groups.values()].filter(G=>G.lines.length&&G.items.every(i=>!i.errs.length));
+  return {items,groups:valid,counts:{rows:objs.length,blank:items.filter(i=>i.kind==='blank').length,records:valid.filter(G=>!G.ex).length,updated:valid.filter(G=>G.ex).length,lines:ok.filter(i=>!i.group||!i.group.na).length,na:ok.filter(i=>i.group&&i.group.na).length,warn:ok.filter(i=>i.warns.length).length,problems:items.filter(i=>i.errs.length).length}};
+}
+function rgPreview(P){
+  S.rgImp=P;const c=P.counts,n=c.records+c.updated;
+  openModal(`<div class="mh"><div><h2>Upload RG Details</h2><div class="mu">File: ${esc(P.fileName)}. Nothing is saved until you click Apply.</div></div><button class="x" data-act="close" aria-label="Close">&times;</button></div>
+  <div class="kpis" style="margin-bottom:12px"><div class="kpi"><small>Rows in File</small><b>${c.rows}</b></div><div class="kpi"><small>New RG Records</small><b>${c.records}</b></div><div class="kpi"><small>Updated RG Records</small><b>${c.updated}</b></div><div class="kpi"><small>Lines Received</small><b>${c.lines}</b></div><div class="kpi"><small>Lines Marked NA</small><b>${c.na}</b></div><div class="kpi ${c.problems?'late':''}"><small>Problems</small><b>${c.problems}</b></div></div>
+  ${n===0&&!c.problems?`<div class="note">${c.blank===c.rows?'No RG details were found in this file. Fill in the RG Number and RG Date (or NA and a remark), then upload it again.':'There is nothing to change.'}</div>`:''}
+  ${c.warn?`<div class="note" style="margin-bottom:8px">${c.warn} line(s) have a warning (shown below). They are still applied.</div>`:''}
+  <div class="tbw" style="max-height:44vh;overflow:auto"><table class="tb" data-sort="off"><tr><th>Row</th><th>HBL</th><th>PO / Item</th><th>Result</th></tr>${P.items.filter(x=>x.kind!=='blank').slice(0,400).map(x=>`<tr class="${x.errs.length?'tr-pend':''}"><td>${x.row}</td><td>${esc(x.hbl||'-')}<br><small class="mu">${esc(x.ref||'')}</small></td><td>${esc(x.po||'-')} / ${esc(x.item||'-')}</td><td>${x.errs.length?`<span class="late-t">${esc(x.errs.join('; '))}</span>`:`<span class="ok-t">${esc(x.text||'')}</span>`}${x.warns.length&&!x.errs.length?`<br><small class="late-t">${esc(x.warns.join('; '))}</small>`:''}</td></tr>`).join('')||'<tr><td colspan="4" class="empty">Nothing to show.</td></tr>'}</table></div>
+  <div class="row sec"><button class="btn pri" data-act="rgImpApply" ${n?'':'disabled'}>Apply ${n} RG Record(s)</button>${c.problems?'<button class="btn" data-act="rgImpProblems">Download Problem List</button>':''}<button class="btn" data-act="close">Cancel</button></div>${c.problems?'<p class="hint">Rows with problems are skipped. Fix them in the file and upload it again.</p>':''}`);
+}
+function rgImpApply(){
+  const P=S.rgImp;if(!P||!can('rgedit'))return {ok:false,msg:'Nothing to apply'};let n=0,bad=0;
+  P.groups.forEach(G=>{const r=rgSaveRec(G.ref,G.form);if(r.ok)n++;else bad++});
+  audit('RG imported','',n+' RG record(s) from '+P.fileName+(bad?', '+bad+' failed':'')+(P.counts.problems?', '+P.counts.problems+' row(s) skipped':''));
+  S.rgImp=null;return {ok:true,msg:n+' RG record(s) saved'+(bad?', '+bad+' failed':'')+(P.counts.problems?'. '+P.counts.problems+' problem row(s) skipped':''),n,bad};
+}
+const rgProblemCsv=P=>toCSV(['Row','HBL / HAWB / Tracking','Internal Reference','PO Number','Item Number','Problem'],P.items.filter(x=>x.errs.length).map(x=>({Row:x.row,'HBL / HAWB / Tracking':x.hbl,'Internal Reference':x.ref,'PO Number':x.po,'Item Number':x.item,Problem:x.errs.join('; ')})));
+/* ----- the RG page ----- */
+function rgRowsAll(){const F=S.ui.rg=S.ui.rg||{f:'Pending',q:'',sel:[]};if(!Array.isArray(F.sel))F.sel=[];const q=String(F.q||'').toLowerCase();
+  return ships().flatMap(rgLines).filter(x=>x.n.it||x.n.fin).filter(x=>!q||[x.sh.ref,rgHbl(x.sh,x.l),faMblOf(x.sh),x.l.InvoiceNumber,rgCont(x.sh,x.l),x.l.PONumber,x.l.ItemNumber,x.sh.carrier,rgRecs(x.sh.ref).map(r=>r.no).join(' ')].join(' ').toLowerCase().includes(q))}
+function rgStageCell(x,st){
+  if(st==='it'&&x.n.one)return '<span class="mu">Not required</span>';
+  if(!x.n[st])return '<span class="mu">Not due yet</span>';
+  const i=x[st];
+  if(i.na)return `<span class="pill">NA</span><br><small class="mu">${esc(i.na.remark)}</small>`;
+  const nums=i.recs.map(r=>esc(r.no)+' ('+qtyTxt(r.lines.find(y=>y.id===x.l.LineID).qty)+')').join(', ');
+  return `<span class="pill ${i.done?'ok':i.got>0?'info':'warn'}">${i.ordered>0?qtyTxt(i.got)+' of '+qtyTxt(i.ordered):(i.done?'Done':'Pending')}</span>${nums?'<br><small class="mu">'+nums+'</small>':''}`;
+}
+function viewRG(){
+  const F=S.ui.rg=S.ui.rg||{f:'Pending',q:'',sel:[]};if(!Array.isArray(F.sel))F.sel=[];
+  const may=can('rgedit'),all=rgRowsAll(),P=all.filter(x=>x.pend.length),ip=P.filter(x=>x.pend.includes('it')),fp=P.filter(x=>x.pend.includes('fin')),dn=all.filter(x=>!x.pend.length);
+  const list=(F.f==='Pending'?P:F.f==='It'?ip:F.f==='Fin'?fp:dn),shown=list.slice(0,300),nSh=a=>uniq(a.map(x=>x.sh.ref)).length;
+  const tile=(id,l,a,cls)=>`<button class="kpi tile fa-t ${cls||''} ${F.f===id?'sel':''}" data-act="rgTile" data-id="${id}" aria-pressed="${F.f===id}"><small>${l}</small><b>${a.length} <span class="fa-u">line${a.length===1?'':'s'}</span></b><span class="fa-i">${nSh(a)} shipment${nSh(a)===1?'':'s'}</span></button>`;
+  const selRefs=uniq(F.sel.map(k=>k.split('|')[0]));
+  return pageHead('RG Pending','Receipt of Goods in Oracle, tracked for every PO and item line. DAP and DDP shipments need only a Final RG after delivery. All other terms need an In-Transit RG once the shipment is in transit, then a Final RG after delivery. One shipment can have several RG numbers, one RG can cover several lines or POs, and a line can be received in parts. A stage is complete when the full quantity is received or the line is marked NA.')+
+  `<div class="fa-tiles">${tile('Pending','All Pending',P,P.length?'late':'')}${tile('It','In-Transit RG Pending',ip,ip.length?'acc':'')}${tile('Fin','Final RG Pending',fp,fp.length?'acc':'')}${tile('Done','RG Complete',dn,'ok')}</div>
+  <div class="card"><div class="row"><label class="f grow">Search<input id="rg_q" class="in" value="${esc(F.q||'')}" placeholder="HBL, MBL, invoice, container, PO, item or RG number"></label>
+  <span class="row" style="align-self:flex-end;gap:6px;flex-wrap:wrap">${may?`<button class="btn sm pri" data-act="rgRecSel" ${F.sel.length?'':'disabled'}>Record RG for Selected Lines (${F.sel.length})</button>`:''}<button class="btn sm" data-act="rdQuick" data-id="rgpending">Download RG Pending Report</button>${may?'<label class="btn sm pri" style="cursor:pointer">Upload RG Details<input type="file" id="rgFile" accept=".xlsx,.xls,.csv" hidden></label>':''}</span></div></div>
+  <div class="card" style="padding:0"><div class="tbw"><table class="tb fa-tb" data-sort="on"><tr><th style="width:30px"><input type="checkbox" data-ch="rgSelAllRows" aria-label="Select all shown" ${shown.length&&shown.every(x=>F.sel.includes(x.key))?'checked':''}></th><th>HBL / HAWB</th><th>MBL / MAWB</th><th>Invoice No.</th><th>Container</th><th>PO Number</th><th>Item Number</th><th class="r">Quantity</th><th>Required Milestone</th><th>In-Transit RG</th><th>Final RG</th><th></th></tr>
+  ${shown.map(x=>{const sh=x.sh,l=x.l;return `<tr><td><input type="checkbox" data-ch="rgSel" data-k="${esc(x.key)}" ${F.sel.includes(x.key)?'checked':''} aria-label="Select line"></td><td><b>${esc(rgHbl(sh,l)||'-')}</b><br><small class="mu nw">Ref ${esc(sh.ref)}</small></td><td>${esc(faMblOf(sh)||'-')}</td><td>${esc(l.InvoiceNumber||'-')}</td><td>${esc(rgCont(sh,l)||'-')}</td><td>${l.PONumber?esc(l.PONumber):'<span class="late-t">Missing</span>'}</td><td>${esc(l.ItemNumber||'-')}</td><td class="r">${qtyTxt(num(l.ItemQty))}</td>
+   <td>${x.pend.length?x.pend.map(s=>`<span class="pill warn">${RG_ST[s]}</span>`).join(' '):'<span class="pill ok">Complete</span>'}${x.n.one?'<br><small class="mu">Final RG only (DAP/DDP)</small>':''}</td><td>${rgStageCell(x,'it')}</td><td>${rgStageCell(x,'fin')}</td><td class="r">${may?`<button class="btn sm pri" data-act="rgOpen" data-ref="${esc(sh.ref)}" data-line="${esc(l.LineID)}">Record RG</button>`:''}</td></tr>`}).join('')||'<tr><td colspan="12" class="empty">Nothing here.</td></tr>'}</table></div></div>
+  ${list.length>shown.length?`<p class="hint">Showing the first ${shown.length} of ${list.length} lines. Search to narrow the list.</p>`:''}
+  <p class="hint">RG numbers are optional. Tick lines of one shipment and choose Record RG, or download the pending report (one row per line), fill in the RG details in Excel and upload it back. An RG number is normally used on one shipment only. The Monthly RG Accrual report is on the Reports page.</p>`;
+}
+function rgModal(ref,o){
+  o=o||{};const sh=getShip(ref);if(!sh)return;const n=rgNeeds(sh),L=rgLines(sh),rec=o.edit?(S.rgs||[]).find(r=>r.id===o.edit&&r.ref===ref):null;
+  let stage=rec?rec.stage:(o.stage||(L.some(x=>x.pend.includes('it'))?'it':'fin'));if(stage==='it'&&n.one)stage='fin';
+  const trig=stage==='it'?n.it:n.fin,na=rec?rec.na:!!o.na;
+  const pre=rec?new Set(rec.lines.map(x=>x.id)):new Set(o.lines&&o.lines.length?o.lines:L.filter(x=>x.pend.includes(stage)).map(x=>x.l.LineID));
+  const pos=uniq(sh.lines.map(l=>String(l.PONumber||'').trim()||'(blank)'));
+  const recs=rgRecs(ref);
+  openModal(`<div class="mh"><div><h2>Record RG: ${esc(faHblOf(sh)||ref)}</h2><div class="mu">HBL ${esc(faHblOf(sh)||'-')} · MBL ${esc(faMblOf(sh)||'-')} · Ref ${esc(ref)} · ${esc(sh.inco||'-')} · ${esc(sh.carrier)} · ${esc(dsrStatus(sh))}</div></div><button class="x" data-act="close" aria-label="Close">&times;</button></div>
+  <div id="rg_err"></div><input type="hidden" id="rg_id" value="${rec?esc(rec.id):''}">
+  <div class="g4"><label class="f">Milestone<select id="rg_stage" data-ch="rgStage" data-ref="${esc(ref)}" class="in" ${rec?'disabled':''}>${n.one?'':`<option value="it" ${stage==='it'?'selected':''}>In-Transit RG</option>`}<option value="fin" ${stage==='fin'?'selected':''}>Final RG</option></select></label>
+   <label class="f">RG Number<input id="rg_no" class="in" value="${esc(rec&&!rec.na?rec.no:'')}" ${trig&&!na?'':'disabled'}></label><label class="f">RG Date<input type="date" id="rg_date" class="in" max="${S.today}" value="${esc(rec&&!rec.na?rec.date:'')}" ${trig&&!na?'':'disabled'}></label>
+   ${stage==='it'?`<label class="f">TO (Optional)<input id="rg_to" class="in" value="${esc(rec?rec.to:'')}" ${trig&&!na?'':'disabled'}></label>`:'<span></span>'}</div>
+  ${stage==='it'?`<div class="g4"><label class="f">PL# (Optional)<input id="rg_pl" class="in" value="${esc(rec?rec.pl:'')}" ${trig&&!na?'':'disabled'}></label></div>`:''}
+  ${trig?'':`<div class="note">${stage==='it'?'The In-Transit RG number can be recorded once the shipment is in transit.':'The Final RG number can be recorded after delivery.'} You can still mark lines NA.</div>`}
+  <div class="row" style="gap:16px;align-items:flex-end;margin-top:6px"><label class="sw"><input type="checkbox" role="switch" id="rg_na" data-ch="rgNa" data-trig="${trig?1:0}" ${na?'checked':''}><span class="sw-t"></span><span>Not applicable (NA)</span></label><label class="f grow">Remark (required for NA)<input id="rg_rem" class="in" value="${esc(rec&&rec.na?rec.remark:'')}" ${na?'':'disabled'} placeholder="Why is no RG needed?"></label></div>
+  <h3 class="sec">Item Lines Covered by This RG</h3>
+  <div class="row" style="gap:6px;flex-wrap:wrap;margin-bottom:8px"><button class="btn sm" data-act="rgSelAll">All Lines</button><button class="btn sm" data-act="rgSelNone">Clear</button>${pos.length>1?pos.map(p=>`<button class="btn sm" data-act="rgSelPo" data-po="${esc(p)}">PO ${esc(p)}</button>`).join(''):''}</div>
+  <div class="tbw"><table class="tb" data-sort="off"><tr><th></th><th>PO Number</th><th>Item Number</th><th>Invoice No.</th><th>Container</th><th class="r">Ordered</th><th class="r">Received (this milestone)</th><th class="r">This RG Qty</th></tr>
+  ${L.map((x,i)=>{const l=x.l,inf=x[stage],q=rec?(rec.lines.find(y=>y.id===l.LineID)||{}).qty:(inf.remaining>0?inf.remaining:(num(l.ItemQty)||1));return `<tr><td><input type="checkbox" id="rgl_${i}" data-rgl="${esc(l.LineID)}" data-po="${esc(String(l.PONumber||'').trim()||'(blank)')}" ${pre.has(l.LineID)?'checked':''} aria-label="Cover this line"></td><td>${esc(l.PONumber||'-')}</td><td>${esc(l.ItemNumber||'-')}</td><td>${esc(l.InvoiceNumber||'-')}</td><td>${esc(rgCont(sh,l)||'-')}</td><td class="r">${qtyTxt(num(l.ItemQty))}</td><td class="r">${inf.na?'<span class="pill">NA</span>':qtyTxt(inf.got)+(rec?' (incl. this RG)':'')}</td><td class="r"><input id="rgq_${i}" class="in" style="width:90px;text-align:right" inputmode="decimal" value="${q==null?'':esc(q)}" ${na?'disabled':''}></td></tr>`}).join('')}</table></div>
+  <div class="row sec"><button class="btn pri" data-act="rgSave" data-ref="${esc(ref)}">${rec?'Save Changes':'Save RG'}</button><button class="btn" data-act="close">Cancel</button></div>
+  ${recs.length?`<h3 class="sec">RG Records on This Shipment</h3><div class="tbw"><table class="tb" data-sort="off"><tr><th>Milestone</th><th>RG Number</th><th>Date</th><th>TO / PL#</th><th class="r">Lines</th><th class="r">Qty</th><th></th></tr>${recs.map(r=>`<tr><td>${RG_ST[r.stage]}</td><td>${r.na?'<span class="pill">NA</span> '+esc(r.remark):esc(r.no)}</td><td>${r.na?'-':fmt(r.date)}</td><td>${esc([r.to,r.pl].filter(Boolean).join(' / ')||'-')}</td><td class="r">${r.lines.length}</td><td class="r">${r.na?'-':qtyTxt(r.lines.reduce((a,x)=>a+(Number(x.qty)||0),0))}</td><td class="r"><button class="btn sm" data-act="rgEdit" data-ref="${esc(ref)}" data-id="${esc(r.id)}">Edit</button> <button class="btn sm danger" data-act="rgRemove" data-ref="${esc(ref)}" data-id="${esc(r.id)}">Remove</button></td></tr>`).join('')}</table></div>`:''}`);
+}
+function rgForm(){
+  const na=!!(document.getElementById('rg_na')||{}).checked,lines=[];
+  document.querySelectorAll('[data-rgl]').forEach(c=>{if(!c.checked)return;const i=c.id.split('_')[1],q=document.getElementById('rgq_'+i);lines.push({id:c.dataset.rgl,qty:q?Number(String(q.value).replace(/,/g,'')):0})});
+  return {id:val('rg_id')||undefined,stage:val('rg_stage')||'fin',no:val('rg_no'),date:val('rg_date'),to:val('rg_to'),pl:val('rg_pl'),na,remark:val('rg_rem'),lines};
+}
+document.addEventListener('click',e=>{
+  const t=e.target.closest&&e.target.closest('[data-act]');if(!t)return;const a=t.dataset.act,d=t.dataset,F=()=>{const f=S.ui.rg=S.ui.rg||{f:'Pending',q:'',sel:[]};if(!Array.isArray(f.sel))f.sel=[];return f};
+  const deny=()=>{if(!can('rgedit')){toast('Your role is not allowed to do this','bad');return true}return false};
+  if(a==='rgTile'){F().f=d.id;render();return}
+  if(a==='rgOpen'){if(deny())return;rgModal(d.ref,{lines:d.line?[d.line]:[]});return}
+  if(a==='rgRecSel'){if(deny())return;const f=F(),refs=uniq(f.sel.map(k=>k.split('|')[0]));if(refs.length!==1){toast('Select lines of one shipment at a time','bad');return}rgModal(refs[0],{lines:f.sel.map(k=>k.split('|')[1])});return}
+  if(a==='rgSelAll'){document.querySelectorAll('[data-rgl]').forEach(c=>{c.checked=true});return}
+  if(a==='rgSelNone'){document.querySelectorAll('[data-rgl]').forEach(c=>{c.checked=false});return}
+  if(a==='rgSelPo'){document.querySelectorAll('[data-rgl]').forEach(c=>{if(c.dataset.po===d.po)c.checked=true});return}
+  if(a==='rgEdit'){if(deny())return;rgModal(d.ref,{edit:d.id});return}
+  if(a==='rgRemove'){if(deny())return;if(!confirm('Remove this RG record?'))return;const r=rgRemove(d.ref,d.id);render();rgModal(d.ref);toast(r.msg,r.ok?'':'bad');return}
+  if(a==='rgSave'){const f=rgForm(),sh=getShip(d.ref),er=sh?rgRecCheck(sh,f):['Shipment not found'];
+    if(er.length){const x=document.getElementById('rg_err');if(x)x.innerHTML=`<div class="err" role="alert" style="margin-bottom:10px">${esc(er[0])}</div>`;return}
+    const o=!f.na&&(S.rgs||[]).find(r=>!r.na&&r.ref!==d.ref&&nk(r.no)===nk(f.no));
+    if(o&&!confirm('RG number '+f.no+' is already recorded on '+o.ref+'. An RG number normally belongs to one shipment. Save it here as well?'))return;
+    const r=rgSaveRec(d.ref,f);if(!r.ok){const x=document.getElementById('rg_err');if(x)x.innerHTML=`<div class="err" role="alert" style="margin-bottom:10px">${esc(r.msg)}</div>`;return}
+    S.ui.rg=S.ui.rg||{};S.ui.rg.sel=[];closeModal();render();toast(r.msg);return}
+  if(a==='rgImpApply'){const r=rgImpApply();closeModal();render();toast(r.msg,r.ok?'':'bad');return}
+  if(a==='rgImpProblems'){if(S.rgImp)downloadText('RG_Upload_Problems.csv','\uFEFF'+rgProblemCsv(S.rgImp),'text/csv');return}
+},true);
+document.addEventListener('change',e=>{
+  const t=e.target;if(!t)return;
+  if(t.id==='rgFile'){const f=t.files[0];if(!f)return;if(!can('rgedit')){toast('Your role is not allowed to do this','bad');t.value='';return}readUpload(f,(err,o)=>{if(err||o.err){toast(err||o.err,'bad');return}const P=rgImportCheck(o.objs,o.hdr);if(P.err){toast(P.err,'bad');return}P.fileName=f.name;rgPreview(P)});t.value='';return}
+  if(!t.dataset)return;
+  if(t.dataset.ch==='rgStage'){rgModal(t.dataset.ref,{stage:t.value});return}
+  if(t.dataset.ch==='rgSel'){const f=S.ui.rg=S.ui.rg||{f:'Pending',q:'',sel:[]};f.sel=f.sel||[];const i=f.sel.indexOf(t.dataset.k);if(t.checked&&i<0)f.sel.push(t.dataset.k);if(!t.checked&&i>=0)f.sel.splice(i,1);render();return}
+  if(t.dataset.ch==='rgSelAllRows'){const f=S.ui.rg=S.ui.rg||{f:'Pending',q:'',sel:[]},keys=[...document.querySelectorAll('[data-ch=rgSel]')].map(c=>c.dataset.k);f.sel=t.checked?uniq([...(f.sel||[]),...keys]):(f.sel||[]).filter(k=>!keys.includes(k));render();return}
+  if(t.dataset.ch==='rgNa'){const on=t.checked,trig=t.dataset.trig==='1';['rg_no','rg_date','rg_to','rg_pl'].forEach(id=>{const i=document.getElementById(id);if(i){i.disabled=on||!trig;if(on)i.value=''}});document.querySelectorAll('[id^=rgq_]').forEach(i=>{i.disabled=on});const r=document.getElementById('rg_rem');if(r){r.disabled=!on;if(!on)r.value='';else r.focus()}return}
+});
+
 
 
 function renderNav(){
