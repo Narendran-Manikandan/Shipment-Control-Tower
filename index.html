@@ -326,6 +326,7 @@ body.signed-in .demobar{display:none}
 #who .prof-prefs{grid-column:1/-1;border-top:1px solid var(--line);margin-top:6px;padding:10px 12px 6px}
 body.compact .tb td,body.compact .tb th{padding:4px 8px;font-size:12px;line-height:1.25}body.compact .tb .pill{padding:0 6px}body.compact .kpi{padding-top:8px;padding-bottom:8px}
 :root[data-theme="dark"]{color-scheme:dark}:root[data-theme="light"]{color-scheme:light}
+.mchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}.mchip{position:relative}.mchip input{position:absolute;opacity:0;width:1px;height:1px}.mchip span{display:inline-block;border:1px solid var(--line2);border-radius:999px;padding:4px 12px;font-size:13px;cursor:pointer;background:var(--panel);color:var(--ink)}.mchip input:checked+span{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}.mchip input:focus-visible+span{outline:2px solid var(--accent);outline-offset:2px}
 
 /* chosen dark theme */
 :root[data-theme="dark"]{
@@ -2905,7 +2906,7 @@ function monBarHTML(){
 }
 
 /* ========== demo sign-in (email and password), problem log, report a problem ========== */
-const APP_BUILD='site build 2026-11-13 07:54 UTC';
+const APP_BUILD='site build 2026-11-13 08:28 UTC';
 const ErrLog={key:'ect.errors',max:60,
   add(kind,msg,src){try{const a=JSON.parse(localStorage.getItem(this.key)||'[]');a.push({t:new Date().toISOString(),kind,msg:String(msg==null?'':msg).slice(0,300),src:String(src||'').slice(0,160),view:(typeof S!=='undefined'&&S&&S.view)||'',role:(typeof S!=='undefined'&&S&&S.role)||''});while(a.length>this.max)a.shift();localStorage.setItem(this.key,JSON.stringify(a))}catch(e){}},
   list(){try{return JSON.parse(localStorage.getItem(this.key)||'[]')}catch(e){return []}},
@@ -5085,20 +5086,36 @@ function stampRef(ref,reg){S.lines.forEach(l=>{if(l.ShipmentRef!==ref)return;if(
 const DSR_STATUS=['To Be Shipped','In Transit','Delivered'];
 const dsrStatus=sh=>sh.status==='Delivered'||sh.f.DeliveredOn?'Delivered':sh.f.PickupActual?'In Transit':'To Be Shipped';
 const DSR_COLS=['ShipmentID','ShipmentRegistered','ShipmentUpdated','Shipper','Consignee','InvoiceNumber','InvoiceDate','PONumber','IncoTerm','ItemNumber','ItemQty','ShipmentType','NatureOfGoods','Mode','OriginCountry','OriginPort','DestinationCountry','DestinationPort','WarehouseDestination','PickupPlanned','PickupActual','ETDPlanned','ETDActual','ETA','ETAActual','ESTDelivery','DeliveredOn','Status','MBL_MAWB','HBL_HAWB_Tracking','ContainerNumber','ContainerType','Carrier','Freight'];
-function dsrRange(o){if(!o||o.kind==='all')return null;if(o.kind==='year')return [o.y+'-01-01',o.y+'-12-31'];if(o.kind==='quarter'){const m0=(o.q-1)*3+1;return [o.y+'-'+pad(m0)+'-01',perLast(o.y,m0+2)]}return [o.y+'-'+pad(o.m)+'-01',perLast(o.y,o.m)]}
-function dsrPeriodLabel(o){return !o||o.kind==='all'?'All':o.kind==='year'?String(o.y):o.kind==='quarter'?'Q'+o.q+'-'+o.y:o.y+'-'+pad(o.m)}
+function dsrNorm(o){
+  o=Object.assign({},o||{});const arr=(a,v)=>Array.isArray(a)?a:(v!==undefined&&v!==null&&v!==''?[v]:[]);
+  const st=Array.isArray(o.statuses)?o.statuses:(o.status&&o.status!=='All'?[o.status]:[]);
+  return {kind:o.kind||'all',years:arr(o.years,o.y).map(Number),quarters:arr(o.quarters,o.q).map(Number),months:arr(o.months,o.m).map(Number),statuses:st.filter(x=>DSR_STATUS.includes(x)),basis:o.basis==='pickup'?'pickup':'delivery',openAlways:o.openAlways!==false};
+}
+function dsrInPeriod(d,o){
+  if(o.kind==='all')return true;if(!isoOK(d))return false;
+  const y=Number(d.slice(0,4)),m=Number(d.slice(5,7));
+  if(o.years.length&&!o.years.includes(y))return false;
+  if(o.kind==='quarter'&&o.quarters.length&&!o.quarters.includes(Math.ceil(m/3)))return false;
+  if(o.kind==='month'&&o.months.length&&!o.months.includes(m))return false;
+  return true;
+}
+function dsrPeriodLabel(o){o=dsrNorm(o);if(o.kind==='all')return 'All';const ys=o.years.join('-')||'AllYears';return o.kind==='year'?ys:o.kind==='quarter'?ys+'_Q'+(o.quarters.join('Q')||'All'):ys+'_M'+(o.months.map(x=>pad(x)).join('-')||'All')}
 function dsrBuild(o){
-  o=o||{};const rng=dsrRange(o),st=o.status||'All',rows=[];
+  o=dsrNorm(o);const rows=[];
   const evDates=ref=>S.events.filter(e=>e.ShipmentRef===ref).map(e=>e.EventDate||'').filter(Boolean).sort();
   ships().forEach(sh=>{
-    const s3=dsrStatus(sh);if(st!=='All'&&st!==s3)return;
-    if(s3==='Delivered'&&rng){const d=sh.f.DeliveredOn||'';if(!d||d<rng[0]||d>rng[1])return}   // rule A: open shipments always show, delivered ones by delivery date
+    const s3=dsrStatus(sh);if(o.statuses.length&&!o.statuses.includes(s3))return;
+    const open=s3!=='Delivered';
+    if(!(open&&o.openAlways)){   // open shipments always show unless the switch is off
+      const d=o.basis==='pickup'?(sh.f.PickupActual||sh.f.PickupPlanned||''):(open?(sh.dueL||''):(sh.f.DeliveredOn||''));
+      if(!dsrInPeriod(d,o))return;
+    }
     const ev=evDates(sh.ref);
     sh.lines.forEach(l=>{const r={};DSR_COLS.forEach(c=>{r[c]=l[c]==null?'':l[c]});
       r.ShipmentID=sh.ref;r.ShipmentRegistered=l.RegisteredOn||(ev[0]||'');r.ShipmentUpdated=l.UpdatedOn||(ev[ev.length-1]||'');r.Status=s3;rows.push(r)});
   });
   rows.sort((a,b)=>a.ShipmentID.localeCompare(b.ShipmentID)||0);
-  return {headers:DSR_COLS,rows,sheet:'DSR',name:'DSR_'+dsrPeriodLabel(o)+'_'+(st==='All'?'AllStatus':st.replace(/ /g,''))};
+  return {headers:DSR_COLS,rows,sheet:'DSR',name:'DSR_'+dsrPeriodLabel(o)+'_'+(o.statuses.length&&o.statuses.length<3?o.statuses.join('+').replace(/ /g,''):'AllStatus')+'_By'+(o.basis==='pickup'?'Pickup':'Delivery')};
 }
 /* ----- freight audit ----- */
 const FA_STATES=['Invoice Pending','Payment Pending','Paid'];
@@ -5239,7 +5256,7 @@ function rgModal(ref){
 }
 /* ----- reports page: every report, with per-role access ----- */
 const RPT=[
- {id:'dsr',label:'Daily Status Report',desc:'Every item line in the Daily Status Report layout, with the three statuses. Open shipments always show; delivered shipments show by delivery date in the chosen period.',opts:'dsr',build:dsrBuild},
+ {id:'dsr',label:'Daily Status Report',desc:'Every item line in the Daily Status Report layout, with the three statuses. Choose several years, quarters, months or statuses, and whether the period follows the pickup date or the delivery date.',opts:'dsr',build:dsrBuild},
  {id:'register',label:'Shipment Register',desc:'One row for each active shipment with route, carrier, dates, status and document count.',build:()=>({headers:['Shipment','Status','Shipper','Consignee','Carrier','Mode','Incoterm','Route','Warehouse','Pickup Planned','Pickup Actual','ETA','Planned Delivery','Delivered On','PO Numbers','Invoice Numbers','Tracking Numbers','Documents'],rows:ships().sort((a,b)=>a.ref.localeCompare(b.ref)).map(s=>({Shipment:s.ref,Status:dsrStatus(s),Shipper:s.shipper,Consignee:s.consignee,Carrier:s.carrier,Mode:s.mode,Incoterm:s.inco,Route:s.route,Warehouse:s.f.WarehouseDestination||'','Pickup Planned':s.f.PickupPlanned||'','Pickup Actual':s.f.PickupActual||'',ETA:s.f.ETA||'','Planned Delivery':s.dueL||'','Delivered On':s.f.DeliveredOn||'','PO Numbers':s.pos.join('; '),'Invoice Numbers':shipInvNos(s),'Tracking Numbers':shipTrackNos(s),Documents:docsOf(s.ref).length})),sheet:'Shipments',name:'Shipment_Register_'+S.today})},
  {id:'overdue',label:'Overdue Milestones',desc:'Milestones past their date that still need an update.',std:'overdue'},
  {id:'atrisk',label:'Shipments at Risk',desc:'Open shipments likely to miss their plan, with the reasons.',std:'atrisk'},
@@ -5256,7 +5273,14 @@ const RPT=[
 RPT.forEach(r=>{if(r.std&&!r.build){const k=r.std;r.build=()=>{const d=REPORTS[k].build();return {headers:d.headers,rows:d.rows.map(x=>Object.fromEntries(d.headers.map((h,i)=>[h,x[i]]))),sheet:r.label.slice(0,30),name:r.label.replace(/[^A-Za-z0-9]+/g,'_')+'_'+S.today}}}});
 const rptOk=r=>can('rpt_'+r.id)&&(!r.money||can('commercial'));
 const rptList=()=>RPT.filter(rptOk);
-function rdState(){const t=S.today.split('-').map(Number);S.ui.rd=S.ui.rd||{dsr:{kind:'month',y:t[0],q:Math.ceil(t[1]/3),m:t[1],status:'All'},month:S.today.slice(0,7)};return S.ui.rd}
+function rdState(){
+  const t=S.today.split('-').map(Number),R=S.ui.rd=S.ui.rd||{};if(!R.dsr)R.dsr={kind:'month'};const d=R.dsr;
+  if(!Array.isArray(d.years))d.years=[d.y||t[0]];if(!Array.isArray(d.quarters))d.quarters=[d.q||Math.ceil(t[1]/3)];if(!Array.isArray(d.months))d.months=[d.m||t[1]];
+  if(!Array.isArray(d.statuses))d.statuses=(d.status&&d.status!=='All')?[d.status]:DSR_STATUS.slice();
+  if(!d.basis)d.basis='delivery';if(d.openAlways===undefined)d.openAlways=true;if(!R.month)R.month=S.today.slice(0,7);return R;
+}
+function rdYears(){const R=rdState();return uniq([Number(S.today.slice(0,4)),...R.dsr.years,...ships().flatMap(s=>[s.f.DeliveredOn,s.f.PickupActual,s.f.PickupPlanned].filter(isoOK).map(d=>Number(d.slice(0,4))))]).sort()}
+const RD_ALL={y:()=>rdYears(),q:()=>[1,2,3,4],m:()=>[1,2,3,4,5,6,7,8,9,10,11,12],s:()=>DSR_STATUS.slice()},RD_KEY={y:'years',q:'quarters',m:'months',s:'statuses'};
 function rptRun(id,fmtX){
   const r=RPT.find(x=>x.id===id);if(!r||!rptOk(r))return {ok:false,msg:'Your role cannot download this report'};
   const R=rdState(),d=r.build(r.opts==='dsr'?R.dsr:r.opts==='month'?{month:R.month}:undefined);
@@ -5266,8 +5290,14 @@ function rptRun(id,fmtX){
 }
 function viewRptDl(){
   const R=rdState(),L=rptList(),sel=(f,list,cur)=>`<select data-ch="rdOpt" data-f="${f}" class="in" style="width:auto">${list.map(([v,l])=>`<option value="${v}" ${String(v)===String(cur)?'selected':''}>${l}</option>`).join('')}</select>`;
-  const years=uniq([Number(S.today.slice(0,4)),R.dsr.y,...ships().flatMap(s=>[s.f.DeliveredOn,s.f.PickupActual,s.f.PickupPlanned].filter(isoOK).map(d=>Number(d.slice(0,4))))]).sort();
-  const opt=r=>r.opts==='dsr'?`<div class="row" style="margin:8px 0;gap:8px"><label class="f">Period${sel('dk',[['all','All'],['year','Year'],['quarter','Quarter'],['month','Month']],R.dsr.kind)}</label>${R.dsr.kind!=='all'?`<label class="f">Year${sel('dy',years.map(y=>[y,y]),R.dsr.y)}</label>`:''}${R.dsr.kind==='quarter'?`<label class="f">Quarter${sel('dq',[1,2,3,4].map(q=>[q,'Q'+q]),R.dsr.q)}</label>`:''}${R.dsr.kind==='month'?`<label class="f">Month${sel('dm',MONL.map((n,i)=>[i+1,n]),R.dsr.m)}</label>`:''}<label class="f">Status${sel('ds',[['All','All Statuses'],...DSR_STATUS.map(x=>[x,x])],R.dsr.status)}</label></div>`:r.opts==='month'?`<div class="row" style="margin:8px 0"><label class="f">Month<input type="month" id="rd_month" class="in" value="${esc(R.month)}" style="width:auto"></label></div>`:'';
+  const years=rdYears();
+  const mchips=(f,items,sel)=>`<div class="mchips" role="group">${items.map(([v,l])=>`<label class="mchip"><input type="checkbox" data-ch="rdMulti" data-f="${f}" data-v="${v}" ${sel.map(String).includes(String(v))?'checked':''}><span>${l}</span></label>`).join('')}</div>`;
+  const mgrp=(f,label,items,sel)=>`<div class="f" style="margin-top:8px"><span>${label} <small class="mu">(tick one or more)</small> <button class="btn sm" data-act="rdAll" data-f="${f}">All</button> <button class="btn sm" data-act="rdNone" data-f="${f}">None</button></span>${mchips(f,items,sel)}</div>`;
+  const opt=r=>r.opts==='dsr'?`<div style="margin:8px 0"><label class="f">Period${sel('dk',[['all','All'],['year','Year'],['quarter','Quarter'],['month','Month']],R.dsr.kind)}</label>
+   ${R.dsr.kind!=='all'?mgrp('y','Year',years.map(y=>[y,y]),R.dsr.years):''}${R.dsr.kind==='quarter'?mgrp('q','Quarter',[1,2,3,4].map(q=>[q,'Q'+q]),R.dsr.quarters):''}${R.dsr.kind==='month'?mgrp('m','Month',MON.map((n,i)=>[i+1,n]),R.dsr.months):''}
+   ${mgrp('s','Status',DSR_STATUS.map(x=>[x,x]),R.dsr.statuses)}
+   <div class="row" style="margin-top:10px;gap:14px"><label class="f">Date Reference${sel('db',[['delivery','Delivery date'],['pickup','Pickup date']],R.dsr.basis)}</label><label class="sw" style="align-self:flex-end"><input type="checkbox" role="switch" data-ch="rdOpt" data-f="do" ${R.dsr.openAlways?'checked':''}><span class="sw-t"></span><span>Always Include Open Shipments</span></label></div>
+   <p class="hint" style="margin:6px 0 0">None ticked in a group means all. The date reference decides which date places a shipment in the period: delivery date (planned delivery for open shipments) or pickup date (actual, else planned). With the switch on, To Be Shipped and In Transit shipments always show.</p></div>`:r.opts==='month'?`<div class="row" style="margin:8px 0"><label class="f">Month<input type="month" id="rd_month" class="in" value="${esc(R.month)}" style="width:auto"></label></div>`:'';
   return pageHead('Reports','Download reports as Excel or CSV. What you see here depends on the reports your role is allowed to download.')+
   (L.length?`<div class="rgrid">${L.map(r=>{let n='';try{n=r.build(r.opts==='dsr'?R.dsr:r.opts==='month'?{month:R.month}:undefined).rows.length}catch(e){n='?'}return `<div class="card"><h3>${esc(r.label)}${r.money?' <span class="pill warn">Costs</span>':''}</h3><p class="mu" style="margin:0 0 6px">${esc(r.desc)}</p>${opt(r)}<div class="row"><button class="btn pri" data-act="rdDl" data-id="${r.id}" data-fmt="xlsx">Download Excel</button><button class="btn" data-act="rdDl" data-id="${r.id}" data-fmt="csv">Download CSV</button><span class="mu sm" style="margin-left:auto">${n} row(s)</span></div></div>`}).join('')}</div>`:'<div class="card empty">Your role cannot download any report. An administrator can allow reports in Administration, Role Access.</div>')+
   `<p class="hint">Daily Status Report columns follow the DSR template. ShipmentRegistered is when the shipment was entered in the application and ShipmentUpdated is when any of its lines last changed (for older shipments, taken from the milestone history).</p>`;
@@ -5296,6 +5326,7 @@ function rptDefaults(){
 document.addEventListener('click',e=>{
   const t=e.target.closest&&e.target.closest('[data-act]');if(!t)return;const a=t.dataset.act,d=t.dataset;
   if(a==='rdDl'||a==='rdQuick'){const r=rptRun(d.id,d.fmt||'xlsx');toast(r.msg,r.ok?'':'bad');e.stopPropagation();return}
+  if(a==='rdAll'||a==='rdNone'){const R=rdState();R.dsr[RD_KEY[d.f]]=a==='rdAll'?RD_ALL[d.f]():[];render();return}
   if(a==='faTile'){const F=S.ui.fa=S.ui.fa||{f:'All',car:'All',q:''};F.f=F.f===d.id&&d.id!=='All'?'All':d.id;render();return}
   if(a==='faOpen'){if(!can('auditedit')){toast('Your role is not allowed to do this','bad');return}faModal(d.ref);return}
   if(a==='faSave'){const r=faSave(d.ref,{amt:val('fa_amt'),inv:val('fa_inv'),paid:val('fa_paid'),paidOn:val('fa_paidon'),rem:val('fa_rem')});if(!r.ok){const x=document.getElementById('fa_err');if(x)x.innerHTML=`<div class="err" role="alert" style="margin-bottom:10px">${esc(r.msg)}</div>`;return}closeModal();render();toast(r.msg);return}
@@ -5308,7 +5339,8 @@ document.addEventListener('change',e=>{
   const t=e.target;if(!t)return;
   if(t.id==='rgFile'){const f=t.files[0];if(!f)return;if(!can('rgedit')){toast('Your role is not allowed to do this','bad');return}readUpload(f,(err,o)=>{if(err||o.err){toast(err||o.err,'bad');return}const P=rgImportCheck(o.objs,o.hdr);if(P.err){toast(P.err,'bad');return}P.fileName=f.name;rgPreview(P)});t.value='';return}
   if(t.dataset&&t.dataset.ch==='faCar'){(S.ui.fa=S.ui.fa||{}).car=t.value;render();return}
-  if(t.dataset&&t.dataset.ch==='rdOpt'){const R=rdState(),f=t.dataset.f;if(f==='dk')R.dsr.kind=t.value;if(f==='dy')R.dsr.y=Number(t.value);if(f==='dq')R.dsr.q=Number(t.value);if(f==='dm')R.dsr.m=Number(t.value);if(f==='ds')R.dsr.status=t.value;render();return}
+  if(t.dataset&&t.dataset.ch==='rdOpt'){const R=rdState(),f=t.dataset.f;if(f==='dk')R.dsr.kind=t.value;if(f==='db')R.dsr.basis=t.value;if(f==='do')R.dsr.openAlways=t.checked;render();return}
+  if(t.dataset&&t.dataset.ch==='rdMulti'){const R=rdState(),f=t.dataset.f,k=RD_KEY[f],v=f==='s'?t.dataset.v:Number(t.dataset.v),a=R.dsr[k],i=a.indexOf(v);if(t.checked&&i<0)a.push(v);if(!t.checked&&i>=0)a.splice(i,1);if(f!=='s')a.sort((x,y)=>x-y);render();return}
   if(t.id==='rd_month'){if(/^\d{4}-\d{2}$/.test(t.value)){rdState().month=t.value;render()}return}
   if(t.dataset&&t.dataset.ch==='uiCompact'){uiSet({compact:t.checked});return}
   if(t.dataset&&t.dataset.ch==='uiTheme'){uiSet({theme:t.value});return}
