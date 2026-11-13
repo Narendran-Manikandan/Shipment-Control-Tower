@@ -350,6 +350,11 @@ body.compact .tb td,body.compact .tb th{padding:4px 8px;font-size:12px;line-heig
 .tbw{background:linear-gradient(90deg,var(--panel),var(--panel)) left center/22px 100% no-repeat local,linear-gradient(270deg,var(--panel),var(--panel)) right center/22px 100% no-repeat local,linear-gradient(90deg,rgba(0,0,0,.14),rgba(0,0,0,0)) left center/12px 100% no-repeat scroll,linear-gradient(270deg,rgba(0,0,0,.14),rgba(0,0,0,0)) right center/12px 100% no-repeat scroll}
 #mfDock{max-width:340px}.view{padding-bottom:84px}
 
+.fa-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-bottom:14px}
+.kpi.tile.fa-t{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left}.fa-t>b,.fa-t>span,.fa-t>small{display:block}.fa-insight td:first-child{white-space:nowrap}.fa-t b{font-size:22px}.fa-u{font-size:12px;font-weight:500;color:var(--muted)}
+.fa-i{font-size:12px;color:var(--muted)}.fa-v{font-size:20px;font-weight:700;color:var(--ink);margin-top:4px}.fa-s{font-size:11px;color:var(--muted);margin-top:2px}
+.fa-insight{margin-bottom:14px;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.fa-insight .tb th,.fa-insight .tb td{padding:6px 8px}.fa-insight .tb th{white-space:nowrap}.fa-tb td,.fa-tb th{vertical-align:top}.fa-bar{margin-bottom:10px}
+
 /* chosen dark theme */
 :root[data-theme="dark"]{
 --bg:#151719;--panel:#1E2124;--panel2:#23272A;--ink:#ECEDED;--muted:#9DA3A4;--line:#33393C;--line2:#454C50;
@@ -440,7 +445,7 @@ const ROLES=['In Organization','Logistics Executive','Logistics Associate','Logi
 const TYPES=['Raw Materials','Consumables','Finished Goods','Machineries','Others'];
 const NATURES=['DG','Non-DG'];
 const normNature=v=>{const x=String(v||'').toLowerCase().replace(/[^a-z]/g,'');if(['dg','dgr','dangerousgoods','hazardous','hazmat'].includes(x))return 'DG';if(['nondg','nodg','ndg','nondangerousgoods','nonhazardous','nonhazmat'].includes(x))return 'Non-DG';return ''};
-const TYPE_COL={'Raw Materials':'#8E5BD0','Consumables':'#2E8B57','Finished Goods':'#B8860B','Machineries':'#3B82C4','Others':'#6B7075','Not set':'#9AA2A7'};
+const TYPE_COL={'Raw Materials':'#8E5BD0','Consumables':'#2E8B57','Finished Goods':'#B8860B','Machineries':'#3B82C4','Others':'#6B7075','Not set':'#9AA2A7',Mixed:'#7C5CBF'};
 const TABS=[
  {id:'tasks',label:'My tasks'},{id:'track',label:'Track & Trace'},{id:'request',label:'Shipment Requests'},{id:'milestones',label:'Milestone Management'},{id:'dataquality',label:'Data Quality'},{id:'carrierupdates',label:'Carrier Updates'},{id:'slotreq',label:'Delivery Slot Requests'},{id:'slotmgmt',label:'Delivery Management'},{id:'warehouse',label:'Warehouse Operations'},
  {id:'dashboard',label:'Control Tower Overview'},{id:'carrier',label:'Carrier Performance'},{id:'transit',label:'Transit Analytics'},{id:'reports',label:'Scheduled reports'},{id:'commercial',label:'Freight Commercials'},{id:'freighttrends',label:'Freight Trends'},{id:'team',label:'My team'},{id:'admin',label:'Administration'}];
@@ -557,7 +562,7 @@ function shipsAll0(){
     return {ref,lines:ls,f,shipper:f.Shipper,consignee:f.Consignee,carrier:f.Carrier,mode:f.Mode,inco:f.IncoTerm,freight:f.Freight,status:f.CurrentStatus,
       nominated:(ls.find(l=>l.NominatedOn)||{}).NominatedOn||'',weight:sum('WeightKg'),packages:sum('Packages'),cbm:sum('Cbm'),
       due:f.ESTDelivery||f.ETA||'',dueRev:f.DeliveryRevised||'',dueL:f.DeliveryRevised||f.ESTDelivery||f.ETA||'',pos:uniq(ls.map(l=>l.PONumber)),containers:uniq(ls.map(l=>l.ContainerNumber)),
-      route:(f.OriginPort||'')+' to '+(f.DestinationPort||''),stype:f.ShipmentType||'',nature:f.NatureOfGoods||'',sample:f.Notes==='Sample history',cancelled:f.CurrentStatus==='Cancelled'};
+      route:(f.OriginPort||'')+' to '+(f.DestinationPort||''),stype:(()=>{const t=uniq(ls.map(l=>l.ShipmentType));return t.length>1?'Mixed':(t[0]||f.ShipmentType||'')})(),types:uniq(ls.map(l=>l.ShipmentType)),nature:ls.some(l=>l.NatureOfGoods==='DG')?'DG':(f.NatureOfGoods||''),sample:f.Notes==='Sample history',cancelled:f.CurrentStatus==='Cancelled'};
   });
 }
 function ships(){return shipsAll().filter(s=>!s.cancelled)}
@@ -1767,13 +1772,13 @@ function shipEditCheck(sh,h,ops,reason){
     if(o.id&&!ex){errs.push(n+' does not belong to '+sh.ref);return}
     if(o.del){if(ex){remaining--;lineChanges.push('Removed line '+o.id)}return}
     if(!ex)remaining++;
-    if(!String(o.po||'').trim())errs.push(n+': PO number is required');
     if(!String(o.inv||'').trim())errs.push(n+': invoice number is required');
     if(!String(o.item||'').trim())errs.push(n+': item number is required');
     if(!(num(o.qty)>0))errs.push(n+': quantity must be a number above 0');
+    if(o.type&&!TYPES.includes(o.type))errs.push(n+': item type "'+o.type+'" is not valid');
     if(o.date&&!isoOK(o.date))errs.push(n+': invoice date must be yyyy-mm-dd');
     if(!ex)lineChanges.push('Added line for PO '+o.po+' item '+o.item);
-    else{const ch=[];[['PONumber',o.po,'PO'],['InvoiceNumber',o.inv,'invoice'],['InvoiceDate',o.date||'','invoice date'],['ItemNumber',o.item,'item'],['ItemQty',o.qty,'quantity'],['HBL_HAWB_Tracking',o.hbl||'','tracking']].forEach(([k,v,l])=>{if(String(ex[k]==null?'':ex[k]).trim()!==String(v==null?'':v).trim())ch.push(l+': '+(ex[k]||'blank')+' to '+(v||'blank'))});if(ch.length)lineChanges.push(o.id+' '+ch.join(', '))}
+    else{const ch=[];[['PONumber',o.po,'PO'],['InvoiceNumber',o.inv,'invoice'],['InvoiceDate',o.date||'','invoice date'],['ItemNumber',o.item,'item'],['ItemQty',o.qty,'quantity'],['HBL_HAWB_Tracking',o.hbl||'','tracking'],...(o.type!==undefined?[['ShipmentType',o.type,'type']]:[])].forEach(([k,v,l])=>{if(String(ex[k]==null?'':ex[k]).trim()!==String(v==null?'':v).trim())ch.push(l+': '+(ex[k]||'blank')+' to '+(v||'blank'))});if(ch.length)lineChanges.push(o.id+' '+ch.join(', '))}
   });
   if(remaining<1)errs.push(sh.ref+' must keep at least one item line');
   return {errs:uniq(errs),changes,lineChanges,planChanged};
@@ -1786,13 +1791,13 @@ function shipEditApply(ref,h,ops,reason){
   if(!ck.changes.length&&!ck.lineChanges.length)return {ok:true,msg:ref+': nothing changed',changes:[]};
   const cur0=shHeader(sh),firstKeys=SH_FIELDS.filter(f=>f[4]==='first').map(f=>f[0]).filter(k=>String(cur0[k])!==String(h[k]==null?'':h[k]).trim()||(ops||[]).some(o=>o.del)),firstVals={};
   firstKeys.forEach(k=>{firstVals[k]=String(cur0[k])!==String(h[k]==null?'':h[k]).trim()?shConv(shF(k),h[k]):shConv(shF(k),cur0[k])});
-  SH_FIELDS.forEach(f=>{if(f[4]==='first')return;const v=shConv(f,h[f[0]]);S.lines.filter(l=>l.ShipmentRef===ref).forEach(l=>{l[f[0]]=v})});
+  SH_FIELDS.forEach(f=>{if(f[4]==='first')return;if(f[0]==='ShipmentType'&&String(cur0.ShipmentType||'')===String(h.ShipmentType==null?'':h.ShipmentType).trim())return;const v=shConv(f,h[f[0]]);S.lines.filter(l=>l.ShipmentRef===ref).forEach(l=>{l[f[0]]=v})});
   let maxN=Math.max(0,...S.lines.filter(l=>l.ShipmentRef===ref).map(l=>Number(String(l.LineID).split('-').pop())||0));
   (ops||[]).forEach(o=>{
     if(o.id){const l=S.lines.find(x=>x.LineID===o.id&&x.ShipmentRef===ref);if(!l)return;
       if(o.del){S.lines.splice(S.lines.indexOf(l),1);return}
-      Object.assign(l,{PONumber:String(o.po).trim(),InvoiceNumber:String(o.inv).trim(),InvoiceDate:o.date||'',ItemNumber:String(o.item).trim(),ItemQty:num(o.qty),HBL_HAWB_Tracking:String(o.hbl||'').trim()});
-    }else if(!o.del){const base=Object.assign({},S.lines.find(x=>x.ShipmentRef===ref));maxN++;Object.assign(base,{LineID:ref+'-'+pad(maxN),PONumber:String(o.po).trim(),InvoiceNumber:String(o.inv).trim(),InvoiceDate:o.date||'',ItemNumber:String(o.item).trim(),ItemQty:num(o.qty),HBL_HAWB_Tracking:String(o.hbl||'').trim(),Packages:'',WeightKg:'',Cbm:''});S.lines.push(base)}
+      Object.assign(l,{PONumber:String(o.po).trim(),InvoiceNumber:String(o.inv).trim(),InvoiceDate:o.date||'',ItemNumber:String(o.item).trim(),ItemQty:num(o.qty),HBL_HAWB_Tracking:String(o.hbl||'').trim(),ShipmentType:o.type||l.ShipmentType});
+    }else if(!o.del){const base=Object.assign({},S.lines.find(x=>x.ShipmentRef===ref));maxN++;Object.assign(base,{LineID:ref+'-'+pad(maxN),PONumber:String(o.po).trim(),InvoiceNumber:String(o.inv).trim(),InvoiceDate:o.date||'',ItemNumber:String(o.item).trim(),ItemQty:num(o.qty),HBL_HAWB_Tracking:String(o.hbl||'').trim(),ShipmentType:o.type||base.ShipmentType,Packages:'',WeightKg:'',Cbm:''});S.lines.push(base)}
   });
   S.lines.filter(l=>l.ShipmentRef===ref).forEach((l,i)=>{firstKeys.forEach(k=>{l[k]=i===0?firstVals[k]:''})});
   const st=getShip(ref).status;
@@ -1806,14 +1811,14 @@ function editModal(ref,focus){
   if(!can('editship')){toast('Your role cannot edit shipments','bad');return}
   if(sh.cancelled){toast(ref+' is cancelled and cannot be edited','bad');return}
   const h=shHeader(sh),locked=sh.status==='Delivered'?['Mode','Carrier','WarehouseDestination','PickupPlanned','ETDPlanned','ETA','ESTDelivery']:[];
-  S.edit={ref,focus:focus||'',h,reason:'',errs:[],lines:sh.lines.map(l=>({id:l.LineID,po:l.PONumber||'',inv:l.InvoiceNumber||'',date:l.InvoiceDate||'',item:l.ItemNumber||'',qty:String(l.ItemQty==null?'':l.ItemQty),hbl:l.HBL_HAWB_Tracking||'',del:false}))};
+  S.edit={ref,focus:focus||'',h,reason:'',errs:[],lines:sh.lines.map(l=>({id:l.LineID,po:l.PONumber||'',inv:l.InvoiceNumber||'',date:l.InvoiceDate||'',item:l.ItemNumber||'',qty:String(l.ItemQty==null?'':l.ItemQty),hbl:l.HBL_HAWB_Tracking||'',type:l.ShipmentType||'',del:false}))};
   editRender();
 }
 function editCollect(){
   const E=S.edit;if(!E)return;const g=id=>document.getElementById(id);
   SH_FIELDS.forEach(([k])=>{const x=g('e_'+k);if(x)E.h[k]=x.value});
   const r=g('e_reason');if(r)E.reason=r.value;
-  E.lines.forEach((l,i)=>{const p=g('el_'+i+'_po');if(!p)return;l.po=p.value;l.inv=g('el_'+i+'_inv').value;l.date=g('el_'+i+'_date').value;l.item=g('el_'+i+'_item').value;l.qty=g('el_'+i+'_qty').value;l.hbl=g('el_'+i+'_hbl').value});
+  E.lines.forEach((l,i)=>{const p=g('el_'+i+'_po');if(!p)return;l.po=p.value;l.inv=g('el_'+i+'_inv').value;l.date=g('el_'+i+'_date').value;l.item=g('el_'+i+'_item').value;l.qty=g('el_'+i+'_qty').value;l.hbl=g('el_'+i+'_hbl').value;const ty=g('el_'+i+'_type');if(ty)l.type=ty.value});
 }
 function editRender(){
   const E=S.edit,sh=getShip(E.ref),locked=sh.status==='Delivered'?['Mode','Carrier','WarehouseDestination','PickupPlanned','ETDPlanned','ETA','ESTDelivery']:[];
@@ -1828,20 +1833,20 @@ function editRender(){
   const grp=(title,keys,note)=>`<h3 class="sec">${title}</h3>${note?`<p class="hint" style="margin:0 0 8px">${note}</p>`:''}<div class="g3">${keys.map(k=>fld(shF(k))).join('')}</div>`;
   openModal(`<div class="mh"><div><h2>Edit ${esc(E.ref)}</h2><div class="mu">${esc(sh.route)}, ${esc(sh.status)}. Every change is recorded in the audit log.${sh.status==='Delivered'?' This shipment is delivered, so its carrier, mode, warehouse and planned dates are locked.':''}</div></div><button class="x" data-act="close" aria-label="Close">&times;</button></div>
   ${E.errs.length?`<div class="err" role="alert"><b>Please fix ${E.errs.length} thing${E.errs.length>1?'s':''} before saving</b><ul>${E.errs.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:''}
-  ${grp('Parties and goods',['Shipper','Consignee','Carrier','ShipmentType','NatureOfGoods','Freight'])}
+  ${grp('Parties and goods',['Shipper','Consignee','Carrier','NatureOfGoods','Freight'])}
   ${grp('Route',['Mode','IncoTerm','OriginCountry','OriginPort','DestinationCountry','DestinationPort','WarehouseDestination'])}
   ${grp('Cargo',['Packages','WeightKg','Cbm','ContainerType','Containers','ContainerNumber','ReeferSetPoint','MBL_MAWB','FreeDays','Notes'])}
   ${grp('Planned dates',['PickupPlanned','ETDPlanned','ETA','ESTDelivery'],'Changing a planned date corrects the original plan that on-time figures are measured against. To move a date because of a delay, record a new estimate in Milestone Management instead.')}
   <label class="f" style="margin-top:8px">Reason for changing planned dates<input id="e_reason" class="in" value="${esc(E.reason)}" placeholder="Required only if a planned date changes"></label>
-  <h3 class="sec">Item lines</h3><div class="tbw"><table class="tb" data-sort="off"><tr><th>#</th><th>PO number *</th><th>Invoice number *</th><th>Invoice date</th><th>Item number *</th><th>Quantity *</th><th>Tracking number (HBL/HAWB)</th><th></th></tr>
-  ${E.lines.map((l,i)=>`<tr class="${l.del?'tr-pend':''}"><td>${l.id?esc(l.id.split('-').pop()):'new'}</td><td><input id="el_${i}_po" class="in" value="${esc(l.po)}" ${l.del?'disabled':''}></td><td><input id="el_${i}_inv" class="in" value="${esc(l.inv)}" ${l.del?'disabled':''}></td><td><input type="date" id="el_${i}_date" class="in" value="${esc(l.date)}" ${l.del?'disabled':''}></td><td><input id="el_${i}_item" class="in" value="${esc(l.item)}" ${l.del?'disabled':''}></td><td><input id="el_${i}_qty" class="in" inputmode="decimal" value="${esc(l.qty)}" style="max-width:90px" ${l.del?'disabled':''}></td><td><input id="el_${i}_hbl" class="in" value="${esc(l.hbl)}" ${l.del?'disabled':''}></td>
+  <h3 class="sec">Item lines</h3><p class="hint" style="margin:0 0 8px">Set the type on each item line. One shipment can hold several types. A blank PO number is allowed and is flagged for follow-up.</p><div class="tbw"><table class="tb" data-sort="off"><tr><th>#</th><th>Type</th><th>PO number</th><th>Invoice number *</th><th>Invoice date</th><th>Item number *</th><th>Quantity *</th><th>Tracking number (HBL/HAWB)</th><th></th></tr>
+  ${E.lines.map((l,i)=>`<tr class="${l.del?'tr-pend':''}"><td>${l.id?esc(l.id.split('-').pop()):'new'}</td><td><select id="el_${i}_type" class="in" ${l.del?'disabled':''}>${['',...TYPES].map(x=>`<option ${x===(l.type||'')?'selected':''}>${x}</option>`).join('')}</select></td><td><input id="el_${i}_po" class="in" value="${esc(l.po)}" ${l.del?'disabled':''}></td><td><input id="el_${i}_inv" class="in" value="${esc(l.inv)}" ${l.del?'disabled':''}></td><td><input type="date" id="el_${i}_date" class="in" value="${esc(l.date)}" ${l.del?'disabled':''}></td><td><input id="el_${i}_item" class="in" value="${esc(l.item)}" ${l.del?'disabled':''}></td><td><input id="el_${i}_qty" class="in" inputmode="decimal" value="${esc(l.qty)}" style="max-width:90px" ${l.del?'disabled':''}></td><td><input id="el_${i}_hbl" class="in" value="${esc(l.hbl)}" ${l.del?'disabled':''}></td>
    <td class="r"><button class="btn sm ${l.del?'':'danger'}" data-act="editDelLine" data-i="${i}">${l.del?'Keep':'Remove'}</button></td></tr>`).join('')}</table></div>
   <div class="row sec"><button class="btn" data-act="editAddLine">Add item line</button><span class="row" style="margin-left:auto"><button class="btn pri" data-act="editSave">Save changes</button><button class="btn" data-act="close">Cancel</button></span></div>`);
   const f=E.focus&&document.getElementById(E.focus.startsWith('el_')?E.focus:'e_'+E.focus);if(f&&f.scrollIntoView){f.scrollIntoView({block:'center'});if(f.focus)f.focus()}
 }
 function editSave(){
   editCollect();const E=S.edit,sh=getShip(E.ref),h=Object.assign({},E.h);
-  const ops=E.lines.map(l=>({id:l.id,po:l.po,inv:l.inv,date:l.date,item:l.item,qty:l.qty,hbl:l.hbl,del:l.del})).filter(o=>!(o.del&&!o.id));
+  const ops=E.lines.map(l=>({id:l.id,po:l.po,inv:l.inv,date:l.date,item:l.item,qty:l.qty,hbl:l.hbl,type:l.type,del:l.del})).filter(o=>!(o.del&&!o.id));
   const r=shipEditApply(E.ref,h,ops,E.reason);
   if(!r.ok){E.errs=r.errs||[r.msg];E.focus='';editRender();return}
   S.edit=null;closeModal();render();toast(r.msg);
@@ -1918,8 +1923,8 @@ function updatePanel(){
   <ul class="hint" style="margin:12px 0 0 18px"><li>Empty cells keep the current value, so you only fill in what changes.</li><li>Changing a planned date corrects the original plan, so give a reason on that row. To move a date because of a delay, use Milestone Management.</li><li>Delivered shipments keep their carrier, mode, warehouse and planned dates. Cancelled shipments cannot be edited.</li></ul></div>`;
 }
 /* ----- data quality ----- */
-const DQ_CHECKS={dup_tracking:['Tracking number on several shipments','Medium'],cbm:['CBM missing for Air or LCL freight','Medium'],plan:['No planned arrival date','High'],wh_unknown:['Warehouse not in the warehouse list','High'],wh_inactive:['Warehouse is inactive','Medium'],wh_contact:['Warehouse has no team email','Medium'],container:['Ocean shipment without container details','Medium'],weight:['Packages or weight missing','Medium'],tracking:['No tracking number although it has left','Low'],type:['Shipment type or nature of goods not set','Low'],order:['Dates out of order','High'],po_dup:['Same PO and item on several shipments','Low'],no_user:['Carrier has no Carrier Partner user','Low']};
-const DQ_FIELD={dup_tracking:'el_0_hbl',cbm:'Cbm',plan:'ETA',wh_unknown:'WarehouseDestination',wh_inactive:'WarehouseDestination',wh_contact:'WarehouseDestination',container:'ContainerType',weight:'WeightKg',tracking:'el_0_hbl',type:'ShipmentType',order:'PickupPlanned',po_dup:'el_0_po',no_user:'Carrier'};
+const DQ_CHECKS={dup_tracking:['Tracking number on several shipments','Medium'],cbm:['CBM missing for Air or LCL freight','Medium'],plan:['No planned arrival date','High'],wh_unknown:['Warehouse not in the warehouse list','High'],wh_inactive:['Warehouse is inactive','Medium'],wh_contact:['Warehouse has no team email','Medium'],container:['Ocean shipment without container details','Medium'],weight:['Packages or weight missing','Medium'],tracking:['No tracking number although it has left','Low'],type:['Shipment type or nature of goods not set','Low'],order:['Dates out of order','High'],po_dup:['Same PO and item on several shipments','Low'],no_user:['Carrier has no Carrier Partner user','Low'],po_missing:['PO number missing','Medium']};
+const DQ_FIELD={dup_tracking:'el_0_hbl',cbm:'Cbm',plan:'ETA',wh_unknown:'WarehouseDestination',wh_inactive:'WarehouseDestination',wh_contact:'WarehouseDestination',container:'ContainerType',weight:'WeightKg',tracking:'el_0_hbl',type:'ShipmentType',order:'PickupPlanned',po_dup:'el_0_po',no_user:'Carrier',po_missing:'el_0_po'};
 function dqIssues(){
   const all=ships(),out=[],add=(c,s,detail)=>out.push({check:c,label:DQ_CHECKS[c][0],sev:DQ_CHECKS[c][1],ref:s.ref,carrier:s.carrier,detail});
   const trk={},po={};
@@ -1939,7 +1944,8 @@ function dqIssues(){
     const pl=[f.PickupPlanned,f.ETDPlanned,f.ETA].filter(isoOK),ac=[f.PickupActual,f.ETDActual,f.ETAActual,f.DeliveredOn].filter(isoOK);
     if(pl.some((d,i)=>i&&d<pl[i-1])||ac.some((d,i)=>i&&d<ac[i-1]))add('order',s,'Planned or actual dates are not in order');
     s.lines.forEach(l=>{const refs=po[l.PONumber+'|'+l.ItemNumber];if(refs&&refs.size>1&&l===s.lines.find(x=>x.PONumber===l.PONumber&&x.ItemNumber===l.ItemNumber))add('po_dup',s,'PO '+l.PONumber+' item '+l.ItemNumber+' is also on '+[...refs].filter(x=>x!==s.ref).join(', '))});
-    if(s.carrier&&!carUsers.has(s.carrier))add('no_user',s,s.carrier+' cannot update this shipment itself')
+    if(s.carrier&&!carUsers.has(s.carrier))add('no_user',s,s.carrier+' cannot update this shipment itself');
+    {const n=s.lines.filter(l=>!String(l.PONumber||'').trim()).length;if(n)add('po_missing',s,n+' item line(s) have no PO number. Please add it')}
   });
   const so={High:0,Medium:1,Low:2};return out.sort((a,b)=>so[a.sev]-so[b.sev]||a.ref.localeCompare(b.ref));
 }
@@ -1962,6 +1968,7 @@ function viewDataQuality(){
 }
 function dqCreateWarnings(b,items){
   const w=[],all=shipsAll();
+  {const nb=(items||[]).filter(it=>!String(it.po||'').trim()).length;if(nb)w.push('PO number is blank on '+nb+' item line(s). The shipment is flagged PO Missing until it is added')}
   String(b.hbl||'').split(/[;,|\s]+/).filter(Boolean).forEach(t=>{const hit=all.filter(s=>shipTrackNos(s).toLowerCase().split('; ').includes(t.toLowerCase()));if(hit.length)w.push('Tracking number '+t+' is already on '+hit.map(s=>s.ref).join(', '))});
   if((['Air','Courier'].includes(b.mode)||(isOcean(b.mode)&&/LCL/i.test(b.ctype||'')))&&!(num(b.cbm)>0))w.push('CBM is empty. Freight rates per kg for Air and LCL need it');
   const wh=whFind(b.wh);
@@ -1973,6 +1980,7 @@ function dqCreateWarnings(b,items){
 }
 function dqBulkNotes(rows){
   const r0=rows[0],w=[],all=shipsAll();
+  {const nb=rows.filter(r=>!String(r.PONumber||'').trim()).length;if(nb)w.push('Check: PO number is blank on '+nb+' row(s). The shipment is flagged PO Missing until it is added')}
   uniq(rows.map(r=>String(r.HBL_HAWB_Tracking||'').trim()).filter(Boolean)).forEach(t=>{const hit=all.filter(s=>shipTrackNos(s).toLowerCase().split('; ').includes(t.toLowerCase()));if(hit.length)w.push('Check: tracking number '+t+' is already on '+hit.map(s=>s.ref).join(', '))});
   if((['Air','Courier'].includes(r0.Mode)||(isOcean(r0.Mode)&&/LCL/i.test(r0.ContainerType||'')))&&!rows.some(r=>num(r.Cbm)>0))w.push('Check: CBM is empty (Air and LCL freight rates need it)');
   const wh=whFind(r0.WarehouseDestination);
@@ -2947,7 +2955,7 @@ function monBarHTML(){
 {const s0=addSampleHistory;addSampleHistory=function(){const r=s0.apply(this,arguments);S.lines.forEach(l=>{if(l.Mode)l.Mode=normMode(l.Mode);if(l.ContainerType)l.ContainerType=normCtype(l.ContainerType)});return r}}
 document.addEventListener('change',e=>{if(e.target&&e.target.id==='f_ctype'){const b=document.getElementById('setptBox');if(b){b.style.display=isReefer(e.target.value)?'':'none';if(!isReefer(e.target.value)){const i=document.getElementById('f_setpt');if(i)i.value=''}}}});
 /* ========== demo sign-in (email and password), problem log, report a problem ========== */
-const APP_BUILD='site build 2026-11-13 10:36 UTC';
+const APP_BUILD='site build 2026-11-13 11:34 UTC';
 const ErrLog={key:'ect.errors',max:60,
   add(kind,msg,src){try{const a=JSON.parse(localStorage.getItem(this.key)||'[]');a.push({t:new Date().toISOString(),kind,msg:String(msg==null?'':msg).slice(0,300),src:String(src||'').slice(0,160),view:(typeof S!=='undefined'&&S&&S.view)||'',role:(typeof S!=='undefined'&&S&&S.role)||''});while(a.length>this.max)a.shift();localStorage.setItem(this.key,JSON.stringify(a))}catch(e){}},
   list(){try{return JSON.parse(localStorage.getItem(this.key)||'[]')}catch(e){return []}},
@@ -3616,8 +3624,8 @@ function singlePanel(){
    <label class="f">Packages<input id="f_pkgs" class="in" inputmode="numeric"></label><label class="f">Gross weight (kg)<input id="f_wt" class="in" inputmode="decimal"></label><label class="f">Volume (CBM, optional)<input id="f_cbm" class="in" inputmode="decimal"></label></div>
    <label class="f" style="margin-top:12px">Notes (optional)<input id="f_notes" class="in"></label>${docsFormHTML()}
    <p class="hint">Packages, weight and CBM are saved on the first item row only, as in your sheet.</p></div>
-  <div class="card"><h3>Item lines</h3><div class="g4" style="grid-template-columns:repeat(5,minmax(0,1fr))">
-   <label class="f">PO number<input id="i_po" class="in"></label><label class="f">Invoice number<input id="i_inv" class="in"></label>
+  <div class="card"><h3>Item lines</h3><div class="g4" style="grid-template-columns:repeat(6,minmax(0,1fr))">
+   <label class="f">Item type<select id="i_stype" class="in"><option value="">Same as shipment type</option>${TYPES.map(x=>`<option>${x}</option>`).join('')}</select></label><label class="f">PO number (optional)<input id="i_po" class="in"></label><label class="f">Invoice number<input id="i_inv" class="in"></label>
    <label class="f">Invoice date (optional)<input type="date" id="i_date" class="in"></label><label class="f">Item number<input id="i_item" class="in"></label><label class="f">Quantity<input id="i_qty" class="in" inputmode="numeric"></label></div>
    <div class="row sec"><button class="btn" data-act="draftAdd">Add item line</button><span class="hint">PO and invoice stay filled so you can add several items quickly.</span></div>
    <div id="draftBox" class="sec">${draftHTML()}</div></div>
@@ -3625,14 +3633,14 @@ function singlePanel(){
 }
 function draftHTML(){
   if(!S.draft.length)return '<div class="empty">No item lines yet. Fill the boxes above and choose "Add item line".</div>';
-  return `<div class="tbw"><table class="tb"><tr><th>#</th><th>PO number</th><th>Invoice</th><th>Invoice date</th><th>Item</th><th class="r">Qty</th><th></th></tr>${S.draft.map((d,i)=>`<tr><td>${i+1}</td><td>${esc(d.po)}</td><td>${esc(d.inv)}</td><td>${fmt(d.date)}</td><td>${esc(d.item)}</td><td class="r">${esc(d.qty)}</td><td class="r"><button class="btn sm danger" data-act="draftRemove" data-i="${i}">Remove</button></td></tr>`).join('')}</table></div>`;
+  return `<div class="tbw"><table class="tb"><tr><th>#</th><th>Type</th><th>PO number</th><th>Invoice</th><th>Invoice date</th><th>Item</th><th class="r">Qty</th><th></th></tr>${S.draft.map((d,i)=>`<tr><td>${i+1}</td><td>${esc(d.stype||'Shipment type')}</td><td>${esc(d.po)||'<span class="late-t">Missing</span>'}</td><td>${esc(d.inv)}</td><td>${fmt(d.date)}</td><td>${esc(d.item)}</td><td class="r">${esc(d.qty)}</td><td class="r"><button class="btn sm danger" data-act="draftRemove" data-i="${i}">Remove</button></td></tr>`).join('')}</table></div>`;
 }
 function createShipment(b,items){
   const ref=nextRef();
   const st=b.deliveredOn?'Delivered':b.etaA?'Out for delivery':b.etdA?'In transit':b.pickupA?'Picked up':'Booked';
   const loc=b.loc||(b.deliveredOn?b.wh:b.op);
   items.forEach((it,i)=>{S.lines.push({ShipmentRef:ref,LineID:ref+'-'+pad(i+1),Shipper:b.shipper,Consignee:b.consignee,InvoiceNumber:it.inv,InvoiceDate:it.date||'',PONumber:it.po,ItemNumber:it.item,ItemQty:it.qty,
-    Packages:i===0?b.packages:'',WeightKg:i===0?b.weight:'',Cbm:i===0?(b.cbm||''):'',Containers:b.containers||'',ContainerType:b.ctype||'',IncoTerm:b.inco,Freight:b.freight,MovementType:b.move,ShipmentType:b.stype||'',NatureOfGoods:b.nature||'',Mode:b.mode,
+    Packages:i===0?b.packages:'',WeightKg:i===0?b.weight:'',Cbm:i===0?(b.cbm||''):'',Containers:b.containers||'',ContainerType:b.ctype||'',IncoTerm:b.inco,Freight:b.freight,MovementType:b.move,ShipmentType:it.stype||b.stype||'',NatureOfGoods:b.nature||'',Mode:b.mode,
     OriginCountry:b.oc,OriginPort:b.op,DestinationPort:b.dp,DestinationCountry:b.dc,WarehouseDestination:b.wh,Carrier:b.carrier,MBL_MAWB:b.mbl,HBL_HAWB_Tracking:b.hbl,ContainerNumber:b.cno,
     NominatedOn:b.nominated||'',PickupPlanned:b.pickup,PickupActual:b.pickupA||'',ETDPlanned:b.etd||'',ETDActual:b.etdA||'',ETA:b.eta,ETAActual:b.etaA||'',ESTDelivery:b.est||'',DeliveredOn:b.deliveredOn||'',CurrentStatus:st,CurrentLocation:loc,Notes:b.notes||''})});
   const early=[b.nominated,b.pickupA,b.pickup,S.today].filter(Boolean).sort()[0];
@@ -3664,7 +3672,7 @@ function saveShip(){
   const ref=createShipment({nature:val('f_nature'),stype:val('f_stype'),shipper:val('f_shipper'),consignee:val('f_consignee'),carrier:val('f_carrier'),mode:val('f_mode'),inco:val('f_inco'),freight:val('f_freight'),move:val('f_move'),
     oc:val('f_ocountry'),op:val('f_oport'),dc:val('f_dcountry'),dp:val('f_dport'),wh:val('f_wh'),pickup:val('f_pickup'),etd:val('f_etd'),eta:val('f_eta'),est:val('f_est'),mbl:val('f_mbl'),hbl:val('f_hbl'),
     ctype:sea?val('f_ctype'):'',containers:sea&&val('f_ccount')?num(val('f_ccount')):'',cno:val('f_cno'),packages:num(val('f_pkgs')),weight:num(val('f_wt')),cbm:val('f_cbm')?num(val('f_cbm')):'',notes:val('f_notes')},
-    S.draft.map(d=>({po:d.po,inv:d.inv,date:d.date,item:d.item,qty:num(d.qty)})));
+    S.draft.map(d=>({po:d.po,inv:d.inv,date:d.date,item:d.item,qty:num(d.qty),stype:d.stype})));
   S.lastSaved={ref,rows:S.lines.filter(l=>l.ShipmentRef===ref)};
   S.draft=[];toast('Saved '+ref+' with '+S.lastSaved.rows.length+' item row(s)');render();window.scrollTo(0,0);
 }
@@ -3772,7 +3780,7 @@ const BULK_DATE_COLS=['PickupPlanned','ETDPlanned','ETA','ESTDelivery','Nominate
 function bulkRowBasic(r){const e=bulkRowBasic0(r),sc=partnerScope();if(sc&&(r.Shipper||r.Consignee)&&!sc.has(r.Shipper,r.Consignee))e.push('Shipper "'+r.Shipper+'" and receiver "'+r.Consignee+'" are not assigned to your company');return e}
 function bulkRowBasic0(r){
   const e=[];
-  ['Shipper','Consignee','Carrier','OriginCountry','OriginPort','DestinationCountry','DestinationPort','WarehouseDestination','PONumber','InvoiceNumber','ItemNumber'].forEach(c=>{if(!r[c])e.push(c+' is empty')});
+  ['Shipper','Consignee','Carrier','OriginCountry','OriginPort','DestinationCountry','DestinationPort','WarehouseDestination','InvoiceNumber','ItemNumber'].forEach(c=>{if(!r[c])e.push(c+' is empty')});
   if(!r.ShipmentType)e.push('ShipmentType is empty');else if(!TYPES.includes(r.ShipmentType))e.push('ShipmentType "'+r.ShipmentType+'" must be Raw Materials, Consumables, Finished Goods, Machineries or Others');
   if(!r.NatureOfGoods)e.push('NatureOfGoods is empty');else if(!NATURES.includes(r.NatureOfGoods))e.push('NatureOfGoods "'+r.NatureOfGoods+'" must be DG or Non-DG');
   if(r.Mode)r.Mode=normMode(r.Mode);if(r.Mode&&!MODES.includes(r.Mode))e.push('Mode must be one of: '+MODES.join(', '));else if(!r.Mode)e.push('Mode is empty');if(r.ContainerType)r.ContainerType=normCtype(r.ContainerType);if(r.ContainerType&&!CTYPES.includes(r.ContainerType))e.push('ContainerType must be one of: '+CTYPES.join(', '));if(String(r.ReeferSetPoint||'').trim()!==''){if(!spOk(r.ReeferSetPoint))e.push('ReeferSetPoint must be a number from -40 to 40');else if(!isReefer(r.ContainerType))e.push('ReeferSetPoint is for reefer containers (20RF or 40RF) only')};
@@ -3817,7 +3825,7 @@ function bulkCheck(objs,hdr,fileName){
   items.forEach(x=>{const k=x.r.ShipmentGroup?'g:'+x.r.ShipmentGroup:'r:'+x.r._row;if(!groups.has(k))groups.set(k,[]);groups.get(k).push(x)});
   groups.forEach(xs=>{
     const g=xs[0].r.ShipmentGroup,first=xs[0].r;
-    if(g)xs.slice(1).forEach(x=>GROUP_KEYS.forEach(c=>{if(x.r[c]&&first[c]&&x.r[c]!==first[c])x.errs.push(c+' differs from the first row of group '+g)}));
+    if(g)xs.slice(1).forEach(x=>GROUP_KEYS.forEach(c=>{if(c!=='ShipmentType'&&x.r[c]&&first[c]&&x.r[c]!==first[c])x.errs.push(c+' differs from the first row of group '+g)}));
     const mg=bulkMerge(xs.map(x=>x.r)),has={};BULK_DATE_COLS.forEach(c=>{has[c]=xs.some(x=>x.r[c])});
     bulkDateRules(mg.m,has).forEach(m=>xs[0].errs.push(m));
     const notes=mg.notes.map(n=>n.col+' differs in group '+g+' ('+n.vals.join(', ')+'): the latest, '+n.used+', is used');
@@ -3839,7 +3847,7 @@ function bulkCommit(){
     const f=Object.assign({},rows[0],bulkMerge(rows).m),nt=rows[0]._notes||[];
     const ref=createShipment({nature:f.NatureOfGoods,stype:f.ShipmentType,shipper:f.Shipper,consignee:f.Consignee,carrier:f.Carrier,mode:f.Mode,inco:f.IncoTerm,freight:f.Freight||autoFreight(f.IncoTerm),move:f.MovementType||'Freight',oc:f.OriginCountry,op:f.OriginPort,dc:f.DestinationCountry,dp:f.DestinationPort,wh:f.WarehouseDestination,
       pickup:f.PickupPlanned||'',etd:f.ETDPlanned,eta:f.ETA||'',est:f.ESTDelivery,nominated:f.NominatedOn,pickupA:f.PickupActual,etdA:f.ETDActual,etaA:f.ETAActual,deliveredOn:f.DeliveredOn,loc:f.CurrentLocation,mbl:f.MBL_MAWB,hbl:f.HBL_HAWB_Tracking,ctype:f.ContainerType,setpt:f.ReeferSetPoint,containers:f.Containers?num(f.Containers):'',cno:f.ContainerNumber,
-      packages:f.Packages?num(f.Packages):'',weight:f.WeightKg?num(f.WeightKg):'',cbm:f.Cbm?num(f.Cbm):'',notes:nt.length?'Bulk upload: '+nt.join('. '):''},rows.map(r=>({po:r.PONumber,inv:r.InvoiceNumber,date:r.InvoiceDate,item:r.ItemNumber,qty:num(r.ItemQty)})));
+      packages:f.Packages?num(f.Packages):'',weight:f.WeightKg?num(f.WeightKg):'',cbm:f.Cbm?num(f.Cbm):'',notes:nt.length?'Bulk upload: '+nt.join('. '):''},rows.map(r=>({po:r.PONumber,inv:r.InvoiceNumber,date:r.InvoiceDate,item:r.ItemNumber,qty:num(r.ItemQty),stype:r.ShipmentType})));
     created.push(ref);lines+=rows.length;
   });
   const rej=P.items.filter(x=>x.errs.length||x.held),rejected=rej.map(x=>({row:x.r._row,errs:x.errs.length?x.errs:[x.held],held:!x.errs.length})),noticeItems=P.items.filter(x=>x.notes&&x.notes.length);
@@ -4072,13 +4080,13 @@ function bulkCancelRun(reason,note){
 }
 function monHTML(all){
   const D=S.ui.dash,q=D.q.toLowerCase();
-  const rows=(D.status==='Cancelled'?cancelledList():all).filter(sh=>(D.status==='All'||D.status==='Cancelled'||sh.status===D.status||(D.status==='Delayed'&&isLateNow(sh))||(D.status==='Invoice pending'&&can('invoices')&&isInvPending(sh))||(D.status==='At risk'&&riskInfo(sh)&&!isLateNow(sh))||(D.status==='Free time ending'&&['ending','over'].includes((freeInfo(sh)||{}).state)))).filter(sh=>!D.overdueOnly||isLateNow(sh)).filter(sh=>!D.missDocs||missingDocs(sh)).filter(sh=>!D.pendRG||rgPending(sh))
+  const rows=(D.status==='Cancelled'?cancelledList():all).filter(sh=>(D.status==='All'||D.status==='Cancelled'||sh.status===D.status||(D.status==='Delayed'&&isLateNow(sh))||(D.status==='Invoice pending'&&can('invoices')&&isInvPending(sh))||(D.status==='At risk'&&riskInfo(sh)&&!isLateNow(sh))||(D.status==='Free time ending'&&['ending','over'].includes((freeInfo(sh)||{}).state)))).filter(sh=>!D.overdueOnly||isLateNow(sh)).filter(sh=>!D.missDocs||missingDocs(sh)).filter(sh=>!D.pendRG||rgPending(sh)).filter(sh=>!D.poMiss||poMissing(sh))
     .filter(sh=>!q||(sh.ref+' '+sh.carrier+' '+sh.shipper+' '+sh.consignee+' '+sh.route+' '+sh.pos.join(' ')).toLowerCase().includes(q)).sort((a,b)=>(a.due||'9').localeCompare(b.due||'9'));
   if(!rows.length)return '<div class="empty">No shipments match these filters.</div>';
   const cb=can('cancelship'),elig=s=>!s.cancelled;D.chk=(D.chk||[]).filter(r=>rows.some(s=>s.ref===r&&elig(s)));
   const allSel=cb&&rows.some(elig)&&rows.filter(elig).every(s=>D.chk.includes(s.ref));
   return `${monBarHTML()}<div class="tbw"><table class="tb" data-sort="on"><tr>${cb?`<th style="width:34px"><input type="checkbox" id="monAll" data-act="monAll" aria-label="Select all shown shipments" ${allSel?'checked':''}></th>`:''}<th>Shipment</th><th>Mode</th><th>Type</th><th>Route</th><th>Carrier</th><th>Progress</th><th>Due</th><th>Status</th>${can('invoices')?'<th>Freight invoice</th>':''}${can('cancelship')?'<th></th>':''}</tr>`+rows.map(sh=>`<tr class="click${can('invoices')&&isInvPending(sh)?' tr-pend':''}" data-act="open" data-ref="${sh.ref}">${cb?`<td><input type="checkbox" data-act="monSel" data-ref="${sh.ref}" aria-label="Select ${sh.ref}" ${elig(sh)?'':'disabled'} ${D.chk.includes(sh.ref)?'checked':''}></td>`:''}<td><b>${sh.ref}</b></td><td>${modeBadge(sh.mode)}</td><td>${typeBadge(sh.stype)}${dgTag(sh.nature)}</td><td>${esc(sh.route)}</td><td>${esc(sh.carrier)}</td><td>${miniHTML(sh)}</td>
-    <td>${dueCell(sh)}</td><td>${pill(sh)}${docBadge(sh)}</td>${can('invoices')?`<td>${sh.cancelled?'-':invPill(sh)}</td>`:''}${can('cancelship')?`<td class="r">${sh.cancelled?'':`<button class="btn sm danger" data-act="cancelOpen" data-ref="${sh.ref}">Cancel</button>`}</td>`:''}</tr>`).join('')+'</table></div>';
+    <td>${dueCell(sh)}</td><td>${pill(sh)}${docBadge(sh)}${poBadge(sh)}</td>${can('invoices')?`<td>${sh.cancelled?'-':invPill(sh)}</td>`:''}${can('cancelship')?`<td class="r">${sh.cancelled?'':`<button class="btn sm danger" data-act="cancelOpen" data-ref="${sh.ref}">Cancel</button>`}</td>`:''}</tr>`).join('')+'</table></div>';
 }
 function onTime(arr,k){
   let n=0,on=0;const late=[];
@@ -4124,7 +4132,7 @@ function perfCard(all){
 const cancelledList=()=>{const D=S.ui.dash;return shipsAll().filter(sh=>sh.cancelled&&(D.mode==='All'||sh.mode===D.mode)&&(!D.type||D.type==='All'||sh.stype===D.type)&&(!D.nature||D.nature==='All'||sh.nature===D.nature)&&perOK(sh))};
 const dashList=()=>{const D=S.ui.dash;return ships().filter(sh=>(D.mode==='All'||sh.mode===D.mode)&&(!D.type||D.type==='All'||sh.stype===D.type)&&(!D.nature||D.nature==='All'||sh.nature===D.nature)).filter(perOK)};
 function typeCard(all){
-  const rows=[...TYPES,'Not set'].map(x=>{const l=all.filter(s=>(s.stype||'Not set')===x);return {x,n:l.length,w:l.reduce((a,s)=>a+s.weight,0)}}).filter(r=>r.n||r.x!=='Not set'),mx=Math.max(1,...rows.map(r=>r.n));
+  const rows=[...TYPES,'Mixed','Not set'].map(x=>{const l=all.filter(s=>(s.stype||'Not set')===x);return {x,n:l.length,w:l.reduce((a,s)=>a+s.weight,0)}}).filter(r=>r.n||r.x!=='Not set'),mx=Math.max(1,...rows.map(r=>r.n));
   const dg=all.filter(s=>s.nature==='DG');
   return `<div class="card"><h3>Shipments by type</h3>${rows.map(r=>`<div style="display:grid;grid-template-columns:130px minmax(60px,1fr) 120px;gap:10px;align-items:center;margin-bottom:8px"><span>${typeBadge(r.x==='Not set'?'':r.x)}</span><div class="bar"><i style="width:${r.n/mx*100}%;background:${TYPE_COL[r.x]}"></i></div><span style="text-align:right">${r.n} <small class="mu">${(r.w/1000).toFixed(1)} t</small></span></div>`).join('')}
   <div class="row" style="justify-content:space-between;border-top:1px solid var(--line);padding-top:10px;margin-top:6px"><span><span class="dg" style="margin-left:0">DG</span> Dangerous goods</span><span><b>${dg.length}</b> <small class="mu">${(dg.reduce((a,s)=>a+s.weight,0)/1000).toFixed(1)} t</small></span></div></div>`;
@@ -4142,7 +4150,7 @@ function viewDash(){
   return pageHead('Control Tower Overview','Click a tile to review the shipments behind it. Pick a date on the calendar to see what is overdue and what is due. Change the milestone to look at pickup, ETD, ETA or delivery.')+periodBar({basis:true})+
   `<div class="card"><div class="row">
     <label class="f">Mode<select id="d_mode" data-ch="dmode">${['All',...MODES].map(o=>`<option ${o===D.mode?'selected':''}>${o}</option>`).join('')}</select></label>
-    <label class="f">Shipment type<select id="d_type" data-ch="dtype">${['All',...TYPES].map(o=>`<option ${o===(D.type||'All')?'selected':''}>${o}</option>`).join('')}</select></label>
+    <label class="f">Shipment type<select id="d_type" data-ch="dtype">${['All',...TYPES,'Mixed'].map(o=>`<option ${o===(D.type||'All')?'selected':''}>${o}</option>`).join('')}</select></label>
     <label class="f">Nature of goods<select id="d_nature" data-ch="dnature">${['All',...NATURES].map(o=>`<option ${o===(D.nature||'All')?'selected':''}>${o}</option>`).join('')}</select></label>
     <label class="f">Milestone<select id="d_ms" data-ch="dms">${Object.keys(MS).map(k=>`<option value="${k}" ${k===D.ms?'selected':''}>${MS[k].label}${k==='Delivery'?' (due date)':' (planned date)'}</option>`).join('')}</select></label>
     <label class="f">Selected date<input type="date" id="d_sel" class="in" value="${D.sel}" data-ch="dsel"></label>
@@ -4320,7 +4328,7 @@ function viewCarrier(){
   const tot=st.reduce((a,c)=>({n:a.n+c.n,late:a.late+c.late,deliv:a.deliv+c.deliv,onT:a.onT+c.onTime,dueN:a.dueN+c.dueN}),{n:0,late:0,deliv:0,onT:0,dueN:0});
   return pageHead('Carrier Performance','How each carrier is performing by mode and time window: volumes handled, delays and on-time delivery. Costs are not shown here.')+periodBar({basis:true})+
   `<div class="card"><div class="row"><label class="f">Mode<select data-ch="cmode">${['All',...MODES].map(o=>`<option ${o===C.mode?'selected':''}>${o}</option>`).join('')}</select></label>
-   <label class="f">Shipment type<select data-ch="ctype">${['All',...TYPES].map(o=>`<option ${o===(C.type||'All')?'selected':''}>${o}</option>`).join('')}</select></label>
+   <label class="f">Shipment type<select data-ch="ctype">${['All',...TYPES,'Mixed'].map(o=>`<option ${o===(C.type||'All')?'selected':''}>${o}</option>`).join('')}</select></label>
    <label class="f">Nature of goods<select data-ch="cnature">${['All',...NATURES].map(o=>`<option ${o===(C.nature||'All')?'selected':''}>${o}</option>`).join('')}</select></label></div></div>
   ${kt('cp',(()=>{
   const L=carrierList(),byC=a=>[...a].sort((x,y)=>x.carrier.localeCompare(y.carrier)||(x.due||'9').localeCompare(y.due||'9'));
@@ -5005,7 +5013,7 @@ function viewTransit(){
     ${sel('Group by','trgroup',Object.entries(GROUPS),T.group)}
     ${sel('Mode','trmode',['All',...MODES].map(o=>[o,o]),T.mode)}</div>
     <div class="g4" style="margin-top:12px">
-    ${sel('Shipment type','trtype',['All',...TYPES].map(o=>[o,o]),T.stype||'All')}
+    ${sel('Shipment type','trtype',['All',...TYPES,'Mixed'].map(o=>[o,o]),T.stype||'All')}
     ${sel('Nature of goods','trnature',['All',...NATURES].map(o=>[o,o]),T.nature||'All')}
     ${sel('Carrier','trcarrier',[['All','All carriers'],...carriers.map(c=>[c,c])],T.carrier)}
     </div>
@@ -5156,52 +5164,6 @@ function dsrBuild(o){
   });
   rows.sort((a,b)=>a.ShipmentID.localeCompare(b.ShipmentID)||0);
   return {headers:DSR_COLS,rows,sheet:'DSR',name:'DSR_'+dsrPeriodLabel(o)+'_'+(o.statuses.length&&o.statuses.length<3?o.statuses.join('+').replace(/ /g,''):'AllStatus')+'_By'+(o.basis==='pickup'?'Pickup':'Delivery')};
-}
-/* ----- freight audit ----- */
-const FA_STATES=['Invoice Pending','Payment Pending','Paid'];
-const faScope=()=>ships().filter(s=>s.status==='Delivered'&&s.freight==='Your Company');
-function faState(sh){const l=invList(sh.ref).filter(i=>i.invRef&&invAmt(i)>0);if(!l.length)return 'Invoice Pending';return l.every(i=>i.paid==='Paid')?'Paid':'Payment Pending'}
-const faPrimary=ref=>invList(ref)[0]||null;
-function faCheck(ref,f){
-  const sh=getShip(ref),e=[];if(!sh||sh.status!=='Delivered')return ['Only delivered shipments can be audited'];
-  const amt=String(f.amt||'').replace(/[$,\s]/g,''),inv=String(f.inv||'').trim();
-  if(amt!==''&&!(Number(amt)>0))e.push('Actual freight cost must be a number above 0');
-  if((amt!==''&&!inv)||(inv&&amt===''))e.push('Enter both the carrier invoice number and the actual freight cost, or leave both empty');
-  if(inv){const o=S.invoices.find(i=>(i.invRef||'').toLowerCase()===inv.toLowerCase()&&i.ref!==ref);if(o)e.push('Invoice number '+inv+' is already recorded on '+o.ref)}
-  if(f.paid==='Paid'){if(!inv||amt==='')e.push('A shipment can only be marked Paid once the invoice number and cost are recorded');if(!isoOK(f.paidOn))e.push('Enter the payment date (yyyy-mm-dd)');else if(f.paidOn>S.today)e.push('The payment date cannot be in the future')}
-  return e;
-}
-function faSave(ref,f){
-  if(!can('auditedit'))return {ok:false,msg:'Your role cannot edit the freight audit'};
-  const e=faCheck(ref,f);if(e.length)return {ok:false,msg:e[0],errs:e};
-  const amt=Number(String(f.amt||'').replace(/[$,\s]/g,''))||0,inv=String(f.inv||'').trim();
-  let r=faPrimary(ref),isNew=false;
-  if(!r){if(!inv&&!String(f.rem||'').trim())return {ok:true,msg:ref+': nothing to save'};r={id:nextInvId(),ref,recordedOn:S.today,recordedBy:S.email,invRef:'',freight:0,extra:0,extraType:'',date:S.today,paid:'Unpaid'};S.invoices.push(r);isNew=true}
-  r.invRef=inv;r.freight=amt;r.remarks=String(f.rem||'').trim();r.paid=f.paid==='Paid'?'Paid':'Unpaid';r.paidOn=r.paid==='Paid'?f.paidOn:'';r.updatedOn=S.today;r.updatedBy=S.email;
-  audit(isNew?'Invoice recorded':'Invoice updated',ref,(inv||'no number')+' actual '+usd(amt)+', '+faState(getShip(ref))+(r.remarks?', '+r.remarks:''));
-  return {ok:true,msg:ref+': freight audit saved ('+faState(getShip(ref))+')'};
-}
-const faPill=s=>`<span class="pill ${s==='Paid'?'ok':s==='Payment Pending'?'warn':'late'}">${s}</span>`;
-function faRows(){const F=S.ui.fa=S.ui.fa||{f:'All',car:'All',q:''};const q=String(F.q||'').toLowerCase();return faScope().filter(s=>F.f==='All'||faState(s)===F.f).filter(s=>F.car==='All'||s.carrier===F.car).filter(s=>!q||[s.ref,s.carrier,s.pos.join(' '),invList(s.ref).map(i=>i.invRef).join(' ')].join(' ').toLowerCase().includes(q)).sort((a,b)=>(a.f.DeliveredOn||'').localeCompare(b.f.DeliveredOn||''))}
-function viewFAudit(){
-  const F=S.ui.fa=S.ui.fa||{f:'All',car:'All',q:''},all=faScope(),n=s=>all.filter(x=>faState(x)===s).length,rows=faRows(),may=can('auditedit');
-  const tile=(id,l,v,cls)=>`<button class="kpi tile ${cls||''} ${F.f===id?'sel':''}" data-act="faTile" data-id="${id}" aria-pressed="${F.f===id}"><small>${l}</small><b>${v}</b></button>`;
-  return pageHead('Freight Audit','Delivered shipments where your company pays the freight. Record the actual freight cost, the carrier invoice number and remarks, and follow each shipment from invoice to payment.')+
-  `<div class="kpis">${tile('All','Delivered Shipments',all.length)}${tile('Invoice Pending','Invoice Pending',n('Invoice Pending'),n('Invoice Pending')?'late':'')}${tile('Payment Pending','Payment Pending',n('Payment Pending'),n('Payment Pending')?'acc':'')}${tile('Paid','Paid',n('Paid'),'ok')}</div>
-  <div class="card"><div class="row"><label class="f">Carrier<select data-ch="faCar"><option>All</option>${uniq(all.map(s=>s.carrier)).sort().map(c=>`<option ${F.car===c?'selected':''}>${esc(c)}</option>`).join('')}</select></label><label class="f grow">Search<input id="fa_q" class="in" value="${esc(F.q||'')}" placeholder="Shipment, carrier, PO or invoice number"></label>
-  <span class="row" style="align-self:flex-end;gap:6px"><button class="btn" data-act="rdQuick" data-id="invpend">Pending Invoices Report</button><button class="btn" data-act="rdQuick" data-id="paypend">Payment Pending Report</button></span></div></div>
-  <div class="card" style="padding:0"><div class="tbw"><table class="tb"><tr><th>Shipment</th><th>Carrier</th><th>Delivered</th><th class="r">Days Since Delivery</th><th class="r">Quote (Est.)</th><th class="r">Actual Freight</th><th>Carrier Invoice No.</th><th>Audit Status</th><th>Remarks</th><th></th></tr>
-  ${rows.map(s=>{const i=faPrimary(s.ref),q=selQuote(s.ref),st=faState(s);return `<tr><td><b>${esc(s.ref)}</b><br><small class="mu">${esc(s.route)}</small></td><td>${esc(s.carrier)}</td><td>${fmt(s.f.DeliveredOn)}</td><td class="r">${s.f.DeliveredOn?diffDays(S.today,s.f.DeliveredOn):'-'}</td><td class="r">${q?usd(q.amount):'-'}</td><td class="r">${i&&invAmt(i)>0?usd(i.freight):'-'}</td><td>${esc(i&&i.invRef||'-')}${invList(s.ref).length>1?`<br><small class="mu">${invList(s.ref).length} invoices</small>`:''}</td><td>${faPill(st)}${i&&i.paidOn?`<br><small class="mu">Paid ${fmt(i.paidOn)}</small>`:''}</td><td>${esc(i&&i.remarks||'-')}</td><td class="r">${may?`<button class="btn sm pri" data-act="faOpen" data-ref="${esc(s.ref)}">${st==='Invoice Pending'?'Record':'Update'}</button>`:''}</td></tr>`}).join('')||'<tr><td colspan="10" class="empty">No delivered shipment matches.</td></tr>'}</table></div></div>
-  <p class="hint">Shipments where the shipper pays the freight are not listed. The invoice and cost are the same records as in Freight Commercials, so nothing is entered twice.</p>`;
-}
-function faModal(ref){
-  const sh=getShip(ref);if(!sh)return;const i=faPrimary(ref)||{};
-  openModal(`<div class="mh"><div><h2>Freight Audit: ${esc(ref)}</h2><div class="mu">${esc(sh.carrier)}, ${esc(sh.route)}, delivered ${fmt(sh.f.DeliveredOn)}${selQuote(ref)?', quote '+usd(selQuote(ref).amount):''}</div></div><button class="x" data-act="close" aria-label="Close">&times;</button></div>
-  <div id="fa_err"></div><div class="g2"><label class="f">Actual Freight Cost (USD)<input id="fa_amt" class="in" inputmode="decimal" value="${i.freight&&invAmt(i)>0?esc(i.freight):''}"></label><label class="f">Carrier Invoice Number<input id="fa_inv" class="in" value="${esc(i.invRef||'')}"></label>
-  <label class="f">Payment Status<select id="fa_paid" class="in"><option ${i.paid!=='Paid'?'selected':''}>Unpaid</option><option ${i.paid==='Paid'?'selected':''}>Paid</option></select></label><label class="f">Payment Date<input type="date" id="fa_paidon" class="in" max="${S.today}" value="${esc(i.paidOn||'')}"></label></div>
-  <label class="f" style="margin-top:8px">Remarks<input id="fa_rem" class="in" value="${esc(i.remarks||'')}" maxlength="200"></label>
-  ${invList(ref).length>1?'<p class="hint">This shipment has several invoices. This form edits the first; use Freight Commercials for the others.</p>':''}
-  <div class="row sec"><button class="btn pri" data-act="faSave" data-ref="${esc(ref)}">Save</button><button class="btn" data-act="close">Cancel</button></div>`);
 }
 /* ----- receipt of goods (RG) ----- */
 const RG_ONE=['DAP','DDP'];
@@ -5378,9 +5340,6 @@ document.addEventListener('click',e=>{
   const t=e.target.closest&&e.target.closest('[data-act]');if(!t)return;const a=t.dataset.act,d=t.dataset;
   if(a==='rdDl'||a==='rdQuick'){const r=rptRun(d.id,d.fmt||'xlsx');toast(r.msg,r.ok?'':'bad');e.stopPropagation();return}
   if(a==='rdAll'||a==='rdNone'){const R=rdState();R.dsr[RD_KEY[d.f]]=a==='rdAll'?RD_ALL[d.f]():[];render();return}
-  if(a==='faTile'){const F=S.ui.fa=S.ui.fa||{f:'All',car:'All',q:''};F.f=F.f===d.id&&d.id!=='All'?'All':d.id;render();return}
-  if(a==='faOpen'){if(!can('auditedit')){toast('Your role is not allowed to do this','bad');return}faModal(d.ref);return}
-  if(a==='faSave'){const r=faSave(d.ref,{amt:val('fa_amt'),inv:val('fa_inv'),paid:val('fa_paid'),paidOn:val('fa_paidon'),rem:val('fa_rem')});if(!r.ok){const x=document.getElementById('fa_err');if(x)x.innerHTML=`<div class="err" role="alert" style="margin-bottom:10px">${esc(r.msg)}</div>`;return}closeModal();render();toast(r.msg);return}
   if(a==='rgTile'){const F=S.ui.rg=S.ui.rg||{f:'Pending',q:''};F.f=d.id;render();return}
   if(a==='rgOpen'){if(!can('rgedit')){toast('Your role is not allowed to do this','bad');return}rgModal(d.ref);return}
   if(a==='rgSave'){const r=rgSave(d.ref,{itNo:val('rg_itno'),itDate:val('rg_itdate'),to:val('rg_to'),pl:val('rg_pl'),finNo:val('rg_finno'),finDate:val('rg_findate')});if(!r.ok){const x=document.getElementById('rg_err');if(x)x.innerHTML=`<div class="err" role="alert" style="margin-bottom:10px">${esc(r.msg)}</div>`;return}closeModal();render();toast(r.msg);return}
@@ -5389,7 +5348,6 @@ document.addEventListener('click',e=>{
 document.addEventListener('change',e=>{
   const t=e.target;if(!t)return;
   if(t.id==='rgFile'){const f=t.files[0];if(!f)return;if(!can('rgedit')){toast('Your role is not allowed to do this','bad');return}readUpload(f,(err,o)=>{if(err||o.err){toast(err||o.err,'bad');return}const P=rgImportCheck(o.objs,o.hdr);if(P.err){toast(P.err,'bad');return}P.fileName=f.name;rgPreview(P)});t.value='';return}
-  if(t.dataset&&t.dataset.ch==='faCar'){(S.ui.fa=S.ui.fa||{}).car=t.value;render();return}
   if(t.dataset&&t.dataset.ch==='rdOpt'){const R=rdState(),f=t.dataset.f;if(f==='dk')R.dsr.kind=t.value;if(f==='db')R.dsr.basis=t.value;if(f==='do')R.dsr.openAlways=t.checked;render();return}
   if(t.dataset&&t.dataset.ch==='rdMulti'){const R=rdState(),f=t.dataset.f,k=RD_KEY[f],v=f==='s'?t.dataset.v:Number(t.dataset.v),a=R.dsr[k],i=a.indexOf(v);if(t.checked&&i<0)a.push(v);if(!t.checked&&i>=0)a.splice(i,1);if(f!=='s')a.sort((x,y)=>x-y);render();return}
   if(t.id==='rd_month'){if(/^\d{4}-\d{2}$/.test(t.value)){rdState().month=t.value;render()}return}
@@ -5427,6 +5385,218 @@ const TC_SEL='#view h1,#view h2,#view h3,#view h4,#modal h2,#modal h3,#view .tab
 const TC_ON=!/[?&]nocap=1/.test(location.search);
 function capAll(){if(!TC_ON)return;document.querySelectorAll(TC_SEL).forEach(capEl)}
 {let tm=null;new MutationObserver(()=>{clearTimeout(tm);tm=setTimeout(capAll,25)}).observe(document.body,{childList:true,subtree:true});setTimeout(capAll,50)}
+/* ========== freight audit (detailed), PO follow-up ========== */
+const usd2=n=>'$'+Number(n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const usdT=n=>'$'+Math.round(Number(n||0)).toLocaleString('en-US');
+DOC_TYPES.push('Carrier freight invoice');
+const FA_BUCKETS=[['0-15 days',0,15],['16-30 days',16,30],['31-60 days',31,60],['Over 60 days',61,99999]];
+const faBucket=d=>d==null?'':(FA_BUCKETS.find(b=>d>=b[1]&&d<=b[2])||FA_BUCKETS[3])[0];
+function faCfg(){const s=S.settings;s.fa=s.fa||{};const c=s.fa;if(!(c.terms>=0))c.terms=30;if(!(c.tol>=0))c.tol=5;if(!(c.remind>=0))c.remind=15;if(!c.termsBy)c.termsBy={};if(!c.reminded)c.reminded={};return c}
+const faTerms=car=>{const c=faCfg(),v=c.termsBy[car];return v!==undefined&&v!==''&&!isNaN(Number(v))?Number(v):c.terms};
+const faMblOf=sh=>uniq(sh.lines.map(l=>l.MBL_MAWB)).join('; ');
+const faHblOf=sh=>uniq(sh.lines.map(l=>l.HBL_HAWB_Tracking)).join('; ');
+function faScope(){return ships().filter(s=>s.status==='Delivered'&&s.freight==='Your Company')}
+const faRec=ref=>invList(ref).filter(i=>i.invRef&&invAmt(i)>0);
+function faState(sh){const r=faRec(sh.ref);if(!r.length)return 'Invoice Pending';if(r.some(i=>i.hold))return 'On Hold';return r.every(i=>i.paid==='Paid')?'Paid':'Payment Pending'}
+const faPrimary=ref=>invList(ref)[0]||null;
+function faRow(sh){
+  const c=faCfg(),q=selQuote(sh.ref),rec=faRec(sh.ref),st=faState(sh),sum=l=>l.reduce((a,i)=>a+invAmt(i),0);
+  const unpaid=rec.filter(i=>i.paid!=='Paid'),paid=rec.filter(i=>i.paid==='Paid'),held=rec.filter(i=>i.hold),total=sum(rec);
+  const dts=(unpaid.length?unpaid:rec).map(i=>i.date).filter(isoOK).sort(),invDate=unpaid.length?(dts[0]||''):(dts[dts.length-1]||'');
+  const days=sh.f.DeliveredOn?diffDays(S.today,sh.f.DeliveredOn):null;
+  const age=st==='Invoice Pending'?days:(st==='Paid'?null:(invDate?diffDays(S.today,invDate):days));
+  const due=invDate&&st!=='Paid'?addDays(invDate,faTerms(sh.carrier)):'',quote=q?q.amount:0;
+  const variance=rec.length&&q?total-quote:null,varPct=variance!=null&&quote>0?variance/quote*100:null;
+  const noHold=unpaid.filter(i=>!i.hold);
+  return {sh,ref:sh.ref,state:st,quote,hasQuote:!!q,qid:q&&q.qid||'',recs:rec,invNos:rec.map(i=>i.invRef).join('; '),freight:rec.reduce((a,i)=>a+num(i.freight),0),extra:rec.reduce((a,i)=>a+num(i.extra),0),total,variance,varPct,over:varPct!=null&&varPct>c.tol,invDate,due,overdue:st==='Payment Pending'&&!!due&&due<S.today,days,age,bucket:age==null?'':faBucket(age),paidOn:paid.map(i=>i.paidOn).filter(Boolean).sort().pop()||'',holdReason:held.map(i=>i.holdReason).filter(Boolean).join('; '),remarks:uniq(invList(sh.ref).map(i=>i.remarks)).join('; '),copy:docsOf(sh.ref).some(d=>d.type==='Carrier freight invoice'),
+    payable:st==='Invoice Pending'?quote:st==='Payment Pending'?sum(noHold):st==='On Hold'?sum(held):sum(paid),paidAmt:sum(paid),heldAmt:sum(held),nInv:rec.length,nPaid:paid.length,nHeld:held.length,nUnpaid:noHold.length};
+}
+function faSt(){const F=S.ui.fa=S.ui.fa||{};const d={f:'All',cars:[],modes:[],kind:'all',years:[],quarters:[],months:[],basis:'delivery',q:'',sel:[]};Object.keys(d).forEach(k=>{if(F[k]===undefined)F[k]=d[k]});if(!Array.isArray(F.sel))F.sel=[];return F}
+const faHay=r=>[r.sh.ref,faMblOf(r.sh),faHblOf(r.sh),r.sh.carrier,r.sh.pos.join(' '),r.invNos,r.sh.containers.join(' ')].join(' ').toLowerCase();
+function faPeriodOk(r,F){if(F.kind==='all')return true;const d=F.basis==='invoice'?(r.recs.length?r.invDate||'':null):(r.sh.f.DeliveredOn||'');if(d===null)return true;return dsrInPeriod(d,{kind:F.kind,years:F.years,quarters:F.quarters,months:F.months})}
+function faBase(){const F=faSt(),q=String(F.q||'').toLowerCase();return faScope().map(faRow).filter(r=>(!F.cars.length||F.cars.includes(r.sh.carrier))&&(!F.modes.length||F.modes.includes(r.sh.mode))&&faPeriodOk(r,F)&&(!q||faHay(r).includes(q)))}
+const faStatusOk=(r,f)=>f==='All'||(f==='Overdue'?r.overdue:f==='Over Quote'?r.over:f==='No Quote'?!r.hasQuote:f==='No Invoice Copy'?(r.nInv>0&&!r.copy):r.state===f);
+function faRows(){const F=faSt();return faBase().filter(r=>faStatusOk(r,F.f)).sort((a,b)=>(a.sh.f.DeliveredOn||'').localeCompare(b.sh.f.DeliveredOn||'')||a.ref.localeCompare(b.ref))}
+function faTotals(rows){
+  const by=s=>rows.filter(r=>r.state===s),ip=by('Invoice Pending'),pp=by('Payment Pending'),oh=by('On Hold'),pd=by('Paid'),S_=(l,k)=>l.reduce((a,r)=>a+r[k],0);
+  return {all:{n:rows.length,inv:S_(rows,'nInv'),val:rows.reduce((a,r)=>a+(r.nInv?r.total:r.quote),0)},
+    ip:{n:ip.length,inv:0,val:S_(ip,'quote'),noQuote:ip.filter(r=>!r.hasQuote).length},
+    pp:{n:pp.length,inv:S_(pp,'nUnpaid'),val:S_(pp,'payable')},oh:{n:oh.length,inv:S_(oh,'nHeld'),val:S_(oh,'heldAmt')},
+    pd:{n:pd.length,inv:S_(rows,'nPaid'),val:S_(rows,'paidAmt')}};
+}
+const faPill=s=>`<span class="pill ${s==='Paid'?'ok':s==='Payment Pending'?'warn':s==='On Hold'?'info':'late'}">${s}</span>`;
+function faCheck(ref,f){
+  const sh=getShip(ref),e=[];if(!sh||sh.status!=='Delivered')return ['Only delivered shipments can be audited'];
+  const amt=String(f.amt==null?'':f.amt).replace(/[$,\s]/g,''),inv=String(f.inv||'').trim(),ex=String(f.extra==null?'':f.extra).replace(/[$,\s]/g,'');
+  if(amt!==''&&!(Number(amt)>0))e.push('Freight charge must be a number above 0');
+  if((amt!==''&&!inv)||(inv&&amt===''))e.push('Enter both the carrier invoice number and the freight charge, or leave both empty');
+  if(ex!==''&&!(Number(ex)>=0&&isFinite(Number(ex))))e.push('Additional charges must be a number, 0 or more');
+  const target=f.id==='new'?null:(f.id?S.invoices.find(i=>String(i.id)===String(f.id)&&i.ref===ref):faPrimary(ref));
+  if(inv){const o=S.invoices.find(i=>(i.invRef||'').toLowerCase()===inv.toLowerCase()&&(!target||i.id!==target.id));if(o)e.push('Invoice number '+inv+' is already recorded on '+o.ref)}
+  if(f.date&&(!isoOK(f.date)||f.date>S.today))e.push('The invoice date must be a valid date that is not in the future');
+  if(f.hold){if(!inv||amt==='')e.push('Only a recorded invoice can be put on hold');if(String(f.holdReason||'').trim().length<3)e.push('Give the reason the invoice is on hold');if(f.paid==='Paid')e.push('A held invoice cannot be marked Paid. Release the hold first')}
+  if(f.paid==='Paid'){if(!inv||amt==='')e.push('A shipment can only be marked Paid once the invoice number and charge are recorded');if(!isoOK(f.paidOn))e.push('Enter the payment date (yyyy-mm-dd)');else if(f.paidOn>S.today)e.push('The payment date cannot be in the future')}
+  return e;
+}
+function faSave(ref,f){
+  if(!can('auditedit'))return {ok:false,msg:'Your role cannot edit the freight audit'};
+  const e=faCheck(ref,f);if(e.length)return {ok:false,msg:e[0],errs:e};
+  const n_=x=>Number(String(x==null?'':x).replace(/[$,\s]/g,''))||0,amt=n_(f.amt),inv=String(f.inv||'').trim();
+  let r=f.id==='new'?null:(f.id?S.invoices.find(i=>String(i.id)===String(f.id)&&i.ref===ref):faPrimary(ref)),isNew=false;
+  if(!r){if(!inv&&!String(f.rem||'').trim())return {ok:true,msg:ref+': nothing to save'};r={id:nextInvId(),ref,recordedOn:S.today,recordedBy:S.email,invRef:'',freight:0,extra:0,extraType:'',date:S.today,paid:'Unpaid'};S.invoices.push(r);isNew=true}
+  r.invRef=inv;r.freight=amt;if(f.extra!==undefined){r.extra=n_(f.extra);r.extraType=r.extra>0?String(f.xtype||'Other'):''}
+  if(f.date)r.date=f.date;r.remarks=String(f.rem||'').trim();
+  r.hold=!!f.hold&&!!inv;r.holdReason=r.hold?String(f.holdReason||'').trim():'';
+  r.paid=f.paid==='Paid'?'Paid':'Unpaid';r.paidOn=r.paid==='Paid'?f.paidOn:'';r.updatedOn=S.today;r.updatedBy=S.email;
+  const st=faState(getShip(ref));
+  audit(isNew?'Invoice recorded':'Invoice updated',ref,(inv||'no number')+' '+usd2(invAmt(r))+', '+st+(r.hold?' ('+r.holdReason+')':'')+(r.remarks?', '+r.remarks:''));
+  return {ok:true,msg:ref+': freight audit saved ('+st+')'};
+}
+function faRemoveInv(ref,id){
+  if(!can('auditedit'))return {ok:false,msg:'Your role cannot edit the freight audit'};
+  const r=S.invoices.find(i=>String(i.id)===String(id)&&i.ref===ref);if(!r)return {ok:false,msg:'Invoice not found'};
+  S.invoices=S.invoices.filter(i=>i!==r);audit('Invoice removed',ref,(r.invRef||'no number')+' '+usd2(invAmt(r)));return {ok:true,msg:'Invoice removed'};
+}
+function faMarkPaid(refs,date){
+  if(!can('auditedit'))return {ok:false,msg:'Your role cannot edit the freight audit'};
+  if(!isoOK(date)||date>S.today)return {ok:false,msg:'Enter a payment date that is not in the future'};
+  let n=0,skip=0;
+  refs.forEach(ref=>{const sh=getShip(ref);if(!sh||faState(sh)!=='Payment Pending'){skip++;return}faRec(ref).filter(i=>i.paid!=='Paid').forEach(i=>{i.paid='Paid';i.paidOn=date;i.updatedOn=S.today;i.updatedBy=S.email});audit('Invoice updated',ref,'marked paid on '+date+' (bulk)');n++});
+  return {ok:true,msg:n+' shipment(s) marked Paid'+(skip?', '+skip+' skipped (not Payment Pending)':''),n,skip};
+}
+function faRemindList(){const c=faCfg(),by={};faScope().map(faRow).filter(r=>r.state==='Invoice Pending'&&r.days!=null&&r.days>=c.remind&&!(c.reminded[r.ref]&&diffDays(S.today,c.reminded[r.ref])<7)).forEach(r=>{(by[r.sh.carrier]=by[r.sh.carrier]||[]).push(r)});return by}
+function faRemindSend(){
+  if(!can('auditedit'))return {ok:false,msg:'Your role cannot edit the freight audit'};
+  const c=faCfg(),by=faRemindList();let mails=0,ships_=0;
+  Object.entries(by).forEach(([car,rows])=>{
+    mail(carrierEmail(car),'Reminder: '+rows.length+' freight invoice'+(rows.length>1?'s':'')+' awaiting from '+car,'Hello,\n\nWe have not yet received the freight invoice for the delivered shipments below. Please send the invoice, quoting the MBL or HBL number.\n\n'+rows.map(r=>'- HBL '+(faHblOf(r.sh)||'-')+(faMblOf(r.sh)?', MBL '+faMblOf(r.sh):'')+', delivered '+fmt(r.sh.f.DeliveredOn)+' ('+r.days+' days ago)').join('\n')+'\n\nThank you.','Invoice reminder');
+    rows.forEach(r=>{c.reminded[r.ref]=S.today});mails++;ships_+=rows.length});
+  if(mails)audit('Invoice reminder sent','',ships_+' shipment(s) to '+mails+' carrier(s)');
+  return {ok:true,msg:mails?'Reminders queued for '+mails+' carrier(s), '+ships_+' shipment(s)':'No reminders are due',mails,ships:ships_};
+}
+const faVarTxt=r=>r.variance==null?'-':(r.variance>0?'+':r.variance<0?'-':'')+usd2(Math.abs(r.variance))+(r.varPct!=null?' ('+(r.varPct>0?'+':r.varPct<0?'-':'')+Math.abs(r.varPct).toFixed(1)+'%)':'');
+const FA_XCOLS=['HBL / HAWB / Tracking','MBL / MAWB','Internal Reference','Carrier','Mode','Delivered On','Days Since Delivery','Aging','Quote (USD)','Quotation ID','Carrier Invoice No.','Invoice Date','Payment Due','Freight (USD)','Additional Charges (USD)','Invoice Total (USD)','Variance (USD)','Variance %','Audit Status','Overdue','Paid On','On Hold Reason','Invoice Copy','Remarks'];
+const faXRow=r=>({'HBL / HAWB / Tracking':faHblOf(r.sh),'MBL / MAWB':faMblOf(r.sh),'Internal Reference':r.ref,Carrier:r.sh.carrier,Mode:r.sh.mode,'Delivered On':r.sh.f.DeliveredOn||'','Days Since Delivery':r.days==null?'':r.days,Aging:r.bucket,'Quote (USD)':r.hasQuote?r.quote:'','Quotation ID':r.qid,'Carrier Invoice No.':r.invNos,'Invoice Date':r.invDate,'Payment Due':r.due,'Freight (USD)':r.nInv?r.freight:'','Additional Charges (USD)':r.nInv?r.extra:'','Invoice Total (USD)':r.nInv?r.total:'','Variance (USD)':r.variance==null?'':Math.round(r.variance*100)/100,'Variance %':r.varPct==null?'':Math.round(r.varPct*10)/10,'Audit Status':r.state,Overdue:r.overdue?'Yes':'','Paid On':r.paidOn,'On Hold Reason':r.holdReason,'Invoice Copy':r.nInv?(r.copy?'Yes':'No'):'',Remarks:r.remarks});
+function faRegister(rows){return {headers:FA_XCOLS,rows:rows.map(faXRow),sheet:'Freight Audit',name:'Freight_Audit_'+S.today}}
+function faAging(rows){
+  return FA_BUCKETS.map(([label])=>{const ip=rows.filter(r=>r.state==='Invoice Pending'&&r.bucket===label),pp=rows.filter(r=>(r.state==='Payment Pending'||r.state==='On Hold')&&r.bucket===label);return {label,ip:{n:ip.length,v:ip.reduce((a,r)=>a+r.quote,0)},pp:{n:pp.length,v:pp.reduce((a,r)=>a+r.payable,0)}}});
+}
+function faTrend(rows){
+  const m={};rows.forEach(r=>{const d=r.sh.f.DeliveredOn;if(!isoOK(d))return;const k=d.slice(0,7);const o=m[k]=m[k]||{ip:0,pp:0,oh:0,pd:0,n:0};o.n++;if(r.state==='Invoice Pending')o.ip+=r.quote;else if(r.state==='Payment Pending')o.pp+=r.payable;else if(r.state==='On Hold')o.oh+=r.payable;else o.pd+=r.payable});
+  return Object.keys(m).sort().slice(-12).map(k=>Object.assign({k},m[k]));
+}
+function faTrendSvg(rows){
+  const T=faTrend(rows);if(!T.length)return '<div class="empty">No data for the selection.</div>';
+  const W=640,H=230,L=48,B=28,Tp=12,max=Math.max(1,...T.map(t=>t.ip+t.pp+t.oh+t.pd)),bw=Math.min(38,(W-L-10)/T.length*0.62),step=(W-L-10)/T.length;
+  const col={pd:'var(--ok)',pp:'var(--accent)',oh:'var(--info)',ip:'var(--line2)'},lab={pd:'Paid',pp:'Payment Pending',oh:'On Hold',ip:'Invoice Pending (est.)'};
+  let g='';[0,0.5,1].forEach(f=>{const y=Tp+(H-Tp-B)*(1-f);g+=`<line x1="${L}" x2="${W}" y1="${y}" y2="${y}" stroke="var(--line)" stroke-width="1"/><text x="${L-6}" y="${y+4}" text-anchor="end" font-size="10" fill="var(--muted)">${usdT(max*f)}</text>`});
+  T.forEach((t,i)=>{const x=L+i*step+(step-bw)/2;let y=H-B;['pd','pp','oh','ip'].forEach(k=>{const h=t[k]/max*(H-Tp-B);if(h>0){y-=h;g+=`<rect x="${x}" y="${y}" width="${bw}" height="${h}" fill="${col[k]}"><title>${t.k}: ${lab[k]} ${usdT(t[k])}</title></rect>`}});g+=`<text x="${x+bw/2}" y="${H-10}" text-anchor="middle" font-size="10" fill="var(--muted)">${MON[Number(t.k.slice(5))-1]} ${t.k.slice(2,4)}</text>`});
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Freight value by delivery month" style="max-height:260px">${g}</svg><div class="row" style="gap:14px;flex-wrap:wrap;margin-top:4px">${['pd','pp','oh','ip'].map(k=>`<span class="mu sm"><i style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${col[k]};margin-right:5px"></i>${lab[k]}</span>`).join('')}</div>`;
+}
+function faCarrierSummary(rows){
+  const by={};rows.forEach(r=>{const c=r.sh.carrier,o=by[c]=by[c]||{c,n:0,inv:0,ip:0,pp:0,oh:0,pd:0,over:0,od:0,lag:[]};o.n++;o.inv+=r.nInv;if(r.state==='Invoice Pending')o.ip+=r.quote;else if(r.state==='Payment Pending')o.pp+=r.payable;else if(r.state==='On Hold')o.oh+=r.payable;o.pd+=r.paidAmt;if(r.over)o.over++;if(r.overdue)o.od++;if(r.nInv&&isoOK(r.invDate)&&r.sh.f.DeliveredOn)o.lag.push(diffDays(r.invDate,r.sh.f.DeliveredOn))});
+  return Object.values(by).sort((a,b)=>(b.ip+b.pp+b.oh)-(a.ip+a.pp+a.oh)||a.c.localeCompare(b.c));
+}
+const faChips=(f,items,sel)=>`<div class="mchips" role="group">${items.map(([v,l])=>`<label class="mchip"><input type="checkbox" data-ch="faMulti" data-f="${f}" data-v="${esc(v)}" ${sel.map(String).includes(String(v))?'checked':''}><span>${esc(l)}</span></label>`).join('')}</div>`;
+const faGrp=(f,label,items,sel)=>`<div class="f" style="margin-top:8px"><span>${label} <small class="mu">(none ticked means all)</small> <button class="btn sm" data-act="faAll" data-f="${f}">All</button> <button class="btn sm" data-act="faNone" data-f="${f}">None</button></span>${faChips(f,items,sel)}</div>`;
+function viewFAudit(){
+  const F=faSt(),may=can('auditedit'),base=faBase(),T=faTotals(base),rows=base.filter(r=>faStatusOk(r,F.f)).sort((a,b)=>(a.sh.f.DeliveredOn||'').localeCompare(b.sh.f.DeliveredOn||'')||a.ref.localeCompare(b.ref));
+  const scope=faScope().map(faRow),cars=uniq(scope.map(r=>r.sh.carrier)).sort(),years=uniq([Number(S.today.slice(0,4)),...scope.map(r=>Number((r.sh.f.DeliveredOn||'').slice(0,4))).filter(Boolean)]).sort();
+  const tile=(id,label,n,inv,val,sub,cls)=>`<button class="kpi tile fa-t ${cls||''} ${F.f===id?'sel':''}" data-act="faTile" data-id="${id}" aria-pressed="${F.f===id}"><small>${label}</small><b>${n} <span class="fa-u">shipment${n===1?'':'s'}</span></b><span class="fa-i">${inv}</span><span class="fa-v">${usdT(val)}</span><small class="fa-s">${sub}</small></button>`;
+  const iv=n=>n+' invoice'+(n===1?'':'s');
+  const odN=base.filter(r=>r.overdue).length,ovN=base.filter(r=>r.over).length,nqN=base.filter(r=>!r.hasQuote).length,ncN=base.filter(r=>r.nInv>0&&!r.copy).length,remN=Object.values(faRemindList()).reduce((a,l)=>a+l.length,0);
+  const chip=(id,label,n,cls)=>n?`<button class="chip ${cls||''} ${F.f===id?'on':''}" data-act="faTile" data-id="${id}">${label}: ${n}</button>`:'';
+  const ag=faAging(base),agMax=Math.max(1,...ag.flatMap(a=>[a.ip.v,a.pp.v]));
+  const cs=faCarrierSummary(base),selN=F.sel.filter(r=>rows.some(x=>x.ref===r)).length,ppSel=F.sel.filter(r=>rows.some(x=>x.ref===r&&x.state==='Payment Pending')).length;
+  const cfg=faCfg();
+  return pageHead('Freight Audit','Delivered shipments where your company pays the freight. The estimated payable uses the selected quote until the carrier invoice is recorded; after that the invoice total (freight plus additional charges) is used. Shipments are identified by their MBL and HBL numbers.')+
+  `<div class="fa-tiles">${tile('All','Delivered',T.all.n,iv(T.all.inv),T.all.val,'quote until invoiced, then invoice total')}${tile('Invoice Pending','Invoice Pending',T.ip.n,'no invoice yet',T.ip.val,'estimated payable'+(T.ip.noQuote?' · '+T.ip.noQuote+' with no quote':''),T.ip.n?'late':'')}${tile('Payment Pending','Payment Pending',T.pp.n,iv(T.pp.inv),T.pp.val,'invoiced, not yet paid',T.pp.n?'acc':'')}${tile('On Hold','On Hold',T.oh.n,iv(T.oh.inv),T.oh.val,'disputed or held',T.oh.n?'late':'')}${tile('Paid','Paid',T.pd.n,iv(T.pd.inv),T.pd.val,'invoice total paid','ok')}</div>
+  ${(odN||ovN||nqN||ncN||remN)?`<div class="chips" style="margin:0 0 12px"><span class="mu">Needs attention:</span>${chip('Overdue','Payment overdue',odN,'warn')}${chip('Over Quote','Over quote',ovN)}${chip('No Quote','No quote',nqN)}${chip('No Invoice Copy','Invoice copy missing',ncN)}${remN&&may?`<button class="chip" data-act="faRemind">Reminders due: ${remN}</button>`:''}</div>`:''}
+  <div class="split fa-insight"><div class="card"><h3>Aging of Pending Invoices and Payments</h3><div class="tbw"><table class="tb" data-sort="off"><tr><th>Age</th><th class="r">Invoice Pending</th><th class="r">Est. Payable</th><th class="r">Payment Pending</th><th class="r">Invoiced</th></tr>${ag.map(a=>`<tr><td>${a.label}</td><td class="r">${a.ip.n}</td><td class="r">${usdT(a.ip.v)}<div class="bar" style="height:5px;margin-top:3px"><i style="width:${a.ip.v/agMax*100}%"></i></div></td><td class="r">${a.pp.n}</td><td class="r">${usdT(a.pp.v)}<div class="bar" style="height:5px;margin-top:3px"><i style="width:${a.pp.v/agMax*100}%;background:var(--info)"></i></div></td></tr>`).join('')}</table></div><p class="hint">Invoice Pending is aged from delivery. Payment Pending is aged from the invoice date.</p></div>
+  <div class="card"><h3>Freight Value by Delivery Month</h3>${faTrendSvg(base)}</div></div>
+  <div class="card"><div class="row" style="justify-content:space-between;align-items:center"><h3 style="margin:0">Filters</h3><button class="btn sm" data-act="faClear">Clear Filters</button></div>
+   <div class="row" style="margin-top:8px;gap:16px;align-items:flex-end"><label class="f grow">Search<input id="fa_q" class="in" value="${esc(F.q||'')}" placeholder="MBL, HBL, carrier, PO, container or invoice number"></label><label class="f">Period<select data-ch="faOpt" data-f="kind" class="in" style="width:auto">${[['all','All'],['year','Year'],['quarter','Quarter'],['month','Month']].map(([v,l])=>`<option value="${v}" ${F.kind===v?'selected':''}>${l}</option>`).join('')}</select></label><label class="f">Date Reference<select data-ch="faOpt" data-f="basis" class="in" style="width:auto"><option value="delivery" ${F.basis==='delivery'?'selected':''}>Delivery date</option><option value="invoice" ${F.basis==='invoice'?'selected':''}>Invoice date</option></select></label></div>
+   ${F.kind!=='all'?faGrp('y','Year',years.map(y=>[y,y]),F.years):''}${F.kind==='quarter'?faGrp('q','Quarter',[1,2,3,4].map(q=>[q,'Q'+q]),F.quarters):''}${F.kind==='month'?faGrp('m','Month',MON.map((n,i)=>[i+1,n]),F.months):''}
+   ${faGrp('c','Carrier',cars.map(c=>[c,c]),F.cars)}${faGrp('o','Mode',MODES.map(m=>[m,m]),F.modes)}
+   ${F.kind!=='all'&&F.basis==='invoice'?'<p class="hint">On the invoice date reference, shipments with no invoice yet are always shown, because they are still pending.</p>':''}</div>
+  <div class="card fa-bar"><div class="row" style="gap:8px;align-items:center;flex-wrap:wrap"><b>${rows.length} shipment${rows.length===1?'':'s'}</b><span class="mu">${selN?selN+' selected':'Tick rows to act on several at once'}</span><span class="row" style="margin-left:auto;gap:6px;flex-wrap:wrap">${may?`<button class="btn sm pri" data-act="faMarkPaid" ${ppSel?'':'disabled'}>Mark Selected Paid (${ppSel})</button>`:''}<button class="btn sm" data-act="faExport" data-sel="${selN?1:0}">${selN?'Export Selected':'Export This View'} (Excel)</button><button class="btn sm" data-act="rdQuick" data-id="invpend">Pending Invoices Report</button><button class="btn sm" data-act="rdQuick" data-id="paypend">Payment Pending Report</button>${may?'<button class="btn sm" data-act="faRemind">Send Reminders</button>':''}</span></div></div>
+  <div class="card" style="padding:0"><div class="tbw"><table class="tb fa-tb" data-sort="on"><tr><th style="width:30px"><input type="checkbox" data-ch="faSelAll" aria-label="Select all shown" ${rows.length&&rows.every(r=>F.sel.includes(r.ref))?'checked':''}></th><th>HBL / HAWB / Tracking</th><th>MBL / MAWB</th><th>Carrier</th><th>Delivered</th><th class="r">Quote (Est.)</th><th>Carrier Invoice No.</th><th>Invoice Date</th><th class="r">Invoice Total</th><th class="r">Variance</th><th>Audit Status</th><th>Copy</th><th>Remarks</th><th></th></tr>
+  ${rows.map(r=>{const sh=r.sh;return `<tr class="${r.overdue?'tr-pend':''}"><td><input type="checkbox" data-ch="faSel" data-ref="${esc(r.ref)}" ${F.sel.includes(r.ref)?'checked':''} aria-label="Select ${esc(faHblOf(sh)||r.ref)}"></td>
+   <td><b>${esc(faHblOf(sh)||'-')}</b><br><small class="mu nw">Ref ${esc(r.ref)}</small></td><td>${esc(faMblOf(sh)||'-')}</td><td>${esc(sh.carrier)}<br><small class="mu">${esc(sh.mode)}</small></td>
+   <td><span class="nw">${fmt(sh.f.DeliveredOn)}</span><br><small class="${r.age!=null&&r.age>60&&r.state!=='Paid'?'late-t':'mu'} nw">${r.days==null?'':r.days+' days ago'}</small></td>
+   <td class="r">${r.hasQuote?usd2(r.quote):'<span class="late-t">No quote</span>'}${r.qid?'<br><small class="mu nw">'+esc(r.qid)+'</small>':''}</td>
+   <td>${esc(r.invNos||'-')}${r.nInv>1?'<br><small class="mu">'+r.nInv+' invoices</small>':''}</td><td><span class="nw">${r.invDate?fmt(r.invDate):'-'}</span>${r.due?`<br><small class="${r.overdue?'late-t':'mu'} nw">Due ${fmtS(r.due)}${r.overdue?', overdue':''}</small>`:''}</td>
+   <td class="r">${r.nInv?usd2(r.total):'-'}${r.nInv&&r.extra>0?'<br><small class="mu nw">incl. '+usd2(r.extra)+' extra</small>':''}</td>
+   <td class="r"><span class="${r.over?'late-t':''}">${faVarTxt(r)}</span>${r.over?'<br><small class="late-t nw">over quote</small>':''}</td>
+   <td>${faPill(r.state)}${r.state==='Paid'&&r.paidOn?`<br><small class="mu nw">Paid ${fmt(r.paidOn)}</small>`:''}${r.state==='On Hold'&&r.holdReason?`<br><small class="mu">${esc(r.holdReason)}</small>`:''}</td>
+   <td>${r.nInv?(r.copy?'<span class="pill ok">Attached</span>':'<span class="pill warn">Missing</span>'):'-'}</td><td>${esc(r.remarks||'-')}</td><td class="r">${may?`<button class="btn sm pri" data-act="faOpen" data-ref="${esc(r.ref)}">${r.state==='Invoice Pending'?'Record':'Update'}</button>`:''}</td></tr>`}).join('')||'<tr><td colspan="14" class="empty">No delivered shipment matches.</td></tr>'}</table></div></div>
+  <div class="card"><h3>Carrier Summary</h3><div class="tbw"><table class="tb" data-sort="on"><tr><th>Carrier</th><th class="r">Shipments</th><th class="r">Invoices</th><th class="r">Est. Payable</th><th class="r">Payment Pending</th><th class="r">On Hold</th><th class="r">Paid</th><th class="r">Over Quote</th><th class="r">Overdue</th><th class="r">Avg Days to Invoice</th></tr>${cs.map(o=>`<tr class="click" data-act="faCarrier" data-c="${esc(o.c)}"><td><b>${esc(o.c)}</b></td><td class="r">${o.n}</td><td class="r">${o.inv}</td><td class="r">${usdT(o.ip)}</td><td class="r">${usdT(o.pp)}</td><td class="r">${usdT(o.oh)}</td><td class="r">${usdT(o.pd)}</td><td class="r">${o.over||'-'}</td><td class="r">${o.od||'-'}</td><td class="r">${o.lag.length?Math.round(o.lag.reduce((a,b)=>a+b,0)/o.lag.length):'-'}</td></tr>`).join('')||'<tr><td colspan="10" class="empty">No carriers in this selection.</td></tr>'}</table></div><p class="hint">Click a carrier to filter the table to it.</p></div>
+  ${may?`<details class="card"><summary><b>Audit Settings</b> <span class="mu">payment terms, over-quote tolerance and reminders</span></summary><div class="g4" style="margin-top:10px"><label class="f">Default Payment Terms (days)<input id="fas_terms" class="in" inputmode="numeric" value="${cfg.terms}"></label><label class="f">Over-Quote Tolerance (%)<input id="fas_tol" class="in" inputmode="decimal" value="${cfg.tol}"></label><label class="f">Remind Carriers After (days)<input id="fas_rem" class="in" inputmode="numeric" value="${cfg.remind}"></label></div>
+   <div class="g4" style="margin-top:8px">${cars.map((c,i)=>`<label class="f">Terms for ${esc(c)} (days)<input class="in" data-fas="${esc(c)}" inputmode="numeric" value="${esc(cfg.termsBy[c]===undefined?'':cfg.termsBy[c])}" placeholder="Default"></label>`).join('')}</div><div class="row sec"><button class="btn pri" data-act="faCfgSave">Save Settings</button></div></details>`:''}
+  <p class="hint">Shipments where the shipper pays the freight are not listed. Invoices and costs are the same records as in Freight Commercials, so nothing is entered twice. Amounts are in USD.</p>`;
+}
+function faModal(ref,id){
+  const sh=getShip(ref);if(!sh)return;const L=invList(ref),sel=id==='new'?null:(id?L.find(i=>String(i.id)===String(id)):L[0])||null,i=sel||{},q=selQuote(ref),row=faRow(sh);
+  const nd=docsOf(ref).filter(d=>d.type==='Carrier freight invoice'),hist=S.audit.filter(a=>a.ref===ref&&/^Invoice|^Document/.test(a.action)).slice(0,6);
+  openModal(`<div class="mh"><div><h2>Freight Audit: ${esc(faHblOf(sh)||ref)}</h2><div class="mu">HBL ${esc(faHblOf(sh)||'-')} · MBL ${esc(faMblOf(sh)||'-')} · Ref ${esc(ref)}<br>${esc(sh.carrier)}, ${esc(sh.route)}, delivered ${fmt(sh.f.DeliveredOn)}${q?', quote '+usd2(q.amount)+(q.qid?' ('+esc(q.qid)+')':''):', no quote'}</div></div><button class="x" data-act="close" aria-label="Close">&times;</button></div>
+  <div id="fa_err"></div>
+  <label class="f" style="margin-bottom:8px">Invoice<select id="fa_which" data-ch="faWhich" data-ref="${esc(ref)}" class="in">${L.map(x=>`<option value="${x.id}" ${sel&&x.id===sel.id?'selected':''}>${esc(x.invRef||'Invoice (no number yet)')}${x.paid==='Paid'?' (paid)':''}${x.hold?' (on hold)':''}</option>`).join('')}<option value="new" ${!sel&&L.length?'selected':''}>${L.length?'+ Add another invoice':'New invoice'}</option></select></label>
+  <input type="hidden" id="fa_id" value="${sel?sel.id:(L.length?'new':'')}">
+  <div class="g2"><label class="f">Carrier Invoice Number<input id="fa_inv" class="in" value="${esc(i.invRef||'')}"></label><label class="f">Invoice Date<input type="date" id="fa_date" class="in" max="${S.today}" value="${esc(i.date||S.today)}"></label>
+  <label class="f">Freight Charge (USD)<input id="fa_amt" class="in" inputmode="decimal" value="${i.freight&&invAmt(i)>0?esc(i.freight):''}"></label><label class="f">Additional Charges (USD)<input id="fa_extra" class="in" inputmode="decimal" value="${i.extra?esc(i.extra):''}"></label>
+  <label class="f">Additional Charge Type<select id="fa_xtype" class="in"><option value=""></option>${XTYPES.map(x=>`<option ${i.extraType===x?'selected':''}>${esc(x)}</option>`).join('')}</select></label><label class="f">Payable Total<input class="in" disabled value="${sel&&invAmt(i)>0?usd2(invAmt(i)):''}"></label>
+  <label class="f">Payment Status<select id="fa_paid" class="in"><option ${i.paid!=='Paid'?'selected':''}>Unpaid</option><option ${i.paid==='Paid'?'selected':''}>Paid</option></select></label><label class="f">Payment Date<input type="date" id="fa_paidon" class="in" max="${S.today}" value="${esc(i.paidOn||'')}"></label></div>
+  <div class="g2" style="margin-top:8px"><label class="f" style="flex-direction:row;gap:8px;align-items:center"><input type="checkbox" id="fa_hold" ${i.hold?'checked':''}> Put this invoice on hold (dispute)</label><label class="f">Reason for Hold<input id="fa_holdr" class="in" value="${esc(i.holdReason||'')}" maxlength="200"></label></div>
+  <label class="f" style="margin-top:8px">Remarks<input id="fa_rem" class="in" value="${esc(i.remarks||'')}" maxlength="200"></label>
+  <h3 class="sec">Invoice Copy</h3><div class="row"><input type="file" id="fa_file" accept="${DOC_ACCEPT}" multiple aria-label="Attach carrier invoice copy"><button class="btn" data-act="faAttach" data-ref="${esc(ref)}">Attach</button>${nd.length?`<span class="mu">${nd.map(d=>esc(d.name)).join(', ')}</span>`:'<span class="mu">No copy attached yet</span>'}</div>
+  ${hist.length?`<h3 class="sec">Recent Changes</h3><div class="tbw"><table class="tb" data-sort="off"><tr><th>When</th><th>By</th><th>What</th></tr>${hist.map(a=>`<tr><td>${esc(a.time)}</td><td>${esc(a.user)}</td><td>${esc(a.action)}: ${esc(a.detail)}</td></tr>`).join('')}</table></div>`:''}
+  <div class="row sec"><button class="btn pri" data-act="faSave" data-ref="${esc(ref)}">Save</button>${sel&&L.length>0?`<button class="btn danger" data-act="faRemoveInv" data-ref="${esc(ref)}" data-id="${sel.id}">Remove This Invoice</button>`:''}<button class="btn" data-act="close">Cancel</button></div>`);
+}
+function faForm(){return {id:val('fa_id'),amt:val('fa_amt'),inv:val('fa_inv'),date:val('fa_date'),extra:val('fa_extra'),xtype:val('fa_xtype'),paid:val('fa_paid'),paidOn:val('fa_paidon'),hold:!!(document.getElementById('fa_hold')||{}).checked,holdReason:val('fa_holdr'),rem:val('fa_rem')}}
+/* ----- reports: more detail, MBL and HBL, new Freight Audit report ----- */
+{const g=id=>RPT.find(r=>r.id===id),pc=(r)=>r.state;
+ g('invpend').build=()=>({headers:['HBL / HAWB / Tracking','MBL / MAWB','Internal Reference','Carrier','Mode','Delivered On','Days Since Delivery','Aging','Estimated Payable (USD)','Quotation ID','Remarks'],rows:faScope().map(faRow).filter(r=>r.state==='Invoice Pending').sort((a,b)=>(a.sh.f.DeliveredOn||'').localeCompare(b.sh.f.DeliveredOn||'')).map(r=>({'HBL / HAWB / Tracking':faHblOf(r.sh),'MBL / MAWB':faMblOf(r.sh),'Internal Reference':r.ref,Carrier:r.sh.carrier,Mode:r.sh.mode,'Delivered On':r.sh.f.DeliveredOn||'','Days Since Delivery':r.days==null?'':r.days,Aging:r.bucket,'Estimated Payable (USD)':r.hasQuote?r.quote:'',  'Quotation ID':r.qid,Remarks:r.remarks})),sheet:'Pending Invoices',name:'Pending_Invoices_'+S.today});
+ g('paypend').build=()=>({headers:['HBL / HAWB / Tracking','MBL / MAWB','Internal Reference','Carrier','Carrier Invoice No.','Invoice Date','Payment Due','Overdue','Freight (USD)','Additional Charges (USD)','Invoice Total (USD)','Days Since Invoice','Aging','Status','On Hold Reason','Remarks'],rows:faScope().map(faRow).filter(r=>r.state==='Payment Pending'||r.state==='On Hold').sort((a,b)=>(a.invDate||'').localeCompare(b.invDate||'')).map(r=>({'HBL / HAWB / Tracking':faHblOf(r.sh),'MBL / MAWB':faMblOf(r.sh),'Internal Reference':r.ref,Carrier:r.sh.carrier,'Carrier Invoice No.':r.invNos,'Invoice Date':r.invDate,'Payment Due':r.due,Overdue:r.overdue?'Yes':'','Freight (USD)':r.freight,'Additional Charges (USD)':r.extra,'Invoice Total (USD)':r.total,'Days Since Invoice':r.invDate?diffDays(S.today,r.invDate):'',Aging:r.bucket,Status:r.state,'On Hold Reason':r.holdReason,Remarks:r.remarks})),sheet:'Payment Pending',name:'Payment_Pending_'+S.today});
+ RPT.push({id:'faregister',label:'Freight Audit Register',desc:'Every delivered shipment with the quote, invoice, variance, aging, payment due and audit status, identified by MBL and HBL.',money:true,build:()=>faRegister(faScope().map(faRow))});
+ RPT_GROUPS.find(x=>x[0]==='Freight Cost')[1].push('faregister');RPT_IC.faregister='faudit'}
+{const m1=migrateData;migrateData=function(){m1.apply(this,arguments);if((S.settings.permV||0)<5){['Logistics Analyst','Logistics Manager'].forEach(r=>{const a=S.access[r];if(a&&!a.includes('rpt_faregister'))a.push('rpt_faregister')});S.settings.permV=5}faCfg()}}
+/* ----- PO number: not an error, a follow-up ----- */
+const poMissing=sh=>!sh.cancelled&&sh.lines.some(l=>!String(l.PONumber||'').trim());
+const poBadge=sh=>poMissing(sh)?' <span class="pill warn" title="One or more item lines have no PO number. Please add it">PO Missing</span>':'';
+{const t0=taskList;taskList=function(){const out=t0.apply(this,arguments);if(can('dataquality')&&S.role!=='Carrier Partner'){const l=ships().filter(poMissing);if(l.length){out.push({grp:'Data quality',sev:'Medium',title:'Shipments with a blank PO number: please add it',count:l.length,detail:l.slice(0,4).map(s=>s.ref).join(', ')+(l.length>4?' and '+(l.length-4)+' more':''),go:()=>{S.view='dataquality';S.ui.dq={sev:'All',check:'po_missing'};render()}});const so={High:0,Medium:1,Info:2};out.sort((a,b)=>so[a.sev]-so[b.sev])}}return out}}
+{const m0=monBarHTML;monBarHTML=function(){const h=m0();return h.replace('</div></div>',`<label class="sw"><input type="checkbox" role="switch" data-ch="monTog" data-k="po" ${S.ui.dash.poMiss?'checked':''}><span class="sw-t"></span><span>PO Missing Only</span></label></div></div>`)}}
+/* ----- freight audit actions ----- */
+document.addEventListener('click',e=>{
+  const t=e.target.closest&&e.target.closest('[data-act]');if(!t)return;const a=t.dataset.act,d=t.dataset,F=()=>faSt();
+  const denyAudit=()=>{if(!can('auditedit')){toast('Your role is not allowed to do this','bad');return true}return false};
+  if(a==='faTile'){const f=F();f.f=f.f===d.id&&d.id!=='All'?'All':d.id;render();return}
+  if(a==='faOpen'){if(denyAudit())return;faModal(d.ref);return}
+  if(a==='faSave'){const r=faSave(d.ref,faForm());if(!r.ok){const x=document.getElementById('fa_err');if(x)x.innerHTML=`<div class="err" role="alert" style="margin-bottom:10px">${esc(r.msg)}</div>`;return}closeModal();render();toast(r.msg);return}
+  if(a==='faRemoveInv'){if(denyAudit())return;if(!confirm('Remove this invoice record?'))return;const r=faRemoveInv(d.ref,d.id);closeModal();render();toast(r.msg,r.ok?'':'bad');return}
+  if(a==='faAttach'){if(denyAudit())return;const inp=document.getElementById('fa_file'),files=inp?[...inp.files]:[],er=docCheck(files,d.ref);if(er.length){toast(er[0],'bad');return}docsUpload(d.ref,files,'Carrier freight invoice').then(r=>{render();faModal(d.ref,val('fa_id')||undefined);toast(r.bad.length?r.bad[0]:r.ok.length+' file(s) attached',r.bad.length?'bad':'')});return}
+  if(a==='faAll'){const f=F(),k={c:'cars',o:'modes',y:'years',q:'quarters',m:'months'}[d.f];const all={c:()=>uniq(faScope().map(s=>s.carrier)).sort(),o:()=>MODES.slice(),y:()=>uniq(faScope().map(s=>Number((s.f.DeliveredOn||'').slice(0,4))).filter(Boolean)),q:()=>[1,2,3,4],m:()=>[1,2,3,4,5,6,7,8,9,10,11,12]}[d.f]();f[k]=all;render();return}
+  if(a==='faNone'){const f=F(),k={c:'cars',o:'modes',y:'years',q:'quarters',m:'months'}[d.f];f[k]=[];render();return}
+  if(a==='faClear'){S.ui.fa=null;faSt();render();return}
+  if(a==='faCarrier'){const f=F();f.cars=[d.c];render();return}
+  if(a==='faMarkPaid'){if(denyAudit())return;const refs=F().sel.filter(r=>{const s=getShip(r);return s&&faState(s)==='Payment Pending'});if(!refs.length){toast('Select shipments that are Payment Pending','bad');return}
+    openModal(`<div class="mh"><h2>Mark ${refs.length} Shipment${refs.length>1?'s':''} Paid</h2><button class="x" data-act="close" aria-label="Close">&times;</button></div><p class="mu">All unpaid, non-held invoices on the selected shipments will be marked Paid. Total ${usd2(refs.reduce((s,r)=>s+faRow(getShip(r)).payable,0))}.</p><label class="f">Payment Date<input type="date" id="fa_bulkdate" class="in" max="${S.today}" value="${S.today}"></label><div class="row sec"><button class="btn pri" data-act="faMarkPaidDo">Mark Paid</button><button class="btn" data-act="close">Cancel</button></div>`);return}
+  if(a==='faMarkPaidDo'){const r=faMarkPaid(faSt().sel,val('fa_bulkdate'));if(!r.ok){toast(r.msg,'bad');return}faSt().sel=[];closeModal();render();toast(r.msg);return}
+  if(a==='faExport'){const f=F(),rows=f.sel.length?faRows().filter(r=>f.sel.includes(r.ref)):faRows(),d2=faRegister(rows);if(xlsxSave(d2.name+'.xlsx',[{name:d2.sheet,headers:d2.headers,rows:d2.rows}])){audit('Report downloaded','','Freight Audit view ('+rows.length+' rows)');toast(rows.length+' row(s) exported')}return}
+  if(a==='faRemind'){if(denyAudit())return;const by=faRemindList(),n=Object.values(by).reduce((s,l)=>s+l.length,0);
+    openModal(`<div class="mh"><h2>Send Invoice Reminders</h2><button class="x" data-act="close" aria-label="Close">&times;</button></div>${n?`<p class="mu">One email to each carrier listing shipments delivered at least ${faCfg().remind} days ago with no invoice, by MBL and HBL number. No amounts are included. A shipment is reminded at most once a week.</p><div class="tbw"><table class="tb" data-sort="off"><tr><th>Carrier</th><th class="r">Shipments</th></tr>${Object.entries(by).map(([c,l])=>`<tr><td>${esc(c)}</td><td class="r">${l.length}</td></tr>`).join('')}</table></div><div class="row sec"><button class="btn pri" data-act="faRemindDo">Queue ${Object.keys(by).length} Email(s)</button><button class="btn" data-act="close">Cancel</button></div>`:'<p class="mu">No reminders are due right now.</p><div class="row sec"><button class="btn" data-act="close">Close</button></div>'}`);return}
+  if(a==='faRemindDo'){const r=faRemindSend();closeModal();render();toast(r.msg,r.ok?'':'bad');return}
+  if(a==='faCfgSave'){if(denyAudit())return;const c=faCfg(),tr=Number(val('fas_terms')),tl=Number(val('fas_tol')),rm=Number(val('fas_rem'));if(!(tr>=0&&tr<=365)||!(tl>=0&&tl<=100)||!(rm>=0&&rm<=365)){toast('Check the numbers: terms and reminder days 0 to 365, tolerance 0 to 100','bad');return}
+    c.terms=tr;c.tol=tl;c.remind=rm;c.termsBy={};document.querySelectorAll('[data-fas]').forEach(i=>{const v=i.value.trim();if(v!==''&&Number(v)>=0)c.termsBy[i.dataset.fas]=Number(v)});audit('Freight audit settings changed','','terms '+tr+' days, tolerance '+tl+'%, reminders after '+rm+' days');render();toast('Settings saved');return}
+},true);
+document.addEventListener('change',e=>{
+  const t=e.target;if(!t||!t.dataset)return;
+  if(t.dataset.ch==='faWhich'){faModal(t.dataset.ref,t.value);return}
+  if(t.dataset.ch==='faMulti'){const f=faSt(),k={c:'cars',o:'modes',y:'years',q:'quarters',m:'months'}[t.dataset.f],v=['y','q','m'].includes(t.dataset.f)?Number(t.dataset.v):t.dataset.v,a=f[k],i=a.indexOf(v);if(t.checked&&i<0)a.push(v);if(!t.checked&&i>=0)a.splice(i,1);render();return}
+  if(t.dataset.ch==='faOpt'){const f=faSt();f[t.dataset.f]=t.value;render();return}
+  if(t.dataset.ch==='faSel'){const f=faSt(),i=f.sel.indexOf(t.dataset.ref);if(t.checked&&i<0)f.sel.push(t.dataset.ref);if(!t.checked&&i>=0)f.sel.splice(i,1);render();return}
+  if(t.dataset.ch==='faSelAll'){const f=faSt(),rs=faRows().map(r=>r.ref);f.sel=t.checked?uniq([...f.sel,...rs]):f.sel.filter(r=>!rs.includes(r));render();return}
+});
+
 function renderNav(){
   window._tasks=can('tasks')?taskList():[];
   $('#nav').innerHTML=navHTML();
@@ -5652,8 +5822,8 @@ document.addEventListener('click',e=>{
    case 'reqTab':S.ui.reqTab=d.t;render();break;
    case 'draftAdd':{
      const po=val('i_po'),inv=val('i_inv'),item=val('i_item'),qty=val('i_qty');
-     if(!po||!inv||!item||!(num(qty)>0)){toast('PO number, invoice number, item number and a quantity above 0 are required','bad');break}
-     S.draft.push({po,inv,date:val('i_date'),item,qty});$('#draftBox').innerHTML=draftHTML();$('#i_item').value='';$('#i_qty').value='';$('#i_item').focus();break}
+     if(!inv||!item||!(num(qty)>0)){toast('Invoice number, item number and a quantity above 0 are required','bad');break}
+     S.draft.push({po,inv,date:val('i_date'),item,qty,stype:val('i_stype')});if(!po)toast('Added without a PO number. It will be flagged for follow-up');$('#draftBox').innerHTML=draftHTML();$('#i_item').value='';$('#i_qty').value='';$('#i_item').focus();break}
    case 'draftRemove':S.draft.splice(Number(d.i),1);$('#draftBox').innerHTML=draftHTML();break;
    case 'saveShip':saveShip();break;
    case 'clearForm':S.draft=[];S.lastSaved=null;render();break;
@@ -5943,7 +6113,7 @@ document.addEventListener('change',e=>{
    case 'whTypeF':{S.ui.wht=t.value;render();break}
    case 'permRole':{S.ui.permRole=t.value;render();break}
    case 'perm':{if(denied('settingsedit')){render();break}permSet(S.ui.permRole,t.dataset.m,t.dataset.k,t.checked);audit('Permission changed','',S.ui.permRole+': '+t.dataset.m+' '+t.dataset.k+' '+(t.checked?'on':'off'));render();break}
-   case 'monTog':{const D=S.ui.dash;if(t.dataset.k==='miss')D.missDocs=t.checked;if(t.dataset.k==='late')D.overdueOnly=t.checked;if(t.dataset.k==='rg')D.pendRG=t.checked;render();break}
+   case 'monTog':{const D=S.ui.dash;if(t.dataset.k==='miss')D.missDocs=t.checked;if(t.dataset.k==='late')D.overdueOnly=t.checked;if(t.dataset.k==='rg')D.pendRG=t.checked;if(t.dataset.k==='po')D.poMiss=t.checked;render();break}
    case 'userShippers':{if(denied('usersedit'))break;const u=S.users[Number(t.dataset.i)];u.Shippers=normShippers(t.value);t.value=u.Shippers;audit('Shippers assigned','',u.UserEmail+': '+(u.Shippers||'none'));toast('Shippers saved');break}
    case 'userCarrier':{if(denied('usersedit'))break;const u=S.users[Number(t.dataset.i)];u.Carrier=t.value;audit('Carrier assigned','',u.UserEmail+' to '+t.value);toast('Carrier assigned');break}
    case 'acc':{if(denied('settingsedit'))break;const r=t.dataset.role,id=t.dataset.id,a=S.access[r];const i=a.indexOf(id);if(t.checked&&i<0)a.push(id);if(!t.checked&&i>=0)a.splice(i,1);audit('Access changed','',r+(t.checked?' can open ':' cannot open ')+id);renderNav();if(!canTab(S.view)){const al=TABS.find(x=>canTab(x.id));S.view=al?al.id:'track';render()}break}
