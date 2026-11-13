@@ -23,6 +23,8 @@ This is a demo with sample data. The sign-in is not real security: users.js is p
 
 
 ## New in this version
+- **Shipment modes** are now Ocean, Ocean+Rail, Ocean+Truck, Air, Courier and Truck, each with its own icon. Existing Sea and Road shipments, saved data, backups and uploads are converted automatically (Sea becomes Ocean, Road becomes Truck). Container, free-time and CBM rules follow the mode: all three Ocean modes behave like ocean freight, Courier like Air for CBM, and Courier and Truck have no free-time tracking.
+- The Reports page is laid out in groups with a featured Daily Status Report card and an icon for each report.
 - **Reports page** (Insights): the Daily Status Report in your DSR template layout (34 columns), plus the shipment register, overdue milestones, shipments at risk, free time, delivery schedule, slot requests, data quality, carrier scorecard, Pending Invoices, Payment Pending, freight spend, RG Pending and the Monthly RG Accrual. Excel or CSV. The Daily Status Report lets you tick several years, quarters, months and statuses, choose whether the period follows the pickup date or the delivery date, and choose whether open shipments always show. Which role can download which report is set in Administration, Role Access, Report Access.
 - **Freight Audit** (Commercial and Access): delivered shipments where your company pays the freight. Record actual freight cost, carrier invoice number and remarks; status Invoice Pending, Payment Pending or Paid.
 - **RG Pending** (Operations, Logistics Analyst by default): DAP and DDP need only a Final RG after delivery; other terms need an In-Transit RG (with optional TO and PL#) once in transit, then a Final RG. Download the pending report, fill it in, upload it back.
