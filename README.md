@@ -20,3 +20,11 @@ To share data between devices, run `supabase-setup.sql` once in a free Supabase 
 - **Data backup** (Administration, Settings): Export all data as a ZIP of separate files or one JSON file, and Upload dump to restore everything, with a confirm summary first and a success summary after.
 
 This is a demo with sample data. The sign-in is not real security: users.js is public and anyone with the shared database key can change its data, so use throwaway passwords and no real company information.
+
+
+## New in this version
+- Sidebar sections open and close; your profile, password, problem report and sign-out are in the avatar menu at the top right (the version line is in that menu too).
+- Delete shipment (permanent, type the reference to confirm). Off by default except for the Logistics Manager role: to give it to another role, go to Administration, Role access, tick Delete under Shipments, save.
+- Optional shipping documents (PDF, Excel, images, up to 5 MB, 10 per shipment) and a Missing Docs badge. With shared data on, the files go to Supabase Storage: run supabase-storage-setup.sql once (after supabase-setup.sql). Anyone with the database key can open the files, so use sample documents only.
+- Quotation ID on quotes, and in the freight export and import.
+- Switches above the monitor: Missing Docs only, Delayed only.

@@ -1,0 +1,7 @@
+﻿"Email","Name","Role","Carrier","Warehouses","Shippers","Receivers","Partner","Password","Show demo tools"
+"alex.logistics@yourcompany.com","Alex Analyst","Logistics Analyst","","","","","","",""
+"sam.carrier@dimerco.example","Sam Driver","Carrier Partner","Dimerco","","","","","",""
+"dana.dock@yourcompany.com","Dana Dock","Warehouse Team","","RD - Fremont | RD - Germany","","","","",""
+"pat.partner@3pl.example","Pat Partner","External Logistics Partner","","","Acme Exports Ltd | Beta Trading","Gamma Imports","","",""
+"eli.exec@3pl.example","Eli Executive","Partner Executive","","","","","pat.partner@3pl.example","",""
+"fiona.finance@yourcompany.com","Fiona Finance","Finance","","","","","","",""
