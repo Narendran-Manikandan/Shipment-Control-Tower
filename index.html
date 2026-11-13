@@ -1760,6 +1760,7 @@ function shipValidate(h,cur){
 }
 function shipEditCheck(sh,h,ops,reason){
   const cur=shHeader(sh),errs=shipValidate(h,cur),changes=[],lineChanges=[];let planChanged=false;
+  {const shp=String(h.Shipper!==undefined?h.Shipper:sh.shipper).trim(),chg=normShipper(shp)!==normShipper(sh.shipper),seen=new Set();(ops||[]).forEach(o=>{if(o.del)return;const k=normInvNo(o.inv);if(!k||seen.has(k))return;const old=o.id?sh.lines.find(l=>l.LineID===o.id):null;if(old&&!chg&&normInvNo(old.InvoiceNumber)===k)return;seen.add(k);const hit=invDupFind(shp,o.inv,sh.ref);if(hit)errs.push(invDupMsg(hit,o.inv))})}
   SH_FIELDS.forEach(([k,l,t,req,tag])=>{const a=String(cur[k]||''),b=String(h[k]==null?'':h[k]).trim();if(a!==b){changes.push(l+': '+(a||'blank')+' to '+(b||'blank'));if(tag==='plan')planChanged=true}});
   if(sh.cancelled)errs.push(sh.ref+' is cancelled and cannot be edited');
   {const sc=partnerScope();if(sc&&!sc.has(h.Shipper,h.Consignee))errs.push('The shipper or receiver must stay assigned to your company')}
@@ -1923,8 +1924,8 @@ function updatePanel(){
   <ul class="hint" style="margin:12px 0 0 18px"><li>Empty cells keep the current value, so you only fill in what changes.</li><li>Changing a planned date corrects the original plan, so give a reason on that row. To move a date because of a delay, use Milestone Management.</li><li>Delivered shipments keep their carrier, mode, warehouse and planned dates. Cancelled shipments cannot be edited.</li></ul></div>`;
 }
 /* ----- data quality ----- */
-const DQ_CHECKS={dup_tracking:['Tracking number on several shipments','Medium'],cbm:['CBM missing for Air or LCL freight','Medium'],plan:['No planned arrival date','High'],wh_unknown:['Warehouse not in the warehouse list','High'],wh_inactive:['Warehouse is inactive','Medium'],wh_contact:['Warehouse has no team email','Medium'],container:['Ocean shipment without container details','Medium'],weight:['Packages or weight missing','Medium'],tracking:['No tracking number although it has left','Low'],type:['Shipment type or nature of goods not set','Low'],order:['Dates out of order','High'],po_dup:['Same PO and item on several shipments','Low'],no_user:['Carrier has no Carrier Partner user','Low'],po_missing:['PO number missing','Medium']};
-const DQ_FIELD={dup_tracking:'el_0_hbl',cbm:'Cbm',plan:'ETA',wh_unknown:'WarehouseDestination',wh_inactive:'WarehouseDestination',wh_contact:'WarehouseDestination',container:'ContainerType',weight:'WeightKg',tracking:'el_0_hbl',type:'ShipmentType',order:'PickupPlanned',po_dup:'el_0_po',no_user:'Carrier',po_missing:'el_0_po'};
+const DQ_CHECKS={dup_tracking:['Tracking number on several shipments','Medium'],cbm:['CBM missing for Air or LCL freight','Medium'],plan:['No planned arrival date','High'],wh_unknown:['Warehouse not in the warehouse list','High'],wh_inactive:['Warehouse is inactive','Medium'],wh_contact:['Warehouse has no team email','Medium'],container:['Ocean shipment without container details','Medium'],weight:['Packages or weight missing','Medium'],tracking:['No tracking number although it has left','Low'],type:['Shipment type or nature of goods not set','Low'],order:['Dates out of order','High'],po_dup:['Same PO and item on several shipments','Low'],no_user:['Carrier has no Carrier Partner user','Low'],po_missing:['PO number missing','Medium'],dup_invoice:['Duplicate invoice number','Medium']};
+const DQ_FIELD={dup_tracking:'el_0_hbl',cbm:'Cbm',plan:'ETA',wh_unknown:'WarehouseDestination',wh_inactive:'WarehouseDestination',wh_contact:'WarehouseDestination',container:'ContainerType',weight:'WeightKg',tracking:'el_0_hbl',type:'ShipmentType',order:'PickupPlanned',po_dup:'el_0_po',no_user:'Carrier',po_missing:'el_0_po',dup_invoice:'el_0_inv'};
 function dqIssues(){
   const all=ships(),out=[],add=(c,s,detail)=>out.push({check:c,label:DQ_CHECKS[c][0],sev:DQ_CHECKS[c][1],ref:s.ref,carrier:s.carrier,detail});
   const trk={},po={};
@@ -1946,6 +1947,7 @@ function dqIssues(){
     s.lines.forEach(l=>{const refs=po[l.PONumber+'|'+l.ItemNumber];if(refs&&refs.size>1&&l===s.lines.find(x=>x.PONumber===l.PONumber&&x.ItemNumber===l.ItemNumber))add('po_dup',s,'PO '+l.PONumber+' item '+l.ItemNumber+' is also on '+[...refs].filter(x=>x!==s.ref).join(', '))});
     if(s.carrier&&!carUsers.has(s.carrier))add('no_user',s,s.carrier+' cannot update this shipment itself');
     {const n=s.lines.filter(l=>!String(l.PONumber||'').trim()).length;if(n)add('po_missing',s,n+' item line(s) have no PO number. Please add it')}
+    {const d=uniq(s.lines.map(l=>l.InvoiceNumber).filter(Boolean)).filter(i=>invDupFind(s.shipper,i,s.ref));if(d.length)add('dup_invoice',s,'Invoice number '+d.join(', ')+' is also on another shipment of the same shipper')}
   });
   const so={High:0,Medium:1,Low:2};return out.sort((a,b)=>so[a.sev]-so[b.sev]||a.ref.localeCompare(b.ref));
 }
@@ -2955,7 +2957,7 @@ function monBarHTML(){
 {const s0=addSampleHistory;addSampleHistory=function(){const r=s0.apply(this,arguments);S.lines.forEach(l=>{if(l.Mode)l.Mode=normMode(l.Mode);if(l.ContainerType)l.ContainerType=normCtype(l.ContainerType)});return r}}
 document.addEventListener('change',e=>{if(e.target&&e.target.id==='f_ctype'){const b=document.getElementById('setptBox');if(b){b.style.display=isReefer(e.target.value)?'':'none';if(!isReefer(e.target.value)){const i=document.getElementById('f_setpt');if(i)i.value=''}}}});
 /* ========== demo sign-in (email and password), problem log, report a problem ========== */
-const APP_BUILD='site build 2026-11-13 11:34 UTC';
+const APP_BUILD='site build 2026-11-13 15:38 UTC';
 const ErrLog={key:'ect.errors',max:60,
   add(kind,msg,src){try{const a=JSON.parse(localStorage.getItem(this.key)||'[]');a.push({t:new Date().toISOString(),kind,msg:String(msg==null?'':msg).slice(0,300),src:String(src||'').slice(0,160),view:(typeof S!=='undefined'&&S&&S.view)||'',role:(typeof S!=='undefined'&&S&&S.role)||''});while(a.length>this.max)a.shift();localStorage.setItem(this.key,JSON.stringify(a))}catch(e){}},
   list(){try{return JSON.parse(localStorage.getItem(this.key)||'[]')}catch(e){return []}},
@@ -3656,6 +3658,7 @@ function saveShip(){
   [['f_stype','Shipment type'],['f_nature','Nature of goods'],['f_shipper','Shipper'],['f_consignee','Consignee'],['f_carrier','Carrier'],['f_ocountry','Origin country'],['f_oport','Origin port'],['f_dcountry','Destination country'],['f_dport','Destination port'],['f_wh','Warehouse destination'],['f_pickup','Pickup planned'],['f_eta','ETA']].forEach(([i,l])=>need(i,l));
   {const sc=partnerScope();if(sc&&!sc.has(val('f_shipper'),val('f_consignee'))){e.push('The shipper or receiver must be one assigned to your company');bad.add('f_shipper');bad.add('f_consignee')}}
   {const dc=docFormCheck();if(dc)e.push(dc)}
+  {const shp=val('f_shipper'),seen=new Set();S.draft.forEach(d=>{const k=normInvNo(d.inv);if(!k||seen.has(k))return;seen.add(k);const hit=invDupFind(shp,d.inv,null);if(hit){e.push(invDupMsg(hit,d.inv));bad.add('i_inv')}})}
   {const sp=val('f_setpt');if(sp!==''){if(!spOk(sp)){e.push('Reefer set point must be a number from -40 to 40');bad.add('f_setpt')}else if(!isReefer(val('f_ctype'))||!isOcean(val('f_mode'))){e.push('A set point can be entered only for a reefer container (20RF or 40RF)');bad.add('f_setpt')}}}
   if(val('f_pickup')&&val('f_eta')&&val('f_eta')<val('f_pickup')){e.push('ETA cannot be before the planned pickup');bad.add('f_eta')}
   if(val('f_etd')&&val('f_pickup')&&val('f_etd')<val('f_pickup')){e.push('ETD cannot be before the planned pickup');bad.add('f_etd')}
@@ -3811,6 +3814,7 @@ function validateBulkRow(r){
   return bulkRowBasic(r).concat(bulkDateRules(v,has));
 }
 function bulkCheck(objs,hdr,fileName){
+  const bulkInvSeen={};
   const miss=['ShipmentType','NatureOfGoods','Shipper','Consignee','Carrier','Mode','IncoTerm','PickupPlanned','ETA','PONumber','InvoiceNumber','ItemNumber','ItemQty'].filter(c=>!hdr.includes(c));
   if(miss.length){toast('Missing columns: '+miss.join(', ')+'. Use the template.','bad');return false}
   let skipped=0;const items=[];
@@ -3826,6 +3830,7 @@ function bulkCheck(objs,hdr,fileName){
   groups.forEach(xs=>{
     const g=xs[0].r.ShipmentGroup,first=xs[0].r;
     if(g)xs.slice(1).forEach(x=>GROUP_KEYS.forEach(c=>{if(c!=='ShipmentType'&&x.r[c]&&first[c]&&x.r[c]!==first[c])x.errs.push(c+' differs from the first row of group '+g)}));
+    {const shp=first.Shipper;xs.forEach(x=>{const inv=x.r.InvoiceNumber;if(!inv)return;const hit=invDupFind(shp,inv,null);if(hit)x.errs.push(invDupMsg(hit,inv));const k=normShipper(shp)+'|'+normInvNo(inv);if(bulkInvSeen[k]!==undefined&&bulkInvSeen[k]!==(g||x.r._row))x.errs.push('Invoice number '+inv+' is used for two shipments in this file');bulkInvSeen[k]=g||x.r._row})}
     const mg=bulkMerge(xs.map(x=>x.r)),has={};BULK_DATE_COLS.forEach(c=>{has[c]=xs.some(x=>x.r[c])});
     bulkDateRules(mg.m,has).forEach(m=>xs[0].errs.push(m));
     const notes=mg.notes.map(n=>n.col+' differs in group '+g+' ('+n.vals.join(', ')+'): the latest, '+n.used+', is used');
@@ -5519,7 +5524,7 @@ function viewFAudit(){
    ${F.kind!=='all'?faGrp('y','Year',years.map(y=>[y,y]),F.years):''}${F.kind==='quarter'?faGrp('q','Quarter',[1,2,3,4].map(q=>[q,'Q'+q]),F.quarters):''}${F.kind==='month'?faGrp('m','Month',MON.map((n,i)=>[i+1,n]),F.months):''}
    ${faGrp('c','Carrier',cars.map(c=>[c,c]),F.cars)}${faGrp('o','Mode',MODES.map(m=>[m,m]),F.modes)}
    ${F.kind!=='all'&&F.basis==='invoice'?'<p class="hint">On the invoice date reference, shipments with no invoice yet are always shown, because they are still pending.</p>':''}</div>
-  <div class="card fa-bar"><div class="row" style="gap:8px;align-items:center;flex-wrap:wrap"><b>${rows.length} shipment${rows.length===1?'':'s'}</b><span class="mu">${selN?selN+' selected':'Tick rows to act on several at once'}</span><span class="row" style="margin-left:auto;gap:6px;flex-wrap:wrap">${may?`<button class="btn sm pri" data-act="faMarkPaid" ${ppSel?'':'disabled'}>Mark Selected Paid (${ppSel})</button>`:''}<button class="btn sm" data-act="faExport" data-sel="${selN?1:0}">${selN?'Export Selected':'Export This View'} (Excel)</button><button class="btn sm" data-act="rdQuick" data-id="invpend">Pending Invoices Report</button><button class="btn sm" data-act="rdQuick" data-id="paypend">Payment Pending Report</button>${may?'<button class="btn sm" data-act="faRemind">Send Reminders</button>':''}</span></div></div>
+  <div class="card fa-bar"><div class="row" style="gap:8px;align-items:center;flex-wrap:wrap"><b>${rows.length} shipment${rows.length===1?'':'s'}</b><span class="mu">${selN?selN+' selected':'Tick rows to act on several at once'}</span><span class="row" style="margin-left:auto;gap:6px;flex-wrap:wrap">${may?`<button class="btn sm pri" data-act="faMarkPaid" ${ppSel?'':'disabled'}>Mark Selected Paid (${ppSel})</button>`:''}${may?`<button class="btn sm" data-act="faTemplate">Download Template</button><label class="btn sm pri" style="cursor:pointer">Upload Invoice Details<input type="file" id="faFile" accept=".xlsx,.xls,.csv" hidden></label>`:''}<button class="btn sm" data-act="faExport" data-sel="${selN?1:0}">${selN?'Export Selected':'Export This View'} (Excel)</button><button class="btn sm" data-act="rdQuick" data-id="invpend">Pending Invoices Report</button><button class="btn sm" data-act="rdQuick" data-id="paypend">Payment Pending Report</button>${may?'<button class="btn sm" data-act="faRemind">Send Reminders</button>':''}</span></div></div>
   <div class="card" style="padding:0"><div class="tbw"><table class="tb fa-tb" data-sort="on"><tr><th style="width:30px"><input type="checkbox" data-ch="faSelAll" aria-label="Select all shown" ${rows.length&&rows.every(r=>F.sel.includes(r.ref))?'checked':''}></th><th>HBL / HAWB / Tracking</th><th>MBL / MAWB</th><th>Carrier</th><th>Delivered</th><th class="r">Quote (Est.)</th><th>Carrier Invoice No.</th><th>Invoice Date</th><th class="r">Invoice Total</th><th class="r">Variance</th><th>Audit Status</th><th>Copy</th><th>Remarks</th><th></th></tr>
   ${rows.map(r=>{const sh=r.sh;return `<tr class="${r.overdue?'tr-pend':''}"><td><input type="checkbox" data-ch="faSel" data-ref="${esc(r.ref)}" ${F.sel.includes(r.ref)?'checked':''} aria-label="Select ${esc(faHblOf(sh)||r.ref)}"></td>
    <td><b>${esc(faHblOf(sh)||'-')}</b><br><small class="mu nw">Ref ${esc(r.ref)}</small></td><td>${esc(faMblOf(sh)||'-')}</td><td>${esc(sh.carrier)}<br><small class="mu">${esc(sh.mode)}</small></td>
@@ -5555,8 +5560,8 @@ function faModal(ref,id){
 function faForm(){return {id:val('fa_id'),amt:val('fa_amt'),inv:val('fa_inv'),date:val('fa_date'),extra:val('fa_extra'),xtype:val('fa_xtype'),paid:val('fa_paid'),paidOn:val('fa_paidon'),hold:!!(document.getElementById('fa_hold')||{}).checked,holdReason:val('fa_holdr'),rem:val('fa_rem')}}
 /* ----- reports: more detail, MBL and HBL, new Freight Audit report ----- */
 {const g=id=>RPT.find(r=>r.id===id),pc=(r)=>r.state;
- g('invpend').build=()=>({headers:['HBL / HAWB / Tracking','MBL / MAWB','Internal Reference','Carrier','Mode','Delivered On','Days Since Delivery','Aging','Estimated Payable (USD)','Quotation ID','Remarks'],rows:faScope().map(faRow).filter(r=>r.state==='Invoice Pending').sort((a,b)=>(a.sh.f.DeliveredOn||'').localeCompare(b.sh.f.DeliveredOn||'')).map(r=>({'HBL / HAWB / Tracking':faHblOf(r.sh),'MBL / MAWB':faMblOf(r.sh),'Internal Reference':r.ref,Carrier:r.sh.carrier,Mode:r.sh.mode,'Delivered On':r.sh.f.DeliveredOn||'','Days Since Delivery':r.days==null?'':r.days,Aging:r.bucket,'Estimated Payable (USD)':r.hasQuote?r.quote:'',  'Quotation ID':r.qid,Remarks:r.remarks})),sheet:'Pending Invoices',name:'Pending_Invoices_'+S.today});
- g('paypend').build=()=>({headers:['HBL / HAWB / Tracking','MBL / MAWB','Internal Reference','Carrier','Carrier Invoice No.','Invoice Date','Payment Due','Overdue','Freight (USD)','Additional Charges (USD)','Invoice Total (USD)','Days Since Invoice','Aging','Status','On Hold Reason','Remarks'],rows:faScope().map(faRow).filter(r=>r.state==='Payment Pending'||r.state==='On Hold').sort((a,b)=>(a.invDate||'').localeCompare(b.invDate||'')).map(r=>({'HBL / HAWB / Tracking':faHblOf(r.sh),'MBL / MAWB':faMblOf(r.sh),'Internal Reference':r.ref,Carrier:r.sh.carrier,'Carrier Invoice No.':r.invNos,'Invoice Date':r.invDate,'Payment Due':r.due,Overdue:r.overdue?'Yes':'','Freight (USD)':r.freight,'Additional Charges (USD)':r.extra,'Invoice Total (USD)':r.total,'Days Since Invoice':r.invDate?diffDays(S.today,r.invDate):'',Aging:r.bucket,Status:r.state,'On Hold Reason':r.holdReason,Remarks:r.remarks})),sheet:'Payment Pending',name:'Payment_Pending_'+S.today});
+ g('invpend').build=()=>({headers:['HBL / HAWB / Tracking','MBL / MAWB','Internal Reference','Carrier','Mode','Delivered On','Days Since Delivery','Aging','Estimated Payable (USD)','Quotation ID','Carrier Invoice No.','Invoice Date','Freight Charge (USD)','Additional Charges (USD)','Additional Charge Type','Payment Status','Payment Date','Hold','Hold Reason','Remarks'],help:[['HBL / HAWB / Tracking, MBL / MAWB, Internal Reference','Do not change. The upload finds the shipment by HBL first, then MBL, then the internal reference.'],['Carrier Invoice No.','Required for any row you fill in. One invoice covers one HBL. For a second invoice on the same HBL, add another row with the same HBL.'],['Invoice Date','Date on the carrier invoice, for example 2026-11-13 or 13-Nov-2026. If blank, today is used.'],['Freight Charge (USD)','Required for a new invoice. Numbers only, a $ sign is fine.'],['Additional Charges (USD) and Additional Charge Type','Optional, for example demurrage or fuel surcharge.'],['Payment Status and Payment Date','Paid with the date the carrier was paid, or leave empty for Unpaid. A date alone also means Paid.'],['Hold and Hold Reason','Optional. Yes with a reason puts the invoice on hold (dispute).'],['Rows you leave empty','Rows with nothing entered are ignored.']],rows:faScope().map(faRow).filter(r=>r.state==='Invoice Pending').sort((a,b)=>(a.sh.f.DeliveredOn||'').localeCompare(b.sh.f.DeliveredOn||'')).map(r=>({'HBL / HAWB / Tracking':faHblOf(r.sh),'MBL / MAWB':faMblOf(r.sh),'Internal Reference':r.ref,Carrier:r.sh.carrier,Mode:r.sh.mode,'Delivered On':r.sh.f.DeliveredOn||'','Days Since Delivery':r.days==null?'':r.days,Aging:r.bucket,'Estimated Payable (USD)':r.hasQuote?r.quote:'','Quotation ID':r.qid,'Carrier Invoice No.':'','Invoice Date':'','Freight Charge (USD)':'','Additional Charges (USD)':'','Additional Charge Type':'','Payment Status':'','Payment Date':'',Hold:'','Hold Reason':'',Remarks:r.remarks})),sheet:'Pending Invoices',name:'Pending_Invoices_'+S.today});
+ g('paypend').build=()=>({headers:['HBL / HAWB / Tracking','MBL / MAWB','Internal Reference','Carrier','Carrier Invoice No.','Invoice Date','Payment Due','Overdue','Freight (USD)','Additional Charges (USD)','Invoice Total (USD)','Days Since Invoice','Aging','Status','On Hold Reason','Payment Status','Payment Date','Remarks'],help:[['Carrier Invoice No.','Do not change. It tells the upload which invoice to update.'],['Payment Status and Payment Date','Enter Paid and the payment date for invoices the carrier has been paid, then upload the file on the Freight Audit page.']],rows:faScope().map(faRow).filter(r=>r.state==='Payment Pending'||r.state==='On Hold').sort((a,b)=>(a.invDate||'').localeCompare(b.invDate||'')).map(r=>({'HBL / HAWB / Tracking':faHblOf(r.sh),'MBL / MAWB':faMblOf(r.sh),'Internal Reference':r.ref,Carrier:r.sh.carrier,'Carrier Invoice No.':r.invNos,'Invoice Date':r.invDate,'Payment Due':r.due,Overdue:r.overdue?'Yes':'','Freight (USD)':r.freight,'Additional Charges (USD)':r.extra,'Invoice Total (USD)':r.total,'Days Since Invoice':r.invDate?diffDays(S.today,r.invDate):'',Aging:r.bucket,Status:r.state,'On Hold Reason':r.holdReason,'Payment Status':'','Payment Date':'',Remarks:r.remarks})),sheet:'Payment Pending',name:'Payment_Pending_'+S.today});
  RPT.push({id:'faregister',label:'Freight Audit Register',desc:'Every delivered shipment with the quote, invoice, variance, aging, payment due and audit status, identified by MBL and HBL.',money:true,build:()=>faRegister(faScope().map(faRow))});
  RPT_GROUPS.find(x=>x[0]==='Freight Cost')[1].push('faregister');RPT_IC.faregister='faudit'}
 {const m1=migrateData;migrateData=function(){m1.apply(this,arguments);if((S.settings.permV||0)<5){['Logistics Analyst','Logistics Manager'].forEach(r=>{const a=S.access[r];if(a&&!a.includes('rpt_faregister'))a.push('rpt_faregister')});S.settings.permV=5}faCfg()}}
@@ -5596,6 +5601,114 @@ document.addEventListener('change',e=>{
   if(t.dataset.ch==='faSel'){const f=faSt(),i=f.sel.indexOf(t.dataset.ref);if(t.checked&&i<0)f.sel.push(t.dataset.ref);if(!t.checked&&i>=0)f.sel.splice(i,1);render();return}
   if(t.dataset.ch==='faSelAll'){const f=faSt(),rs=faRows().map(r=>r.ref);f.sel=t.checked?uniq([...f.sel,...rs]):f.sel.filter(r=>!rs.includes(r));render();return}
 });
+/* ========== duplicate shipment invoice numbers, freight audit upload ========== */
+const normInvNo=s=>String(s||'').toLowerCase().replace(/[\s\-\/.]/g,'');
+const normShipper=s=>String(s==null?'':s).trim().toLowerCase();
+function invDupFind(shipper,inv,exceptRef){
+  const k=normInvNo(inv);if(!k)return null;const sp=normShipper(shipper);
+  return shipsAll().find(s=>!s.cancelled&&s.ref!==exceptRef&&normShipper(s.shipper)===sp&&s.lines.some(l=>normInvNo(l.InvoiceNumber)===k))||null;
+}
+function invDupMsg(hit,inv){
+  const sc=typeof partnerScope==='function'?partnerScope():null,vis=!sc||sc.has(hit.shipper,hit.consignee);
+  const on=(hit.lines[0].RegisteredOn||'').slice(0,10),h=faHblOf(hit);
+  return 'Invoice number '+inv+' has already been entered for this shipper'+(vis?' on '+(h?'HBL '+h+' (ref '+hit.ref+')':hit.ref)+(on?', entered '+fmt(on):''):'')+'. The same invoice cannot be entered again';
+}
+/* ----- upload of carrier invoice details ----- */
+const FA_ALIAS={hbl:['hblhawbtracking','hblhawb','hbl','hawb','hblnumber','hawbnumber','tracking','trackingnumber','trackingno'],mbl:['mblmawb','mbl','mawb','mblnumber','mawbnumber'],ref:['internalreference','shipmentreference','shipmentref','shipmentid','shipment','reference','ref'],inv:['carrierinvoiceno','carrierinvoicenumber','invoiceno','invoicenumber','invoice','invno','invoiceref'],date:['invoicedate','dateofinvoice','invdate'],freight:['freightchargeusd','freightcharge','freightamountusd','freightamount','freightusd','freight','invoiceamountusd','invoiceamount','amountusd','amount'],extra:['additionalchargesusd','additionalcharges','additionalchargeusd','additionalcharge','extracharges','extra','surcharges'],xtype:['additionalchargetype','additionalchargestype','chargetype','extratype'],paid:['paymentstatus','paystatus','paid','payment'],paidOn:['paymentdate','paiddate','paidon','dateofpayment'],hold:['hold','onhold','dispute'],holdr:['holdreason','disputereason','reasonforhold'],rem:['remarks','remark','notes','comments','comment']};
+const faStr=v=>v instanceof Date?v.toISOString().slice(0,10):String(v==null?'':v).trim();
+const faNum=v=>{const s=faStr(v).replace(/[$,\s]/g,'');return s===''?null:(isFinite(Number(s))?Number(s):NaN)};
+function faDate(v){
+  const s=faStr(v);if(!s)return '';if(isoOK(s))return s;
+  const MN={jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12};
+  let m=/^(\d{1,2})[\/\-. ]([A-Za-z]{3})[A-Za-z]*[\/\-. ,]*(\d{4})$/.exec(s),d,mo,y;
+  if(m){d=+m[1];mo=MN[m[2].toLowerCase()];y=+m[3]}else if(m=/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})$/.exec(s)){d=+m[1];mo=+m[2];y=+m[3]}else return null;   // day first, as written in India
+  if(!mo)return null;const iso=y+'-'+pad(mo)+'-'+pad(d);return isoOK(iso)?iso:null;
+}
+const faYes=v=>['yes','y','true','1','hold','on hold','held'].includes(faStr(v).toLowerCase()),faNo=v=>['','no','n','false','0','release','released'].includes(faStr(v).toLowerCase());
+function faResolve(hbl,mbl,ref){
+  const all=shipsAll(),norm=x=>String(x||'').toLowerCase().replace(/\s+/g,''),has=(sh,f,v)=>uniq(sh.lines.map(l=>l[f])).join(';').split(';').map(norm).includes(norm(v));
+  let hits=[];if(hbl)hits=all.filter(s=>has(s,'HBL_HAWB_Tracking',hbl));else if(mbl)hits=all.filter(s=>has(s,'MBL_MAWB',mbl));else if(ref)hits=all.filter(s=>s.ref.toLowerCase()===ref.toLowerCase());
+  const key=hbl?'HBL '+hbl:mbl?'MBL '+mbl:'reference '+ref;
+  hits=hits.filter(s=>!s.cancelled||hits.length===1);
+  if(!hits.length)return {err:'No shipment found for '+key};
+  if(hits.length>1)return {err:key+' matches '+hits.length+' shipments ('+hits.map(s=>s.ref).slice(0,4).join(', ')+'). Use the internal reference to say which one'};
+  const sh=hits[0];
+  if(sh.cancelled)return {err:'Shipment '+sh.ref+' is cancelled'};
+  if(sh.status!=='Delivered')return {err:'Shipment '+sh.ref+' is not delivered yet, so it is not in the freight audit'};
+  if(sh.freight!=='Your Company')return {err:'Shipment '+sh.ref+' is paid for by the shipper, so it is not in the freight audit'};
+  if(hbl&&mbl&&!has(sh,'MBL_MAWB',mbl))return {err:'MBL '+mbl+' does not match HBL '+hbl+' (that shipment has MBL '+(faMblOf(sh)||'none')+')'};
+  return {sh};
+}
+function faImportCheck(objs,hdr){
+  const C=impCols(hdr,FA_ALIAS);
+  if(!C.hbl&&!C.mbl&&!C.ref)return {err:'The file needs an HBL / HAWB / Tracking, MBL / MAWB or Internal Reference column. Download the Pending Invoices Report to get the template.'};
+  if(!C.inv&&!C.freight&&!C.paid&&!C.paidOn)return {err:'The file has no invoice columns to read. Add Carrier Invoice No., Invoice Date, Freight Charge (USD) and Payment Status columns, or download the Pending Invoices Report, which has them.'};
+  const items=[],seen={};const cfg=faCfg();
+  objs.forEach(r=>{
+    const g=k=>C[k]?r[C[k]]:'',it={row:r._row,hbl:faStr(g('hbl')),mbl:faStr(g('mbl')),ref:'',errs:[],warns:[],form:null,kind:'',text:''};
+    const inv=faStr(g('inv')),fr=faNum(g('freight')),ex=faNum(g('extra')),xt=faStr(g('xtype')),ps=faStr(g('paid')),po=faStr(g('paidOn')),hs=faStr(g('hold')),hr=faStr(g('holdr')),rem=faStr(g('rem')),dt=faStr(g('date'));
+    if(!inv&&fr==null&&ex==null&&!ps&&!po&&!hs&&!rem&&!dt&&!xt&&!hr){it.kind='blank';items.push(it);return}
+    const f0=faResolve(it.hbl,it.mbl,faStr(g('ref')));if(f0.err){it.errs.push(f0.err);items.push(it);return}
+    const sh=f0.sh;it.ref=sh.ref;it.hbl=it.hbl||faHblOf(sh);it.mbl=it.mbl||faMblOf(sh);
+    if(!inv){it.errs.push('Enter the carrier invoice number');items.push(it);return}
+    const key=normInvNo(inv);if(seen[key]&&seen[key]!==sh.ref)it.errs.push('Invoice number '+inv+' is used for two different shipments in this file. One invoice covers one HBL');
+    else if(seen[key+'|'+sh.ref])it.errs.push('The same invoice appears twice for this shipment in the file');
+    seen[key]=sh.ref;seen[key+'|'+sh.ref]=1;
+    const other=S.invoices.find(i=>normInvNo(i.invRef)===key&&i.ref!==sh.ref);if(other){const o=getShip(other.ref);it.errs.push('Invoice number '+inv+' is already recorded on '+(o&&faHblOf(o)?'HBL '+faHblOf(o)+' (ref '+other.ref+')':other.ref)+'. One invoice covers one HBL')}
+    const ex0=invList(sh.ref).find(i=>normInvNo(i.invRef)===key),isNew=!ex0;
+    if(Number.isNaN(fr))it.errs.push('Freight charge is not a number');if(Number.isNaN(ex))it.errs.push('Additional charges is not a number');
+    if(isNew&&(fr==null||!(fr>0)))it.errs.push('Freight charge is needed for a new invoice');
+    const dd=faDate(dt);if(dd===null)it.errs.push('Invoice date "'+dt+'" is not a valid date');
+    let paid=ex0?ex0.paid:'Unpaid';if(ps){const x=ps.toLowerCase();if(['paid','yes','y','true','1'].includes(x))paid='Paid';else if(['unpaid','no','n','false','0','pending','open','due'].includes(x))paid='Unpaid';else it.errs.push('Payment status "'+ps+'" must be Paid or Unpaid')}else if(po)paid='Paid';
+    const pd=faDate(po);if(pd===null)it.errs.push('Payment date "'+po+'" is not a valid date');
+    const hold=hs?(faYes(hs)?true:(faNo(hs)?false:(it.errs.push('Hold "'+hs+'" must be Yes or No'),false))):(ex0?!!ex0.hold:false);
+    const form={id:ex0?ex0.id:'new',inv,amt:fr!=null&&!Number.isNaN(fr)?fr:(ex0?ex0.freight:''),extra:ex!=null&&!Number.isNaN(ex)?ex:(ex0?(ex0.extra||0):0),xtype:xt||(ex0?ex0.extraType:''),date:dd||(ex0?ex0.date:''),paid,paidOn:paid==='Paid'?(pd||(ex0?ex0.paidOn:'')||''):'',hold,holdReason:hold?(hr||(ex0?ex0.holdReason:'')||''):'',rem:rem||(ex0?(ex0.remarks||''):'')};
+    if(isNew&&!dd){form.date=S.today;it.warns.push('Invoice date is blank, so today is used')}
+    if(!it.errs.length){
+      const ce=faCheck(sh.ref,form);ce.forEach(e=>it.errs.push(e));
+      if(!ce.length&&form.paid==='Paid'&&form.paidOn&&form.date&&form.paidOn<form.date)it.errs.push('The payment date is before the invoice date');
+    }
+    if(!it.errs.length){
+      it.form=form;const q=selQuote(sh.ref),total=(Number(form.amt)||0)+(Number(form.extra)||0);
+      if(q&&q.amount>0){const p=(total-q.amount)/q.amount*100;if(p>cfg.tol)it.warns.push('Invoice is '+p.toFixed(1)+'% over the quote ('+usd2(q.amount)+')')}
+      if(isNew){it.kind='new';it.text='Add invoice '+inv+': '+usd2(total)+(form.paid==='Paid'?', paid '+fmt(form.paidOn):'')+(form.hold?', on hold':'')}
+      else{const ch=[],o=ex0;if(Number(o.freight)!==Number(form.amt))ch.push('freight '+usd2(o.freight)+' to '+usd2(form.amt));if((Number(o.extra)||0)!==Number(form.extra))ch.push('additional '+usd2(o.extra||0)+' to '+usd2(form.extra));if(o.date!==form.date)ch.push('invoice date to '+fmt(form.date));if(o.paid!==form.paid)ch.push(form.paid==='Paid'?'marked Paid '+fmt(form.paidOn):'marked Unpaid');else if(form.paid==='Paid'&&(o.paidOn||'')!==form.paidOn)ch.push('payment date to '+fmt(form.paidOn));if(!!o.hold!==form.hold)ch.push(form.hold?'put on hold':'hold released');else if(form.hold&&(o.holdReason||'')!==form.holdReason)ch.push('hold reason changed');if((o.remarks||'')!==form.rem)ch.push('remarks changed');if((o.extraType||'')!==(form.xtype||'')&&form.extra>0)ch.push('charge type to '+form.xtype);
+        if(!ch.length){it.kind='nochange';it.text='No change'}else{it.kind=(o.paid!=='Paid'&&form.paid==='Paid')?'paid':'update';it.text='Update invoice '+inv+': '+ch.join(', ')}}
+    }
+    items.push(it);
+  });
+  const k=x=>items.filter(i=>i.kind===x&&!i.errs.length).length;
+  return {items,counts:{rows:items.length,blank:items.filter(i=>i.kind==='blank').length,add:k('new'),update:k('update'),paid:k('paid'),nochange:k('nochange'),warn:items.filter(i=>i.warns.length&&!i.errs.length).length,problems:items.filter(i=>i.errs.length).length}};
+}
+function faImportPreview(P){
+  S.faImp=P;const c=P.counts,n=c.add+c.update+c.paid;
+  openModal(`<div class="mh"><div><h2>Upload Invoice Details</h2><div class="mu">File: ${esc(P.fileName)}. Nothing is saved until you click Apply.</div></div><button class="x" data-act="close" aria-label="Close">&times;</button></div>
+  <div class="kpis" style="margin-bottom:12px"><div class="kpi"><small>Rows in File</small><b>${c.rows}</b></div><div class="kpi"><small>New Invoices</small><b>${c.add}</b></div><div class="kpi"><small>Updated</small><b>${c.update}</b></div><div class="kpi"><small>Marked Paid</small><b>${c.paid}</b></div><div class="kpi"><small>No Details Entered</small><b>${c.blank}</b></div><div class="kpi ${c.problems?'late':''}"><small>Problems</small><b>${c.problems}</b></div></div>
+  ${n===0&&!c.problems?`<div class="note">${c.blank===c.rows?'No invoice details were found in this file. Fill in the Carrier Invoice No., Freight Charge and Payment columns, then upload it again.':'There is nothing to change.'}</div>`:''}
+  ${c.warn?`<div class="note" style="margin-bottom:8px">${c.warn} row(s) have a warning (shown below). They are still applied.</div>`:''}
+  <div class="tbw" style="max-height:44vh;overflow:auto"><table class="tb" data-sort="off"><tr><th>Row</th><th>HBL / MBL</th><th>Ref</th><th>Result</th></tr>${P.items.filter(x=>x.kind!=='blank').slice(0,400).map(x=>`<tr class="${x.errs.length?'tr-pend':''}"><td>${x.row}</td><td>${esc(x.hbl||'-')}${x.mbl?'<br><small class="mu">'+esc(x.mbl)+'</small>':''}</td><td>${esc(x.ref||'-')}</td><td>${x.errs.length?`<span class="late-t">${esc(x.errs.join('; '))}</span>`:`<span class="${x.kind==='nochange'?'mu':'ok-t'}">${esc(x.text)}</span>`}${x.warns.length&&!x.errs.length?`<br><small class="late-t">${esc(x.warns.join('; '))}</small>`:''}</td></tr>`).join('')||'<tr><td colspan="4" class="empty">Nothing to show.</td></tr>'}</table></div>
+  <div class="row sec"><button class="btn pri" data-act="faImpApply" ${n?'':'disabled'}>Apply ${n} Change(s)</button>${c.problems?'<button class="btn" data-act="faImpProblems">Download Problem List</button>':''}<button class="btn" data-act="close">Cancel</button></div>${c.problems?'<p class="hint">Rows with problems are skipped. Fix them in the file and upload it again.</p>':''}`);
+}
+function faImportApply(){
+  const P=S.faImp;if(!P||!can('auditedit'))return {ok:false,msg:'Nothing to apply'};
+  let a=0,u=0,p=0,bad=0;
+  P.items.filter(x=>!x.errs.length&&x.form&&['new','update','paid'].includes(x.kind)).forEach(x=>{const r=faSave(x.ref,x.form);if(!r.ok){bad++;return}if(x.kind==='new')a++;else if(x.kind==='paid')p++;else u++});
+  audit('Freight audit upload','',P.fileName+': '+a+' new, '+u+' updated, '+p+' marked paid'+(bad?', '+bad+' failed':'')+(P.counts.problems?', '+P.counts.problems+' skipped':''));
+  S.faImp=null;return {ok:true,msg:a+' invoice(s) added, '+u+' updated, '+p+' marked Paid'+(bad?', '+bad+' failed':'')+(P.counts.problems?'. '+P.counts.problems+' problem row(s) skipped':''),a,u,p,bad};
+}
+function faProblemCsv(P){return toCSV(['Row','HBL / HAWB / Tracking','MBL / MAWB','Internal Reference','Problem'],P.items.filter(x=>x.errs.length).map(x=>({Row:x.row,'HBL / HAWB / Tracking':x.hbl,'MBL / MAWB':x.mbl,'Internal Reference':x.ref,Problem:x.errs.join('; ')})))}
+document.addEventListener('click',e=>{
+  const t=e.target.closest&&e.target.closest('[data-act]');if(!t)return;const a=t.dataset.act;
+  if(a==='faTemplate'){const r=rptRun('invpend','xlsx');toast(r.msg,r.ok?'':'bad');return}
+  if(a==='faImpApply'){const r=faImportApply();closeModal();render();toast(r.msg,r.ok?'':'bad');return}
+  if(a==='faImpProblems'){if(S.faImp)downloadText('Freight_Audit_Upload_Problems.csv','\uFEFF'+faProblemCsv(S.faImp),'text/csv');return}
+},true);
+document.addEventListener('change',e=>{
+  const t=e.target;if(!t||t.id!=='faFile')return;const f=t.files[0];if(!f)return;
+  if(!can('auditedit')){toast('Your role is not allowed to do this','bad');t.value='';return}
+  readUpload(f,(err,o)=>{if(err||o.err){toast(err||o.err,'bad');return}const P=faImportCheck(o.objs,o.hdr);if(P.err){toast(P.err,'bad');return}P.fileName=f.name;faImportPreview(P)});t.value='';
+});
+
 
 function renderNav(){
   window._tasks=can('tasks')?taskList():[];
