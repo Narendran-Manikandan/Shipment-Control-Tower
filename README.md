@@ -23,8 +23,12 @@ This is a demo with sample data. The sign-in is not real security: users.js is p
 
 
 ## New in this version
-- Sidebar sections open and close; your profile, password, problem report and sign-out are in the avatar menu at the top right (the version line is in that menu too).
-- Delete shipment (permanent, type the reference to confirm). Off by default except for the Logistics Manager role: to give it to another role, go to Administration, Role access, tick Delete under Shipments, save.
-- Optional shipping documents (PDF, Excel, images, up to 5 MB, 10 per shipment) and a Missing Docs badge. With shared data on, the files go to Supabase Storage: run supabase-storage-setup.sql once (after supabase-setup.sql). Anyone with the database key can open the files, so use sample documents only.
-- Quotation ID on quotes, and in the freight export and import.
-- Switches above the monitor: Missing Docs only, Delayed only.
+- **Reports page** (Insights): the Daily Status Report in your DSR template layout (34 columns), plus the shipment register, overdue milestones, shipments at risk, free time, delivery schedule, slot requests, data quality, carrier scorecard, Pending Invoices, Payment Pending, freight spend, RG Pending and the Monthly RG Accrual. Excel or CSV. Which role can download which report is set in Administration, Role Access, Report Access.
+- **Freight Audit** (Commercial and Access): delivered shipments where your company pays the freight. Record actual freight cost, carrier invoice number and remarks; status Invoice Pending, Payment Pending or Paid.
+- **RG Pending** (Operations, Logistics Analyst by default): DAP and DDP need only a Final RG after delivery; other terms need an In-Transit RG (with optional TO and PL#) once in transit, then a Final RG. Download the pending report, fill it in, upload it back.
+- **Track & Trace access** is now editable per role (Role Access).
+- Quick-filter switches above the monitor: Missing Docs only, Delayed only, Pending RG only.
+- Account menu: Compact Table Rows, and Theme (match device, light or dark).
+- Titles and subheadings use headline-style capitalisation.
+- Optional shipping documents with a Missing Docs badge (run supabase-storage-setup.sql once for shared storage), and a Quotation ID on quotes.
+- Sidebar sections open and close; profile, password, problem report and sign-out are in the avatar menu at the top right.

@@ -15,7 +15,7 @@
 --side:#1E2124;--side-hover:#2D3136;--side-ink:#C9CBCB;
 --late:#B3261E;--late-bg:#FDECEA;--ok:#2E6B2E;--ok-bg:#E7F3E7;--info:#1A55A0;--info-bg:#E7F0FB;--warn:#9A4A0E;--warn-bg:#FFF0E4;--chip:#ECECE8;
 --shadow:0 12px 40px rgba(0,0,0,.22)}
-@media (prefers-color-scheme:dark){:root{
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
 --bg:#151719;--panel:#1E2124;--panel2:#23272A;--ink:#ECEDED;--muted:#9DA3A4;--line:#33393C;--line2:#454C50;
 --accent:#F37021;--side:#0F1112;--side-hover:#1E2326;--side-ink:#AEB3B4;
 --late:#FF9A90;--late-bg:#3A1E1C;--ok:#8FD18F;--ok-bg:#1F3320;--info:#8EB8F0;--info-bg:#1B2A3F;--warn:#F5B383;--warn-bg:#3A2616;--chip:#2B3033}}
@@ -143,7 +143,7 @@ details summary{cursor:pointer;font-weight:600}
 
 /* ===== v3 design system: corporate control tower ===== */
 :root{--bg:#F3F4F5;--panel:#FFFFFF;--panel2:#F8F9FA;--ink:#14171A;--muted:#5B6166;--line:#E2E5E8;--line2:#C9CFD4;--chip:#EBEEF0;--accent-ink:#14171A;--side:#12151A;--side-ink:#AEB5BA;--demo:#FFF5EA;--demo-ink:#7A3F0A}
-@media (prefers-color-scheme:dark){:root{--bg:#0E1113;--panel:#171B1E;--panel2:#1B2024;--ink:#EDF0F1;--muted:#98A1A6;--line:#2A3135;--line2:#3B444A;--chip:#242A2E;--side:#0A0C0E;--side-ink:#9AA2A7;--demo:#2A2016;--demo-ink:#F2B27C}}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0E1113;--panel:#171B1E;--panel2:#1B2024;--ink:#EDF0F1;--muted:#98A1A6;--line:#2A3135;--line2:#3B444A;--chip:#242A2E;--side:#0A0C0E;--side-ink:#9AA2A7;--demo:#2A2016;--demo-ink:#F2B27C}}
 body{font-family:'IBM Plex Sans','Segoe UI Variable','Segoe UI',system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;font-size:14px;line-height:1.5}
 .app{grid-template-columns:256px minmax(0,1fr)}
 .brand{padding:22px 20px 18px;gap:12px;border-bottom:1px solid rgba(255,255,255,.07)}
@@ -209,7 +209,7 @@ h3{font-size:15px;font-weight:600;padding-left:0;border-left:0;margin:0 0 14px;l
 .tr-pend td{background:var(--late-bg)}
 .spbar{display:flex;height:12px;border-radius:6px;overflow:hidden;background:var(--chip)}.spbar i{display:block;height:100%}
 .rv{color:#9A5B00;font-weight:600}
-@media (prefers-color-scheme:dark){.rv{color:#E9B25C}}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .rv{color:#E9B25C}}
 .ufl{margin-bottom:10px}.ufl.bad .in{border-color:#B3261E}
 .uf-row{display:grid;grid-template-columns:minmax(120px,1.1fr) minmax(110px,1fr) minmax(120px,.9fr) minmax(130px,1fr) minmax(110px,1fr) auto;gap:10px;align-items:end}
 @media (max-width:980px){.uf-row{grid-template-columns:1fr 1fr}}
@@ -223,7 +223,7 @@ h3{font-size:15px;font-weight:600;padding-left:0;border-left:0;margin:0 0 14px;l
 .mfgrid table{min-width:100%}.mfgrid td,.mfgrid th{white-space:nowrap;max-width:320px;overflow:hidden;text-overflow:ellipsis}
 .mf-add td{background:color-mix(in srgb,var(--ok) 16%,transparent)}
 td.mf-chg{background:#FFF1A8!important;color:#3a2f00;font-weight:600}
-@media (prefers-color-scheme:dark){td.mf-chg{background:#6b5a00!important;color:#FFF0B0}}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) td.mf-chg{background:#6b5a00!important;color:#FFF0B0}}
 .mbox.wide{max-width:min(1240px,96vw);width:96vw}
 @media (max-width:900px){#mfDock{display:none}}
 .mfx{font-size:18px;line-height:1;padding:2px 9px}
@@ -321,6 +321,17 @@ body.signed-in .demobar{display:none}
 @media (max-width:980px){.nav-gh{display:none}.nav-grp,.nav-sec,.nav-sec.closed,.nav-in{display:contents}.nav-sec.closed .nav-in{visibility:visible}}
 @media (max-width:620px){.titlebar{display:flex!important;justify-content:flex-end;padding:6px 12px}.crumb,.asof{display:none}}
 .swrow{display:flex;gap:18px;flex-wrap:wrap;margin-left:auto}.sw{display:inline-flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;color:var(--ink)}.sw input{position:absolute;opacity:0;width:1px;height:1px}.sw-t{width:34px;height:20px;border-radius:999px;background:var(--line2);position:relative;transition:background .18s;flex:none}.sw-t::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.3);transition:transform .18s}.sw input:checked+.sw-t{background:var(--accent)}.sw input:checked+.sw-t::after{transform:translateX(14px)}.sw input:focus-visible+.sw-t{outline:2px solid var(--accent);outline-offset:2px}.monbar{flex-wrap:wrap}@media (prefers-reduced-motion:reduce){.sw-t,.sw-t::after{transition:none}}
+
+.rgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:14px}.rgrid .card{margin:0}
+#who .prof-prefs{grid-column:1/-1;border-top:1px solid var(--line);margin-top:6px;padding:10px 12px 6px}
+body.compact .tb td,body.compact .tb th{padding:4px 8px;font-size:12px;line-height:1.25}body.compact .tb .pill{padding:0 6px}body.compact .kpi{padding-top:8px;padding-bottom:8px}
+:root[data-theme="dark"]{color-scheme:dark}:root[data-theme="light"]{color-scheme:light}
+
+/* chosen dark theme */
+:root[data-theme="dark"]{
+--bg:#151719;--panel:#1E2124;--panel2:#23272A;--ink:#ECEDED;--muted:#9DA3A4;--line:#33393C;--line2:#454C50;
+--accent:#F37021;--side:#0F1112;--side-hover:#1E2326;--side-ink:#AEB3B4;
+--late:#FF9A90;--late-bg:#3A1E1C;--ok:#8FD18F;--ok-bg:#1F3320;--info:#8EB8F0;--info-bg:#1B2A3F;--warn:#F5B383;--warn-bg:#3A2616;--chip:#2B3033}:root[data-theme="dark"]{--bg:#0E1113;--panel:#171B1E;--panel2:#1B2024;--ink:#EDF0F1;--muted:#98A1A6;--line:#2A3135;--line2:#3B444A;--chip:#242A2E;--side:#0A0C0E;--side-ink:#9AA2A7;--demo:#2A2016;--demo-ink:#F2B27C}:root[data-theme="dark"] .rv{color:#E9B25C}:root[data-theme="dark"] td.mf-chg{background:#6b5a00!important;color:#FFF0B0}
 .ver{padding:2px 18px 14px;font-size:11px;opacity:.65;color:var(--side-ink)}@media(max-width:820px){.ver{display:none}}
 .whol .shoff{font-size:11px;opacity:.8;text-decoration:none;cursor:default}
 .gate-brand{display:flex;align-items:center;gap:10px;margin-bottom:14px;font-size:15px}.gate-logo{height:38px;width:38px}
@@ -403,7 +414,7 @@ const TYPE_COL={'Raw Materials':'#8E5BD0','Consumables':'#2E8B57','Finished Good
 const TABS=[
  {id:'tasks',label:'My tasks'},{id:'track',label:'Track & Trace'},{id:'request',label:'Shipment Requests'},{id:'milestones',label:'Milestone Management'},{id:'dataquality',label:'Data Quality'},{id:'carrierupdates',label:'Carrier Updates'},{id:'slotreq',label:'Delivery Slot Requests'},{id:'slotmgmt',label:'Delivery Management'},{id:'warehouse',label:'Warehouse Operations'},
  {id:'dashboard',label:'Control Tower Overview'},{id:'carrier',label:'Carrier Performance'},{id:'transit',label:'Transit Analytics'},{id:'reports',label:'Scheduled reports'},{id:'commercial',label:'Freight Commercials'},{id:'freighttrends',label:'Freight Trends'},{id:'team',label:'My team'},{id:'admin',label:'Administration'}];
-const ACCESS_ITEMS=[...TABS,{id:'invoices',label:'Invoices and pending invoices (sub-tabs of Freight Commercials)'},{id:'usersview',label:'Users: open the Users and roles tab'},{id:'usersadd',label:'Users: create users'},{id:'usersedit',label:'Users: edit users and reset passwords'},{id:'usersdel',label:'Users: remove users'},{id:'settingsedit',label:'Settings: change roles, warehouses, branding, settings and restore backups'},{id:'cancelship',label:'Cancel and reinstate shipments (monitor and shipment details)'},{id:'deleteship',label:'Delete shipments permanently'},{id:'editship',label:'Edit shipments and item lines, update shipments by upload'},{id:'mfmaster',label:'Master file view: Master workbook'},{id:'mfcomm',label:'Master file view: Commercials workbook (restricted)'}];
+const ACCESS_ITEMS=[...TABS,{id:'invoices',label:'Invoices and pending invoices (sub-tabs of Freight Commercials)'},{id:'usersview',label:'Users: open the Users and roles tab'},{id:'usersadd',label:'Users: create users'},{id:'usersedit',label:'Users: edit users and reset passwords'},{id:'usersdel',label:'Users: remove users'},{id:'settingsedit',label:'Settings: change roles, warehouses, branding, settings and restore backups'},{id:'cancelship',label:'Cancel and reinstate shipments (monitor and shipment details)'},{id:'editship',label:'Edit shipments and item lines, update shipments by upload'},{id:'mfmaster',label:'Master file view: Master workbook'},{id:'mfcomm',label:'Master file view: Commercials workbook (restricted)'}];
 const TAB_BY_LABEL=Object.assign(Object.fromEntries(TABS.map(t=>[t.label,t.id])),{'Shipment Tracking Site':'track','Shipment Request Form':'request','Shipment Milestone Updates':'milestones','Shipment Dashboard':'dashboard','Carrier Dashboard':'carrier','Transit Time Analysis':'transit','Shipment Quote + Commercials':'commercial','Admin':'admin'});
 const MS={Pickup:{plan:'PickupPlanned',act:'PickupActual',status:'Picked up',label:'Pickup'},ETD:{plan:'ETDPlanned',act:'ETDActual',status:'In transit',label:'ETD (departure)'},
  ETA:{plan:'ETA',act:'ETAActual',status:'Out for delivery',label:'ETA (arrival)'},Delivery:{plan:'',act:'DeliveredOn',status:'Delivered',label:'Delivery'}};
@@ -461,7 +472,7 @@ let S;
 function init(){
   clockRefresh();
   S={brand:clone(BRAND_DEFAULT),today:CLOCK.today,role:'Logistics Analyst',email:'demo.user@yourcompany.com',baseEmail:'demo.user@yourcompany.com',carrier:'',view:'track',
-     lines:clone(RAW.lines),events:clone(RAW.events),users:clone(RAW.users),access:{},customRoles:[],accounts:[],docs:[],subs:clone(RAW.subs),
+     lines:clone(RAW.lines),events:clone(RAW.events),users:clone(RAW.users),access:{},customRoles:[],accounts:[],docs:[],rg:{},subs:clone(RAW.subs),
      quotes:[],invoices:[],remind:{},revisions:[],uf:null,warehouses:[],slots:[],slotBlocks:[],whTeam:'',whLog:[],whNotified:{},wh:{lead:1,weekDay:4,overdue:true},utcTime:CLOCK.utc,whFail:false,mf:{log:[],ver:{master:1,commercial:1},hl:{},dock:true,closed:false,file:'master',tab:'tblShipments',q:'',only:false},outbox:[],audit:[],settings:{domain:'yourcompany.com',strip:{track:true},permV:2},draft:[],lastSaved:null,bulkResult:null,msResult:null,
      ui:{q:'',dash:{ym:CLOCK.today.slice(0,7),sel:CLOCK.today,mode:'All',ms:'Delivery',q:'',status:'All',overdueOnly:false,tile:null,type:'All',nature:'All',mm:{measure:'ships',basis:'pickup',dim:'mode',carrier:'All',sel:null}},
          carrier:{mode:'All',win:'All',type:'All',nature:'All',metric:'ontime',target:90,mm:{measure:'weight',basis:'pickup',dim:'carrier',carrier:'All',sel:null}},tr:{seg:'d2d',basis:'actual',group:'mode',pcts:[50,90,95],mode:'All',carrier:'All',stype:'All',nature:'All',oc:'All',dc:'All',op:'All',dp:'All',win:'All'},com:'quotes',invCarrier:'All',invStatus:'All',admin:'users',msFilter:'active',cu:{carrier:'',filter:'active',q:''},ft:{series:'both',metric:'avg',group:'none',oc:'All',op:'All',dc:'All',dp:'All',nature:'All',mode:'All',vol:'All'},kt:{},sp:{carrier:'All'},wh:{tab:'schedule',code:'All',days:14},per:{kind:'all',y:+CLOCK.today.slice(0,4),q:Math.ceil(+CLOCK.today.slice(5,7)/3),m:+CLOCK.today.slice(5,7),basis:'pickup'},sort:{},sl:{tab:'my',f:'All',ship:'',week:'',pick:'first',first:null,second:null,vehicle:'',driver:'',phone:'',note:''},dm:{tab:'review',f:'Open',code:'All',week:'',sel:[],prop:null}}};
@@ -2232,7 +2243,7 @@ function dvLocate(){
   navigator.geolocation.getCurrentPosition(p=>{document.getElementById('dv_loc').value=p.coords.latitude.toFixed(4)+', '+p.coords.longitude.toFixed(4);out.textContent='Location added'},()=>{out.textContent='Location is switched off. Type where you are.'},{timeout:8000});
 }
 /* ========== go live: storage, sign-in and roles, flows ========== */
-const PERSIST_KEYS=['today','lines','events','users','access','subs','quotes','invoices','remind','revisions','warehouses','slots','slotBlocks','whLog','whNotified','wh','utcTime','whFail','outbox','audit','settings','brand','views','reports','whSince','customRoles','accounts','docs'];
+const PERSIST_KEYS=['today','lines','events','users','access','subs','quotes','invoices','remind','revisions','warehouses','slots','slotBlocks','whLog','whNotified','wh','utcTime','whFail','outbox','audit','settings','brand','views','reports','whSince','customRoles','accounts','docs','rg'];
 const Store={key:'ect.state.v1',modeKey:'ect.mode',last:null,err:'',
   available(){try{localStorage.setItem('ect.test','1');localStorage.removeItem('ect.test');return true}catch(e){return false}},
   mode(){if(window.ECT_LOGIN&&window.ECT_LOGIN.storage==='shared'&&window.ECT_LOGIN.shared&&window.ECT_LOGIN.shared.url)return 'shared';const d=window.ECT_LOGIN&&window.ECT_LOGIN.storage==='browser'?'browser':'demo';try{return localStorage.getItem(this.modeKey)||d}catch(e){return d}},
@@ -2615,14 +2626,16 @@ function teamDel(em){
 }
 /* ========== module permissions: View / Create / Edit / Delete ========== */
 const MODULES=[
- {id:'shipments',label:'Shipments',V:['track','tasks','dataquality'],C:['request'],E:['milestones','editship','carrierupdates'],D:['cancelship','deleteship'],note:'View: Track & Trace, My tasks, Data Quality. Create: Shipment Requests. Edit: Milestone Management, Carrier Updates and editing shipments. Delete: cancel, reinstate and permanently delete.'},
+ {id:'shipments',label:'Shipments',V:['tasks','dataquality'],C:['request'],E:['milestones','editship','carrierupdates'],D:['cancelship'],note:'View: My tasks, Data Quality. Create: Shipment Requests. Edit: Milestone Management, Carrier Updates and editing shipments. Delete: cancel and reinstate shipments.'},
+ {id:'trackmod',label:'Track & Trace',V:['track'],C:[],E:[],D:[],note:'View: the Track & Trace page.'},
  {id:'warehouse',label:'Warehouse Operations',V:['warehouse'],C:['slotreq'],E:['slotmgmt'],D:[],note:'View: Warehouse Operations. Create: request delivery slots. Edit: Delivery Management (approve, propose, block).'},
- {id:'freight',label:'Freight Cost',V:['commercial','freighttrends'],C:[],E:['invoices'],D:[],note:'View: Freight Commercials and Freight Trends. Edit: invoices and actual freight.'},
+ {id:'freight',label:'Freight Cost',V:['commercial','freighttrends','faudit'],C:[],E:['invoices','auditedit'],D:[],note:'View: Freight Commercials, Freight Trends and Freight Audit. Edit: invoices, actual freight, and the freight audit.'},
+ {id:'rgmod',label:'Receipt of Goods (RG)',V:['rg'],C:[],E:['rgedit'],D:[],note:'View: the RG Pending page. Edit: record RG details and upload them.'},
  {id:'analysis',label:'Analysis',V:['dashboard','carrier','transit','reports'],C:[],E:[],D:[],note:'View: Control Tower Overview, Carrier Performance, Transit Analytics, Scheduled reports.'},
  {id:'users',label:'Users',V:['usersview'],C:['usersadd'],E:['usersedit'],D:['usersdel'],note:'View: the Users and roles tab. Create, edit (including password reset) and remove users.'},
  {id:'settings',label:'Settings',V:['admin'],C:[],E:['settingsedit'],D:[],note:'View: the other Administration tabs. Edit: change roles and access, warehouses, branding, settings and restore a backup.'}];
 const PERM_KEYS=[['V','View'],['C','Create'],['E','Edit'],['D','Delete']];
-const canTab=id=>can(id)||(id==='admin'&&can('usersview'));
+const canTab=id=>id==='rptdl'?RPT.some(r=>can('rpt_'+r.id)&&(!r.money||can('commercial'))):can(id)||(id==='admin'&&can('usersview'));
 function denied(id){if(can(id))return false;toast('Your role is not allowed to do this','bad');return true}
 function permOn(role,m,k){const ids=m[k];if(!ids||!ids.length)return null;const a=S.access[role]||[];return ids.some(i=>a.includes(i))}
 function permPartial(role,m,k){const ids=m[k]||[];const a=S.access[role]||[];return ids.length>1&&ids.some(i=>a.includes(i))&&!ids.every(i=>a.includes(i))}
@@ -2630,7 +2643,6 @@ function permSet(role,mid,k,on){
   const m=MODULES.find(x=>x.id===mid);if(!m)return;const a=S.access[role]=S.access[role]||[];
   const add=ids=>ids.forEach(i=>{if(!a.includes(i))a.push(i)}),del=ids=>ids.forEach(i=>{const j=a.indexOf(i);if(j>=0)a.splice(j,1)});
   if(k==='V'){if(on)add(m.V);else['V','C','E','D'].forEach(x=>del(m[x]))}else{if(on){add(m.V);add(m[k])}else del(m[k])}
-  if(!a.includes('track'))a.push('track');
 }
 function accessFor(spec){const a=['track','tasks'],add=i=>{if(!a.includes(i))a.push(i)};Object.entries(spec).forEach(([mid,keys])=>{const m=MODULES.find(x=>x.id===mid);m.V.forEach(add);[...keys].forEach(k=>(m[k]||[]).forEach(add))});return a}
 Object.assign(PROFILE_PRESETS,{Finance:accessFor({shipments:'V',freight:'VE',analysis:'V'}),SCM:accessFor({shipments:'VCE',warehouse:'VC',analysis:'V'}),'Warehouse Manager':accessFor({shipments:'V',warehouse:'VCE'}),Admin:accessFor({shipments:'VCED',warehouse:'VCE',freight:'VE',analysis:'V',users:'VCED',settings:'VE'})});
@@ -2666,7 +2678,7 @@ function migratePerms(){
 {const m0=migrateData;migrateData=function(){m0.apply(this,arguments);migratePerms()}}
 /* ========== export all data (ZIP or JSON) and restore from a dump ========== */
 const DATASETS=[
- {id:'shipments',file:'shipments.json',label:'Shipment data',keys:['lines','subs','revisions','docs']},
+ {id:'shipments',file:'shipments.json',label:'Shipment data',keys:['lines','subs','revisions','docs','rg']},
  {id:'milestones',file:'milestones.json',label:'Milestones',keys:['events']},
  {id:'slots',file:'delivery_slots.json',label:'Delivery slots',keys:['slots','slotBlocks']},
  {id:'users',file:'user_list.json',label:'User list, roles and access',keys:['users','access','customRoles','accounts']},
@@ -2825,7 +2837,6 @@ document.addEventListener('keydown',e=>{
   if((e.key==='ArrowDown'||e.key==='ArrowUp')&&w.contains(document.activeElement)){const it=[...w.querySelectorAll('[role=menuitem]')];if(it.length){e.preventDefault();const i=it.indexOf(document.activeElement);it[(i+(e.key==='ArrowDown'?1:-1)+it.length)%it.length].focus()}}
 });
 /* ========== delete shipment, shipping documents, quotation id ========== */
-const DELETE_HOOKS=[];
 const DOC_TYPES=['Bill of Lading / AWB','Commercial invoice','Packing list','Other'];
 const DOC_MAX=5*1024*1024,DOC_PER=10,DOC_EXT=['pdf','xls','xlsx','csv','png','jpg','jpeg','gif','webp'];
 const DOC_ACCEPT=DOC_EXT.map(x=>'.'+x).join(',');
@@ -2885,30 +2896,6 @@ function docsFormHTML(){
   if(inp&&inp.files&&inp.files.length){const files=[...inp.files],type=(document.getElementById('f_doctype')||{}).value;
     docsUpload(ref,files,type).then(r=>{render();if(r.bad.length)toast('Shipment saved, but '+r.bad.length+' document(s) could not be uploaded ('+r.bad[0]+'). Add them from the shipment details.','bad');else toast(ref+' saved with '+r.ok.length+' document(s)')})}
   return ref}}
-/* ----- delete a shipment ----- */
-function delCounts(ref){return {items:S.lines.filter(l=>l.ShipmentRef===ref).length,events:S.events.filter(e=>e.ShipmentRef===ref).length,slots:S.slots.filter(r=>r.ref===ref).length,quotes:S.quotes.filter(q=>q.ref===ref).length,invoices:S.invoices.filter(i=>i.ref===ref).length,docs:docsOf(ref).length,subs:S.subs.filter(s=>s.ShipmentRef===ref).length}}
-async function shipDelete(ref){
-  if(!can('deleteship'))return {ok:false,msg:'Your role cannot delete shipments'};
-  const sh=getShip(ref);if(!sh)return {ok:false,msg:'Shipment not found'};
-  const c=delCounts(ref);let fileErr=0;
-  for(const d of docsOf(ref)){try{await Docs.remove(d)}catch(e){fileErr++}}
-  S.lines=S.lines.filter(l=>l.ShipmentRef!==ref);S.events=S.events.filter(e=>e.ShipmentRef!==ref);S.subs=S.subs.filter(s=>s.ShipmentRef!==ref);S.slots=S.slots.filter(r=>r.ref!==ref);
-  S.quotes=S.quotes.filter(q=>q.ref!==ref);S.invoices=S.invoices.filter(i=>i.ref!==ref);S.revisions=S.revisions.filter(r=>r.ref!==ref);S.docs=(S.docs||[]).filter(d=>d.ref!==ref);delete S.whNotified[ref];
-  if(S.ui.dash&&S.ui.dash.chk)S.ui.dash.chk=S.ui.dash.chk.filter(r=>r!==ref);
-  DELETE_HOOKS.forEach(f=>{try{f(ref)}catch(e){}});
-  audit('Shipment deleted',ref,sh.route+', '+sh.carrier+', '+sh.status+': '+c.items+' item line(s), '+c.events+' milestone(s), '+c.slots+' slot request(s), '+c.quotes+' quote(s), '+c.invoices+' invoice(s), '+c.docs+' document(s)');
-  return {ok:true,msg:ref+' was deleted permanently'+(fileErr?'. '+fileErr+' document file(s) could not be removed from storage':''),counts:c,fileErr};
-}
-function deleteModal(ref){
-  const sh=getShip(ref);if(!sh)return;const c=delCounts(ref);
-  openModal(`<div class="mh"><h2>Delete ${esc(ref)}</h2><button class="x" data-act="close" aria-label="Close">&times;</button></div>
-  <p class="mu" style="margin-bottom:8px">${esc(sh.mode)}, ${esc(sh.route)}, ${esc(sh.carrier)}, ${esc(sh.status)}</p>
-  <div class="err"><b>This permanently deletes the shipment and everything attached to it. It cannot be undone.</b><ul style="margin:8px 0 0 18px"><li>${c.items} item line(s) and ${c.events} milestone(s)</li><li>${c.slots} delivery slot request(s)</li><li>${c.quotes} freight quote(s) and ${c.invoices} invoice(s)</li><li>${c.docs} document(s) and ${c.subs} email subscription(s)</li></ul></div>
-  <p class="hint" style="margin-top:8px">If you only want it out of the figures, use Cancel instead: it keeps the record and can be reinstated. A deletion is recorded in the audit log.</p>
-  <label class="f" style="margin-top:10px">Type <b>${esc(ref)}</b> to confirm<input id="del_conf" class="in" autocomplete="off" aria-label="Type the shipment reference to confirm"></label>
-  <div class="row sec"><button class="btn danger" id="del_go" data-act="deleteDo" data-ref="${esc(ref)}" disabled>Delete permanently</button><button class="btn" data-act="close">Keep it</button></div>`);
-}
-document.addEventListener('input',e=>{if(e.target&&e.target.id==='del_conf'){const b=document.getElementById('del_go');if(b)b.disabled=e.target.value.trim()!==b.dataset.ref}});
 /* ----- quick-filter switches above the shipment monitor ----- */
 function monBarHTML(){
   const D=S.ui.dash,n=(D.chk||[]).length,cb=can('cancelship'),sw=(k,l,on)=>`<label class="sw"><input type="checkbox" role="switch" data-ch="monTog" data-k="${k}" ${on?'checked':''}><span class="sw-t"></span><span>${l}</span></label>`;
@@ -2917,10 +2904,8 @@ function monBarHTML(){
   return `<div id="monBar" class="monbar${n?' on':''}">${n?`<b>${n} selected</b><button class="btn sm danger" data-act="monCancelOpen">Cancel selected (${n})</button><button class="btn sm" data-act="monClear">Clear</button>`:'<span class="mu sm">Tick the boxes to cancel several shipments at once. To remove demo records, set the status filter to Delivered and tick the box in the heading.</span>'}${tog}</div>`;
 }
 
-/* permissions: Managers get the new Delete permission once */
-{const m1=migrateData;migrateData=function(){m1.apply(this,arguments);if((S.settings.permV||0)<3){const m=S.access['Logistics Manager'];if(m&&!m.includes('deleteship'))m.push('deleteship');S.settings.permV=3}}}
 /* ========== demo sign-in (email and password), problem log, report a problem ========== */
-const APP_BUILD='site build 2026-11-13 07:08 UTC';
+const APP_BUILD='site build 2026-11-13 07:54 UTC';
 const ErrLog={key:'ect.errors',max:60,
   add(kind,msg,src){try{const a=JSON.parse(localStorage.getItem(this.key)||'[]');a.push({t:new Date().toISOString(),kind,msg:String(msg==null?'':msg).slice(0,300),src:String(src||'').slice(0,160),view:(typeof S!=='undefined'&&S&&S.view)||'',role:(typeof S!=='undefined'&&S&&S.role)||''});while(a.length>this.max)a.shift();localStorage.setItem(this.key,JSON.stringify(a))}catch(e){}},
   list(){try{return JSON.parse(localStorage.getItem(this.key)||'[]')}catch(e){return []}},
@@ -3548,7 +3533,7 @@ function detailModal(ref){
   <h3 class="sec">History</h3>${ev.length?`<div class="tbw"><table class="tb"><tr><th>Date</th><th>Status</th><th>Location</th><th>Note</th><th>Posted by</th></tr>${ev.map(e=>`<tr><td>${fmt(e.EventDate)}</td><td>${esc(e.Status)}</td><td>${esc(e.Location)}</td><td>${esc(e.Note)}</td><td>${esc(e.PostedBy)}</td></tr>`).join('')}</table></div>`:'<div class="empty">No history yet.</div>'}
   ${can('milestones')&&sh.status!=='Delivered'&&!sh.cancelled?`<h3 class="sec">Record an update</h3>${ufHTML(ref,false)}`:''}
   ${can('request')&&!sh.cancelled?`<h3 class="sec">Shipment details</h3><div class="row"><label class="f">Shipment type<select id="m_stype" class="in" style="width:auto">${(sh.stype?'':'<option value="" selected>Not set</option>')+TYPES.map(x=>`<option ${x===sh.stype?'selected':''}>${x}</option>`).join('')}</select></label><label class="f">Nature of goods<select id="m_nature" class="in" style="width:auto">${(sh.nature?'':'<option value="" selected>Not set</option>')+NATURES.map(x=>`<option ${x===sh.nature?'selected':''}>${x}</option>`).join('')}</select></label><button class="btn" data-act="saveType" data-ref="${esc(ref)}" style="align-self:flex-end">Save details</button></div>`:''}
-  <div class="row sec">${sh.cancelled?'':`<button class="btn" data-act="subOpen" data-ref="${esc(ref)}">Email me updates</button>`}${can('editship')&&!sh.cancelled?`<button class="btn" data-act="editOpen" data-ref="${esc(ref)}">Edit shipment</button>`:''}${can('cancelship')&&!sh.cancelled?`<button class="btn danger" data-act="cancelOpen" data-ref="${esc(ref)}">Cancel this shipment</button>`:''}${can('deleteship')?`<button class="btn danger" data-act="deleteOpen" data-ref="${esc(ref)}">Delete shipment</button>`:''}</div>`);
+  <div class="row sec">${sh.cancelled?'':`<button class="btn" data-act="subOpen" data-ref="${esc(ref)}">Email me updates</button>`}${can('editship')&&!sh.cancelled?`<button class="btn" data-act="editOpen" data-ref="${esc(ref)}">Edit shipment</button>`:''}${can('cancelship')&&!sh.cancelled?`<button class="btn danger" data-act="cancelOpen" data-ref="${esc(ref)}">Cancel this shipment</button>`:''}</div>`);
 }
 
 /* ----- 2. Request form ----- */
@@ -4044,13 +4029,13 @@ function bulkCancelRun(reason,note){
 }
 function monHTML(all){
   const D=S.ui.dash,q=D.q.toLowerCase();
-  const rows=(D.status==='Cancelled'?cancelledList():all).filter(sh=>(D.status==='All'||D.status==='Cancelled'||sh.status===D.status||(D.status==='Delayed'&&isLateNow(sh))||(D.status==='Invoice pending'&&can('invoices')&&isInvPending(sh))||(D.status==='At risk'&&riskInfo(sh)&&!isLateNow(sh))||(D.status==='Free time ending'&&['ending','over'].includes((freeInfo(sh)||{}).state)))).filter(sh=>!D.overdueOnly||isLateNow(sh)).filter(sh=>!D.missDocs||missingDocs(sh))
+  const rows=(D.status==='Cancelled'?cancelledList():all).filter(sh=>(D.status==='All'||D.status==='Cancelled'||sh.status===D.status||(D.status==='Delayed'&&isLateNow(sh))||(D.status==='Invoice pending'&&can('invoices')&&isInvPending(sh))||(D.status==='At risk'&&riskInfo(sh)&&!isLateNow(sh))||(D.status==='Free time ending'&&['ending','over'].includes((freeInfo(sh)||{}).state)))).filter(sh=>!D.overdueOnly||isLateNow(sh)).filter(sh=>!D.missDocs||missingDocs(sh)).filter(sh=>!D.pendRG||rgPending(sh))
     .filter(sh=>!q||(sh.ref+' '+sh.carrier+' '+sh.shipper+' '+sh.consignee+' '+sh.route+' '+sh.pos.join(' ')).toLowerCase().includes(q)).sort((a,b)=>(a.due||'9').localeCompare(b.due||'9'));
   if(!rows.length)return '<div class="empty">No shipments match these filters.</div>';
   const cb=can('cancelship'),elig=s=>!s.cancelled;D.chk=(D.chk||[]).filter(r=>rows.some(s=>s.ref===r&&elig(s)));
   const allSel=cb&&rows.some(elig)&&rows.filter(elig).every(s=>D.chk.includes(s.ref));
-  return `${monBarHTML()}<div class="tbw"><table class="tb" data-sort="on"><tr>${cb?`<th style="width:34px"><input type="checkbox" id="monAll" data-act="monAll" aria-label="Select all shown shipments" ${allSel?'checked':''}></th>`:''}<th>Shipment</th><th>Mode</th><th>Type</th><th>Route</th><th>Carrier</th><th>Progress</th><th>Due</th><th>Status</th>${can('invoices')?'<th>Freight invoice</th>':''}${can('cancelship')||can('deleteship')?'<th></th>':''}</tr>`+rows.map(sh=>`<tr class="click${can('invoices')&&isInvPending(sh)?' tr-pend':''}" data-act="open" data-ref="${sh.ref}">${cb?`<td><input type="checkbox" data-act="monSel" data-ref="${sh.ref}" aria-label="Select ${sh.ref}" ${elig(sh)?'':'disabled'} ${D.chk.includes(sh.ref)?'checked':''}></td>`:''}<td><b>${sh.ref}</b></td><td>${modeBadge(sh.mode)}</td><td>${typeBadge(sh.stype)}${dgTag(sh.nature)}</td><td>${esc(sh.route)}</td><td>${esc(sh.carrier)}</td><td>${miniHTML(sh)}</td>
-    <td>${dueCell(sh)}</td><td>${pill(sh)}${docBadge(sh)}</td>${can('invoices')?`<td>${sh.cancelled?'-':invPill(sh)}</td>`:''}${can('cancelship')||can('deleteship')?`<td class="r">${sh.cancelled||!can('cancelship')?'':`<button class="btn sm danger" data-act="cancelOpen" data-ref="${sh.ref}">Cancel</button>`}${can('deleteship')?` <button class="btn sm danger" data-act="deleteOpen" data-ref="${sh.ref}" title="Delete permanently">Delete</button>`:''}</td>`:''}</tr>`).join('')+'</table></div>';
+  return `${monBarHTML()}<div class="tbw"><table class="tb" data-sort="on"><tr>${cb?`<th style="width:34px"><input type="checkbox" id="monAll" data-act="monAll" aria-label="Select all shown shipments" ${allSel?'checked':''}></th>`:''}<th>Shipment</th><th>Mode</th><th>Type</th><th>Route</th><th>Carrier</th><th>Progress</th><th>Due</th><th>Status</th>${can('invoices')?'<th>Freight invoice</th>':''}${can('cancelship')?'<th></th>':''}</tr>`+rows.map(sh=>`<tr class="click${can('invoices')&&isInvPending(sh)?' tr-pend':''}" data-act="open" data-ref="${sh.ref}">${cb?`<td><input type="checkbox" data-act="monSel" data-ref="${sh.ref}" aria-label="Select ${sh.ref}" ${elig(sh)?'':'disabled'} ${D.chk.includes(sh.ref)?'checked':''}></td>`:''}<td><b>${sh.ref}</b></td><td>${modeBadge(sh.mode)}</td><td>${typeBadge(sh.stype)}${dgTag(sh.nature)}</td><td>${esc(sh.route)}</td><td>${esc(sh.carrier)}</td><td>${miniHTML(sh)}</td>
+    <td>${dueCell(sh)}</td><td>${pill(sh)}${docBadge(sh)}</td>${can('invoices')?`<td>${sh.cancelled?'-':invPill(sh)}</td>`:''}${can('cancelship')?`<td class="r">${sh.cancelled?'':`<button class="btn sm danger" data-act="cancelOpen" data-ref="${sh.ref}">Cancel</button>`}</td>`:''}</tr>`).join('')+'</table></div>';
 }
 function onTime(arr,k){
   let n=0,on=0;const late=[];
@@ -4468,7 +4453,7 @@ function viewAdmin(){
 }
 function accessPanel(){
   return profilesCard()+permCard()+`<div class="card"><h3>Advanced: tab and action level, role by role</h3><div class="tbw"><table class="tb"><tr><th>Tab</th>${ROLES.map(r=>`<th>${r}</th>`).join('')}</tr>
-  ${ACCESS_ITEMS.map(t=>`<tr><td>${esc(t.label)}</td>${ROLES.map(r=>`<td><input type="checkbox" data-ch="acc" data-role="${esc(r)}" data-id="${t.id}" ${(S.access[r]||[]).includes(t.id)?'checked':''} ${t.id==='track'?'disabled':''} aria-label="${esc(r)} can open ${esc(t.label)}" style="width:auto"></td>`).join('')}</tr>`).join('')}</table></div>
+  ${ACCESS_ITEMS.map(t=>`<tr><td>${esc(t.label)}</td>${ROLES.map(r=>`<td><input type="checkbox" data-ch="acc" data-role="${esc(r)}" data-id="${t.id}" ${(S.access[r]||[]).includes(t.id)?'checked':''} aria-label="${esc(r)} can open ${esc(t.label)}" style="width:auto"></td>`).join('')}</tr>`).join('')}</table></div>
   <p class="hint">Changes apply at once. Use "Preview as" at the top to see the app as another role. Hiding a tab is a convenience; real protection comes from file permissions in the production version.</p></div>`;
 }
 function outboxPanel(){
@@ -5087,6 +5072,278 @@ function brandingPanel(){
 
 /* ========== render ========== */
 const NAV_GROUPS=[['Operations',['tasks','track','request','milestones','dataquality','carrierupdates','team']],['Deliveries',['slotreq','slotmgmt','warehouse']],['Insights',['dashboard','carrier','transit','reports']],['Commercial and access',['commercial','freighttrends','admin']]];
+/* ========== reports downloads, freight audit, RG, display switches, headline capitalisation ========== */
+const nowStamp=()=>{const d=new Date();return S.today+' '+pad(d.getHours())+':'+pad(d.getMinutes())};
+function stampRef(ref,reg){S.lines.forEach(l=>{if(l.ShipmentRef!==ref)return;if(reg&&!l.RegisteredOn)l.RegisteredOn=nowStamp();l.UpdatedOn=nowStamp()})}
+{const c0=createShipment;createShipment=function(b,items){const ref=c0(b,items);stampRef(ref,true);return ref}}
+{const w=(name,regFlag)=>{};}
+{const a0=applyUpdates;applyUpdates=function(ref){const r=a0.apply(this,arguments);if(r&&r.ok)stampRef(ref);return r}}
+{const e0=shipEditApply;shipEditApply=function(ref){const r=e0.apply(this,arguments);if(r&&r.ok&&r.changes&&r.changes.length)stampRef(ref);return r}}
+{const c0=shipCancel;shipCancel=function(ref){const r=c0.apply(this,arguments);if(r&&r.ok)stampRef(ref);return r}}
+{const c0=shipReinstate;shipReinstate=function(ref){const r=c0.apply(this,arguments);if(r&&r.ok)stampRef(ref);return r}}
+/* ----- three-state status for the Daily Status Report ----- */
+const DSR_STATUS=['To Be Shipped','In Transit','Delivered'];
+const dsrStatus=sh=>sh.status==='Delivered'||sh.f.DeliveredOn?'Delivered':sh.f.PickupActual?'In Transit':'To Be Shipped';
+const DSR_COLS=['ShipmentID','ShipmentRegistered','ShipmentUpdated','Shipper','Consignee','InvoiceNumber','InvoiceDate','PONumber','IncoTerm','ItemNumber','ItemQty','ShipmentType','NatureOfGoods','Mode','OriginCountry','OriginPort','DestinationCountry','DestinationPort','WarehouseDestination','PickupPlanned','PickupActual','ETDPlanned','ETDActual','ETA','ETAActual','ESTDelivery','DeliveredOn','Status','MBL_MAWB','HBL_HAWB_Tracking','ContainerNumber','ContainerType','Carrier','Freight'];
+function dsrRange(o){if(!o||o.kind==='all')return null;if(o.kind==='year')return [o.y+'-01-01',o.y+'-12-31'];if(o.kind==='quarter'){const m0=(o.q-1)*3+1;return [o.y+'-'+pad(m0)+'-01',perLast(o.y,m0+2)]}return [o.y+'-'+pad(o.m)+'-01',perLast(o.y,o.m)]}
+function dsrPeriodLabel(o){return !o||o.kind==='all'?'All':o.kind==='year'?String(o.y):o.kind==='quarter'?'Q'+o.q+'-'+o.y:o.y+'-'+pad(o.m)}
+function dsrBuild(o){
+  o=o||{};const rng=dsrRange(o),st=o.status||'All',rows=[];
+  const evDates=ref=>S.events.filter(e=>e.ShipmentRef===ref).map(e=>e.EventDate||'').filter(Boolean).sort();
+  ships().forEach(sh=>{
+    const s3=dsrStatus(sh);if(st!=='All'&&st!==s3)return;
+    if(s3==='Delivered'&&rng){const d=sh.f.DeliveredOn||'';if(!d||d<rng[0]||d>rng[1])return}   // rule A: open shipments always show, delivered ones by delivery date
+    const ev=evDates(sh.ref);
+    sh.lines.forEach(l=>{const r={};DSR_COLS.forEach(c=>{r[c]=l[c]==null?'':l[c]});
+      r.ShipmentID=sh.ref;r.ShipmentRegistered=l.RegisteredOn||(ev[0]||'');r.ShipmentUpdated=l.UpdatedOn||(ev[ev.length-1]||'');r.Status=s3;rows.push(r)});
+  });
+  rows.sort((a,b)=>a.ShipmentID.localeCompare(b.ShipmentID)||0);
+  return {headers:DSR_COLS,rows,sheet:'DSR',name:'DSR_'+dsrPeriodLabel(o)+'_'+(st==='All'?'AllStatus':st.replace(/ /g,''))};
+}
+/* ----- freight audit ----- */
+const FA_STATES=['Invoice Pending','Payment Pending','Paid'];
+const faScope=()=>ships().filter(s=>s.status==='Delivered'&&s.freight==='Your Company');
+function faState(sh){const l=invList(sh.ref).filter(i=>i.invRef&&invAmt(i)>0);if(!l.length)return 'Invoice Pending';return l.every(i=>i.paid==='Paid')?'Paid':'Payment Pending'}
+const faPrimary=ref=>invList(ref)[0]||null;
+function faCheck(ref,f){
+  const sh=getShip(ref),e=[];if(!sh||sh.status!=='Delivered')return ['Only delivered shipments can be audited'];
+  const amt=String(f.amt||'').replace(/[$,\s]/g,''),inv=String(f.inv||'').trim();
+  if(amt!==''&&!(Number(amt)>0))e.push('Actual freight cost must be a number above 0');
+  if((amt!==''&&!inv)||(inv&&amt===''))e.push('Enter both the carrier invoice number and the actual freight cost, or leave both empty');
+  if(inv){const o=S.invoices.find(i=>(i.invRef||'').toLowerCase()===inv.toLowerCase()&&i.ref!==ref);if(o)e.push('Invoice number '+inv+' is already recorded on '+o.ref)}
+  if(f.paid==='Paid'){if(!inv||amt==='')e.push('A shipment can only be marked Paid once the invoice number and cost are recorded');if(!isoOK(f.paidOn))e.push('Enter the payment date (yyyy-mm-dd)');else if(f.paidOn>S.today)e.push('The payment date cannot be in the future')}
+  return e;
+}
+function faSave(ref,f){
+  if(!can('auditedit'))return {ok:false,msg:'Your role cannot edit the freight audit'};
+  const e=faCheck(ref,f);if(e.length)return {ok:false,msg:e[0],errs:e};
+  const amt=Number(String(f.amt||'').replace(/[$,\s]/g,''))||0,inv=String(f.inv||'').trim();
+  let r=faPrimary(ref),isNew=false;
+  if(!r){if(!inv&&!String(f.rem||'').trim())return {ok:true,msg:ref+': nothing to save'};r={id:nextInvId(),ref,recordedOn:S.today,recordedBy:S.email,invRef:'',freight:0,extra:0,extraType:'',date:S.today,paid:'Unpaid'};S.invoices.push(r);isNew=true}
+  r.invRef=inv;r.freight=amt;r.remarks=String(f.rem||'').trim();r.paid=f.paid==='Paid'?'Paid':'Unpaid';r.paidOn=r.paid==='Paid'?f.paidOn:'';r.updatedOn=S.today;r.updatedBy=S.email;
+  audit(isNew?'Invoice recorded':'Invoice updated',ref,(inv||'no number')+' actual '+usd(amt)+', '+faState(getShip(ref))+(r.remarks?', '+r.remarks:''));
+  return {ok:true,msg:ref+': freight audit saved ('+faState(getShip(ref))+')'};
+}
+const faPill=s=>`<span class="pill ${s==='Paid'?'ok':s==='Payment Pending'?'warn':'late'}">${s}</span>`;
+function faRows(){const F=S.ui.fa=S.ui.fa||{f:'All',car:'All',q:''};const q=String(F.q||'').toLowerCase();return faScope().filter(s=>F.f==='All'||faState(s)===F.f).filter(s=>F.car==='All'||s.carrier===F.car).filter(s=>!q||[s.ref,s.carrier,s.pos.join(' '),invList(s.ref).map(i=>i.invRef).join(' ')].join(' ').toLowerCase().includes(q)).sort((a,b)=>(a.f.DeliveredOn||'').localeCompare(b.f.DeliveredOn||''))}
+function viewFAudit(){
+  const F=S.ui.fa=S.ui.fa||{f:'All',car:'All',q:''},all=faScope(),n=s=>all.filter(x=>faState(x)===s).length,rows=faRows(),may=can('auditedit');
+  const tile=(id,l,v,cls)=>`<button class="kpi tile ${cls||''} ${F.f===id?'sel':''}" data-act="faTile" data-id="${id}" aria-pressed="${F.f===id}"><small>${l}</small><b>${v}</b></button>`;
+  return pageHead('Freight Audit','Delivered shipments where your company pays the freight. Record the actual freight cost, the carrier invoice number and remarks, and follow each shipment from invoice to payment.')+
+  `<div class="kpis">${tile('All','Delivered Shipments',all.length)}${tile('Invoice Pending','Invoice Pending',n('Invoice Pending'),n('Invoice Pending')?'late':'')}${tile('Payment Pending','Payment Pending',n('Payment Pending'),n('Payment Pending')?'acc':'')}${tile('Paid','Paid',n('Paid'),'ok')}</div>
+  <div class="card"><div class="row"><label class="f">Carrier<select data-ch="faCar"><option>All</option>${uniq(all.map(s=>s.carrier)).sort().map(c=>`<option ${F.car===c?'selected':''}>${esc(c)}</option>`).join('')}</select></label><label class="f grow">Search<input id="fa_q" class="in" value="${esc(F.q||'')}" placeholder="Shipment, carrier, PO or invoice number"></label>
+  <span class="row" style="align-self:flex-end;gap:6px"><button class="btn" data-act="rdQuick" data-id="invpend">Pending Invoices Report</button><button class="btn" data-act="rdQuick" data-id="paypend">Payment Pending Report</button></span></div></div>
+  <div class="card" style="padding:0"><div class="tbw"><table class="tb"><tr><th>Shipment</th><th>Carrier</th><th>Delivered</th><th class="r">Days Since Delivery</th><th class="r">Quote (Est.)</th><th class="r">Actual Freight</th><th>Carrier Invoice No.</th><th>Audit Status</th><th>Remarks</th><th></th></tr>
+  ${rows.map(s=>{const i=faPrimary(s.ref),q=selQuote(s.ref),st=faState(s);return `<tr><td><b>${esc(s.ref)}</b><br><small class="mu">${esc(s.route)}</small></td><td>${esc(s.carrier)}</td><td>${fmt(s.f.DeliveredOn)}</td><td class="r">${s.f.DeliveredOn?diffDays(S.today,s.f.DeliveredOn):'-'}</td><td class="r">${q?usd(q.amount):'-'}</td><td class="r">${i&&invAmt(i)>0?usd(i.freight):'-'}</td><td>${esc(i&&i.invRef||'-')}${invList(s.ref).length>1?`<br><small class="mu">${invList(s.ref).length} invoices</small>`:''}</td><td>${faPill(st)}${i&&i.paidOn?`<br><small class="mu">Paid ${fmt(i.paidOn)}</small>`:''}</td><td>${esc(i&&i.remarks||'-')}</td><td class="r">${may?`<button class="btn sm pri" data-act="faOpen" data-ref="${esc(s.ref)}">${st==='Invoice Pending'?'Record':'Update'}</button>`:''}</td></tr>`}).join('')||'<tr><td colspan="10" class="empty">No delivered shipment matches.</td></tr>'}</table></div></div>
+  <p class="hint">Shipments where the shipper pays the freight are not listed. The invoice and cost are the same records as in Freight Commercials, so nothing is entered twice.</p>`;
+}
+function faModal(ref){
+  const sh=getShip(ref);if(!sh)return;const i=faPrimary(ref)||{};
+  openModal(`<div class="mh"><div><h2>Freight Audit: ${esc(ref)}</h2><div class="mu">${esc(sh.carrier)}, ${esc(sh.route)}, delivered ${fmt(sh.f.DeliveredOn)}${selQuote(ref)?', quote '+usd(selQuote(ref).amount):''}</div></div><button class="x" data-act="close" aria-label="Close">&times;</button></div>
+  <div id="fa_err"></div><div class="g2"><label class="f">Actual Freight Cost (USD)<input id="fa_amt" class="in" inputmode="decimal" value="${i.freight&&invAmt(i)>0?esc(i.freight):''}"></label><label class="f">Carrier Invoice Number<input id="fa_inv" class="in" value="${esc(i.invRef||'')}"></label>
+  <label class="f">Payment Status<select id="fa_paid" class="in"><option ${i.paid!=='Paid'?'selected':''}>Unpaid</option><option ${i.paid==='Paid'?'selected':''}>Paid</option></select></label><label class="f">Payment Date<input type="date" id="fa_paidon" class="in" max="${S.today}" value="${esc(i.paidOn||'')}"></label></div>
+  <label class="f" style="margin-top:8px">Remarks<input id="fa_rem" class="in" value="${esc(i.remarks||'')}" maxlength="200"></label>
+  ${invList(ref).length>1?'<p class="hint">This shipment has several invoices. This form edits the first; use Freight Commercials for the others.</p>':''}
+  <div class="row sec"><button class="btn pri" data-act="faSave" data-ref="${esc(ref)}">Save</button><button class="btn" data-act="close">Cancel</button></div>`);
+}
+/* ----- receipt of goods (RG) ----- */
+const RG_ONE=['DAP','DDP'];
+const rgRec=ref=>(S.rg||{})[ref]||{};
+function rgNeeds(sh){const one=RG_ONE.includes(String(sh.inco||'').toUpperCase());return {one,it:!one&&!!sh.f.PickupActual,fin:sh.status==='Delivered'}}
+const rgDone=(r,st)=>st==='it'?!!(r.itNo&&r.itDate):!!(r.finNo&&r.finDate);
+function rgState(sh){const n=rgNeeds(sh),r=rgRec(sh.ref),pend=[];if(n.it&&!rgDone(r,'it'))pend.push('In-Transit RG');if(n.fin&&!rgDone(r,'fin'))pend.push('Final RG');return {n,r,pend}}
+const rgPending=sh=>!sh.cancelled&&rgState(sh).pend.length>0;
+function rgCheck(sh,f){
+  const e=[],n=rgNeeds(sh),d=x=>String(x||'').trim();
+  if(sh.cancelled)e.push(sh.ref+' is cancelled');
+  const hasIt=d(f.itNo)||d(f.itDate)||d(f.to)||d(f.pl),hasFin=d(f.finNo)||d(f.finDate);
+  if(hasIt&&n.one)e.push('DAP and DDP shipments take only a Final RG');
+  else if(hasIt&&!n.it)e.push('The In-Transit RG can be recorded once the shipment is in transit');
+  if(hasFin&&!n.fin)e.push('The Final RG can be recorded after delivery');
+  if((d(f.itNo)&&!d(f.itDate))||(!d(f.itNo)&&d(f.itDate)))e.push('Enter both the In-Transit RG number and date');
+  if((d(f.finNo)&&!d(f.finDate))||(!d(f.finNo)&&d(f.finDate)))e.push('Enter both the Final RG number and date');
+  if((d(f.to)||d(f.pl))&&!d(f.itNo))e.push('TO and PL# belong to the In-Transit RG: enter its number and date first');
+  [['itDate','In-Transit RG date'],['finDate','Final RG date']].forEach(([k,l])=>{if(d(f[k])){if(!isoOK(d(f[k])))e.push(l+' must be a date (yyyy-mm-dd)');else if(d(f[k])>S.today)e.push(l+' cannot be in the future')}});
+  return e;
+}
+function rgSave(ref,f){
+  if(!can('rgedit'))return {ok:false,msg:'Your role cannot record RG'};
+  const sh=getShip(ref);if(!sh)return {ok:false,msg:'Shipment not found'};
+  const e=rgCheck(sh,f);if(e.length)return {ok:false,msg:e[0],errs:e};
+  const t=x=>String(x||'').trim();S.rg=S.rg||{};
+  const r={itNo:t(f.itNo),itDate:t(f.itDate),to:t(f.to),pl:t(f.pl),finNo:t(f.finNo),finDate:t(f.finDate),by:S.email,on:S.today};
+  if(!r.itNo&&!r.finNo&&!r.to&&!r.pl)delete S.rg[ref];else S.rg[ref]=r;
+  audit('RG recorded',ref,[r.itNo?'In-Transit '+r.itNo+' '+r.itDate:'',r.finNo?'Final '+r.finNo+' '+r.finDate:''].filter(Boolean).join('; ')||'cleared');
+  return {ok:true,msg:ref+': RG saved'+(rgPending(getShip(ref))?'. Still pending: '+rgState(getShip(ref)).pend.join(', '):'. Nothing pending')};
+}
+const RG_COLS=['Shipment','RG Stage Pending','Incoterm','Carrier','Shipper','Consignee','Warehouse','PO Numbers','Invoice Numbers','Status','Pickup Actual','Delivered On','In-Transit RG Number','In-Transit RG Date','TO','PL#','Final RG Number','Final RG Date'];
+function rgRow(sh){const r=rgRec(sh.ref),st=rgState(sh);return {'Shipment':sh.ref,'RG Stage Pending':st.pend.join(' and ')||'None',Incoterm:sh.inco||'',Carrier:sh.carrier,Shipper:sh.shipper,Consignee:sh.consignee,Warehouse:sh.f.WarehouseDestination||'','PO Numbers':sh.pos.join('; '),'Invoice Numbers':shipInvNos(sh),Status:dsrStatus(sh),'Pickup Actual':sh.f.PickupActual||'','Delivered On':sh.f.DeliveredOn||'','In-Transit RG Number':r.itNo||'','In-Transit RG Date':r.itDate||'',TO:r.to||'','PL#':r.pl||'','Final RG Number':r.finNo||'','Final RG Date':r.finDate||''}}
+const rgBuildPending=()=>({headers:RG_COLS,rows:ships().filter(rgPending).sort((a,b)=>a.ref.localeCompare(b.ref)).map(rgRow),sheet:'RG Pending',name:'RG_Pending_'+S.today,help:[['Shipment','Do not change.'],['In-Transit RG Number and Date','Fill both. Not used for DAP and DDP shipments.'],['TO and PL#','Optional. Oracle transfer order and packing list number, with the In-Transit RG.'],['Final RG Number and Date','Fill both, after delivery.'],['Empty cells','Keep what is already recorded. Upload the file back on the RG page.']]});
+function rgBuildAccrual(o){
+  const mo=(o&&o.month)||S.today.slice(0,7),rows=[];
+  Object.entries(S.rg||{}).forEach(([ref,r])=>{const sh=getShip(ref);if(!sh)return;const base=x=>({Month:mo,Shipment:ref,Stage:x,Incoterm:sh.inco||'',Carrier:sh.carrier,Shipper:sh.shipper,Consignee:sh.consignee,Warehouse:sh.f.WarehouseDestination||'','PO Numbers':sh.pos.join('; '),'Invoice Numbers':shipInvNos(sh),'Pickup Actual':sh.f.PickupActual||'','Delivered On':sh.f.DeliveredOn||'',Status:dsrStatus(sh)});
+    if(r.itNo&&r.itDate&&r.itDate.slice(0,7)===mo)rows.push(Object.assign(base('In-Transit RG'),{'RG Number':r.itNo,'RG Date':r.itDate,TO:r.to||'','PL#':r.pl||''}));
+    if(r.finNo&&r.finDate&&r.finDate.slice(0,7)===mo)rows.push(Object.assign(base('Final RG'),{'RG Number':r.finNo,'RG Date':r.finDate,TO:'','PL#':''}))});
+  rows.sort((a,b)=>a['RG Date'].localeCompare(b['RG Date'])||a.Shipment.localeCompare(b.Shipment));
+  return {headers:['Month','Shipment','Stage','RG Number','RG Date','TO','PL#','Incoterm','Carrier','Shipper','Consignee','Warehouse','PO Numbers','Invoice Numbers','Pickup Actual','Delivered On','Status'],rows,sheet:'RG Accrual',name:'RG_Accrual_'+mo};
+}
+function rgImportCheck(objs,hdr){
+  const C=impCols(hdr,{ref:['shipment','shipmentref','shipmentid'],itNo:['intransitrgnumber','intransitrgno'],itDate:['intransitrgdate'],to:['to','transferorder'],pl:['pl','plnumber','packinglistnumber'],finNo:['finalrgnumber','finalrgno'],finDate:['finalrgdate']});
+  if(!C.ref)return {err:'The file needs a Shipment column. Download the RG Pending Report to get the template.'};
+  const items=[],seen={};
+  objs.forEach(r=>{
+    const v=k=>C[k]?impVal(r,C,k):'',ref=v('ref'),sh=ref?getShip(ref):null,it={row:r._row,ref,errs:[],changes:[],f:null};
+    if(!sh)it.errs.push(ref?'Shipment '+ref+' not found':'Shipment is empty');
+    else{if(seen[ref])it.errs.push('Same shipment as row '+seen[ref]);else seen[ref]=r._row;
+      const cur=rgRec(ref),f={itNo:cur.itNo||'',itDate:cur.itDate||'',to:cur.to||'',pl:cur.pl||'',finNo:cur.finNo||'',finDate:cur.finDate||''};
+      ['itNo','itDate','to','pl','finNo','finDate'].forEach(k=>{const x=v(k);if(x!==''&&x!==f[k]){it.changes.push(k+': '+(f[k]||'blank')+' to '+x);f[k]=x}});
+      rgCheck(sh,f).forEach(e=>it.errs.push(e));it.f=f}
+    items.push(it)});
+  return {items,counts:{rows:items.length,update:items.filter(x=>!x.errs.length&&x.changes.length).length,nochange:items.filter(x=>!x.errs.length&&!x.changes.length).length,problems:items.filter(x=>x.errs.length).length}};
+}
+function rgPreview(P){
+  S.rgImp=P;const c=P.counts;
+  openModal(`<div class="mh"><div><h2>Upload RG Details</h2><div class="mu">File: ${esc(P.fileName)}. Nothing is saved until you click Apply.</div></div><button class="x" data-act="close" aria-label="Close">&times;</button></div>
+  <div class="kpis" style="margin-bottom:12px"><div class="kpi"><small>Rows in File</small><b>${c.rows}</b></div><div class="kpi"><small>To Update</small><b>${c.update}</b></div><div class="kpi"><small>No Change</small><b>${c.nochange}</b></div><div class="kpi ${c.problems?'late':''}"><small>Problems</small><b>${c.problems}</b></div></div>
+  <div class="tbw" style="max-height:44vh;overflow:auto"><table class="tb" data-sort="off"><tr><th>Row</th><th>Shipment</th><th>Result</th></tr>${P.items.slice(0,300).map(x=>`<tr class="${x.errs.length?'tr-pend':''}"><td>${x.row}</td><td>${esc(x.ref||'-')}</td><td>${x.errs.length?`<span class="late-t">${esc(x.errs.join('; '))}</span>`:x.changes.length?`<span class="ok-t">Will update</span><br><small>${esc(x.changes.join('; '))}</small>`:'<span class="mu">No change</span>'}</td></tr>`).join('')}</table></div>
+  <div class="row sec"><button class="btn pri" data-act="rgImpApply" ${c.update?'':'disabled'}>Apply ${c.update} Update(s)</button><button class="btn" data-act="close">Cancel</button></div>${c.problems?'<p class="hint">Rows with problems are skipped.</p>':''}`);
+}
+function rgImpApply(){
+  const P=S.rgImp;if(!P||!can('rgedit'))return {ok:false,msg:'Nothing to apply'};let n=0;
+  P.items.filter(x=>!x.errs.length&&x.changes.length).forEach(x=>{const r=rgSave(x.ref,x.f);if(r.ok)n++});
+  audit('RG imported','',n+' shipment(s) from '+P.fileName);S.rgImp=null;return {ok:true,msg:n+' shipment(s) updated',n};
+}
+function viewRG(){
+  const F=S.ui.rg=S.ui.rg||{f:'Pending',q:''},act=ships(),may=can('rgedit'),pend=act.filter(rgPending);
+  const itP=pend.filter(s=>rgState(s).pend.includes('In-Transit RG')),finP=pend.filter(s=>rgState(s).pend.includes('Final RG'));
+  const closed=act.filter(s=>{const n=rgNeeds(s);return (n.it||n.fin)&&!rgPending(s)});
+  const q=String(F.q||'').toLowerCase(),list=(F.f==='Pending'?pend:F.f==='It'?itP:F.f==='Fin'?finP:closed).filter(s=>!q||[s.ref,s.carrier,s.pos.join(' '),shipInvNos(s)].join(' ').toLowerCase().includes(q));
+  const tile=(id,l,v,cls)=>`<button class="kpi tile ${cls||''} ${F.f===id?'sel':''}" data-act="rgTile" data-id="${id}" aria-pressed="${F.f===id}"><small>${l}</small><b>${v}</b></button>`;
+  return pageHead('RG Pending','Receipt of Goods in Oracle. DAP and DDP shipments need only a Final RG after delivery. All other terms need an In-Transit RG once the shipment is in transit, then a Final RG after delivery. A shipment leaves the list when its required RG numbers and dates are recorded.')+
+  `<div class="kpis">${tile('Pending','All Pending',pend.length,pend.length?'late':'')}${tile('It','In-Transit RG Pending',itP.length,itP.length?'acc':'')}${tile('Fin','Final RG Pending',finP.length,finP.length?'acc':'')}${tile('Done','RG Complete',closed.length,'ok')}</div>
+  <div class="card"><div class="row"><label class="f grow">Search<input id="rg_q" class="in" value="${esc(F.q||'')}" placeholder="Shipment, carrier, PO or invoice number"></label>
+  <span class="row" style="align-self:flex-end;gap:6px"><button class="btn" data-act="rdQuick" data-id="rgpending">Download RG Pending Report</button>${may?'<label class="btn pri" style="cursor:pointer">Upload RG Details<input type="file" id="rgFile" accept=".xlsx,.xls,.csv" hidden></label>':''}</span></div></div>
+  <div class="card" style="padding:0"><div class="tbw"><table class="tb"><tr><th>Shipment</th><th>Incoterm</th><th>Carrier</th><th>Status</th><th>RG Pending</th><th>In-Transit RG</th><th>TO / PL#</th><th>Final RG</th><th></th></tr>
+  ${list.map(s=>{const st=rgState(s),r=st.r;return `<tr><td><b>${esc(s.ref)}</b><br><small class="mu">${esc(s.route)}</small></td><td>${esc(s.inco||'-')}${st.n.one?'<br><small class="mu">Final RG only</small>':''}</td><td>${esc(s.carrier)}</td><td>${esc(dsrStatus(s))}</td><td>${st.pend.length?st.pend.map(p=>`<span class="pill warn">${p}</span>`).join(' '):'<span class="pill ok">Complete</span>'}</td><td>${st.n.one?'<span class="mu">Not required</span>':r.itNo?esc(r.itNo)+'<br><small class="mu">'+fmt(r.itDate)+'</small>':'-'}</td><td>${esc([r.to,r.pl].filter(Boolean).join(' / ')||'-')}</td><td>${r.finNo?esc(r.finNo)+'<br><small class="mu">'+fmt(r.finDate)+'</small>':'-'}</td><td class="r">${may?`<button class="btn sm pri" data-act="rgOpen" data-ref="${esc(s.ref)}">Record RG</button>`:''}</td></tr>`}).join('')||'<tr><td colspan="9" class="empty">Nothing here.</td></tr>'}</table></div></div>
+  <p class="hint">RG numbers are optional. Download the pending report, fill in the RG details in Excel and upload it back, or record them one shipment at a time. The Monthly RG Accrual report is on the Reports page.</p>`;
+}
+function rgModal(ref){
+  const sh=getShip(ref);if(!sh)return;const st=rgState(sh),r=st.r,n=st.n;
+  openModal(`<div class="mh"><div><h2>Record RG: ${esc(ref)}</h2><div class="mu">${esc(sh.inco||'-')}, ${esc(sh.carrier)}, ${esc(dsrStatus(sh))}</div></div><button class="x" data-act="close" aria-label="Close">&times;</button></div>
+  <div id="rg_err"></div>
+  <h3 class="sec">In-Transit RG</h3>${n.one?'<div class="note">DAP and DDP shipments take only a Final RG.</div>':!n.it?'<div class="note">Available once the shipment is in transit.</div>':''}
+  <div class="g4"><label class="f">RG Number<input id="rg_itno" class="in" value="${esc(r.itNo||'')}" ${n.it?'':'disabled'}></label><label class="f">RG Date<input type="date" id="rg_itdate" class="in" max="${S.today}" value="${esc(r.itDate||'')}" ${n.it?'':'disabled'}></label><label class="f">TO (Optional)<input id="rg_to" class="in" value="${esc(r.to||'')}" ${n.it?'':'disabled'}></label><label class="f">PL# (Optional)<input id="rg_pl" class="in" value="${esc(r.pl||'')}" ${n.it?'':'disabled'}></label></div>
+  <h3 class="sec">Final RG</h3>${n.fin?'':'<div class="note">Available after delivery.</div>'}
+  <div class="g4"><label class="f">RG Number<input id="rg_finno" class="in" value="${esc(r.finNo||'')}" ${n.fin?'':'disabled'}></label><label class="f">RG Date<input type="date" id="rg_findate" class="in" max="${S.today}" value="${esc(r.finDate||'')}" ${n.fin?'':'disabled'}></label></div>
+  <div class="row sec"><button class="btn pri" data-act="rgSave" data-ref="${esc(ref)}">Save</button><button class="btn" data-act="close">Cancel</button></div>`);
+}
+/* ----- reports page: every report, with per-role access ----- */
+const RPT=[
+ {id:'dsr',label:'Daily Status Report',desc:'Every item line in the Daily Status Report layout, with the three statuses. Open shipments always show; delivered shipments show by delivery date in the chosen period.',opts:'dsr',build:dsrBuild},
+ {id:'register',label:'Shipment Register',desc:'One row for each active shipment with route, carrier, dates, status and document count.',build:()=>({headers:['Shipment','Status','Shipper','Consignee','Carrier','Mode','Incoterm','Route','Warehouse','Pickup Planned','Pickup Actual','ETA','Planned Delivery','Delivered On','PO Numbers','Invoice Numbers','Tracking Numbers','Documents'],rows:ships().sort((a,b)=>a.ref.localeCompare(b.ref)).map(s=>({Shipment:s.ref,Status:dsrStatus(s),Shipper:s.shipper,Consignee:s.consignee,Carrier:s.carrier,Mode:s.mode,Incoterm:s.inco,Route:s.route,Warehouse:s.f.WarehouseDestination||'','Pickup Planned':s.f.PickupPlanned||'','Pickup Actual':s.f.PickupActual||'',ETA:s.f.ETA||'','Planned Delivery':s.dueL||'','Delivered On':s.f.DeliveredOn||'','PO Numbers':s.pos.join('; '),'Invoice Numbers':shipInvNos(s),'Tracking Numbers':shipTrackNos(s),Documents:docsOf(s.ref).length})),sheet:'Shipments',name:'Shipment_Register_'+S.today})},
+ {id:'overdue',label:'Overdue Milestones',desc:'Milestones past their date that still need an update.',std:'overdue'},
+ {id:'atrisk',label:'Shipments at Risk',desc:'Open shipments likely to miss their plan, with the reasons.',std:'atrisk'},
+ {id:'freetime',label:'Free Time Ending or Over',desc:'Shipments at or past the last free day after arrival.',std:'freetime'},
+ {id:'schedule',label:'Delivery Schedule (7 Days)',desc:'Deliveries booked for the next seven days.',std:'schedule'},
+ {id:'slotspend',label:'Slot Requests Awaiting Approval',desc:'Delivery slot requests waiting for the warehouse team.',std:'slots_pending'},
+ {id:'dq',label:'Data Quality Issues',desc:'High and medium severity data issues.',std:'dq'},
+ {id:'scorecard',label:'Carrier Scorecard',desc:'On-time delivery, updates, slot acceptance and invoice accuracy for each carrier.',build:()=>({headers:['Carrier','Shipments','On-Time Delivery %','Updates Within a Day %','Slot Requests Accepted First Time %','Invoice Within 5% of Quote %','Score'],rows:carrierScorecard().map(r=>{const p=k=>r.m[k]==null?'':Math.round(r.m[k]*100);return {Carrier:r.name,Shipments:r.n,'On-Time Delivery %':p('ontime'),'Updates Within a Day %':p('upd'),'Slot Requests Accepted First Time %':p('slot'),'Invoice Within 5% of Quote %':can('invoices')?p('inv'):'',Score:r.score==null?'':r.score}}),sheet:'Scorecard',name:'Carrier_Scorecard_'+S.today})},
+ {id:'invpend',label:'Pending Invoices Report',desc:'Delivered shipments still waiting for a carrier invoice.',money:true,build:()=>({headers:['Shipment','Carrier','Delivered On','Days Since Delivery','Quote (Est.)','Quotation ID','Remarks'],rows:faScope().filter(s=>faState(s)==='Invoice Pending').sort((a,b)=>(a.f.DeliveredOn||'').localeCompare(b.f.DeliveredOn||'')).map(s=>{const q=selQuote(s.ref),i=faPrimary(s.ref);return {Shipment:s.ref,Carrier:s.carrier,'Delivered On':s.f.DeliveredOn||'','Days Since Delivery':s.f.DeliveredOn?diffDays(S.today,s.f.DeliveredOn):'','Quote (Est.)':q?q.amount:'','Quotation ID':q&&q.qid||'',Remarks:i&&i.remarks||''}}),sheet:'Pending Invoices',name:'Pending_Invoices_'+S.today})},
+ {id:'paypend',label:'Payment Pending Report',desc:'Invoiced shipments that are not yet paid.',money:true,build:()=>({headers:['Shipment','Carrier','Carrier Invoice No.','Actual Freight (USD)','Delivered On','Days Since Delivery','Remarks'],rows:faScope().filter(s=>faState(s)==='Payment Pending').map(s=>{const i=faPrimary(s.ref);return {Shipment:s.ref,Carrier:s.carrier,'Carrier Invoice No.':invList(s.ref).map(x=>x.invRef).filter(Boolean).join('; '),'Actual Freight (USD)':invTotal(s.ref),'Delivered On':s.f.DeliveredOn||'','Days Since Delivery':s.f.DeliveredOn?diffDays(S.today,s.f.DeliveredOn):'',Remarks:i&&i.remarks||''}}),sheet:'Payment Pending',name:'Payment_Pending_'+S.today})},
+ {id:'spend',label:'Freight Spend by Carrier',desc:'Quoted and invoiced freight for each carrier.',money:true,std:'spend'},
+ {id:'rgpending',label:'RG Pending Report',desc:'Shipments waiting for an In-Transit or Final RG, ready to fill in and upload back on the RG page.',build:rgBuildPending},
+ {id:'rgaccrual',label:'Monthly RG Accrual',desc:'RG records with an RG date in the chosen month, for financial accrual.',opts:'month',build:rgBuildAccrual}];
+RPT.forEach(r=>{if(r.std&&!r.build){const k=r.std;r.build=()=>{const d=REPORTS[k].build();return {headers:d.headers,rows:d.rows.map(x=>Object.fromEntries(d.headers.map((h,i)=>[h,x[i]]))),sheet:r.label.slice(0,30),name:r.label.replace(/[^A-Za-z0-9]+/g,'_')+'_'+S.today}}}});
+const rptOk=r=>can('rpt_'+r.id)&&(!r.money||can('commercial'));
+const rptList=()=>RPT.filter(rptOk);
+function rdState(){const t=S.today.split('-').map(Number);S.ui.rd=S.ui.rd||{dsr:{kind:'month',y:t[0],q:Math.ceil(t[1]/3),m:t[1],status:'All'},month:S.today.slice(0,7)};return S.ui.rd}
+function rptRun(id,fmtX){
+  const r=RPT.find(x=>x.id===id);if(!r||!rptOk(r))return {ok:false,msg:'Your role cannot download this report'};
+  const R=rdState(),d=r.build(r.opts==='dsr'?R.dsr:r.opts==='month'?{month:R.month}:undefined);
+  if(fmtX==='csv')downloadText(d.name+'.csv',toCSV(d.headers,d.rows),'text/csv');
+  else{const sheets=[{name:d.sheet,headers:d.headers,rows:d.rows}];if(d.help)sheets.push({name:'Help',headers:['Column','What to Enter'],rows:d.help.map(x=>({Column:x[0],'What to Enter':x[1]}))});if(!xlsxSave(d.name+'.xlsx',sheets))return {ok:false,msg:'Excel is not available here'}}
+  audit('Report downloaded','',r.label+' ('+d.rows.length+' rows, '+(fmtX==='csv'?'CSV':'Excel')+')');return {ok:true,msg:r.label+': '+d.rows.length+' row(s) downloaded',rows:d.rows.length};
+}
+function viewRptDl(){
+  const R=rdState(),L=rptList(),sel=(f,list,cur)=>`<select data-ch="rdOpt" data-f="${f}" class="in" style="width:auto">${list.map(([v,l])=>`<option value="${v}" ${String(v)===String(cur)?'selected':''}>${l}</option>`).join('')}</select>`;
+  const years=uniq([Number(S.today.slice(0,4)),R.dsr.y,...ships().flatMap(s=>[s.f.DeliveredOn,s.f.PickupActual,s.f.PickupPlanned].filter(isoOK).map(d=>Number(d.slice(0,4))))]).sort();
+  const opt=r=>r.opts==='dsr'?`<div class="row" style="margin:8px 0;gap:8px"><label class="f">Period${sel('dk',[['all','All'],['year','Year'],['quarter','Quarter'],['month','Month']],R.dsr.kind)}</label>${R.dsr.kind!=='all'?`<label class="f">Year${sel('dy',years.map(y=>[y,y]),R.dsr.y)}</label>`:''}${R.dsr.kind==='quarter'?`<label class="f">Quarter${sel('dq',[1,2,3,4].map(q=>[q,'Q'+q]),R.dsr.q)}</label>`:''}${R.dsr.kind==='month'?`<label class="f">Month${sel('dm',MONL.map((n,i)=>[i+1,n]),R.dsr.m)}</label>`:''}<label class="f">Status${sel('ds',[['All','All Statuses'],...DSR_STATUS.map(x=>[x,x])],R.dsr.status)}</label></div>`:r.opts==='month'?`<div class="row" style="margin:8px 0"><label class="f">Month<input type="month" id="rd_month" class="in" value="${esc(R.month)}" style="width:auto"></label></div>`:'';
+  return pageHead('Reports','Download reports as Excel or CSV. What you see here depends on the reports your role is allowed to download.')+
+  (L.length?`<div class="rgrid">${L.map(r=>{let n='';try{n=r.build(r.opts==='dsr'?R.dsr:r.opts==='month'?{month:R.month}:undefined).rows.length}catch(e){n='?'}return `<div class="card"><h3>${esc(r.label)}${r.money?' <span class="pill warn">Costs</span>':''}</h3><p class="mu" style="margin:0 0 6px">${esc(r.desc)}</p>${opt(r)}<div class="row"><button class="btn pri" data-act="rdDl" data-id="${r.id}" data-fmt="xlsx">Download Excel</button><button class="btn" data-act="rdDl" data-id="${r.id}" data-fmt="csv">Download CSV</button><span class="mu sm" style="margin-left:auto">${n} row(s)</span></div></div>`}).join('')}</div>`:'<div class="card empty">Your role cannot download any report. An administrator can allow reports in Administration, Role Access.</div>')+
+  `<p class="hint">Daily Status Report columns follow the DSR template. ShipmentRegistered is when the shipment was entered in the application and ShipmentUpdated is when any of its lines last changed (for older shipments, taken from the milestone history).</p>`;
+}
+function reportAccessCard(){
+  const roles=ROLES.filter(r=>!['In Organization','Carrier Partner','Warehouse Team','Partner Executive','External Logistics Partner'].includes(r)).concat((S.customRoles||[]).map(c=>c.name));
+  return `<div class="card"><h3>Report Access</h3><p class="hint" style="margin:0 0 8px">Choose which roles can download each report on the Reports page. Reports that contain costs also need Freight Cost view access.</p><div class="tbw"><table class="tb" data-sort="off"><tr><th>Report</th>${roles.map(r=>`<th>${esc(r)}</th>`).join('')}</tr>${RPT.map(rp=>`<tr><td>${esc(rp.label)}${rp.money?' <span class="pill warn">Costs</span>':''}</td>${roles.map(r=>`<td><input type="checkbox" data-ch="acc" data-role="${esc(r)}" data-id="rpt_${rp.id}" ${(S.access[r]||[]).includes('rpt_'+rp.id)?'checked':''} aria-label="${esc(r)} can download ${esc(rp.label)}" style="width:auto"></td>`).join('')}</tr>`).join('')}</table></div></div>`;
+}
+{const ap=accessPanel;accessPanel=function(){return ap()+reportAccessCard()}}
+/* ----- wiring: tabs, nav, icons, default access ----- */
+[['rptdl','Reports'],['faudit','Freight Audit'],['rg','RG Pending']].forEach(([id,label])=>{TABS.push({id,label});ACCESS_ITEMS.push({id,label})});
+ACCESS_ITEMS.push({id:'auditedit',label:'Freight Audit: record costs, invoices and payments'},{id:'rgedit',label:'RG: record and upload RG details'});
+{const g=NAV_GROUPS;g[0][1].splice(g[0][1].indexOf('dataquality')+1,0,'rg');g[2][1].splice(g[2][1].indexOf('reports'),0,'rptdl');g[3][1].splice(g[3][1].indexOf('commercial')+1,0,'faudit');g[3][0]='Commercial and Access'}
+ICON.rptdl='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-4-4m4 4 4-4M5 21h14"/></svg>';
+ICON.faudit='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h3m1 2 2 2 3-3"/></svg>';
+ICON.rg='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l2 2 4-4"/><path d="M5 4h14v16H5z"/></svg>';
+function rptDefaults(){
+  const give=(roles,ids)=>roles.forEach(r=>{const a=S.access[r];if(!a)return;ids.forEach(i=>{if(!a.includes(i))a.push(i)})});
+  const std=['dsr','register','overdue','atrisk','freetime','schedule','slotspend','dq','scorecard'].map(x=>'rpt_'+x),money=['invpend','paypend','spend'].map(x=>'rpt_'+x),rg=['rgpending','rgaccrual'].map(x=>'rpt_'+x);
+  give(['Logistics Analyst','Logistics Manager'],[...std,...money,'faudit','auditedit']);give(['Logistics Analyst'],[...rg,'rg','rgedit']);
+}
+{const m1=migrateData;migrateData=function(){m1.apply(this,arguments);
+  if((S.settings.permV||0)<4){Object.keys(S.access).forEach(r=>{S.access[r]=S.access[r].filter(i=>i!=='deleteship')});rptDefaults();S.settings.permV=4}
+  if(!S.rg||typeof S.rg!=='object'||Array.isArray(S.rg))S.rg={}}}
+/* ----- actions ----- */
+document.addEventListener('click',e=>{
+  const t=e.target.closest&&e.target.closest('[data-act]');if(!t)return;const a=t.dataset.act,d=t.dataset;
+  if(a==='rdDl'||a==='rdQuick'){const r=rptRun(d.id,d.fmt||'xlsx');toast(r.msg,r.ok?'':'bad');e.stopPropagation();return}
+  if(a==='faTile'){const F=S.ui.fa=S.ui.fa||{f:'All',car:'All',q:''};F.f=F.f===d.id&&d.id!=='All'?'All':d.id;render();return}
+  if(a==='faOpen'){if(!can('auditedit')){toast('Your role is not allowed to do this','bad');return}faModal(d.ref);return}
+  if(a==='faSave'){const r=faSave(d.ref,{amt:val('fa_amt'),inv:val('fa_inv'),paid:val('fa_paid'),paidOn:val('fa_paidon'),rem:val('fa_rem')});if(!r.ok){const x=document.getElementById('fa_err');if(x)x.innerHTML=`<div class="err" role="alert" style="margin-bottom:10px">${esc(r.msg)}</div>`;return}closeModal();render();toast(r.msg);return}
+  if(a==='rgTile'){const F=S.ui.rg=S.ui.rg||{f:'Pending',q:''};F.f=d.id;render();return}
+  if(a==='rgOpen'){if(!can('rgedit')){toast('Your role is not allowed to do this','bad');return}rgModal(d.ref);return}
+  if(a==='rgSave'){const r=rgSave(d.ref,{itNo:val('rg_itno'),itDate:val('rg_itdate'),to:val('rg_to'),pl:val('rg_pl'),finNo:val('rg_finno'),finDate:val('rg_findate')});if(!r.ok){const x=document.getElementById('rg_err');if(x)x.innerHTML=`<div class="err" role="alert" style="margin-bottom:10px">${esc(r.msg)}</div>`;return}closeModal();render();toast(r.msg);return}
+  if(a==='rgImpApply'){const r=rgImpApply();closeModal();render();toast(r.msg,r.ok?'':'bad');return}
+},true);
+document.addEventListener('change',e=>{
+  const t=e.target;if(!t)return;
+  if(t.id==='rgFile'){const f=t.files[0];if(!f)return;if(!can('rgedit')){toast('Your role is not allowed to do this','bad');return}readUpload(f,(err,o)=>{if(err||o.err){toast(err||o.err,'bad');return}const P=rgImportCheck(o.objs,o.hdr);if(P.err){toast(P.err,'bad');return}P.fileName=f.name;rgPreview(P)});t.value='';return}
+  if(t.dataset&&t.dataset.ch==='faCar'){(S.ui.fa=S.ui.fa||{}).car=t.value;render();return}
+  if(t.dataset&&t.dataset.ch==='rdOpt'){const R=rdState(),f=t.dataset.f;if(f==='dk')R.dsr.kind=t.value;if(f==='dy')R.dsr.y=Number(t.value);if(f==='dq')R.dsr.q=Number(t.value);if(f==='dm')R.dsr.m=Number(t.value);if(f==='ds')R.dsr.status=t.value;render();return}
+  if(t.id==='rd_month'){if(/^\d{4}-\d{2}$/.test(t.value)){rdState().month=t.value;render()}return}
+  if(t.dataset&&t.dataset.ch==='uiCompact'){uiSet({compact:t.checked});return}
+  if(t.dataset&&t.dataset.ch==='uiTheme'){uiSet({theme:t.value});return}
+});
+document.addEventListener('input',e=>{const t=e.target;if(t&&(t.id==='fa_q'||t.id==='rg_q')){const k=t.id==='fa_q'?'fa':'rg';(S.ui[k]=S.ui[k]||{})[k==='fa'?'q':'q']=t.value;clearTimeout(window._qt);window._qt=setTimeout(()=>{const p=t.selectionStart;render();const n=document.getElementById(t.id);if(n){n.focus();try{n.setSelectionRange(p,p)}catch(x){}}},250)}});
+/* ----- display switches: compact rows and theme ----- */
+function uiGet(){try{return JSON.parse(localStorage.getItem('ect.ui')||'{}')}catch(e){return {}}}
+function uiApply(){const u=uiGet();document.body.classList.toggle('compact',!!u.compact);const th=['light','dark'].includes(u.theme)?u.theme:'';if(th)document.documentElement.setAttribute('data-theme',th);else document.documentElement.removeAttribute('data-theme')}
+function uiSet(p){const u=Object.assign(uiGet(),p);try{localStorage.setItem('ect.ui',JSON.stringify(u))}catch(e){}uiApply()}
+function addPrefs(){
+  const w=document.getElementById('who');if(!w||w.querySelector('.prof-prefs'))return;const u=uiGet();
+  w.insertAdjacentHTML('beforeend',`<div class="prof-prefs"><label class="sw"><input type="checkbox" role="switch" data-ch="uiCompact" ${u.compact?'checked':''}><span class="sw-t"></span><span>Compact Table Rows</span></label><label class="f" style="margin-top:8px">Theme<select data-ch="uiTheme" class="in"><option value="">Match My Device</option><option value="light" ${u.theme==='light'?'selected':''}>Light</option><option value="dark" ${u.theme==='dark'?'selected':''}>Dark</option></select></label></div>`);
+}
+{const b0=buildProfileMenu;buildProfileMenu=function(){b0();addPrefs()}}
+uiApply();
+/* ----- quick-filter switch: pending RG ----- */
+{const m0=monBarHTML;monBarHTML=function(){let h=m0();if(!can('rg'))return h;const D=S.ui.dash;return h.replace('</div></div>',`<label class="sw"><input type="checkbox" role="switch" data-ch="monTog" data-k="rg" ${D.pendRG?'checked':''}><span class="sw-t"></span><span>Pending RG Only</span></label></div></div>`)}}
+/* ----- headline-style capitalisation of titles and subheadings ----- */
+const TC_MINOR=new Set('a an the and but or nor for so yet as if at by in of off on per to up via vs with from into onto over'.split(' '));
+function tcToken(tok,first,last){
+  const m=/^([^A-Za-z]*)(.*?)([^A-Za-z0-9]*)$/.exec(tok);if(!m||!m[2])return tok;let [,pre,core,post]=m;
+  if(/[0-9@#_.\/]/.test(core)||/[A-Z]/.test(core.slice(1)))return tok;           // refs, emails, acronyms and mixed case stay as written
+  const parts=core.split('-'),out=parts.map((p,i)=>{if(!p)return p;const low=p.toLowerCase();if(!(first&&i===0)&&!(last&&i===parts.length-1)&&TC_MINOR.has(low))return low;return low.charAt(0).toUpperCase()+low.slice(1)});
+  if(parts.length===1&&/^[A-Z]+$/.test(core)&&core.length>1)return tok;
+  return pre+out.join('-')+post;
+}
+function tcText(s,first,last){const toks=s.split(/(\s+)/);const words=toks.map((x,i)=>({x,i})).filter(o=>!/^\s+$/.test(o.x)&&o.x!=='');let prevColon=false;words.forEach((o,k)=>{const f=(first&&k===0)||prevColon,l=last&&k===words.length-1;toks[o.i]=tcToken(o.x,f,l);prevColon=/:$/.test(o.x)});return toks.join('')}
+function capEl(el){
+  const nodes=[];const w=document.createTreeWalker(el,NodeFilter.SHOW_TEXT,null);let n;while(n=w.nextNode()){if(n.nodeValue.trim())nodes.push(n)}
+  nodes.forEach((n,i)=>{const v=tcText(n.nodeValue,i===0,i===nodes.length-1);if(v!==n.nodeValue)n.nodeValue=v});
+}
+const TC_SEL='#view h1,#view h2,#view h3,#view h4,#modal h2,#modal h3,#view .tabs button,#modal .tabs button,#nav .nav-gh>span:first-child,#nav .nav-i>span:not(.nav-badge),.crumb b';
+const TC_ON=!/[?&]nocap=1/.test(location.search);
+function capAll(){if(!TC_ON)return;document.querySelectorAll(TC_SEL).forEach(capEl)}
+{let tm=null;new MutationObserver(()=>{clearTimeout(tm);tm=setTimeout(capAll,25)}).observe(document.body,{childList:true,subtree:true});setTimeout(capAll,50)}
 function renderNav(){
   window._tasks=can('tasks')?taskList():[];
   $('#nav').innerHTML=navHTML();
@@ -5118,7 +5375,7 @@ function render(){
   $('#demoDate').value=S.today;$('#roleSel').value=S.role;{const dl=$('#demoDate').closest('label');if(dl)dl.style.display=CLOCK.mode==='real'?'none':''}
   {const isC=S.role==='Carrier Partner';$('#carrierLbl').style.display=isC?'':'none';if(isC)$('#carrierSel').innerHTML=carriersList().map(c=>`<option ${c===S.carrier?'selected':''}>${esc(c)}</option>`).join('')}
   {const isW=S.role==='Warehouse Team';$('#whTeamLbl').style.display=isW?'':'none';if(isW)$('#whTeamSel').innerHTML=S.users.filter(u=>u.Role==='Warehouse Team').map(u=>`<option value="${esc(u.UserEmail)}" ${u.UserEmail===S.whTeam?'selected':''}>${esc(u.DisplayName)} (${esc(u.Warehouses||'no warehouse')})</option>`).join('')}
-  const V={track:viewTrack,request:viewRequest,milestones:viewMilestones,carrierupdates:viewCarrierUpdates,warehouse:viewWarehouse,dataquality:viewDataQuality,tasks:viewTasks,reports:viewReports,slotreq:viewSlotReq,slotmgmt:viewSlotMgmt,freighttrends:viewFreightTrends,dashboard:viewDash,carrier:viewCarrier,transit:viewTransit,commercial:viewCommercial,admin:viewAdmin,team:viewTeam};
+  const V={track:viewTrack,request:viewRequest,milestones:viewMilestones,carrierupdates:viewCarrierUpdates,warehouse:viewWarehouse,dataquality:viewDataQuality,tasks:viewTasks,reports:viewReports,rptdl:viewRptDl,faudit:viewFAudit,rg:viewRG,slotreq:viewSlotReq,slotmgmt:viewSlotMgmt,freighttrends:viewFreightTrends,dashboard:viewDash,carrier:viewCarrier,transit:viewTransit,commercial:viewCommercial,admin:viewAdmin,team:viewTeam};
   $('#sampleFlag').innerHTML=hasSample()?'<span class="pill warn">Sample history loaded</span><button class="btn sm" data-act="sampleRemove">Remove</button>':'';
   $('#view').innerHTML=towerStrip()+V[S.view]();
   if(S.view==='request'&&S.ui.reqTab!=='bulk')syncForm();
@@ -5258,8 +5515,6 @@ document.addEventListener('click',e=>{
    case 'exportAll':exportAll();break
    case 'navSec':{const g=d.g,open=navOpenMap(),sec=[...document.querySelectorAll('.nav-sec')].find(x=>x.dataset.g===g);if(!sec)break;const now=sec.classList.contains('closed');open[g]=now;sec.classList.toggle('closed',!now);t.setAttribute('aria-expanded',String(now));navSave();break}
    case 'profMenu':profOpen();break
-   case 'deleteOpen':if(denied('deleteship'))break;deleteModal(d.ref);break
-   case 'deleteDo':{if(denied('deleteship'))break;if(val('del_conf')!==d.ref){toast('Type the shipment reference exactly to confirm','bad');break}shipDelete(d.ref).then(r=>{closeModal();render();toast(r.msg,r.ok?'':'bad')});break}
    case 'docUpload':{const inp=document.getElementById('doc_files'),files=inp?[...inp.files]:[],e=docCheck(files,d.ref);if(e.length){toast(e[0],'bad');break}const ty=val('doc_type');docsUpload(d.ref,files,ty).then(r=>{render();detailModal(d.ref);toast(r.bad.length?r.bad[0]:r.ok.length+' document(s) uploaded',r.bad.length?'bad':'')});break}
    case 'docOpen':docOpenFile(d.id).then(r=>{if(!r.ok)toast(r.msg,'bad')});break
    case 'docDel':{if(!confirm('Delete this document?'))break;const dd=(S.docs||[]).find(x=>x.id===d.id),dref=dd&&dd.ref;docRemove(d.id).then(r=>{render();toast(r.msg,r.ok?'':'bad');if(dref)detailModal(dref)});break}
@@ -5605,10 +5860,10 @@ document.addEventListener('change',e=>{
    case 'whTypeF':{S.ui.wht=t.value;render();break}
    case 'permRole':{S.ui.permRole=t.value;render();break}
    case 'perm':{if(denied('settingsedit')){render();break}permSet(S.ui.permRole,t.dataset.m,t.dataset.k,t.checked);audit('Permission changed','',S.ui.permRole+': '+t.dataset.m+' '+t.dataset.k+' '+(t.checked?'on':'off'));render();break}
-   case 'monTog':{const D=S.ui.dash;if(t.dataset.k==='miss')D.missDocs=t.checked;if(t.dataset.k==='late')D.overdueOnly=t.checked;render();break}
+   case 'monTog':{const D=S.ui.dash;if(t.dataset.k==='miss')D.missDocs=t.checked;if(t.dataset.k==='late')D.overdueOnly=t.checked;if(t.dataset.k==='rg')D.pendRG=t.checked;render();break}
    case 'userShippers':{if(denied('usersedit'))break;const u=S.users[Number(t.dataset.i)];u.Shippers=normShippers(t.value);t.value=u.Shippers;audit('Shippers assigned','',u.UserEmail+': '+(u.Shippers||'none'));toast('Shippers saved');break}
    case 'userCarrier':{if(denied('usersedit'))break;const u=S.users[Number(t.dataset.i)];u.Carrier=t.value;audit('Carrier assigned','',u.UserEmail+' to '+t.value);toast('Carrier assigned');break}
-   case 'acc':{if(denied('settingsedit'))break;const r=t.dataset.role,id=t.dataset.id,a=S.access[r];const i=a.indexOf(id);if(t.checked&&i<0)a.push(id);if(!t.checked&&i>=0)a.splice(i,1);audit('Access changed','',r+(t.checked?' can open ':' cannot open ')+id);renderNav();if(!canTab(S.view)){S.view='track';render()}break}
+   case 'acc':{if(denied('settingsedit'))break;const r=t.dataset.role,id=t.dataset.id,a=S.access[r];const i=a.indexOf(id);if(t.checked&&i<0)a.push(id);if(!t.checked&&i>=0)a.splice(i,1);audit('Access changed','',r+(t.checked?' can open ':' cannot open ')+id);renderNav();if(!canTab(S.view)){const al=TABS.find(x=>canTab(x.id));S.view=al?al.id:'track';render()}break}
   }
 });
 $('#modal').addEventListener('mousedown',e=>{if(e.target.id==='modal')closeModal()});
