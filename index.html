@@ -28,7 +28,7 @@ p{margin:0}
 button{font:inherit}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .app{display:grid;grid-template-columns:244px minmax(0,1fr);min-height:100vh}
-.side{background:var(--side);color:var(--side-ink);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow:auto}
+.side{background:var(--side);color:var(--side-ink);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow:hidden}
 .brand{padding:16px;display:flex;flex-direction:column;align-items:flex-start;gap:10px;border-bottom:1px solid rgba(255,255,255,.08)}
 .logo-wrap{background:#fff;border-radius:6px;padding:6px 10px;max-width:100%}.logo-wrap img{display:block;max-height:34px;max-width:190px}.logo-wrap.txt{color:#1E2124;font-weight:700;font-size:15px}
 .logo{border:1px dashed #8A8D8D;color:#B9BBBB;font-size:11px;padding:4px 10px;border-radius:3px}
@@ -414,6 +414,13 @@ body.compact .tb td,body.compact .tb th{padding:4px 8px;font-size:12px;line-heig
 .whdd-p{position:absolute;z-index:40;top:calc(100% + 4px);left:0;background:var(--panel);border:1px solid var(--line2);border-radius:10px;padding:6px;min-width:270px;max-height:250px;overflow:auto;box-shadow:0 10px 28px rgba(0,0,0,.18)}.whdd-p[hidden]{display:none}
 .whdd-p label{display:flex;gap:8px;align-items:center;padding:7px 8px;border-radius:6px;cursor:pointer;font-size:13px}.whdd-p label:hover{background:var(--chip)}
 .uform .in[disabled],.uform .whdd-b[disabled]{background:var(--chip);opacity:.55;cursor:not-allowed}
+
+.calwrap{display:grid;grid-template-columns:minmax(0,500px) minmax(0,1fr);gap:16px;align-items:start;margin-bottom:16px}.calc{padding:12px}.calc .cal-c{min-height:46px;padding:3px 4px}
+.cal-n{display:flex;flex-wrap:wrap;gap:2px}.cal-n .bd{padding:0 6px;font-size:11px;min-width:18px;text-align:center}.caldp .tbw{max-height:430px;overflow:auto}
+@media (max-width:980px){.calwrap{grid-template-columns:1fr}}
+.seg{display:inline-flex;border:1px solid var(--line2);border-radius:10px;overflow:hidden}.seg button{border:0;background:var(--panel);padding:9px 14px;cursor:pointer;font-weight:600;color:var(--ink)}.seg button.on{background:var(--accent);color:#fff}
+.side{overflow:hidden!important}.brand{flex:none}#nav{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain}.brand div,.brand span{white-space:normal!important;text-overflow:clip!important;overflow:visible!important}
+@media (max-width:980px){.side{overflow:hidden!important}nav#nav,#nav{overflow-y:auto!important;overflow-x:hidden!important;display:block!important}}
 
 /* chosen dark theme */
 :root[data-theme="dark"]{
@@ -2321,7 +2328,7 @@ function cuDriverHTML(rows){
     const k=nextMs(sh),done=sh.status==='Delivered',pl=k?msPlanL(sh,k):'',od=k&&pl&&pl<S.today?diffDays(S.today,pl):0;
     const slot=S.slots.find(r=>r.ref===sh.ref&&slotHeld(r)),w=slot?whFind(slot.code):whFind(whCodeOf(sh)),at=slot?slotAt(slot):null,fi=freeInfo(sh);
     return `<div class="dvc ${od?'od':''}"><div class="row" style="justify-content:space-between;align-items:flex-start"><div><b style="font-size:18px">${sh.ref}</b><div class="mu">${modeBadge(sh.mode)} ${esc(sh.route)}</div></div><span>${pill(sh)}</span></div>
-     <div class="dvl"><span>HBL</span><b>${esc(shipHbl(sh).join("; ")||"-")}</b></div><div class="dvl"><span>MBL</span><b>${esc(shipMbl(sh).join("; ")||"-")}</b></div><div class="dvl"><span>Container</span><b>${esc(shipCont(sh).join("; ")||"-")}</b></div><div class="dvl"><span>Invoice</span><b>${esc(shipInvL(sh).join("; ")||"-")}</b></div>
+     <div class="dvl"><span>Invoice</span><b>${esc(shipInvL(sh).join("; ")||"-")}</b></div><div class="dvl"><span>MBL</span><b>${esc(shipMbl(sh).join("; ")||"-")}</b></div><div class="dvl"><span>HBL</span><b>${esc(shipHbl(sh).join("; ")||"-")}</b></div><div class="dvl"><span>Container</span><b>${esc(shipCont(sh).join("; ")||"-")}</b></div>
      <div class="dvl"><span>Goods</span><b>${typeBadge(sh.stype)}${dgTag(sh.nature)} ${sh.packages||'-'} pkg, ${sh.weight?kg(sh.weight):'-'}</b></div>
      <div class="dvl"><span>Delivery due</span><b>${esc(dueText(sh))}</b></div>
      ${w?`<div class="dvl"><span>Warehouse</span><b>${esc(w.code)}</b><small class="mu">${esc([w.address,w.city].filter(Boolean).join(', ')||w.name||'')}</small>${mapsLink(w)?`<a class="btn sm" target="_blank" rel="noopener" href="${mapsLink(w)}">Open in Maps</a>`:''}${w.phone?` <a class="btn sm" href="tel:${esc(String(w.phone).replace(/[^+\\d]/g,''))}">Call ${esc(w.contact||'the warehouse')}</a>`:''}</div>`:''}
@@ -2331,7 +2338,7 @@ function cuDriverHTML(rows){
      <button class="btn pri dvb" data-act="dvOpen" data-ref="${sh.ref}" data-k="${k}">${esc(DV_BTN[k])}</button>
      <div class="row" style="gap:8px;margin-top:8px">${sh.f.ETAActual&&!sh.f.CustomsClearedActual?`<button class="btn dvs" data-act="dvOpen" data-ref="${sh.ref}" data-k="CustomsCleared">Customs cleared</button>`:''}${sh.f.ETAActual&&!sh.f.GateOutActual?`<button class="btn dvs" data-act="dvOpen" data-ref="${sh.ref}" data-k="GateOut">Gate-out</button>`:''}<button class="btn dvs" data-act="cuOpen" data-ref="${sh.ref}">New estimate or more</button></div>`}</div>`}).join('')}</div>`;
 }
-const cuBody=rows=>S.ui.cu.cal?calGen('cu',cuItems(rows)):driverMode()?cuDriverHTML(rows):cuTable(rows);
+const cuBody=rows=>driverMode()?cuDriverHTML(rows):cuTable(rows);
 function dvOpen(ref,k){
   const sh=getShip(ref);if(!sh)return;S.dv={ref,k};
   openModal(`<div class="mh"><div><h2>${esc(DV_BTN[k]||MSL(k))}</h2><div class="mu">${esc(ref)}, ${esc(sh.route)}</div></div><button class="x" data-act="close" aria-label="Close">&times;</button></div>
@@ -2695,7 +2702,7 @@ function userAddFromForm(){
   if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em))return {msg:'Enter a valid email address'};
   if(S.users.some(u=>u.UserEmail.toLowerCase()===em))return {msg:'That user already exists'};
   if(!role)return {msg:'Choose a role for this user'};
-  const carrier=type==='Carrier'?val('u_carrier').trim():'',whSel=[...(document.getElementById('u_wh')||{selectedOptions:[]}).selectedOptions].map(o=>o.value),sh=normShippers(val('u_shippers')),rc=normShippers(val('u_receivers')),partner=val('u_partner');
+  const carrier=type==='Carrier'?canonCarrier(val('u_carrier')):'',whSel=[...(document.getElementById('u_wh')||{selectedOptions:[]}).selectedOptions].map(o=>o.value),sh=normShippers(val('u_shippers')),rc=normShippers(val('u_receivers')),partner=val('u_partner');
   if(type==='Carrier'&&!carrier)return {msg:'Enter the carrier this user belongs to'};
   if(type==='Warehouse'&&!whSel.length)return {msg:'Choose at least one warehouse for this Warehouse user'};
   if(type==='External Logistics Partner'&&!sh&&!rc)return {msg:'Enter at least one shipper or receiver for this logistics partner'};
@@ -2744,7 +2751,7 @@ const MODULES=[
  {id:'trackmod',label:'Track & Trace',V:['track'],C:[],E:[],D:[],note:'View: the Track & Trace page.'},
  {id:'warehouse',label:'Warehouse Operations',V:['warehouse'],C:['slotreq'],E:['slotmgmt'],D:[],note:'View: Warehouse Operations. Create: request delivery slots. Edit: Delivery Management (approve, propose, block).'},
  {id:'freight',label:'Freight Cost',V:['commercial','freighttrends','faudit'],C:[],E:['invoices','auditedit'],D:[],note:'View: Freight Commercials, Freight Trends and Freight Audit. Edit: invoices, actual freight, and the freight audit.'},
- {id:'rgmod',label:'Receipt of Goods (RG)',V:['rg'],C:[],E:['rgedit'],D:[],note:'View: the RG Pending page. Edit: record RG details and upload them.'},
+ {id:'rgmod',label:'Receipt of Goods (RG)',V:['rg'],C:[],E:['rgedit'],D:[],note:'View: the Receipts page. Edit: record RG details and upload them.'},
  {id:'analysis',label:'Analysis',V:['dashboard','carrier','transit','reports'],C:[],E:[],D:[],note:'View: Control Tower Overview, Carrier Performance, Transit Analytics, Scheduled reports.'},
  {id:'users',label:'Users',V:['usersview'],C:['usersadd'],E:['usersedit'],D:['usersdel'],note:'View: the Users and roles tab. Create, edit (including password reset) and remove users.'},
  {id:'settings',label:'Settings',V:['admin'],C:[],E:['settingsedit'],D:[],note:'View: the other Administration tabs. Edit: change roles and access, warehouses, branding, settings and restore a backup.'}];
@@ -3013,7 +3020,7 @@ function monBarHTML(){
 {const s0=addSampleHistory;addSampleHistory=function(){const r=s0.apply(this,arguments);S.lines.forEach(l=>{if(l.Mode)l.Mode=normMode(l.Mode);if(l.ContainerType)l.ContainerType=normCtype(l.ContainerType)});return r}}
 document.addEventListener('change',e=>{if(e.target&&e.target.id==='f_ctype'){const b=document.getElementById('setptBox');if(b){b.style.display=isReefer(e.target.value)?'':'none';if(!isReefer(e.target.value)){const i=document.getElementById('f_setpt');if(i)i.value=''}}}});
 /* ========== demo sign-in (email and password), problem log, report a problem ========== */
-const APP_BUILD='site build 2026-11-14 16:59 UTC';
+const APP_BUILD='site build 2026-11-14 18:34 UTC';
 const ErrLog={key:'ect.errors',max:60,
   add(kind,msg,src){try{const a=JSON.parse(localStorage.getItem(this.key)||'[]');a.push({t:new Date().toISOString(),kind,msg:String(msg==null?'':msg).slice(0,300),src:String(src||'').slice(0,160),view:(typeof S!=='undefined'&&S&&S.view)||'',role:(typeof S!=='undefined'&&S&&S.role)||''});while(a.length>this.max)a.shift();localStorage.setItem(this.key,JSON.stringify(a))}catch(e){}},
   list(){try{return JSON.parse(localStorage.getItem(this.key)||'[]')}catch(e){return []}},
@@ -4035,7 +4042,7 @@ function msRun(text,scope){
     let ref=cRef?String(r[cRef]||'').trim():'';
     if(!ref){const f0=rgResolve(cHbl?String(r[cHbl]||'').trim():'',cMbl?String(r[cMbl]||'').trim():'','');if(f0.err){fail++;msgs.push('Row '+r._row+': '+f0.err);return}ref=f0.sh.ref}
     const sh=getShip(ref);
-    if(sh&&cCar&&r[cCar]&&String(r[cCar]).trim().toLowerCase()!==sh.carrier.toLowerCase()){fail++;msgs.push('Row '+r._row+': carrier "'+r[cCar]+'" does not match '+sh.ref+' ('+sh.carrier+')');return}
+    if(sh&&cCar&&r[cCar]&&canonCarrier(r[cCar]).toLowerCase()!==canonCarrier(sh.carrier).toLowerCase()){fail++;msgs.push('Row '+r._row+': carrier "'+r[cCar]+'" does not match '+sh.ref+' ('+sh.carrier+')');return}
     const res=applyMilestone(ref,k,r[cAct],cLoc?r[cLoc]:'',cNote?r[cNote]:'Bulk update',scope?{carrier:scope}:undefined);
     if(res.ok)ok++;else{fail++;msgs.push('Row '+r._row+': '+res.msg)}
   });
@@ -4071,7 +4078,7 @@ function viewCarrierUpdates(){
    {id:'s',label:'Delivery due in 3 days',value:soon,title:'Delivery due in the next 3 days',rows:act.filter(s=>s.dueL&&diffDays(s.dueL,S.today)>=0&&diffDays(s.dueL,S.today)<=3)},
    {id:'d',label:'Delivered',value:all.filter(s=>s.status==='Delivered').length,cls:'ok',title:'Delivered shipments',rows:all.filter(s=>s.status==='Delivered')}]})(),'cuOpen')}
   ${S.msResult?`<div class="${S.msResult.fail?'note':'okbox'}"><b>${S.msResult.ok} update(s) applied, ${S.msResult.fail} rejected.</b>${S.msResult.msgs.length?`<ul style="margin:6px 0 0 18px">${S.msResult.msgs.map(m=>`<li>${esc(m)}</li>`).join('')}</ul>`:''}</div>`:''}
-  <div class="row" style="margin-bottom:12px"><button class="btn pri" data-act="cuDownload">Download overdue (CSV)</button><button class="btn" data-act="cuDriver">${driverMode()?'Table view':'Driver view'}</button><button class="btn" data-act="cuCal">${S.ui.cu.cal?'Table view':'Calendar'}</button><button class="btn" data-act="cuBulkOpen">Upload updates</button>
+  <div class="row" style="margin-bottom:12px"><button class="btn pri" data-act="cuDownload">Download overdue (CSV)</button><span class="seg" role="group" aria-label="List view"><button type="button" class="${driverMode()?'':'on'}" data-act="cuView" data-v="table" aria-pressed="${!driverMode()}">Table</button><button type="button" class="${driverMode()?'on':''}" data-act="cuView" data-v="driver" aria-pressed="${driverMode()}">Driver view</button></span><button class="btn" data-act="cuBulkOpen">Upload updates</button>
    <span class="row" style="margin-left:auto"><input id="cu_q" class="in" placeholder="Search HBL, MBL, invoice or container" value="${esc(U.q||'')}" style="width:270px" aria-label="Search your shipments"><select data-ch="cufilter" class="in" style="width:auto" aria-label="Show">${[['active','Active shipments'],['overdue','Overdue updates'],['delivered','Delivered'],['all','All']].map(([v,l])=>`<option value="${v}" ${v===U.filter?'selected':''}>${l}</option>`).join('')}</select></span></div>
   <div id="cuTable" ${driverMode()?'':'class="card" style="padding:0"'}>${cuBody(rows)}</div>
   <p class="hint">${hidden&&!isCar?hidden+' shipment(s) list '+esc(me)+' as the carrier but are not nominated yet, so they stay hidden. ':''}Shipments appear here once Your Company nominates your company. Dates cannot be in the future, and a recorded date can only be corrected by Your Company logistics.</p>`;
@@ -5294,7 +5301,7 @@ function reportAccessCard(){
 }
 {const ap=accessPanel;accessPanel=function(){return ap()+reportAccessCard()}}
 /* ----- wiring: tabs, nav, icons, default access ----- */
-[['rptdl','Reports'],['faudit','Freight Audit'],['rg','RG Pending']].forEach(([id,label])=>{TABS.push({id,label});ACCESS_ITEMS.push({id,label})});
+[['rptdl','Reports'],['faudit','Freight Audit'],['rg','Receipts']].forEach(([id,label])=>{TABS.push({id,label});ACCESS_ITEMS.push({id,label})});
 ACCESS_ITEMS.push({id:'auditedit',label:'Freight Audit: record costs, invoices and payments'},{id:'rgedit',label:'RG: record and upload RG details'});
 {const g=NAV_GROUPS;g[0][1].splice(g[0][1].indexOf('dataquality')+1,0,'rg');g[2][1].splice(g[2][1].indexOf('reports'),0,'rptdl');g[3][1].splice(g[3][1].indexOf('commercial')+1,0,'faudit');g[3][0]='Freight Cost';g[3][1].splice(g[3][1].indexOf('admin'),1);g.push(['Settings',['admin']])}
 ICON.rptdl='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-4-4m4 4 4-4M5 21h14"/></svg>';
@@ -5858,7 +5865,7 @@ function viewRG(){
   const list=(F.f==='Pending'?P:F.f==='It'?ip:F.f==='Fin'?fp:dn),shown=list.slice(0,300),nSh=a=>uniq(a.map(x=>x.sh.ref)).length;
   const tile=(id,l,a,cls)=>`<button class="kpi tile fa-t ${cls||''} ${F.f===id?'sel':''}" data-act="rgTile" data-id="${id}" aria-pressed="${F.f===id}"><small>${l}</small><b>${a.length} <span class="fa-u">line${a.length===1?'':'s'}</span></b><span class="fa-i">${nSh(a)} shipment${nSh(a)===1?'':'s'}</span></button>`;
   const selRefs=uniq(F.sel.map(k=>k.split('|')[0]));
-  return pageHead('RG Pending','Receipt of Goods in Oracle, tracked for every PO and item line. DAP and DDP shipments need only a Final RG after delivery. All other terms need an In-Transit RG once the shipment is in transit, then a Final RG after delivery. One shipment can have several RG numbers, one RG can cover several lines or POs, and a line can be received in parts. A stage is complete when the full quantity is received or the line is marked NA.')+
+  return pageHead('Receipts','Receipt of Goods in Oracle, tracked for every PO and item line. DAP and DDP shipments need only a Final RG after delivery. All other terms need an In-Transit RG once the shipment is in transit, then a Final RG after delivery. One shipment can have several RG numbers, one RG can cover several lines or POs, and a line can be received in parts. A stage is complete when the full quantity is received or the line is marked NA.')+
   `<div class="fa-tiles">${tile('Pending','All Pending',P,P.length?'late':'')}${tile('It','In-Transit RG Pending',ip,ip.length?'acc':'')}${tile('Fin','Final RG Pending',fp,fp.length?'acc':'')}${tile('Done','RG Complete',dn,'ok')}</div>
   <div class="card"><div class="row"><label class="f grow">Search<input id="rg_q" class="in" value="${esc(F.q||'')}" placeholder="HBL, MBL, invoice, container, PO, item or RG number"></label>
   <span class="row" style="align-self:flex-end;gap:6px;flex-wrap:wrap">${may?`<button class="btn sm pri" data-act="rgRecSel" ${F.sel.length?'':'disabled'}>Record RG for Selected Lines (${F.sel.length})</button>`:''}<button class="btn sm" data-act="rdQuick" data-id="rgpending">Download RG Pending Report</button>${may?'<label class="btn sm pri" style="cursor:pointer">Upload RG Details<input type="file" id="rgFile" accept=".xlsx,.xls,.csv" hidden></label>':''}</span></div></div>
@@ -5992,6 +5999,7 @@ function navApply(){
   if(b){if(dm){b.setAttribute('aria-label','Open menu');b.setAttribute('aria-expanded',String(open))}else{b.setAttribute('aria-label',col?'Expand menu':'Collapse menu');b.setAttribute('aria-expanded',String(!col))}}
   document.querySelectorAll('#nav .nav-i').forEach(i=>{const sec=i.closest('.nav-sec'),lab=(i.querySelector('span:not(.nav-badge)')||{}).textContent||'';if(col)i.title=(sec?sec.dataset.g+', ':'')+lab;else i.removeAttribute('title')});
   if(dm)drawerState();
+  const on=document.querySelector('#nav .nav-i.on');if(on&&on.scrollIntoView&&!document.body.classList.contains('nav-collapsed'))on.scrollIntoView({block:'nearest'});
 }
 function navOpen(){
   if(!drawerMode())return;S.ui.drawerG=null;drawerState();
@@ -6127,7 +6135,7 @@ document.addEventListener('click',e=>{
 const calState=(date,done)=>done?'done':date<S.today?'late':date===S.today?'today':'up';
 const CAL_LAB={done:'Done',late:'Overdue',today:'Due Today',up:'Upcoming'},CAL_PILL={done:'ok',late:'late',today:'warn',up:'info'};
 function calCounts(items){const n={done:0,late:0,today:0,up:0};items.forEach(i=>{n[calState(i.date,i.done)]++});return n}
-const calBadges=n=>(n.late?`<span class="bd late">${n.late} overdue</span>`:'')+(n.today?`<span class="bd today">${n.today} today</span>`:'')+(n.up?`<span class="bd due">${n.up} due</span>`:'')+(n.done?`<span class="bd done">${n.done} done</span>`:'');
+const calBadges=n=>`<span class="cal-n">${n.late?`<span class="bd late" title="${n.late} overdue">${n.late}</span>`:''}${n.today?`<span class="bd today" title="${n.today} due today">${n.today}</span>`:''}${n.up?`<span class="bd due" title="${n.up} upcoming">${n.up}</span>`:''}${n.done?`<span class="bd done" title="${n.done} done">${n.done}</span>`:''}</span>`;
 const calTint=n=>n.late?'s-late':n.today?'s-today':n.up?'s-up':n.done?'s-done':'';
 const calLegend=()=>'<p class="hint cal-leg"><span class="bd done">Done</span> completed <span class="bd late">Overdue</span> past and still open <span class="bd today">Due today</span> still open today <span class="bd due">Upcoming</span> still to come</p>';
 function calHTML(all){
@@ -6154,26 +6162,21 @@ function calGen(id,items){
     g+=`<button type="button" class="cal-c ${iso===C.sel?'sel':''} ${iso===S.today?'today':''} ${calTint(n)}" data-act="cgDay" data-id="${id}" data-d="${iso}" style="text-align:left" aria-label="${fmt(iso)}: ${its.length} item(s), ${n.done} done, ${n.late} overdue, ${n.today} due today, ${n.up} upcoming"><span class="dn">${d}</span>${calBadges(n)}</button>`}
   g+='</div>';
   const day=(by[C.sel]||[]).slice().sort((a,b)=>String(a.k).localeCompare(String(b.k))||a.sh.ref.localeCompare(b.sh.ref));
-  const list=day.length?`<div class="tbw"><table class="tb" data-sort="off"><tr><th>Milestone</th><th>Shipment</th><th>MBL</th><th>Invoice</th><th>Container</th><th>Carrier</th><th>Status</th><th></th></tr>${day.map(i=>{const s=calState(i.date,i.done);return `<tr><td>${esc(i.label||i.k)}</td><td>${shipIdCell(i.sh)}</td><td>${esc(shipMbl(i.sh).join('; ')||'-')}</td><td>${esc(shipInvL(i.sh).join('; ')||'-')}</td><td>${esc(shipCont(i.sh).join('; ')||'-')}</td><td>${esc(i.sh.carrier)}</td><td><span class="pill ${CAL_PILL[s]}">${CAL_LAB[s]}</span></td><td class="r"><button class="btn sm" data-act="${calOpenAct()}" data-ref="${esc(i.sh.ref)}">Open</button></td></tr>`}).join('')}</table></div>`:`<div class="empty">${C.sel?'Nothing is planned for this day.':'Tap a day to see its shipments.'}</div>`;
-  return `<div class="card"><div class="row" style="justify-content:space-between;margin-bottom:8px"><button class="btn sm" data-act="cgNav" data-id="${id}" data-n="-1">Previous</button><b>${MONL[m-1]} ${y}</b><span class="row"><button class="btn sm" data-act="cgNav" data-id="${id}" data-n="0">Today</button><button class="btn sm" data-act="cgNav" data-id="${id}" data-n="1">Next</button></span></div>${g}${calLegend()}</div><div class="card"><h3>${C.sel?fmt(C.sel):'Day'} (${day.length})</h3>${list}</div>`;
+  const list=day.length?`<div class="tbw"><table class="tb" data-sort="off"><tr><th>Milestone</th><th>Shipment</th><th>References</th><th>Status</th></tr>${day.map(i=>{const s=calState(i.date,i.done);return `<tr class="click" data-act="${calOpenAct()}" data-ref="${esc(i.sh.ref)}"><td>${esc(i.label||i.k)}</td><td>${shipIdCell(i.sh)}</td><td>${refsCell(i.sh)}</td><td><span class="pill ${CAL_PILL[s]}">${CAL_LAB[s]}</span></td></tr>`}).join('')}</table></div>`:`<div class="empty">${C.sel?'Nothing is planned for this day.':'Tap a day to see its shipments.'}</div>`;
+  return `<div class="calwrap"><div class="card calc"><div class="row" style="justify-content:space-between;margin-bottom:8px"><button class="btn sm" data-act="cgNav" data-id="${id}" data-n="-1">Previous</button><b>${MONL[m-1]} ${y}</b><span class="row"><button class="btn sm" data-act="cgNav" data-id="${id}" data-n="0">Today</button><button class="btn sm" data-act="cgNav" data-id="${id}" data-n="1">Next</button></span></div>${g}${calLegend()}</div><div class="card caldp"><h3>${C.sel?fmt(C.sel):'Day'} (${day.length})</h3>${list}</div></div>`;
 }
 const whCell=sh=>{const w=whFind(whCodeOf(sh));return w?`<b>${esc(w.code)}</b><br><small class="mu">${esc([w.city,w.country].filter(Boolean).join(', '))}</small>`:'<span class="mu">-</span>'};
 {const v0=viewMilestones;viewMilestones=function(){
-  let h0=v0();if(!S.ui.msCal)return h0.replace('<input id="ms_q"','<button class="btn" data-act="msCal">Calendar</button><input id="ms_q"');
-  const f=S.ui.msFilter,od=overdueRows(),q=String(S.ui.msQ||'').toLowerCase(),rows=ships().filter(s=>s.status!=='Delivered').filter(s=>f==='overdue'?isLateNow(s)||od.some(o=>o.sh.ref===s.ref):true).filter(s=>!q||shipHay(s).includes(q));
-  const a=h0.lastIndexOf('<div class="card" style="padding:0"><div class="tbw"><table class="tb"><tr><th>Shipment</th>'),b=h0.indexOf('</table></div></div>',a);
-  if(a<0||b<0)return h0;
-  return h0.slice(0,a)+calGen('ms',calItemsMs(rows))+h0.slice(b+'</table></div></div>'.length).replace('<input id="ms_q"','<button class="btn" data-act="msCal">Table view</button><input id="ms_q"');
+  const h0=v0(),rows=ships().filter(s=>s.status!=='Delivered'),a=h0.indexOf('Download overdue (CSV)');if(a<0)return h0;const b=h0.lastIndexOf('<div class="row"',a);
+  return h0.slice(0,b)+calGen('ms',calItemsMs(rows))+h0.slice(b).replace('<button class="btn" data-act="msCal">Calendar</button>','').replace('<button class="btn" data-act="msCal">Table view</button>','');
 }}
-{const v1=viewMilestones;viewMilestones=function(){let h0=v1();if(S.ui.msCal)h0=h0.replace('<input id="ms_q"','<button class="btn" data-act="msCal">Table view</button><input id="ms_q"');return h0}}
 function dmIncomingPanel(codes){
-  const D=S.ui.dm,sel=D.code==='All'?codes:[D.code],f=D.inF||'pipe',q=String(D.inQ||'').toLowerCase(),view=D.inView||'table';
+  const D=S.ui.dm,sel=D.code==='All'?codes:[D.code],f=D.inF||'pipe',q=String(D.inQ||'').toLowerCase();
   const all=ships().filter(s=>sel.some(c=>whKey(c)===whKey(whCodeOf(s)))),list=all.filter(s=>f==='all'||s.status!=='Delivered').filter(s=>!q||shipHay(s).includes(q)).sort((a,b)=>(a.dueL||'9').localeCompare(b.dueL||'9')||a.ref.localeCompare(b.ref));
   const slotOf=sh=>S.slots.find(r=>r.ref===sh.ref&&slotHeld(r)),when=sh=>{const r=slotOf(sh);if(r){const w=whFind(r.code)||{},at=slotAt(r);return (slotEff(r)==='Approved'?'Confirmed ':'Requested ')+slotWhen(w,at.date,at.slot)}return sh.dueL?'Due '+fmtS(sh.dueL):'No date'};
-  const items=list.map(sh=>{const r=slotOf(sh),d=r&&slotEff(r)==='Approved'?slotAt(r).date:(sh.dueL||sh.due||'');return d?{date:d,k:'Delivery',label:'Delivery',sh,done:sh.status==='Delivered'}:null}).filter(Boolean);
-  const bar=`<div class="card"><div class="row" style="gap:10px;flex-wrap:wrap"><span class="chips" style="margin:0"><button class="chip ${f==='pipe'?'on':''}" data-act="dmInSet" data-k="inF" data-v="pipe">In the pipeline (${all.filter(s=>s.status!=='Delivered').length})</button><button class="chip ${f==='all'?'on':''}" data-act="dmInSet" data-k="inF" data-v="all">All (${all.length})</button></span><input id="dm_inq" class="in" placeholder="Search shipment, invoice, MBL, HBL or container" value="${esc(D.inQ||'')}" style="width:340px" aria-label="Search incoming shipments"><span class="row" style="margin-left:auto"><button class="btn sm ${view==='table'?'pri':''}" data-act="dmInSet" data-k="inView" data-v="table">Table</button><button class="btn sm ${view==='cal'?'pri':''}" data-act="dmInSet" data-k="inView" data-v="cal">Calendar</button></span></div></div>`;
-  if(view==='cal')return bar+calGen('dmin',items);
-  return bar+`<div class="card" style="padding:0"><div class="tbw"><table class="tb"><tr><th>Shipment</th><th>Invoice</th><th>MBL</th><th>HBL</th><th>Container</th><th>Carrier</th><th>Warehouse</th><th>Delivery</th><th>Status</th></tr>${list.map(sh=>`<tr class="click" data-act="open" data-ref="${esc(sh.ref)}"><td><b>${esc(sh.ref)}</b><br><small class="mu">${esc(sh.route)}</small></td><td>${esc(shipInvL(sh).join('; ')||'-')}</td><td>${esc(shipMbl(sh).join('; ')||'-')}</td><td>${esc(shipHbl(sh).join('; ')||'-')}</td><td>${esc(shipCont(sh).join('; ')||'-')}</td><td>${esc(sh.carrier)}</td><td>${whCell(sh)}</td><td>${esc(when(sh))}</td><td>${pill(sh)}</td></tr>`).join('')||'<tr><td colspan="9" class="empty">No shipments are on their way to this warehouse.</td></tr>'}</table></div></div>`;
+  const items=all.map(sh=>{const r=slotOf(sh),d=r&&slotEff(r)==='Approved'?slotAt(r).date:(sh.dueL||sh.due||'');return d?{date:d,k:'Delivery',label:'Delivery',sh,done:sh.status==='Delivered'}:null}).filter(Boolean);
+  const bar=`<div class="card"><div class="row" style="gap:10px;flex-wrap:wrap"><span class="chips" style="margin:0"><button class="chip ${f==='pipe'?'on':''}" data-act="dmInSet" data-k="inF" data-v="pipe">In the pipeline (${all.filter(s=>s.status!=='Delivered').length})</button><button class="chip ${f==='all'?'on':''}" data-act="dmInSet" data-k="inF" data-v="all">All (${all.length})</button></span><input id="dm_inq" class="in" placeholder="Search shipment, invoice, MBL, HBL or container" value="${esc(D.inQ||'')}" style="width:340px" aria-label="Search incoming shipments"></div></div>`;
+  return bar+calGen('dmin',items)+`<div class="card" style="padding:0"><div class="tbw"><table class="tb"><tr><th>Shipment</th><th>Invoice</th><th>MBL</th><th>HBL</th><th>Container</th><th>Carrier</th><th>Warehouse</th><th>Delivery</th><th>Status</th></tr>${list.map(sh=>`<tr class="click" data-act="open" data-ref="${esc(sh.ref)}"><td><b>${esc(sh.ref)}</b><br><small class="mu">${esc(sh.route)}</small></td><td>${esc(shipInvL(sh).join('; ')||'-')}</td><td>${esc(shipMbl(sh).join('; ')||'-')}</td><td>${esc(shipHbl(sh).join('; ')||'-')}</td><td>${esc(shipCont(sh).join('; ')||'-')}</td><td>${esc(sh.carrier)}</td><td>${whCell(sh)}</td><td>${esc(when(sh))}</td><td>${pill(sh)}</td></tr>`).join('')||'<tr><td colspan="9" class="empty">No shipments are on their way to this warehouse.</td></tr>'}</table></div></div>`;
 }
 /* ----- tap any shipment number, HBL, MBL, container or invoice number to open the shipment ----- */
 function idlinkApply(){
@@ -6260,6 +6263,61 @@ document.addEventListener('change',e=>{
   if(T.from&&T.to&&T.from>T.to){const x=T.from;T.from=T.to;T.to=x}render();
 });
 
+/* ========== carrier names: one official spelling ========== */
+const CARR_DEF=[{name:'FedEx',aliases:['Fedex','FEDEX','Fed Ex','Fed-Ex','Federal Express','FedEx Express','FedEx Freight']}];
+const carrKey=s=>String(s||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+const carrList=()=>(S.settings&&Array.isArray(S.settings.carrierAliases)&&S.settings.carrierAliases.length)?S.settings.carrierAliases:CARR_DEF;
+function carrierCounts(){const c=new Map(),add=n=>{n=String(n||'').replace(/\s+/g,' ').trim();if(n)c.set(n,(c.get(n)||0)+1)};S.lines.forEach(l=>add(l.Carrier));S.users.forEach(u=>add(u.Carrier));S.quotes.forEach(q=>add(q.vendor));return c}
+function canonCarrier(name,counts){
+  const raw=String(name==null?'':name).replace(/\s+/g,' ').trim();if(!raw)return '';
+  const k=carrKey(raw);
+  for(const d of carrList()){if(k===carrKey(d.name)||(d.aliases||[]).some(a=>carrKey(a)===k))return d.name}
+  if(k.startsWith('fedex')||k==='federalexpress')return 'FedEx';
+  let best=null,bc=0;(counts||carrierCounts()).forEach((n,sp)=>{if(carrKey(sp)===k&&n>bc){best=sp;bc=n}});
+  return best||raw;
+}
+function carrierVariants(){
+  const cn=carrierCounts(),out=new Map();
+  cn.forEach((n,sp)=>{const to=canonCarrier(sp,cn);if(to!==sp){const key=sp+'\u0000'+to;out.set(key,{from:sp,to,n})}});
+  return [...out.values()].sort((a,b)=>b.n-a.n);
+}
+function carrierCleanup(){
+  const cn=carrierCounts(),res={lines:0,users:0,quotes:0},fix=(o,f)=>{const v=o[f];if(!v)return false;const to=canonCarrier(v,cn);if(to!==v){o[f]=to;return true}return false};
+  S.lines.forEach(l=>{if(fix(l,'Carrier'))res.lines++});S.users.forEach(u=>{if(fix(u,'Carrier'))res.users++});S.quotes.forEach(q=>{if(fix(q,'vendor'))res.quotes++});
+  if(S.carrier){const c=canonCarrier(S.carrier,cn);if(c!==S.carrier)S.carrier=c}
+  audit('Carrier names cleaned','',res.lines+' shipment line(s), '+res.users+' user(s), '+res.quotes+' quote(s)');
+  return res;
+}
+{const c0=createShipment;createShipment=function(b,items){if(b&&b.carrier!==undefined)b.carrier=canonCarrier(b.carrier);return c0.apply(this,arguments)}}
+{const b0=bulkCheck;bulkCheck=function(objs,hdr,fileName){const cn=carrierCounts();(objs||[]).forEach(r=>{if(r&&r.Carrier)r.Carrier=canonCarrier(r.Carrier,cn)});return b0.apply(this,arguments)}}
+{const e0=shipEditCheck;shipEditCheck=function(sh,h,ops,reason){if(h&&h.Carrier!==undefined&&String(h.Carrier).trim())h.Carrier=canonCarrier(h.Carrier);return e0.apply(this,arguments)}}
+function carrierNamesCard(){
+  const L=carrList(),v=carrierVariants();
+  return `<div class="card"><h3>Carrier Names</h3><p class="mu" style="margin:0 0 10px">Every carrier has one official spelling. Anything typed or uploaded in another format (capitals, spaces, hyphens, or an alternative name you list here) becomes the official name. A name that matches an existing carrier takes the most used spelling.</p>
+  <div class="tbw"><table class="tb" data-sort="off"><tr><th>Official name</th><th>Also recognised as (separate with commas)</th><th></th></tr>${L.map((d,i)=>`<tr><td><input class="in" data-ch="carName" data-i="${i}" value="${esc(d.name)}" aria-label="Official carrier name"></td><td><input class="in" data-ch="carAl" data-i="${i}" value="${esc((d.aliases||[]).join(', '))}" style="width:100%" aria-label="Alternative spellings for ${esc(d.name)}"></td><td class="r"><button class="btn sm danger" data-act="carDel" data-i="${i}">Remove</button></td></tr>`).join('')}
+  <tr><td><input id="car_new" class="in" placeholder="New carrier" aria-label="New official carrier name"></td><td><input id="car_new_al" class="in" placeholder="Other spellings" style="width:100%" aria-label="Alternative spellings"></td><td class="r"><button class="btn sm pri" data-act="carAdd">Add</button></td></tr></table></div>
+  <div class="row sec"><button class="btn pri" data-act="carSave">Save Carrier Names</button></div>
+  <h3 class="sec">Existing Data</h3>${v.length?`<p class="mu">${v.length} spelling${v.length===1?'':'s'} in your data will change: ${v.slice(0,6).map(x=>esc(x.from)+' to '+esc(x.to)+' ('+x.n+')').join(', ')}${v.length>6?', and more':''}.</p><div class="row"><button class="btn" data-act="exportAll">Download Backup First</button><button class="btn pri" data-act="carCleanup">Clean Up Existing Data</button></div>`:'<p class="mu">Every carrier in your data already uses its official spelling.</p>'}</div>`;
+}
+{const s0=settingsPanel;settingsPanel=function(){return s0.apply(this,arguments)+carrierNamesCard()}}
+function carrierPrompt(){
+  const v=carrierVariants();if(!v.length)return;
+  openModal(`<div class="mh"><h2>Carrier Names Need Tidying</h2><button class="x" data-act="close" aria-label="Close">&times;</button></div><p>${v.length} carrier name${v.length===1?' is':'s are'} spelled in more than one way: ${v.slice(0,5).map(x=>'<b>'+esc(x.from)+'</b> becomes <b>'+esc(x.to)+'</b> ('+x.n+' record'+(x.n===1?'':'s')+')').join(', ')}.</p><p class="mu">Download a backup first, then clean up. Carrier users keep seeing their shipments.</p><div class="row sec"><button class="btn" data-act="exportAll">Download Backup</button><button class="btn pri" data-act="carCleanup">Clean Up Now</button><button class="btn" data-act="close">Later</button></div>`);
+}
+{const r0=render;render=function(){r0.apply(this,arguments);try{if(typeof can==='function'&&can('settingsedit')&&!S.ui._carAsked&&!document.querySelector('#modal .mh')&&carrierVariants().length){S.ui._carAsked=true;carrierPrompt()}}catch(e){}}}
+document.addEventListener('click',e=>{
+  const t=e.target.closest&&e.target.closest('[data-act]');if(!t)return;const a=t.dataset.act,d=t.dataset;
+  if(!['carDel','carAdd','carSave','carCleanup'].includes(a))return;
+  if(!can('settingsedit')){toast('Your role is not allowed to do this','bad');return}
+  const collect=()=>{const L=carrList().map((x,i)=>({name:(document.querySelector('[data-ch=carName][data-i="'+i+'"]')||{value:x.name}).value.replace(/\s+/g,' ').trim(),aliases:((document.querySelector('[data-ch=carAl][data-i="'+i+'"]')||{value:''}).value||'').split(',').map(s=>s.trim()).filter(Boolean)})).filter(x=>x.name);return L};
+  if(a==='carDel'){const L=collect();L.splice(Number(d.i),1);S.settings.carrierAliases=L.length?L:[{name:'FedEx',aliases:[]}];render();return}
+  if(a==='carAdd'){const L=collect(),n=(document.getElementById('car_new')||{value:''}).value.replace(/\s+/g,' ').trim();if(!n){toast('Enter the carrier name','bad');return}if(L.some(x=>carrKey(x.name)===carrKey(n))){toast(n+' is already in the list','bad');return}L.push({name:n,aliases:((document.getElementById('car_new_al')||{value:''}).value||'').split(',').map(s=>s.trim()).filter(Boolean)});S.settings.carrierAliases=L;audit('Carrier names changed','',n+' added');render();toast(n+' added');return}
+  if(a==='carSave'){S.settings.carrierAliases=collect();audit('Carrier names changed','','saved');render();toast('Carrier names saved');return}
+  if(a==='carCleanup'){const r=carrierCleanup();closeModal();render();toast('Carrier names cleaned: '+r.lines+' shipment line(s), '+r.users+' user(s), '+r.quotes+' quote(s)');return}
+},true);
+
+document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('[data-act=cuView]');if(!t)return;e.stopImmediatePropagation();if((t.dataset.v==='driver')!==driverMode()){const b=document.createElement('button');b.dataset.act='cuDriver';document.body.appendChild(b);b.click();b.remove()}},true);
+{const v0=viewCarrierUpdates;viewCarrierUpdates=function(){const h0=v0(),a=h0.indexOf('data-act="cuDownload"');if(a<0)return h0;const b=h0.lastIndexOf('<div class="row"',a),{all}=cuData();return h0.slice(0,b)+calGen('cu',cuItems(all))+h0.slice(b)}}
 const pickupCol=()=>colx('Pickup vs plan',sh=>{if(!sh.f.PickupActual||!sh.f.PickupPlanned)return '-';const d=diffDays(sh.f.PickupActual,sh.f.PickupPlanned);return d<=0?'<span class="ok-t">'+(d===0?'On time':(-d)+' day(s) early')+'</span>':'<span class="late-t">'+d+' day(s) late</span>'},sh=>{if(!sh.f.PickupActual||!sh.f.PickupPlanned)return '';const d=diffDays(sh.f.PickupActual,sh.f.PickupPlanned);return d<=0?(d===0?'On time':(-d)+' early'):d+' late'});
 const pickupDatesCol=()=>colx('Pickup planned / actual',sh=>fmtS(sh.f.PickupPlanned)+' / '+fmtS(sh.f.PickupActual),sh=>(sh.f.PickupPlanned||'')+' / '+(sh.f.PickupActual||''));
 document.addEventListener('click',e=>{
@@ -6359,10 +6417,9 @@ function refPill(label,arr){
   const more=arr.length>1?` <b class="rfm" title="${esc(arr.join(', '))}">+${arr.length-1}</b>`:'';
   return `<span class="rf" title="${esc(arr.join(', '))}"><i>${label}</i> <span class="rfv">${esc(arr[0])}</span>${more}</span>`;
 }
-const refsCell=sh=>`<div class="refs">${refPill('MBL',shipMbl(sh))}${refPill('Inv',shipInvL(sh))}${refPill('Cont',shipCont(sh))}</div>`;
+const refsCell=sh=>`<div class="refs">${refPill('Inv',shipInvL(sh))}${refPill('MBL',shipMbl(sh))}${refPill('HBL',shipHbl(sh))}${refPill('Cont',shipCont(sh))}</div>`;
 function shipIdCell(sh,line2){
-  const h=shipHbl(sh);
-  return `<b>${h.length?esc(h[0]):'<span class="mu">No HBL</span>'}</b>${h.length>1?' <b class="rfm" title="'+esc(h.join(', '))+'">+'+(h.length-1)+'</b>':''} <small class="mu nw">Ref ${esc(sh.ref)}</small><br><small class="mu">${line2||[esc(sh.mode),esc(sh.stype||'Type not set')+(sh.nature==='DG'?' · DG':''),esc(sh.route)].join(' · ')}</small>`;
+  return `<b>${esc(sh.ref)}</b><br><small class="mu">${line2||[esc(sh.mode),esc(sh.stype||'Type not set')+(sh.nature==='DG'?' \u00b7 DG':''),esc(sh.route)].join(' \u00b7 ')}</small>`;
 }
 const shipHay=sh=>[sh.ref,sh.carrier,sh.route,sh.pos.join(' '),shipHbl(sh).join(' '),shipMbl(sh).join(' '),shipInvL(sh).join(' '),shipCont(sh).join(' ')].join(' ').toLowerCase();
 document.addEventListener('input',e=>{const t=e.target;if(t&&t.id==='ms_q'){S.ui.msQ=t.value;clearTimeout(window._mst);window._mst=setTimeout(()=>{const p=t.selectionStart;render();const n=document.getElementById('ms_q');if(n){n.focus();try{n.setSelectionRange(p,p)}catch(x){}}},250)}});
@@ -6727,7 +6784,7 @@ document.addEventListener('click',e=>{
    case 'comTab':S.ui.com=d.t;render();break;
    case 'quotesOpen':quotesModal(d.ref);break;
    case 'quoteAdd':{const amt=num(val('q_amt'));if(!val('q_vendor')||!(amt>0)){toast('Enter a vendor and an amount above 0','bad');break}
-     S.quotes.push({id:nextQuoteId(),ref:d.ref,vendor:val('q_vendor'),amount:amt,days:num(val('q_days'))||'',qid:val('q_qid'),status:'Received',date:S.today});audit('Quote added',d.ref,val('q_vendor')+' '+usd(amt));quotesModal(d.ref);render();toast('Quote added');break}
+     S.quotes.push({id:nextQuoteId(),ref:d.ref,vendor:canonCarrier(val('q_vendor')),amount:amt,days:num(val('q_days'))||'',qid:val('q_qid'),status:'Received',date:S.today});audit('Quote added',d.ref,val('q_vendor')+' '+usd(amt));quotesModal(d.ref);render();toast('Quote added');break}
    case 'quoteSelect':{const q=S.quotes.find(x=>x.id===Number(d.id));if(!q)break;
      S.quotes.filter(x=>x.ref===d.ref).forEach(x=>x.status=x===q?'Selected':'Rejected');
      const sh=getShip(d.ref);sh.lines.forEach(l=>{l.Carrier=q.vendor;if(!l.NominatedOn)l.NominatedOn=S.today});

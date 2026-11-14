@@ -22,7 +22,14 @@ To share data between devices, run `supabase-setup.sql` once in a free Supabase 
 This is a demo with sample data. The sign-in is not real security: users.js is public and anyone with the shared database key can change its data, so use throwaway passwords and no real company information.
 
 
-## What is new in this release (latest)
+## Latest changes
+- **Carrier names.** Every carrier has one official spelling, and FedEx is the only spelling of that carrier: FEDEX, fedex, Fed Ex, Fed-Ex, Federal Express, FedEx Express and FedEx Freight all become **FedEx**. Any other name that matches an existing carrier apart from capitals, spaces or hyphens takes the most used spelling. This applies in the entry form, the edit window, bulk upload, milestone upload, quotes and the carrier field when adding users. The list of official names and other spellings is in Administration, Settings, Carrier Names. An administrator is offered a one-time cleanup of existing data (with a backup download first) when different spellings are found, and it can be run from the same card.
+- **Carrier Updates, Incoming Shipments and Milestone Management** show a compact calendar that is always on the page (about 500 px wide, with the selected day's list beside it on a desktop and under it on a tablet or phone). Day cells show small coloured counts (green done, red overdue, yellow due today, blue upcoming), with the words on hover. Carriers choose **Table | Driver view** for the list below it.
+- **References** now run Inv, MBL, HBL, Cont everywhere (Milestone Management, Carrier Updates, the calendar day lists, driver cards), and the Shipment column leads with the shipment number.
+- **Sidebar:** the logo and company name stay fixed at the top while only the menu scrolls (on desktop, in the collapsed strip and in the phone drawer).
+- **Receipts:** the sidebar item and the page heading now say Receipts. Inside the page the RG wording is unchanged.
+
+## What was in the previous releases
 - **Calendar colours.** On Control Tower Overview a day shows a coloured count for each state: **green** done (including anything completed today), **red** past and still open, **yellow** due today and still open, **blue** upcoming. The day is tinted by the most urgent state, and a legend sits under the calendar.
 - **Calendars for carriers, warehouses and partners.** Carrier Updates has a Calendar button showing all four milestones of the carrier's shipments. Delivery Management has an **Incoming Shipments** tab with a Table (separate Shipment, Invoice, MBL, HBL and Container columns) and a Calendar for the user's warehouses. Milestone Management has a Table and Calendar toggle, which gives a Partner Executive a calendar of their shippers' shipments. Tap a day to see its shipments.
 - **Driver view** cards show HBL, MBL, Container and Invoice.
