@@ -403,6 +403,18 @@ body.compact .tb td,body.compact .tb th{padding:4px 8px;font-size:12px;line-heig
 }
 @media (prefers-reduced-motion:reduce){.side,.nav-scrim,.app,.nav-sec{transition:none!important}}
 
+.bd.done{background:var(--ok-bg);color:var(--ok)}.bd.today{background:#FFF1B8;color:#6B4E00}
+.cal-c.s-late{box-shadow:inset 4px 0 0 var(--late)}.cal-c.s-today{box-shadow:inset 4px 0 0 #E0A800;background:#FFFBE6}.cal-c.s-up{box-shadow:inset 4px 0 0 var(--info)}.cal-c.s-done{box-shadow:inset 4px 0 0 var(--ok)}
+.cal-leg{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.idlink{color:var(--info);text-decoration:underline dotted;text-underline-offset:2px;cursor:pointer;border-radius:3px}.idlink:hover{text-decoration:underline}.idlink:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .bd.today{background:#4A3B00;color:#FFE08A}:root:not([data-theme="light"]) .cal-c.s-today{background:#2A2500}}
+:root[data-theme="dark"] .bd.today{background:#4A3B00;color:#FFE08A}:root[data-theme="dark"] .cal-c.s-today{background:#2A2500}
+
+.whdd{position:relative;display:inline-block}.whdd-b{width:auto;min-width:200px;text-align:left;background:var(--panel);cursor:pointer}
+.whdd-p{position:absolute;z-index:40;top:calc(100% + 4px);left:0;background:var(--panel);border:1px solid var(--line2);border-radius:10px;padding:6px;min-width:270px;max-height:250px;overflow:auto;box-shadow:0 10px 28px rgba(0,0,0,.18)}.whdd-p[hidden]{display:none}
+.whdd-p label{display:flex;gap:8px;align-items:center;padding:7px 8px;border-radius:6px;cursor:pointer;font-size:13px}.whdd-p label:hover{background:var(--chip)}
+.uform .in[disabled],.uform .whdd-b[disabled]{background:var(--chip);opacity:.55;cursor:not-allowed}
+
 /* chosen dark theme */
 :root[data-theme="dark"]{
 --bg:#151719;--panel:#1E2124;--panel2:#23272A;--ink:#ECEDED;--muted:#9DA3A4;--line:#33393C;--line2:#454C50;
@@ -1466,13 +1478,13 @@ function viewSlotMgmt(){
   if(!codes.length)return pageHead('Delivery Management','Review delivery slot requests and manage the delivery schedule.')+'<div class="card empty">No warehouse is assigned to you yet. Ask an administrator to assign one in Administration, Users and roles.</div>';
   const mine=S.slots.filter(r=>slotVisible(r)&&codes.some(c=>whKey(c)===whKey(r.code))),L=r=>whLocal(whFind(r.code)||{}).date;
   const tile=(id,l,v,cls,sub)=>`<button class="kpi tile ${cls||''} ${D.f===id&&D.tab==='review'?'sel':''}" data-act="dmFilter" data-f="${id}"><small>${l}</small><b>${v}</b>${sub?`<small>${sub}</small>`:''}</button>`;
-  const tabs=[['review','Requests to review'],['schedule','Schedule'],['blocks','Blocked slots'],['settings','Slot settings']];
+  const tabs=[['review','Requests to review'],['incoming','Incoming shipments'],['schedule','Schedule'],['blocks','Blocked slots'],['settings','Slot settings']];
   const today=mine.filter(r=>slotEff(r)==='Approved'&&slotAt(r).date===L(r));
   return pageHead('Delivery Management','Approve or reschedule delivery slot requests, see the delivery schedule, and block slots for holidays, audits and other closures.')+
   `<div class="card"><div class="row"><label class="f">Warehouse<select data-ch="dmCode"><option value="All">${codes.length>1?'All my warehouses':'My warehouse'}</option>${codes.map(c=>`<option ${whKey(c)===whKey(D.code)?'selected':''}>${esc(c)}</option>`).join('')}</select></label><span class="hint" style="align-self:flex-end">${isWT()?'You see the warehouses assigned to you.':'Logistics sees every warehouse.'}</span></div></div>
   <div class="kpis">${tile('Requested','Awaiting approval',mine.filter(r=>slotEff(r)==='Requested').length,mine.some(r=>slotEff(r)==='Requested')?'late':'')}${tile('Flag','Needs new schedule',mine.filter(r=>slotHeld(r)&&r.flag).length,mine.some(r=>slotHeld(r)&&r.flag)?'late':'','slot blocked')}${tile('Proposed','Proposals sent',mine.filter(r=>slotEff(r)==='Alternative proposed').length,'acc','waiting for the requester')}${tile('Approved','Approved',mine.filter(r=>slotEff(r)==='Approved').length,'ok')}${tile('Today','Deliveries today',today.length,'')}</div>
   <div class="tabs">${tabs.map(([k,l])=>`<button class="${D.tab===k?'on':''}" data-act="dmTab" data-t="${k}">${l}</button>`).join('')}</div>`+
-  (D.tab==='schedule'?dmSchedulePanel(codes):D.tab==='blocks'?dmBlocksPanel(codes):D.tab==='settings'?dmSettingsPanel(D.code==='All'?codes:[dmCode()]):dmReviewPanel(codes));
+  (D.tab==='incoming'?dmIncomingPanel(codes):D.tab==='schedule'?dmSchedulePanel(codes):D.tab==='blocks'?dmBlocksPanel(codes):D.tab==='settings'?dmSettingsPanel(D.code==='All'?codes:[dmCode()]):dmReviewPanel(codes));
 }
 function dmProposeModal(id){
   const r=slotFind(id);if(!r)return;const w=whFind(r.code),D=S.ui.dm,P=D.prop&&D.prop.id===id?D.prop:(D.prop={id,date:'',slot:0,week:weekStart(slotAt(r).date>=whLocal(w).date?slotAt(r).date:whLocal(w).date),reason:'',note:''}),sh=getShip(r.ref);
@@ -1702,10 +1714,10 @@ function usersTableHTML(){
 }
 function usersPanel(){
   const roles=ROLES.filter(r=>r!=='In Organization'),codes=S.warehouses.map(w=>w.code);
-  return `<div class="card"><div class="row" style="justify-content:space-between;margin-bottom:10px"><h3 style="margin:0">Users and roles</h3><span class="row"><button class="btn sm" data-act="usersExportX">Export (Excel)</button><button class="btn sm" data-act="usersExportCsv">Export (CSV)</button><label class="btn sm pri" style="cursor:pointer">Import users<input type="file" id="impUsers" accept=".xlsx,.xls,.csv" hidden></label></span></div>
+  return `<div class="card"><div class="row" style="justify-content:space-between;margin-bottom:10px"><h3 style="margin:0">Users and roles</h3><span class="row"><button class="btn sm" data-act="usersTemplateX">Download Template</button><button class="btn sm" data-act="usersTemplateCsv">Template (CSV)</button><button class="btn sm" data-act="usersExportX">Export (Excel)</button><button class="btn sm" data-act="usersExportCsv">Export (CSV)</button><label class="btn sm pri" style="cursor:pointer">Upload New Users<input type="file" id="impUsers" accept=".xlsx,.xls,.csv" hidden></label></span></div>
   <div class="row" style="margin-bottom:10px"><input id="us_q" class="in grow" placeholder="Search by name, email, role, carrier or warehouse" value="${esc(S.ui.usq||'')}" aria-label="Search users"></div>
   <div id="usersTbl">${usersTableHTML()}</div>
-  <div class="row sec uform"><input id="u_email" class="in grow" placeholder="email@${esc(S.settings.domain)}"><input id="u_name" class="in grow" placeholder="Name">${userTypeFields()}<select id="u_role" class="in" style="width:auto" aria-label="Role (internal users)">${INTERNAL_ROLES().map(r=>`<option>${esc(r)}</option>`).join('')}</select><input id="u_carrier" class="in" list="dl_car_users" placeholder="Carrier (type a new name to add one)" style="width:290px" autocomplete="off"><datalist id="dl_car_users">${carriersList().map(c=>`<option value="${esc(c)}">`).join('')}</datalist><select id="u_wh" multiple size="3" class="in" style="width:auto" aria-label="Warehouses (Warehouse Team only)">${codes.map(c=>`<option>${esc(c)}</option>`).join('')}</select><input id="u_shippers" class="in" list="dl_shp_users" placeholder="Shippers (External Logistics Partner only), separated by ;" style="width:300px" autocomplete="off"><datalist id="dl_shp_users">${uniq(S.lines.map(l=>l.Shipper)).sort().map(x=>`<option value="${esc(x)}">`).join('')}</datalist>${typeof acctFormHTML==='function'?acctFormHTML():''}<button class="btn pri" data-act="userAdd">Add user</button></div>
+  <div class="row sec uform"><input id="u_email" class="in grow" placeholder="email@${esc(S.settings.domain)}"><input id="u_name" class="in grow" placeholder="Name">${userTypeFields()}<select id="u_role" class="in" style="width:auto" aria-label="Role (internal users)">${INTERNAL_ROLES().map(r=>`<option>${esc(r)}</option>`).join('')}</select><input id="u_carrier" class="in" list="dl_car_users" placeholder="Carrier (type a new name to add one)" style="width:290px" autocomplete="off"><datalist id="dl_car_users">${carriersList().map(c=>`<option value="${esc(c)}">`).join('')}</datalist><div class="whdd" id="u_whdd"><button type="button" class="in whdd-b" data-act="whddToggle" aria-haspopup="listbox" aria-expanded="false" aria-label="Warehouses (Warehouse Team only)">Warehouses</button><div class="whdd-p" hidden>${codes.map(c=>`<label><input type="checkbox" data-ch="whddPick" value="${esc(c)}"> ${esc(c)}</label>`).join('')}</div><select id="u_wh" multiple hidden aria-hidden="true">${codes.map(c=>`<option>${esc(c)}</option>`).join('')}</select></div><input id="u_shippers" class="in" list="dl_shp_users" placeholder="Shippers (External Logistics Partner only), separated by ;" style="width:300px" autocomplete="off"><datalist id="dl_shp_users">${uniq(S.lines.map(l=>l.Shipper)).sort().map(x=>`<option value="${esc(x)}">`).join('')}</datalist>${typeof acctFormHTML==='function'?acctFormHTML():''}<button class="btn pri" data-act="userAdd">Add user</button></div>
   <p class="hint">Export the list, add, change or delete rows (Action = Delete) in Excel, and import it back to make many changes at once. Anyone with a company email who is not listed gets the In Organization role, which opens Track &amp; Trace only. A Carrier Partner opens Carrier Updates and Delivery Slot Requests, and sees only the shipments nominated to their carrier. A Warehouse Team user opens Delivery Management for the warehouses assigned to them (hold Ctrl or Cmd to pick several). A External Logistics Partner works like a Logistics Executive, but only for the shippers registered under them: separate several shipper names with a semicolon. Profiles you create under Role access (for example Finance or SCM) can be assigned here too.</p></div>`;
 }
 /* ----- Administration: warehouses ----- */
@@ -2309,6 +2321,7 @@ function cuDriverHTML(rows){
     const k=nextMs(sh),done=sh.status==='Delivered',pl=k?msPlanL(sh,k):'',od=k&&pl&&pl<S.today?diffDays(S.today,pl):0;
     const slot=S.slots.find(r=>r.ref===sh.ref&&slotHeld(r)),w=slot?whFind(slot.code):whFind(whCodeOf(sh)),at=slot?slotAt(slot):null,fi=freeInfo(sh);
     return `<div class="dvc ${od?'od':''}"><div class="row" style="justify-content:space-between;align-items:flex-start"><div><b style="font-size:18px">${sh.ref}</b><div class="mu">${modeBadge(sh.mode)} ${esc(sh.route)}</div></div><span>${pill(sh)}</span></div>
+     <div class="dvl"><span>HBL</span><b>${esc(shipHbl(sh).join("; ")||"-")}</b></div><div class="dvl"><span>MBL</span><b>${esc(shipMbl(sh).join("; ")||"-")}</b></div><div class="dvl"><span>Container</span><b>${esc(shipCont(sh).join("; ")||"-")}</b></div><div class="dvl"><span>Invoice</span><b>${esc(shipInvL(sh).join("; ")||"-")}</b></div>
      <div class="dvl"><span>Goods</span><b>${typeBadge(sh.stype)}${dgTag(sh.nature)} ${sh.packages||'-'} pkg, ${sh.weight?kg(sh.weight):'-'}</b></div>
      <div class="dvl"><span>Delivery due</span><b>${esc(dueText(sh))}</b></div>
      ${w?`<div class="dvl"><span>Warehouse</span><b>${esc(w.code)}</b><small class="mu">${esc([w.address,w.city].filter(Boolean).join(', ')||w.name||'')}</small>${mapsLink(w)?`<a class="btn sm" target="_blank" rel="noopener" href="${mapsLink(w)}">Open in Maps</a>`:''}${w.phone?` <a class="btn sm" href="tel:${esc(String(w.phone).replace(/[^+\\d]/g,''))}">Call ${esc(w.contact||'the warehouse')}</a>`:''}</div>`:''}
@@ -2318,7 +2331,7 @@ function cuDriverHTML(rows){
      <button class="btn pri dvb" data-act="dvOpen" data-ref="${sh.ref}" data-k="${k}">${esc(DV_BTN[k])}</button>
      <div class="row" style="gap:8px;margin-top:8px">${sh.f.ETAActual&&!sh.f.CustomsClearedActual?`<button class="btn dvs" data-act="dvOpen" data-ref="${sh.ref}" data-k="CustomsCleared">Customs cleared</button>`:''}${sh.f.ETAActual&&!sh.f.GateOutActual?`<button class="btn dvs" data-act="dvOpen" data-ref="${sh.ref}" data-k="GateOut">Gate-out</button>`:''}<button class="btn dvs" data-act="cuOpen" data-ref="${sh.ref}">New estimate or more</button></div>`}</div>`}).join('')}</div>`;
 }
-const cuBody=rows=>driverMode()?cuDriverHTML(rows):cuTable(rows);
+const cuBody=rows=>S.ui.cu.cal?calGen('cu',cuItems(rows)):driverMode()?cuDriverHTML(rows):cuTable(rows);
 function dvOpen(ref,k){
   const sh=getShip(ref);if(!sh)return;S.dv={ref,k};
   openModal(`<div class="mh"><div><h2>${esc(DV_BTN[k]||MSL(k))}</h2><div class="mu">${esc(ref)}, ${esc(sh.route)}</div></div><button class="x" data-act="close" aria-label="Close">&times;</button></div>
@@ -3000,7 +3013,7 @@ function monBarHTML(){
 {const s0=addSampleHistory;addSampleHistory=function(){const r=s0.apply(this,arguments);S.lines.forEach(l=>{if(l.Mode)l.Mode=normMode(l.Mode);if(l.ContainerType)l.ContainerType=normCtype(l.ContainerType)});return r}}
 document.addEventListener('change',e=>{if(e.target&&e.target.id==='f_ctype'){const b=document.getElementById('setptBox');if(b){b.style.display=isReefer(e.target.value)?'':'none';if(!isReefer(e.target.value)){const i=document.getElementById('f_setpt');if(i)i.value=''}}}});
 /* ========== demo sign-in (email and password), problem log, report a problem ========== */
-const APP_BUILD='site build 2026-11-14 10:02 UTC';
+const APP_BUILD='site build 2026-11-14 16:59 UTC';
 const ErrLog={key:'ect.errors',max:60,
   add(kind,msg,src){try{const a=JSON.parse(localStorage.getItem(this.key)||'[]');a.push({t:new Date().toISOString(),kind,msg:String(msg==null?'':msg).slice(0,300),src:String(src||'').slice(0,160),view:(typeof S!=='undefined'&&S&&S.view)||'',role:(typeof S!=='undefined'&&S&&S.role)||''});while(a.length>this.max)a.shift();localStorage.setItem(this.key,JSON.stringify(a))}catch(e){}},
   list(){try{return JSON.parse(localStorage.getItem(this.key)||'[]')}catch(e){return []}},
@@ -3984,11 +3997,11 @@ function viewMilestones(){
   <div class="row" style="margin-bottom:12px"><button class="btn pri" data-act="msDownload">Download overdue (CSV)</button><button class="btn" data-act="msBulkOpen">Upload updates</button>
    <span style="margin-left:auto" class="row"><input id="ms_q" class="in" placeholder="Search HBL, MBL, invoice or container" value="${esc(S.ui.msQ||'')}" style="width:290px" aria-label="Search shipments"><label class="sw"><input type="checkbox" role="switch" data-ch="msRefs" ${showRefs()?'checked':''}><span class="sw-t"></span><span>Show Reference Numbers</span></label><label class="mu sm">Show <select id="msFilter" data-ch="msFilter" class="in" style="width:auto"><option value="active" ${f==='active'?'selected':''}>All active shipments</option><option value="overdue" ${f==='overdue'?'selected':''}>Only overdue</option></select></label></span></div>
   ${S.msResult?`<div class="${S.msResult.fail?'note':'okbox'}"><b>${S.msResult.ok} update(s) applied, ${S.msResult.fail} rejected.</b>${S.msResult.msgs.length?`<ul style="margin:6px 0 0 18px">${S.msResult.msgs.map(m=>`<li>${esc(m)}</li>`).join('')}</ul>`:''}</div>`:''}
-  <div class="card" style="padding:0"><div class="tbw"><table class="tb"><tr><th>Shipment</th>${showRefs()?'<th>References</th>':''}<th>Carrier</th><th>Nominated</th><th>Pickup</th><th>ETD</th><th>ETA</th><th>Delivery due</th><th>Status</th><th></th></tr>
-  ${rows.length?rows.map(sh=>`<tr><td>${shipIdCell(sh)}</td>${showRefs()?`<td>${refsCell(sh)}</td>`:''}<td>${esc(sh.carrier)}</td>
+  <div class="card" style="padding:0"><div class="tbw"><table class="tb"><tr><th>Shipment</th>${showRefs()?'<th>References</th>':''}<th>Delivered To</th><th>Carrier</th><th>Nominated</th><th>Pickup</th><th>ETD</th><th>ETA</th><th>Delivery due</th><th>Status</th><th></th></tr>
+  ${rows.length?rows.map(sh=>`<tr><td>${shipIdCell(sh)}</td>${showRefs()?`<td>${refsCell(sh)}</td>`:''}<td>${whCell(sh)}</td><td>${esc(sh.carrier)}</td>
    <td>${sh.nominated?`<span class="ok-t">${fmtS(sh.nominated)} done</span>`:sh.freight==='Shipper'?'<span class="mu">By shipper</span>':'<span class="pill warn">Not nominated</span>'}</td>
    <td>${msCell(sh,'Pickup')}</td><td>${msCell(sh,'ETD')}</td><td>${msCell(sh,'ETA')}</td><td>${msCell(sh,'Delivery')}</td><td>${pill(sh)}</td>
-   <td class="r"><button class="btn sm" data-act="open" data-ref="${sh.ref}">Update</button></td></tr>`).join(''):'<tr><td colspan="10" class="empty">Nothing to show.</td></tr>'}</table></div></div>`;
+   <td class="r"><button class="btn sm" data-act="open" data-ref="${sh.ref}">Update</button></td></tr>`).join(''):'<tr><td colspan="11" class="empty">Nothing to show.</td></tr>'}</table></div></div>`;
 }
 const shipInvNos=sh=>uniq(sh.lines.map(l=>l.InvoiceNumber).filter(Boolean)).join('; ');
 const shipTrackNos=sh=>uniq(sh.lines.map(l=>l.HBL_HAWB_Tracking).filter(Boolean)).join('; ');
@@ -4039,8 +4052,8 @@ function cuData(){
 }
 function cuTable(rows){
   if(!rows.length)return '<div class="empty">No shipments match. Shipments appear here once Your Company nominates your company.</div>';
-  return `<div class="tbw"><table class="tb"><tr><th>Shipment</th>${showRefs()?'<th>References</th>':''}<th>What is shipping</th><th>Pickup</th><th>ETD</th><th>ETA</th><th>Delivery due</th><th>Status</th><th></th></tr>`+rows.map(sh=>`<tr>
-   <td>${shipIdCell(sh,modeBadge(sh.mode)+' '+esc(sh.route))}</td>${showRefs()?`<td>${refsCell(sh)}</td>`:''}<td>${typeBadge(sh.stype)}${dgTag(sh.nature)}<br><small class="mu">${sh.weight?kg(sh.weight):'-'}${sh.containers.length?', '+esc(sh.containers.join(', ')):''}</small></td>
+  return `<div class="tbw"><table class="tb"><tr><th>Shipment</th>${showRefs()?'<th>References</th>':''}<th>Delivered To</th><th>What is shipping</th><th>Pickup</th><th>ETD</th><th>ETA</th><th>Delivery due</th><th>Status</th><th></th></tr>`+rows.map(sh=>`<tr>
+   <td>${shipIdCell(sh,modeBadge(sh.mode)+' '+esc(sh.route))}</td>${showRefs()?`<td>${refsCell(sh)}</td>`:''}<td>${whCell(sh)}</td><td>${typeBadge(sh.stype)}${dgTag(sh.nature)}<br><small class="mu">${sh.weight?kg(sh.weight):'-'}${sh.containers.length?', '+esc(sh.containers.join(', ')):''}</small></td>
    <td>${msCell(sh,'Pickup')}</td><td>${msCell(sh,'ETD')}</td><td>${msCell(sh,'ETA')}</td><td>${msCell(sh,'Delivery')}</td><td>${pill(sh)}</td>
    <td class="r"><button class="btn sm ${sh.status==='Delivered'?'':'pri'}" data-act="cuOpen" data-ref="${sh.ref}">${sh.status==='Delivered'?'View':'Update'}</button></td></tr>`).join('')+'</table></div>';
 }
@@ -4058,7 +4071,7 @@ function viewCarrierUpdates(){
    {id:'s',label:'Delivery due in 3 days',value:soon,title:'Delivery due in the next 3 days',rows:act.filter(s=>s.dueL&&diffDays(s.dueL,S.today)>=0&&diffDays(s.dueL,S.today)<=3)},
    {id:'d',label:'Delivered',value:all.filter(s=>s.status==='Delivered').length,cls:'ok',title:'Delivered shipments',rows:all.filter(s=>s.status==='Delivered')}]})(),'cuOpen')}
   ${S.msResult?`<div class="${S.msResult.fail?'note':'okbox'}"><b>${S.msResult.ok} update(s) applied, ${S.msResult.fail} rejected.</b>${S.msResult.msgs.length?`<ul style="margin:6px 0 0 18px">${S.msResult.msgs.map(m=>`<li>${esc(m)}</li>`).join('')}</ul>`:''}</div>`:''}
-  <div class="row" style="margin-bottom:12px"><button class="btn pri" data-act="cuDownload">Download overdue (CSV)</button><button class="btn" data-act="cuDriver">${driverMode()?'Table view':'Driver view'}</button><button class="btn" data-act="cuBulkOpen">Upload updates</button>
+  <div class="row" style="margin-bottom:12px"><button class="btn pri" data-act="cuDownload">Download overdue (CSV)</button><button class="btn" data-act="cuDriver">${driverMode()?'Table view':'Driver view'}</button><button class="btn" data-act="cuCal">${S.ui.cu.cal?'Table view':'Calendar'}</button><button class="btn" data-act="cuBulkOpen">Upload updates</button>
    <span class="row" style="margin-left:auto"><input id="cu_q" class="in" placeholder="Search HBL, MBL, invoice or container" value="${esc(U.q||'')}" style="width:270px" aria-label="Search your shipments"><select data-ch="cufilter" class="in" style="width:auto" aria-label="Show">${[['active','Active shipments'],['overdue','Overdue updates'],['delivered','Delivered'],['all','All']].map(([v,l])=>`<option value="${v}" ${v===U.filter?'selected':''}>${l}</option>`).join('')}</select></span></div>
   <div id="cuTable" ${driverMode()?'':'class="card" style="padding:0"'}>${cuBody(rows)}</div>
   <p class="hint">${hidden&&!isCar?hidden+' shipment(s) list '+esc(me)+' as the carrier but are not nominated yet, so they stay hidden. ':''}Shipments appear here once Your Company nominates your company. Dates cannot be in the future, and a recorded date can only be corrected by Your Company logistics.</p>`;
@@ -4135,7 +4148,7 @@ function monHTML(all){
   if(!rows.length)return monBarHTML()+monEmptyHTML();
   const cb=can('cancelship'),elig=s=>!s.cancelled;D.chk=(D.chk||[]).filter(r=>rows.some(s=>s.ref===r&&elig(s)));
   const allSel=cb&&rows.some(elig)&&rows.filter(elig).every(s=>D.chk.includes(s.ref));
-  return `${monBarHTML()}<div class="tbw"><table class="tb" data-sort="on"><tr>${cb?`<th style="width:34px"><input type="checkbox" id="monAll" data-act="monAll" aria-label="Select all shown shipments" ${allSel?'checked':''}></th>`:''}<th>Shipment</th><th>Mode</th><th>Type</th><th>Route</th><th>Carrier</th><th>Progress</th><th>Due</th><th>Status</th>${can('invoices')?'<th>Freight invoice</th>':''}${can('cancelship')?'<th></th>':''}</tr>`+rows.map(sh=>`<tr class="click${can('invoices')&&isInvPending(sh)?' tr-pend':''}" data-act="open" data-ref="${sh.ref}">${cb?`<td><input type="checkbox" data-act="monSel" data-ref="${sh.ref}" aria-label="Select ${sh.ref}" ${elig(sh)?'':'disabled'} ${D.chk.includes(sh.ref)?'checked':''}></td>`:''}<td><b>${sh.ref}</b></td><td>${modeBadge(sh.mode)}</td><td>${typeBadge(sh.stype)}${dgTag(sh.nature)}</td><td>${esc(sh.route)}</td><td>${esc(sh.carrier)}</td><td>${miniHTML(sh)}</td>
+  return `${monBarHTML()}<div class="tbw"><table class="tb" data-sort="on"><tr>${cb?`<th style="width:34px"><input type="checkbox" id="monAll" data-act="monAll" aria-label="Select all shown shipments" ${allSel?'checked':''}></th>`:''}<th>Shipment</th><th>Mode</th><th>Type</th><th>Route</th><th>Delivered To</th><th>Carrier</th><th>Progress</th><th>Due</th><th>Status</th>${can('invoices')?'<th>Freight invoice</th>':''}${can('cancelship')?'<th></th>':''}</tr>`+rows.map(sh=>`<tr class="click${can('invoices')&&isInvPending(sh)?' tr-pend':''}" data-act="open" data-ref="${sh.ref}">${cb?`<td><input type="checkbox" data-act="monSel" data-ref="${sh.ref}" aria-label="Select ${sh.ref}" ${elig(sh)?'':'disabled'} ${D.chk.includes(sh.ref)?'checked':''}></td>`:''}<td><b>${sh.ref}</b></td><td>${modeBadge(sh.mode)}</td><td>${typeBadge(sh.stype)}${dgTag(sh.nature)}</td><td>${esc(sh.route)}</td><td>${whCell(sh)}</td><td>${esc(sh.carrier)}</td><td>${miniHTML(sh)}</td>
     <td>${dueCell(sh)}</td><td>${pill(sh)}${docBadge(sh)}${poBadge(sh)}</td>${can('invoices')?`<td>${sh.cancelled?'-':invPill(sh)}</td>`:''}${can('cancelship')?`<td class="r">${sh.cancelled?'':`<button class="btn sm danger" data-act="cancelOpen" data-ref="${sh.ref}">Cancel</button>`}</td>`:''}</tr>`).join('')+'</table></div>';
 }
 function onTime(arr,k){
@@ -4208,7 +4221,7 @@ function viewDash(){
   <div class="kpis">${(can('invoices')?[...tiles.slice(0,5),['invoiced','Invoiced',TS.invoiced.rows.length,'ok'],['invpend','Invoice pending',TS.invpend.rows.length,'late'],...tiles.slice(5)]:tiles).map(([id,l,v,cls])=>`<button class="kpi tile ${cls} ${D.tile===id?'sel':''}" data-act="tile" data-t="${id}" aria-pressed="${D.tile===id}"><small>${l}</small><b>${v}</b>${id==='ontime'?`<small>${onN} of ${dwith.length} delivered</small>`:''}</button>`).join('')}</div>
   ${tilePanel(all)}
   <div class="split"><div class="card"><div class="row" style="justify-content:space-between;margin-bottom:10px"><button class="btn sm" data-act="calPrev" aria-label="Previous month">Previous</button><b>${MONL[m-1]} ${y}</b><button class="btn sm" data-act="calNext" aria-label="Next month">Next</button></div>${calHTML(all)}
-     <p class="hint">Blue badge: milestones planned that day. Red badge: planned that day and still open today (${fmt(S.today)}).</p></div>
+     ${calLegend()}</div>
    <div><div class="card"><h3>Overdue as of ${fmt(D.sel)} (${over.length})</h3>${listRows(over,'over')}</div><div class="card"><h3>Due on ${fmt(D.sel)} (${dueOn.length})</h3>${listRows(dueOn,'due')}</div></div></div>
   ${monthlyCard('dash')}
   <div class="split">${perfCard(all)}<div><div class="card"><h3>Shipments by stage</h3>${STAGES.map(st=>{const n=all.filter(s=>s.status===st).length;return `<div class="row" style="margin-bottom:8px"><span style="width:120px">${st}</span><div class="bar grow" style="min-width:80px"><i style="width:${all.length?n/all.length*100:0}%"></i></div><b style="width:28px;text-align:right">${n}</b></div>`}).join('')}</div>
@@ -4570,7 +4583,7 @@ function settingsPanel(){
   <div class="card"><h3>Settings</h3><div class="row"><label class="f grow">Allowed email domain for subscriptions<input id="s_domain" class="in" value="${esc(S.settings.domain)}"></label><button class="btn pri" data-act="saveDomain" style="align-self:flex-end">Save</button></div>
   <p class="hint">Only addresses ending in @${esc(S.settings.domain)} can subscribe. Other addresses are blocked and logged.</p></div>
   <div class="card"><h3>Free time and risk rules</h3><p class="mu" style="margin-bottom:10px">Free days start on the day a shipment arrives (the actual ETA) and end at gate-out or delivery. A shipment can override its free days when you edit it. A shipment is flagged as stale when it has had no update for the number of days below.</p>
-  <div class="tbw"><table class="tb" data-sort="off"><tr><th>Mode</th><th>Free days after arrival</th><th>Charge per day after that (USD)</th><th>Stale after (days without an update)</th></tr>${MODES.map(m=>`<tr><td>${modeBadge(m)}</td><td><input id="fs_free_${m}" aria-label="Free days for ${m}" class="in" inputmode="numeric" value="${fdSet().freeDays[m]}" style="max-width:100px"></td><td><input id="fs_rate_${m}" aria-label="Charge per day after the free days for ${m}" class="in" inputmode="decimal" value="${fdSet().demRate[m]}" style="max-width:100px"></td><td><input id="fs_stale_${m}" class="in" inputmode="numeric" value="${fdSet().staleDays[m]}" style="max-width:100px"></td></tr>`).join('')}</table></div>
+  <div class="tbw"><table class="tb" data-sort="off"><tr><th>Mode</th><th>Free days after arrival</th><th>Charge per day after that (USD)</th><th>Stale after (days without an update)</th></tr>${MODES.map(m=>`<tr><td>${modeBadge(m)}</td><td><input id="fs_free_${m}" aria-label="Free days for ${m}" class="in" inputmode="numeric" value="${fdSet().freeDays[m]}" style="max-width:100px"></td><td><input id="fs_rate_${m}" aria-label="Charge per day after the free days for ${m}" class="in" inputmode="decimal" value="${fdSet().demRate[m]}" style="max-width:100px"></td><td><input id="fs_stale_${m}" aria-label="Days without an update before ${m} is stale" class="in" inputmode="numeric" value="${fdSet().staleDays[m]}" style="max-width:100px"></td></tr>`).join('')}</table></div>
   <div class="row sec"><button class="btn pri" data-act="ftSetSave">Save rules</button></div><p class="hint">The charge per day is only used for the estimate shown to roles with invoice access. 0 free days switches the countdown off for that mode.</p></div>
   <div class="card"><h3>Sample history</h3><p class="mu" style="margin-bottom:10px">Adds 60 delivered shipments (SMP-0001 to SMP-0060) with realistic transit times, so the Transit Analytics, Carrier Performance and on-time figures have enough data to be meaningful. They come with freight quotes and invoices, so Freight Commercials and Freight Trends have data.</p>${liveMode()?'':hasSample()?'<button class="btn danger" data-act="sampleRemove">Remove sample history</button>':'<button class="btn pri" data-act="sampleAdd">Load sample history</button>'}</div>
   <div class="card"><h3>Data in this demo</h3><p class="mu">${S.lines.length} item rows, ${ships().length} shipments, ${S.events.length} history events, ${S.subs.length} subscriptions. All changes live in memory and disappear when the page reloads. The production version writes to the Excel files in SharePoint. Use the Master file button at the top to watch each change as it would be written.</p></div>`;
@@ -6109,6 +6122,143 @@ document.addEventListener('click',e=>{
     const r=slotBookDay(U.ship,{date:D.date,alt:D.date2,period:D.period},D);if(!r.ok){const x=document.getElementById('sd_err');if(x)x.innerHTML=`<div class="err" role="alert" style="margin-bottom:10px">${esc(r.msg)}</div>`;return}
     S.ui.sl.day=null;U.ship='';render();toast(r.msg);return}
 },true);
+
+/* ========== calendars with states, incoming shipments, tap to open, reference columns ========== */
+const calState=(date,done)=>done?'done':date<S.today?'late':date===S.today?'today':'up';
+const CAL_LAB={done:'Done',late:'Overdue',today:'Due Today',up:'Upcoming'},CAL_PILL={done:'ok',late:'late',today:'warn',up:'info'};
+function calCounts(items){const n={done:0,late:0,today:0,up:0};items.forEach(i=>{n[calState(i.date,i.done)]++});return n}
+const calBadges=n=>(n.late?`<span class="bd late">${n.late} overdue</span>`:'')+(n.today?`<span class="bd today">${n.today} today</span>`:'')+(n.up?`<span class="bd due">${n.up} due</span>`:'')+(n.done?`<span class="bd done">${n.done} done</span>`:'');
+const calTint=n=>n.late?'s-late':n.today?'s-today':n.up?'s-up':n.done?'s-done':'';
+const calLegend=()=>'<p class="hint cal-leg"><span class="bd done">Done</span> completed <span class="bd late">Overdue</span> past and still open <span class="bd today">Due today</span> still open today <span class="bd due">Upcoming</span> still to come</p>';
+function calHTML(all){
+  const D=S.ui.dash;const [y,m]=D.ym.split('-').map(Number);
+  const startDow=(new Date(Date.UTC(y,m-1,1)).getUTCDay()+6)%7,dim=new Date(Date.UTC(y,m,0)).getUTCDate();
+  let h='<div class="cal-h">'+['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d=>`<div>${d}</div>`).join('')+'</div><div class="cal">';
+  for(let i=0;i<startDow;i++)h+='<div class="cal-c empty"></div>';
+  for(let d=1;d<=dim;d++){
+    const iso=`${y}-${pad(m)}-${pad(d)}`,due=all.filter(sh=>msPlanL(sh,D.ms)===iso),n=calCounts(due.map(sh=>({date:iso,done:doneBy(sh,D.ms,S.today)})));
+    h+=`<button class="cal-c ${iso===D.sel?'sel':''} ${iso===S.today?'today':''} ${calTint(n)}" data-act="pickday" data-d="${iso}" style="text-align:left" aria-label="${fmt(iso)}: ${due.length} due, ${n.done} done, ${n.late} overdue, ${n.today} due today, ${n.up} upcoming"><span class="dn">${d}</span>${calBadges(n)}</button>`;
+  }
+  return h+'</div>';
+}
+function calItemsMs(list){const o=[];list.forEach(sh=>['Pickup','ETD','ETA','Delivery'].forEach(k=>{const d=msPlanL(sh,k);if(d)o.push({date:d,k,label:MS[k].label,sh,done:doneBy(sh,k,S.today)})}));return o}
+const cuItems=rows=>calItemsMs(rows);
+const calOpenAct=()=>S.role==='Carrier Partner'?'cuOpen':'open';
+function calGen(id,items){
+  const C=(S.ui.cal=S.ui.cal||{})[id]||(S.ui.cal[id]={ym:S.today.slice(0,7),sel:S.today});
+  const [y,m]=C.ym.split('-').map(Number),startDow=(new Date(Date.UTC(y,m-1,1)).getUTCDay()+6)%7,dim=new Date(Date.UTC(y,m,0)).getUTCDate(),by={};
+  items.forEach(i=>{(by[i.date]=by[i.date]||[]).push(i)});
+  let g='<div class="cal-h">'+['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d=>`<div>${d}</div>`).join('')+'</div><div class="cal">';
+  for(let i=0;i<startDow;i++)g+='<div class="cal-c empty"></div>';
+  for(let d=1;d<=dim;d++){const iso=`${y}-${pad(m)}-${pad(d)}`,its=by[iso]||[],n=calCounts(its);
+    g+=`<button type="button" class="cal-c ${iso===C.sel?'sel':''} ${iso===S.today?'today':''} ${calTint(n)}" data-act="cgDay" data-id="${id}" data-d="${iso}" style="text-align:left" aria-label="${fmt(iso)}: ${its.length} item(s), ${n.done} done, ${n.late} overdue, ${n.today} due today, ${n.up} upcoming"><span class="dn">${d}</span>${calBadges(n)}</button>`}
+  g+='</div>';
+  const day=(by[C.sel]||[]).slice().sort((a,b)=>String(a.k).localeCompare(String(b.k))||a.sh.ref.localeCompare(b.sh.ref));
+  const list=day.length?`<div class="tbw"><table class="tb" data-sort="off"><tr><th>Milestone</th><th>Shipment</th><th>MBL</th><th>Invoice</th><th>Container</th><th>Carrier</th><th>Status</th><th></th></tr>${day.map(i=>{const s=calState(i.date,i.done);return `<tr><td>${esc(i.label||i.k)}</td><td>${shipIdCell(i.sh)}</td><td>${esc(shipMbl(i.sh).join('; ')||'-')}</td><td>${esc(shipInvL(i.sh).join('; ')||'-')}</td><td>${esc(shipCont(i.sh).join('; ')||'-')}</td><td>${esc(i.sh.carrier)}</td><td><span class="pill ${CAL_PILL[s]}">${CAL_LAB[s]}</span></td><td class="r"><button class="btn sm" data-act="${calOpenAct()}" data-ref="${esc(i.sh.ref)}">Open</button></td></tr>`}).join('')}</table></div>`:`<div class="empty">${C.sel?'Nothing is planned for this day.':'Tap a day to see its shipments.'}</div>`;
+  return `<div class="card"><div class="row" style="justify-content:space-between;margin-bottom:8px"><button class="btn sm" data-act="cgNav" data-id="${id}" data-n="-1">Previous</button><b>${MONL[m-1]} ${y}</b><span class="row"><button class="btn sm" data-act="cgNav" data-id="${id}" data-n="0">Today</button><button class="btn sm" data-act="cgNav" data-id="${id}" data-n="1">Next</button></span></div>${g}${calLegend()}</div><div class="card"><h3>${C.sel?fmt(C.sel):'Day'} (${day.length})</h3>${list}</div>`;
+}
+const whCell=sh=>{const w=whFind(whCodeOf(sh));return w?`<b>${esc(w.code)}</b><br><small class="mu">${esc([w.city,w.country].filter(Boolean).join(', '))}</small>`:'<span class="mu">-</span>'};
+{const v0=viewMilestones;viewMilestones=function(){
+  let h0=v0();if(!S.ui.msCal)return h0.replace('<input id="ms_q"','<button class="btn" data-act="msCal">Calendar</button><input id="ms_q"');
+  const f=S.ui.msFilter,od=overdueRows(),q=String(S.ui.msQ||'').toLowerCase(),rows=ships().filter(s=>s.status!=='Delivered').filter(s=>f==='overdue'?isLateNow(s)||od.some(o=>o.sh.ref===s.ref):true).filter(s=>!q||shipHay(s).includes(q));
+  const a=h0.lastIndexOf('<div class="card" style="padding:0"><div class="tbw"><table class="tb"><tr><th>Shipment</th>'),b=h0.indexOf('</table></div></div>',a);
+  if(a<0||b<0)return h0;
+  return h0.slice(0,a)+calGen('ms',calItemsMs(rows))+h0.slice(b+'</table></div></div>'.length).replace('<input id="ms_q"','<button class="btn" data-act="msCal">Table view</button><input id="ms_q"');
+}}
+{const v1=viewMilestones;viewMilestones=function(){let h0=v1();if(S.ui.msCal)h0=h0.replace('<input id="ms_q"','<button class="btn" data-act="msCal">Table view</button><input id="ms_q"');return h0}}
+function dmIncomingPanel(codes){
+  const D=S.ui.dm,sel=D.code==='All'?codes:[D.code],f=D.inF||'pipe',q=String(D.inQ||'').toLowerCase(),view=D.inView||'table';
+  const all=ships().filter(s=>sel.some(c=>whKey(c)===whKey(whCodeOf(s)))),list=all.filter(s=>f==='all'||s.status!=='Delivered').filter(s=>!q||shipHay(s).includes(q)).sort((a,b)=>(a.dueL||'9').localeCompare(b.dueL||'9')||a.ref.localeCompare(b.ref));
+  const slotOf=sh=>S.slots.find(r=>r.ref===sh.ref&&slotHeld(r)),when=sh=>{const r=slotOf(sh);if(r){const w=whFind(r.code)||{},at=slotAt(r);return (slotEff(r)==='Approved'?'Confirmed ':'Requested ')+slotWhen(w,at.date,at.slot)}return sh.dueL?'Due '+fmtS(sh.dueL):'No date'};
+  const items=list.map(sh=>{const r=slotOf(sh),d=r&&slotEff(r)==='Approved'?slotAt(r).date:(sh.dueL||sh.due||'');return d?{date:d,k:'Delivery',label:'Delivery',sh,done:sh.status==='Delivered'}:null}).filter(Boolean);
+  const bar=`<div class="card"><div class="row" style="gap:10px;flex-wrap:wrap"><span class="chips" style="margin:0"><button class="chip ${f==='pipe'?'on':''}" data-act="dmInSet" data-k="inF" data-v="pipe">In the pipeline (${all.filter(s=>s.status!=='Delivered').length})</button><button class="chip ${f==='all'?'on':''}" data-act="dmInSet" data-k="inF" data-v="all">All (${all.length})</button></span><input id="dm_inq" class="in" placeholder="Search shipment, invoice, MBL, HBL or container" value="${esc(D.inQ||'')}" style="width:340px" aria-label="Search incoming shipments"><span class="row" style="margin-left:auto"><button class="btn sm ${view==='table'?'pri':''}" data-act="dmInSet" data-k="inView" data-v="table">Table</button><button class="btn sm ${view==='cal'?'pri':''}" data-act="dmInSet" data-k="inView" data-v="cal">Calendar</button></span></div></div>`;
+  if(view==='cal')return bar+calGen('dmin',items);
+  return bar+`<div class="card" style="padding:0"><div class="tbw"><table class="tb"><tr><th>Shipment</th><th>Invoice</th><th>MBL</th><th>HBL</th><th>Container</th><th>Carrier</th><th>Warehouse</th><th>Delivery</th><th>Status</th></tr>${list.map(sh=>`<tr class="click" data-act="open" data-ref="${esc(sh.ref)}"><td><b>${esc(sh.ref)}</b><br><small class="mu">${esc(sh.route)}</small></td><td>${esc(shipInvL(sh).join('; ')||'-')}</td><td>${esc(shipMbl(sh).join('; ')||'-')}</td><td>${esc(shipHbl(sh).join('; ')||'-')}</td><td>${esc(shipCont(sh).join('; ')||'-')}</td><td>${esc(sh.carrier)}</td><td>${whCell(sh)}</td><td>${esc(when(sh))}</td><td>${pill(sh)}</td></tr>`).join('')||'<tr><td colspan="9" class="empty">No shipments are on their way to this warehouse.</td></tr>'}</table></div></div>`;
+}
+/* ----- tap any shipment number, HBL, MBL, container or invoice number to open the shipment ----- */
+function idlinkApply(){
+  if(window._idlBusy||typeof S==='undefined'||!S.lines)return;window._idlBusy=true;
+  try{
+    const ix=new Map();ships().forEach(sh=>{[sh.ref,...shipHbl(sh),...shipMbl(sh),...shipCont(sh),...shipInvL(sh)].forEach(x=>{const k=String(x).trim().toLowerCase();if(k.length>=5&&!ix.has(k))ix.set(k,sh.ref)})});
+    let n=0;
+    for(const e of document.querySelectorAll('#view td,#view dd,#view b,#view small,#view span.rfv,#modal td,#modal dd,#modal b,#modal small')){
+      if(n>4000)break;if(e.children.length||e.dataset.idl||e.closest('th,button,a,input,select,textarea,.idlink,label,h1,h2,h3'))continue;
+      const t=e.textContent;if(!t||t.length>400){e.dataset.idl='1';continue}
+      const parts=t.split(/(;\s*|,\s*)/);let hit=false;
+      const out=parts.map(p=>{const k=p.trim().replace(/^Ref\s+/i,'').toLowerCase();const ref=k.length>=5?ix.get(k):null;if(ref){hit=true;return `<span class="idlink" role="link" tabindex="0" data-idlink="${esc(ref)}" title="Open shipment ${esc(ref)}">${esc(p)}</span>`}return esc(p)});
+      e.dataset.idl='1';if(hit)e.innerHTML=out.join('');n++;
+    }
+  }catch(x){}finally{window._idlBusy=false}
+}
+{let tm=null;new MutationObserver(()=>{clearTimeout(tm);tm=setTimeout(idlinkApply,60)}).observe(document.body,{childList:true,subtree:true});setTimeout(idlinkApply,80)}
+function idlinkOpen(ref){const b=document.createElement('button');b.dataset.act=S.role==='Carrier Partner'?'cuOpen':'open';b.dataset.ref=ref;document.body.appendChild(b);b.click();b.remove()}
+document.addEventListener('click',e=>{
+  const l=e.target.closest&&e.target.closest('.idlink');if(l){e.preventDefault();e.stopImmediatePropagation();idlinkOpen(l.dataset.idlink);return}
+  const t=e.target.closest&&e.target.closest('[data-act]');if(!t)return;const a=t.dataset.act,d=t.dataset;
+  if(a==='cgNav'){const C=(S.ui.cal=S.ui.cal||{})[d.id]||(S.ui.cal[d.id]={ym:S.today.slice(0,7),sel:S.today});if(d.n==='0'){C.ym=S.today.slice(0,7);C.sel=S.today}else{const [y,m]=C.ym.split('-').map(Number),dt=new Date(Date.UTC(y,m-1+Number(d.n),1));C.ym=dt.getUTCFullYear()+'-'+pad(dt.getUTCMonth()+1);C.sel=''}render();return}
+  if(a==='cgDay'){const C=(S.ui.cal=S.ui.cal||{})[d.id]||(S.ui.cal[d.id]={ym:S.today.slice(0,7),sel:''});C.sel=d.d;render();return}
+  if(a==='cuCal'){S.ui.cu.cal=!S.ui.cu.cal;render();return}
+  if(a==='msCal'){S.ui.msCal=!S.ui.msCal;render();return}
+  if(a==='dmInSet'){S.ui.dm[d.k]=d.v;render();return}
+},true);
+document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.classList&&e.target.classList.contains('idlink')){e.preventDefault();idlinkOpen(e.target.dataset.idlink)}});
+document.addEventListener('input',e=>{const t=e.target;if(t&&t.id==='dm_inq'){S.ui.dm.inQ=t.value;clearTimeout(window._dmt);window._dmt=setTimeout(()=>{const p=t.selectionStart;render();const n=document.getElementById('dm_inq');if(n){n.focus();try{n.setSelectionRange(p,p)}catch(x){}}},250)}});
+
+/* ========== users: template, role-aware add form, warehouse dropdown; simple monthly bar chart ========== */
+function usersTemplateSheets(){
+  const roles=ROLES.filter(r=>r!=='In Organization'),whs=S.warehouses.map(w=>w.code),cars=carriersList();
+  return [{name:'New Users',headers:USER_COLS,rows:[]},{name:'Help',headers:['Column','What to enter'],rows:[...USER_HELP.map(x=>({Column:x[0],'What to enter':x[1]})),{Column:'Allowed roles',"What to enter":roles.join(', ')},{Column:'Warehouses to choose from',"What to enter":whs.join('; ')+' (separate several with a semicolon)'},{Column:'Carriers already in the app',"What to enter":cars.join(', ')},{Column:'Leave the Action column empty','What to enter':'A new email address is added. An email that already exists is updated. Type Delete in Action to remove a user.'},{Column:'Passwords','What to enter':'New users get a temporary password when you upload. Share it with them and they change it at first sign-in.'}]}];
+}
+function userFormSync(){
+  const t=(document.getElementById('u_type')||{}).value;if(!t)return;
+  const need={u_role:['Internal'],u_carrier:['Carrier'],u_shippers:['External Logistics Partner'],u_receivers:['External Logistics Partner'],u_partner:['Partner Executive']};
+  Object.entries(need).forEach(([id,ts])=>{const on=ts.includes(t),e=document.getElementById(id);if(!e)return;e.disabled=!on;e.title=on?'':'Not needed for this user type';if(!on&&e.tagName==='INPUT')e.value=''});
+  const b=document.querySelector('#u_whdd .whdd-b'),on=t==='Warehouse',sel=document.getElementById('u_wh');
+  if(b){b.disabled=!on;b.title=on?'':'Not needed for this user type';if(!on){document.querySelectorAll('#u_whdd input[type=checkbox]').forEach(c=>{c.checked=false});if(sel)[...sel.options].forEach(o=>{o.selected=false});b.textContent='Warehouses';document.querySelector('#u_whdd .whdd-p').hidden=true;b.setAttribute('aria-expanded','false')}}
+}
+function whddLabel(){const c=[...document.querySelectorAll('#u_whdd input[type=checkbox]:checked')].map(x=>x.value),b=document.querySelector('#u_whdd .whdd-b');if(b)b.textContent=c.length?(c.length===1?c[0]:c.length+' warehouses selected'):'Warehouses'}
+{const r0=render;render=function(){r0.apply(this,arguments);try{userFormSync()}catch(e){}}}
+document.addEventListener('change',e=>{
+  const t=e.target;if(!t)return;
+  if(t.id==='u_type')userFormSync();
+  if(t.dataset&&t.dataset.ch==='whddPick'){const sel=document.getElementById('u_wh');if(sel){const o=[...sel.options].find(x=>x.value===t.value);if(o)o.selected=t.checked}whddLabel()}
+});
+document.addEventListener('click',e=>{
+  const t=e.target.closest&&e.target.closest('[data-act]'),a=t&&t.dataset.act;
+  if(a==='whddToggle'){e.stopImmediatePropagation();const p=document.querySelector('#u_whdd .whdd-p');p.hidden=!p.hidden;t.setAttribute('aria-expanded',String(!p.hidden));return}
+  if(a==='usersTemplateX'){e.stopImmediatePropagation();xlsxSave('users-template.xlsx',usersTemplateSheets());return}
+  if(a==='usersTemplateCsv'){e.stopImmediatePropagation();downloadText('users-template.csv','\uFEFF'+toCSV(USER_COLS,[]),'text/csv');return}
+  if(!e.target.closest('#u_whdd')){const p=document.querySelector('#u_whdd .whdd-p');if(p&&!p.hidden){p.hidden=true;const b=document.querySelector('#u_whdd .whdd-b');if(b)b.setAttribute('aria-expanded','false')}}
+},true);
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){const p=document.querySelector('#u_whdd .whdd-p');if(p&&!p.hidden){p.hidden=true;const b=document.querySelector('#u_whdd .whdd-b');if(b){b.setAttribute('aria-expanded','false');b.focus()}}}});
+/* ----- carrier performance: one simple bar per month ----- */
+function ctrBars(pts,meas,tgt){
+  const W=760,H=290,L=48,R=20,Tp=26,B=48,n=pts.length,pct=meas.pct,max=pct?100:Math.max(5,Math.ceil(Math.max(0,...pts.map(p=>p.v))/5)*5),plotW=W-L-R,slot=plotW/Math.max(n,1),bw=Math.min(76,slot*0.62),Y=v=>Tp+(H-Tp-B)*(1-v/max);
+  let g='';[0,0.25,0.5,0.75,1].forEach(f=>{const y=Y(max*f);g+=`<line x1="${L}" x2="${W-R}" y1="${y}" y2="${y}" stroke="var(--line)"/><text x="${L-8}" y="${y+4}" text-anchor="end" font-size="11" fill="var(--muted)">${Math.round(max*f)}${pct?'%':''}</text>`});
+  pts.forEach((p,i)=>{const cx=L+slot*(i+0.5),y=Y(p.v),low=p.n<CTR_MIN,col=pct?(p.v>=tgt?'var(--ok)':'var(--late)'):'var(--accent)';
+    g+=`<rect x="${cx-bw/2}" y="${y}" width="${bw}" height="${Math.max(0,H-B-y)}" rx="5" fill="${col}" opacity="${low?.5:1}"><title>${ctrMonLabel(p.m)}: ${pct?Math.round(p.v)+'% ('+p.on+' of '+p.n+')':p.n+' shipment'+(p.n===1?'':'s')}${low?' (fewer than '+CTR_MIN+' shipments)':''}</title></rect><text x="${cx}" y="${y-7}" text-anchor="middle" font-size="13" font-weight="700" fill="var(--ink)" stroke="var(--panel)" stroke-width="4" paint-order="stroke">${pct?Math.round(p.v)+'%':p.v}${low?' *':''}</text><text x="${cx}" y="${H-B+18}" text-anchor="middle" font-size="12" fill="var(--ink)">${ctrMonLabel(p.m)}</text>${pct?`<text x="${cx}" y="${H-B+34}" text-anchor="middle" font-size="10.5" fill="var(--muted)">${p.on} of ${p.n}</text>`:''}`});
+  if(pct)g+=`<line x1="${L}" x2="${W-R}" y1="${Y(tgt)}" y2="${Y(tgt)}" stroke="var(--ink)" stroke-dasharray="5 4" stroke-width="1.3"/><text x="${W-R}" y="${Y(tgt)-5}" text-anchor="end" font-size="11" fill="var(--ink)">Target ${tgt}%</text>`;
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="${esc(meas.label)} for each month" style="max-height:340px">${g}</svg>`;
+}
+function carrierTrendCard(st){
+  const C=S.ui.carrier,tgt=C.target,T=C.tr2=C.tr2||{measure:'del',car:'All',from:'',to:''};
+  const names=[...st].sort((a,b)=>b.n-a.n||a.name.localeCompare(b.name)).map(c=>c.name);if(T.car!=='All'&&!names.includes(T.car))T.car='All';if(!CTR_MEAS[T.measure])T.measure='del';
+  const meas=CTR_MEAS[T.measure],src=c=>T.measure==='pick'?c.pm:c.months,list=T.car==='All'?st:st.filter(c=>c.name===T.car);
+  const allM=uniq(list.flatMap(c=>Object.keys(src(c)))).sort(),months=allM.filter(m=>(!T.from||m>=T.from)&&(!T.to||m<=T.to));
+  const pts=months.map(m=>{const b=list.reduce((a,c)=>{const x=src(c)[m];return x?{n:a.n+x.n,on:a.on+x.on}:a},{n:0,on:0});return {m,n:b.n,on:b.on,v:meas.pct?(b.n?b.on/b.n*100:0):b.n}});
+  const mopt=v=>allM.map(m=>`<option value="${m}" ${v===m?'selected':''}>${ctrMonLabel(m)}</option>`).join('');
+  const what=T.measure==='pick'?'pickups':'delivered shipments',who=T.car==='All'?'all carriers':T.car;
+  return `<div class="card"><h3 style="margin:0 0 4px">Month by Month</h3><p class="mu" style="margin:0 0 10px">${meas.pct?`Each bar is the share of ${what} that were on time in that month, for ${esc(who)}. Green bars meet the ${tgt}% target and red bars miss it.`:`Each bar is the number of shipments delivered in that month, for ${esc(who)}.`}</p>
+  <div class="row" style="gap:14px;flex-wrap:wrap;align-items:flex-end"><label class="f">Measure<select data-ch="ctrM2" class="in" style="width:auto">${Object.entries(CTR_MEAS).map(([k,v])=>`<option value="${k}" ${T.measure===k?'selected':''}>${v.label}</option>`).join('')}</select></label><label class="f">Carrier<select data-ch="ctrC2" class="in" style="width:auto"><option value="All">All carriers</option>${names.map(n=>`<option ${T.car===n?'selected':''}>${esc(n)}</option>`).join('')}</select></label><label class="f">From<select data-ch="ctrF2" class="in" style="width:auto"><option value="">Earliest</option>${mopt(T.from)}</select></label><label class="f">To<select data-ch="ctrT2" class="in" style="width:auto"><option value="">Latest</option>${mopt(T.to)}</select></label></div>
+  <div style="margin-top:12px">${pts.length?ctrBars(pts,meas,tgt):'<div class="empty">No months of data for this choice yet.</div>'}</div>
+  <p class="hint">A lighter bar marked * has fewer than ${CTR_MIN} shipments that month, so one late shipment can swing the figure.${allM.length<3&&!hasSample()&&!liveMode()?' Only '+allM.length+' month(s) of data so far. <button class="btn sm" data-act="sampleAdd">Load sample history</button> to see more months.':''}</p></div>`;
+}
+document.addEventListener('change',e=>{
+  const t=e.target;if(!t||!t.dataset||!['ctrM2','ctrC2','ctrF2','ctrT2'].includes(t.dataset.ch))return;
+  const T=S.ui.carrier.tr2=S.ui.carrier.tr2||{measure:'del',car:'All',from:'',to:''},k=t.dataset.ch;
+  if(k==='ctrM2'){T.measure=t.value;T.from='';T.to=''}if(k==='ctrC2')T.car=t.value;if(k==='ctrF2')T.from=t.value;if(k==='ctrT2')T.to=t.value;
+  if(T.from&&T.to&&T.from>T.to){const x=T.from;T.from=T.to;T.to=x}render();
+});
 
 const pickupCol=()=>colx('Pickup vs plan',sh=>{if(!sh.f.PickupActual||!sh.f.PickupPlanned)return '-';const d=diffDays(sh.f.PickupActual,sh.f.PickupPlanned);return d<=0?'<span class="ok-t">'+(d===0?'On time':(-d)+' day(s) early')+'</span>':'<span class="late-t">'+d+' day(s) late</span>'},sh=>{if(!sh.f.PickupActual||!sh.f.PickupPlanned)return '';const d=diffDays(sh.f.PickupActual,sh.f.PickupPlanned);return d<=0?(d===0?'On time':(-d)+' early'):d+' late'});
 const pickupDatesCol=()=>colx('Pickup planned / actual',sh=>fmtS(sh.f.PickupPlanned)+' / '+fmtS(sh.f.PickupActual),sh=>(sh.f.PickupPlanned||'')+' / '+(sh.f.PickupActual||''));

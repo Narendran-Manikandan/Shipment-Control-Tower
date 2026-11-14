@@ -22,7 +22,16 @@ To share data between devices, run `supabase-setup.sql` once in a free Supabase 
 This is a demo with sample data. The sign-in is not real security: users.js is public and anyone with the shared database key can change its data, so use throwaway passwords and no real company information.
 
 
-## What is new in this release
+## What is new in this release (latest)
+- **Calendar colours.** On Control Tower Overview a day shows a coloured count for each state: **green** done (including anything completed today), **red** past and still open, **yellow** due today and still open, **blue** upcoming. The day is tinted by the most urgent state, and a legend sits under the calendar.
+- **Calendars for carriers, warehouses and partners.** Carrier Updates has a Calendar button showing all four milestones of the carrier's shipments. Delivery Management has an **Incoming Shipments** tab with a Table (separate Shipment, Invoice, MBL, HBL and Container columns) and a Calendar for the user's warehouses. Milestone Management has a Table and Calendar toggle, which gives a Partner Executive a calendar of their shippers' shipments. Tap a day to see its shipments.
+- **Driver view** cards show HBL, MBL, Container and Invoice.
+- **Delivered To** column (warehouse code and city) in the Shipment Monitor, Milestone Management and Carrier Updates.
+- **Tap to open.** Every shipment number, HBL, MBL, container and invoice number shown in a table or card is tappable and opens that shipment (a carrier gets its update window). It works with the keyboard too.
+- **Users and roles:** Download Template (Excel with a Help sheet, or CSV) for people to fill in, and Upload New Users. In the add-user form, fields that do not apply to the chosen user type are greyed out and locked, and Warehouses is a dropdown with tick boxes. (The list boxes in the table of existing users are unchanged.)
+- **Carrier Performance** now has one simple "Month by Month" bar chart: pick the measure and All carriers or one carrier. Green bars meet the target, red bars miss it.
+
+## What was in the previous release
 - **Four document upload fields** on the shipment entry form and in the shipment details: Shipment Invoice, Packing List, BL / HAWB / AWB and Others (with a description). Several files per field, each file gets the type of its field, and a checklist shows which of the three key documents are attached. The carrier invoice stays in Freight Audit.
 - **Milestone Management** shows the HBL first with the internal reference small, a compact References column (MBL, invoice, container, with +n for several), a search box, and a Show Reference Numbers switch. Carrier Updates has the same. Download Overdue now has HBL, MBL and Container Number instead of Tracking Number, and the upload finds a shipment by HBL or MBL when the Shipment Reference is empty (an HBL on two shipments is rejected, never guessed).
 - **Delivery slots by warehouse type.** Distribution Centers keep the slot grid. For Manufacturing Sites, Research Centers and Suppliers the carrier requests a delivery day (with an optional second choice and a preferred time of day), and the receiving team confirms the date and time, proposes another date or time, or rejects it. Slot settings and blocked slots show only for Distribution Centers. Requests already made are unchanged.
