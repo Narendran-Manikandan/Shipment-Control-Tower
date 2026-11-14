@@ -422,6 +422,11 @@ body.compact .tb td,body.compact .tb th{padding:4px 8px;font-size:12px;line-heig
 .side{overflow:hidden!important}.brand{flex:none}#nav{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain}.brand div,.brand span{white-space:normal!important;text-overflow:clip!important;overflow:visible!important}
 @media (max-width:980px){.side{overflow:hidden!important}nav#nav,#nav{overflow-y:auto!important;overflow-x:hidden!important;display:block!important}}
 
+.mpd{position:relative;display:inline-block;max-width:260px}.mpd-b{width:auto;min-width:190px;text-align:left;background:var(--panel);cursor:pointer}
+.mpd-p{position:absolute;z-index:45;top:calc(100% + 4px);left:0;background:var(--panel);border:1px solid var(--line2);border-radius:10px;padding:8px;min-width:300px;max-width:min(420px,90vw);box-shadow:0 10px 28px rgba(0,0,0,.18)}.mpd-p[hidden]{display:none}
+.mpd-l{max-height:210px;overflow:auto;margin-top:6px}.mpd-l label{display:flex;gap:8px;align-items:center;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:13px}.mpd-l label:hover{background:var(--chip)}
+.mpd.locked .mpd-b{background:var(--chip);opacity:.55;cursor:not-allowed}
+
 /* chosen dark theme */
 :root[data-theme="dark"]{
 --bg:#151719;--panel:#1E2124;--panel2:#23272A;--ink:#ECEDED;--muted:#9DA3A4;--line:#33393C;--line2:#454C50;
@@ -579,7 +584,7 @@ let S;
 function init(){
   clockRefresh();
   S={brand:clone(BRAND_DEFAULT),today:CLOCK.today,role:'Logistics Analyst',email:'demo.user@yourcompany.com',baseEmail:'demo.user@yourcompany.com',carrier:'',view:'track',
-     lines:clone(RAW.lines),events:clone(RAW.events),users:clone(RAW.users),access:{},customRoles:[],accounts:[],docs:[],rg:{},rgs:[],subs:clone(RAW.subs),
+     lines:clone(RAW.lines),events:clone(RAW.events),users:clone(RAW.users),access:{},customRoles:[],accounts:[],docs:[],rg:{},rgs:[],redirects:[],subs:clone(RAW.subs),
      quotes:[],invoices:[],remind:{},revisions:[],uf:null,warehouses:[],slots:[],slotBlocks:[],whTeam:'',whLog:[],whNotified:{},wh:{lead:1,weekDay:4,overdue:true},utcTime:CLOCK.utc,whFail:false,mf:{log:[],ver:{master:1,commercial:1},hl:{},dock:false,closed:false,file:'master',tab:'tblShipments',q:'',only:false},outbox:[],audit:[],settings:{domain:'yourcompany.com',strip:{track:true},permV:2},draft:[],lastSaved:null,bulkResult:null,msResult:null,
      ui:{q:'',dash:{ym:CLOCK.today.slice(0,7),sel:CLOCK.today,mode:'All',ms:'Delivery',q:'',status:'All',overdueOnly:false,tile:null,type:'All',nature:'All',mm:{measure:'ships',basis:'pickup',dim:'mode',carrier:'All',sel:null}},
          carrier:{mode:'All',win:'All',type:'All',nature:'All',metric:'ontime',target:90,mm:{measure:'weight',basis:'pickup',dim:'carrier',carrier:'All',sel:null}},tr:{seg:'d2d',basis:'actual',group:'mode',pcts:[50,90,95],mode:'All',carrier:'All',stype:'All',nature:'All',oc:'All',dc:'All',op:'All',dp:'All',win:'All'},com:'quotes',invCarrier:'All',invStatus:'All',admin:'users',msFilter:'active',cu:{carrier:'',filter:'active',q:''},ft:{series:'both',metric:'avg',group:'none',oc:'All',op:'All',dc:'All',dp:'All',nature:'All',mode:'All',vol:'All'},kt:{},sp:{carrier:'All'},wh:{tab:'schedule',code:'All',days:14},per:{kind:'all',y:+CLOCK.today.slice(0,4),q:Math.ceil(+CLOCK.today.slice(5,7)/3),m:+CLOCK.today.slice(5,7),basis:'pickup'},sort:{},sl:{tab:'my',f:'All',ship:'',week:'',pick:'first',first:null,second:null,vehicle:'',driver:'',phone:'',note:''},dm:{tab:'review',f:'Open',code:'All',week:'',sel:[],prop:null}}};
@@ -1687,7 +1692,7 @@ function usersImportCheck(objs,hdr){
     const name=impVal(r,C,'name')||(cur?cur.DisplayName:email);let car='',wh='';
     if(role==='Carrier Partner'){const raw=impVal(r,C,'car');if(raw){const f=cars.find(x=>x.toLowerCase()===raw.toLowerCase());car=f||raw}else if(cur&&cur.Role==='Carrier Partner')car=cur.Carrier;else it.errs.push('Carrier is required for a Carrier Partner')}
     if(role==='Warehouse Team'){const raw=impVal(r,C,'wh');if(raw){const list=raw.split(/[;,|]+/).map(x=>x.trim()).filter(Boolean),bad=[],good=[];list.forEach(x=>{const f=codes.find(c=>whKey(c)===whKey(x));if(f)good.push(f);else bad.push(x)});if(bad.length)it.errs.push('Warehouse not found: '+bad.join(', '));wh=uniq(good).join('; ')}else if(cur&&cur.Role==='Warehouse Team')wh=cur.Warehouses;else it.errs.push('Warehouses are required for a Warehouse Team user')}
-    let shp='',rcv='',prt='';if(role===PARTNER){const raw=impVal(r,C,'shp'),rr=impVal(r,C,'rcv');if(raw)shp=normShippers(raw);else if(cur&&cur.Role===PARTNER)shp=cur.Shippers||'';if(rr)rcv=normShippers(rr);else if(cur&&cur.Role===PARTNER)rcv=cur.Receivers||'';if(!shp&&!rcv)it.errs.push('A shipper or a receiver is required for an External Logistics Partner')}
+    let shp='',rcv='',prt='';if(role===PARTNER){const raw=impVal(r,C,'shp'),rr=impVal(r,C,'rcv');if(raw)shp=normShippers(raw);else if(cur&&cur.Role===PARTNER)shp=cur.Shippers||'';if(rr)rcv=normShippers(rr);else if(cur&&cur.Role===PARTNER)rcv=cur.Receivers||'';if(!shp&&!rcv)it.errs.push('A shipper or a receiver is required for an External Logistics Partner');else if(shp&&rcv)it.errs.push('A partner works by shipper or by receiver, never both. Fill in only one of the two')}
     if(role===PEXEC){const raw=impVal(r,C,'prt')||(cur&&cur.Role===PEXEC?cur.Partner:'');const pu=S.users.find(x=>x.Role===PARTNER&&x.UserEmail.toLowerCase()===String(raw).toLowerCase());if(!pu)it.errs.push('Partner must be the email of an External Logistics Partner user');else prt=pu.UserEmail}
     it.rec={UserEmail:email,DisplayName:name,Role:role,Type:roleType(role),Carrier:car,Warehouses:wh,Shippers:shp,Receivers:rcv,Partner:prt,Phone:impVal(r,C,'phn')||(cur?cur.Phone||'':''),Location:impVal(r,C,'loc')||(cur?cur.Location||'':'')};
     if(cur){const ch=[];[['DisplayName','User Name'],['Role','Role'],['Carrier','Carrier'],['Warehouses','Warehouses'],['Shippers','Shippers'],['Receivers','Receivers'],['Partner','Partner'],['Phone','Phone'],['Location','Location']].forEach(([k,l])=>{if(String(cur[k]||'')!==String(it.rec[k]||''))ch.push(l+': '+(cur[k]||'none')+' to '+(it.rec[k]||'none'))});it.changes=ch;it.op=it.errs.length?'':ch.length?'update':'nochange'}
@@ -1713,8 +1718,8 @@ function usersTableHTML(){
   ${list.map(({u,i})=>`<tr><td>${esc(u.UserEmail)}</td><td>${esc(u.DisplayName)}</td><td>${esc(u.Type||roleType(u.Role))}</td><td><select data-ch="userRole" data-i="${i}" aria-label="Role" class="in" style="width:auto">${roles.map(r=>`<option ${r===u.Role?'selected':''}>${r}</option>`).join('')}</select></td>
    <td>${u.Role==='Carrier Partner'?`<select data-ch="userCarrier" data-i="${i}" aria-label="Carrier" class="in" style="width:auto">${uniq([...carriersList(),u.Carrier].filter(Boolean)).map(c=>`<option ${c===u.Carrier?'selected':''}>${esc(c)}</option>`).join('')}</select>`:'<span class="mu">-</span>'}</td>
    <td>${u.Role==='Warehouse Team'?`<select multiple size="3" data-ch="userWh" data-i="${i}" class="in" style="width:auto;min-width:170px" aria-label="Warehouses for ${esc(u.UserEmail)}">${codes.map(c=>`<option ${whList(u).some(x=>whKey(x)===whKey(c))?'selected':''}>${esc(c)}</option>`).join('')}</select>`:'<span class="mu">-</span>'}</td>
-   <td>${u.Role===PARTNER?`<input class="in" data-ch="userShippers" data-i="${i}" value="${esc(u.Shippers||'')}" list="dl_shp_users" style="min-width:230px" aria-label="Shippers for ${esc(u.UserEmail)}" placeholder="Shipper names, separated by ;">`:'<span class="mu">-</span>'}</td>
-   <td>${u.Role===PARTNER?`<input class="in" data-ch="userField" data-f="Receivers" data-i="${i}" value="${esc(u.Receivers||'')}" style="min-width:200px" aria-label="Receivers for ${esc(u.UserEmail)}" placeholder="Receiver names, separated by ;">`:'<span class="mu">-</span>'}</td>
+   <td>${u.Role===PARTNER?`${mpd('shippers',`<input type="hidden" data-ch="userShippers" data-i="${i}" value="${esc(u.Shippers||'')}">`,u.Shippers,'Shippers for '+u.UserEmail)}`:'<span class="mu">-</span>'}</td>
+   <td>${u.Role===PARTNER?`${mpd('receivers',`<input type="hidden" data-ch="userField" data-f="Receivers" data-i="${i}" value="${esc(u.Receivers||'')}">`,u.Receivers,'Receivers for '+u.UserEmail)}`:'<span class="mu">-</span>'}</td>
    <td>${u.Role===PEXEC?`<select class="in" data-ch="userPartner" data-i="${i}" aria-label="External logistics partner" style="width:auto"><option value="">Choose</option>${S.users.filter(x=>x.Role===PARTNER).map(x=>`<option value="${esc(x.UserEmail)}" ${x.UserEmail===u.Partner?'selected':''}>${esc(x.DisplayName)}</option>`).join('')}</select>`:'<span class="mu">-</span>'}</td>
    <td><input class="in" data-ch="userField" data-f="Phone" data-i="${i}" value="${esc(u.Phone||'')}" style="width:130px" aria-label="Phone for ${esc(u.UserEmail)}"></td><td><input class="in" data-ch="userField" data-f="Location" data-i="${i}" value="${esc(u.Location||'')}" style="width:140px" aria-label="Location for ${esc(u.UserEmail)}"></td>
    <td class="r">${typeof acctRowBtn==='function'?acctRowBtn(u):''}<button class="btn sm danger" data-act="userDel" data-i="${i}">Remove</button></td></tr>`).join('')}</table></div>`:'<div class="empty">No user matches the search.</div>'}`;
@@ -1724,14 +1729,14 @@ function usersPanel(){
   return `<div class="card"><div class="row" style="justify-content:space-between;margin-bottom:10px"><h3 style="margin:0">Users and roles</h3><span class="row"><button class="btn sm" data-act="usersTemplateX">Download Template</button><button class="btn sm" data-act="usersTemplateCsv">Template (CSV)</button><button class="btn sm" data-act="usersExportX">Export (Excel)</button><button class="btn sm" data-act="usersExportCsv">Export (CSV)</button><label class="btn sm pri" style="cursor:pointer">Upload New Users<input type="file" id="impUsers" accept=".xlsx,.xls,.csv" hidden></label></span></div>
   <div class="row" style="margin-bottom:10px"><input id="us_q" class="in grow" placeholder="Search by name, email, role, carrier or warehouse" value="${esc(S.ui.usq||'')}" aria-label="Search users"></div>
   <div id="usersTbl">${usersTableHTML()}</div>
-  <div class="row sec uform"><input id="u_email" class="in grow" placeholder="email@${esc(S.settings.domain)}"><input id="u_name" class="in grow" placeholder="Name">${userTypeFields()}<select id="u_role" class="in" style="width:auto" aria-label="Role (internal users)">${INTERNAL_ROLES().map(r=>`<option>${esc(r)}</option>`).join('')}</select><input id="u_carrier" class="in" list="dl_car_users" placeholder="Carrier (type a new name to add one)" style="width:290px" autocomplete="off"><datalist id="dl_car_users">${carriersList().map(c=>`<option value="${esc(c)}">`).join('')}</datalist><div class="whdd" id="u_whdd"><button type="button" class="in whdd-b" data-act="whddToggle" aria-haspopup="listbox" aria-expanded="false" aria-label="Warehouses (Warehouse Team only)">Warehouses</button><div class="whdd-p" hidden>${codes.map(c=>`<label><input type="checkbox" data-ch="whddPick" value="${esc(c)}"> ${esc(c)}</label>`).join('')}</div><select id="u_wh" multiple hidden aria-hidden="true">${codes.map(c=>`<option>${esc(c)}</option>`).join('')}</select></div><input id="u_shippers" class="in" list="dl_shp_users" placeholder="Shippers (External Logistics Partner only), separated by ;" style="width:300px" autocomplete="off"><datalist id="dl_shp_users">${uniq(S.lines.map(l=>l.Shipper)).sort().map(x=>`<option value="${esc(x)}">`).join('')}</datalist>${typeof acctFormHTML==='function'?acctFormHTML():''}<button class="btn pri" data-act="userAdd">Add user</button></div>
+  <div class="row sec uform"><input id="u_email" class="in grow" placeholder="email@${esc(S.settings.domain)}"><input id="u_name" class="in grow" placeholder="Name">${userTypeFields()}<select id="u_role" class="in" style="width:auto" aria-label="Role (internal users)">${INTERNAL_ROLES().map(r=>`<option>${esc(r)}</option>`).join('')}</select><input id="u_carrier" class="in" list="dl_car_users" placeholder="Carrier (type a new name to add one)" style="width:290px" autocomplete="off"><datalist id="dl_car_users">${carriersList().map(c=>`<option value="${esc(c)}">`).join('')}</datalist><div class="whdd" id="u_whdd"><button type="button" class="in whdd-b" data-act="whddToggle" aria-haspopup="listbox" aria-expanded="false" aria-label="Warehouses (Warehouse Team only)">Warehouses</button><div class="whdd-p" hidden>${codes.map(c=>`<label><input type="checkbox" data-ch="whddPick" value="${esc(c)}"> ${esc(c)}</label>`).join('')}</div><select id="u_wh" multiple hidden aria-hidden="true">${codes.map(c=>`<option>${esc(c)}</option>`).join('')}</select></div><select id="u_workby" class="in" style="width:auto" aria-label="A partner works by"><option>Shipper</option><option>Receiver</option></select>${mpd('shippers','<input type="hidden" id="u_shippers">','','Shippers (External Logistics Partner)')}<datalist id="dl_shp_users">${uniq(S.lines.map(l=>l.Shipper)).sort().map(x=>`<option value="${esc(x)}">`).join('')}</datalist>${typeof acctFormHTML==='function'?acctFormHTML():''}<button class="btn pri" data-act="userAdd">Add user</button></div>
   <p class="hint">Export the list, add, change or delete rows (Action = Delete) in Excel, and import it back to make many changes at once. Anyone with a company email who is not listed gets the In Organization role, which opens Track &amp; Trace only. A Carrier Partner opens Carrier Updates and Delivery Slot Requests, and sees only the shipments nominated to their carrier. A Warehouse Team user opens Delivery Management for the warehouses assigned to them (hold Ctrl or Cmd to pick several). A External Logistics Partner works like a Logistics Executive, but only for the shippers registered under them: separate several shipper names with a semicolon. Profiles you create under Role access (for example Finance or SCM) can be assigned here too.</p></div>`;
 }
 /* ----- Administration: warehouses ----- */
-const WH_COLS=['Warehouse Code','Warehouse Name','Warehouse Type','City','Country','Address','Receiving Hours','Team Contact Name','Phone','Team email addresses (separate with commas)','Time zone','Delivery due notice at','Weekly updates on','Weekly update at local','Quiet Hours from (local)','Quiet Hours to (local)','Action'];
-const WH_ALIAS={code:['warehousecode','code'],name:['warehousename','name'],type:['warehousetype','type'],city:['city'],country:['country'],addr:['address'],hours:['receivinghours','hours'],contact:['teamcontactname','teamcontact','contact'],phone:['phone'],emails:['teamemailaddressesseparatewithcommas','teamemailaddresses','teamemails','emails'],tz:['timezone'],due:['deliveryduenoticeat','deliveryduenotice'],wday:['weeklyupdateson','weeklyupdateon','weeklyday'],wtime:['weeklyupdateatlocal','weeklyupdateat','weeklyupdatetime'],qfrom:['quiethoursfromlocal','quiethoursfrom'],qto:['quiethourstolocal','quiethoursto','quiethoursuntil'],act:['action']};
+const WH_COLS=['Warehouse Code','Warehouse Name','Warehouse Type','City','Country','Address','Receiving Hours','Team Contact Name','Phone','Team email addresses (separate with commas)','Time zone','Delivery due notice at','Weekly updates on','Weekly update at local','Quiet Hours from (local)','Quiet Hours to (local)','Receiver Names (separate with ;)','Action'];
+const WH_ALIAS={rcv:['receivernamesseparatewith','receivernames','receivers'],code:['warehousecode','code'],name:['warehousename','name'],type:['warehousetype','type'],city:['city'],country:['country'],addr:['address'],hours:['receivinghours','hours'],contact:['teamcontactname','teamcontact','contact'],phone:['phone'],emails:['teamemailaddressesseparatewithcommas','teamemailaddresses','teamemails','emails'],tz:['timezone'],due:['deliveryduenoticeat','deliveryduenotice'],wday:['weeklyupdateson','weeklyupdateon','weeklyday'],wtime:['weeklyupdateatlocal','weeklyupdateat','weeklyupdatetime'],qfrom:['quiethoursfromlocal','quiethoursfrom'],qto:['quiethourstolocal','quiethoursto','quiethoursuntil'],act:['action']};
 const WH_HELP=[['Warehouse Type','One of: Distribution Center, Manufacturing Site, Research Center, Supplier. Empty keeps the current type; a new warehouse gets a type guessed from its code.'],['Warehouse Code','The key. Letters, numbers, spaces and - _ . / (up to 40 characters). Used as the receiving warehouse on shipments.'],['Team email addresses (separate with commas)','The team that receives notices and slot requests.'],['Time zone','For example America/Chicago, or the Windows name such as Central Standard Time.'],['Delivery due notice at','Local time, hh:mm.'],['Weekly updates on','A day name, Monday to Sunday.'],['Weekly update at local','Local time, hh:mm.'],['Quiet Hours from (local)','Local time, hh:mm.'],['Quiet Hours to (local)','Local time, hh:mm.'],['Action','Empty, Add or Update saves the row. Delete removes the warehouse, only if no shipment, slot record or user uses it. Empty cells on an existing warehouse keep the current value; a new warehouse gets the standard defaults.']];
-const whExportRows=()=>S.warehouses.map(w=>({'Warehouse Code':w.code,'Warehouse Name':w.name,'Warehouse Type':w.type||whTypeGuess(w),City:w.city,Country:w.country,Address:w.address,'Receiving Hours':w.hours,'Team Contact Name':w.contact,Phone:w.phone,'Team email addresses (separate with commas)':w.emails.join(', '),'Time zone':w.tz,'Delivery due notice at':w.dueTime,'Weekly updates on':WH_DAYS[w.weekDay],'Weekly update at local':w.weekTime,'Quiet Hours from (local)':w.quietFrom,'Quiet Hours to (local)':w.quietTo,Action:''}));
+const whExportRows=()=>S.warehouses.map(w=>({'Warehouse Code':w.code,'Warehouse Name':w.name,'Warehouse Type':w.type||whTypeGuess(w),City:w.city,Country:w.country,Address:w.address,'Receiving Hours':w.hours,'Receiver Names (separate with ;)':w.Receivers||'','Team Contact Name':w.contact,Phone:w.phone,'Team email addresses (separate with commas)':w.emails.join(', '),'Time zone':w.tz,'Delivery due notice at':w.dueTime,'Weekly updates on':WH_DAYS[w.weekDay],'Weekly update at local':w.weekTime,'Quiet Hours from (local)':w.quietFrom,'Quiet Hours to (local)':w.quietTo,Action:''}));
 const whSheets=()=>[{name:'Warehouses',headers:WH_COLS,rows:whExportRows()},{name:'Help',headers:['Column','What to enter'],rows:WH_HELP.map(x=>({Column:x[0],'What to enter':x[1]}))}];
 const impTz=v=>{const x=String(v).trim().toLowerCase(),f=TZ_LIST.find(z=>z[0].toLowerCase()===x||z[1].toLowerCase()===x);return f?f[0]:null};
 const impTime=v=>{const s=String(v).trim();if(/^\d*\.?\d+$/.test(s)&&Number(s)>=0&&Number(s)<1&&s.includes('.')){const m=Math.round(Number(s)*1440);return pad(Math.floor(m/60))+':'+pad(m%60)}const m=/^(\d{1,2}):(\d{2})(?::\d{2})?$/.exec(s);if(!m||+m[1]>23||+m[2]>59)return null;return pad(+m[1])+':'+m[2]};
@@ -1739,7 +1744,7 @@ const impDay=v=>{const x=String(v).trim().toLowerCase(),i=WH_DAYS.findIndex(d=>d
 const whDefaultDays=h=>{const m=/(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s*-\s*(Mon|Tue|Wed|Thu|Fri|Sat|Sun)/.exec(h||''),a=m?DOWS.indexOf(m[1]):0,b=m?DOWS.indexOf(m[2]):4,d=[];for(let i=a;i<=b;i++)d.push(i);return d.length?d:[0,1,2,3,4]};
 function whImportCheck(objs,hdr){
   const C=impCols(hdr,WH_ALIAS);if(!C.code)return {err:'The file needs a Warehouse Code column. Export the warehouses first to get the template.'};
-  const items=[],seen={},F=[['name','name','Warehouse Name'],['city','city','City'],['country','country','Country'],['addr','address','Address'],['hours','hours','Receiving Hours'],['contact','contact','Team Contact Name'],['phone','phone','Phone']];
+  const items=[],seen={},F=[['name','name','Warehouse Name'],['city','city','City'],['country','country','Country'],['addr','address','Address'],['hours','hours','Receiving Hours'],['rcv','Receivers','Receiver Names'],['contact','contact','Team Contact Name'],['phone','phone','Phone']];
   objs.forEach(r=>{
     const code=impVal(r,C,'code'),act=impAction(impVal(r,C,'act')),cur=code?whFind(code):null,it={row:r._row,r,errs:[],op:'',changes:[],code,rec:null,cells:[]};
     if(!code)it.errs.push('Warehouse Code is empty');else if(!/^[A-Za-z0-9 _.\/-]{1,40}$/.test(code))it.errs.push('The code can use letters, numbers, spaces and - _ . / (up to 40 characters)');
@@ -2364,7 +2369,7 @@ function dvLocate(){
   navigator.geolocation.getCurrentPosition(p=>{document.getElementById('dv_loc').value=p.coords.latitude.toFixed(4)+', '+p.coords.longitude.toFixed(4);out.textContent='Location added'},()=>{out.textContent='Location is switched off. Type where you are.'},{timeout:8000});
 }
 /* ========== go live: storage, sign-in and roles, flows ========== */
-const PERSIST_KEYS=['today','lines','events','users','access','subs','quotes','invoices','remind','revisions','warehouses','slots','slotBlocks','whLog','whNotified','wh','utcTime','whFail','outbox','audit','settings','brand','views','reports','whSince','customRoles','accounts','docs','rg','rgs'];
+const PERSIST_KEYS=['today','lines','events','users','access','subs','quotes','invoices','remind','revisions','warehouses','slots','slotBlocks','whLog','whNotified','wh','utcTime','whFail','outbox','audit','settings','brand','views','reports','whSince','customRoles','accounts','docs','rg','rgs','redirects'];
 const Store={key:'ect.state.v1',modeKey:'ect.mode',last:null,err:'',
   available(){try{localStorage.setItem('ect.test','1');localStorage.removeItem('ect.test');return true}catch(e){return false}},
   mode(){if(window.ECT_LOGIN&&window.ECT_LOGIN.storage==='shared'&&window.ECT_LOGIN.shared&&window.ECT_LOGIN.shared.url)return 'shared';const d=window.ECT_LOGIN&&window.ECT_LOGIN.storage==='browser'?'browser':'demo';try{return localStorage.getItem(this.modeKey)||d}catch(e){return d}},
@@ -2573,8 +2578,9 @@ const normShippers=v=>uniq(String(v||'').split(/[;|]+/).map(x=>x.trim()).filter(
 const shippersOf=u=>normShippers(u&&u.Shippers).split('; ').filter(Boolean);
 function partnerUser(){const em=String(S.email||'').toLowerCase();return S.users.find(u=>u.Role===PARTNER&&String(u.UserEmail).toLowerCase()===em)||S.users.find(u=>u.Role===PARTNER)||null}
 function partnerShippers(){return S.role===PARTNER?shippersOf(partnerUser()):null}
-function visLines(){const sc=partnerScope();return sc?S.lines.filter(l=>sc.has(shipperKey(l.Shipper))):S.lines}
-function shipperFieldHTML(){const a=partnerShippers();return a?`<select id="f_shipper" class="in">${a.map(x=>`<option>${esc(x)}</option>`).join('')}</select>`:`<input id="f_shipper" class="in" list="dl_shipper" autocomplete="off">`}
+function visLines(){const sc=partnerScope();return sc?S.lines.filter(l=>sc.has(l.Shipper,l.Consignee)):S.lines}
+function shipperFieldHTML(){const s=partnerScope();if(s&&(s.kind==='shipper'||(s.kind==='legacy'&&s.shippers.size)))return `<select id="f_shipper" class="in">${listOf(s.org.Shippers).map(x=>`<option>${esc(x)}</option>`).join('')}</select>`;return `<input id="f_shipper" class="in" list="dl_shipper" autocomplete="off">`}
+function consigneeFieldHTML(){const s=partnerScope();if(s&&s.kind==='receiver')return `<select id="f_consignee" class="in">${listOf(s.org.Receivers).map(x=>`<option>${esc(x)}</option>`).join('')}</select>`;return `<input id="f_consignee" class="in" list="dl_consignee" autocomplete="off">`}
 function defaultPartnerAccess(){return (S.access['Logistics Executive']||['track','tasks']).filter(x=>x!=='mfmaster')}
 function migrateData(){
   (S.warehouses||[]).forEach(w=>{if(!WH_TYPES.includes(w.type))w.type=whTypeGuess(w)});
@@ -2663,15 +2669,15 @@ function partnerCtx(){
   return {user:u,org:partnerOrg(u)};
 }
 function partnerScope(){
-  const c=partnerCtx();if(!c)return null;const org=c.org,sh=new Set(listOf(org&&org.Shippers).map(shipperKey)),rc=new Set(listOf(org&&org.Receivers).map(shipperKey));
-  return {org,shippers:sh,receivers:rc,has:(shipper,consignee)=>sh.has(shipperKey(shipper))||rc.has(shipperKey(consignee))};
+  const c=partnerCtx();if(!c)return null;const org=c.org,sh=new Set(listOf(org&&org.Shippers).map(shipperKey)),rc=new Set(listOf(org&&org.Receivers).map(shipperKey)),kind=partnerKindOf(org);
+  return {org,kind,shippers:sh,receivers:rc,has:(shipper,consignee)=>kind==='shipper'?sh.has(shipperKey(shipper)):kind==='receiver'?rc.has(shipperKey(consignee)):(sh.has(shipperKey(shipper))||rc.has(shipperKey(consignee)))};
 }
 function partnerShippers(){const s=partnerScope();return s?listOf(s.org&&s.org.Shippers):null}
 function visLines(){const sc=partnerScope();return sc?S.lines.filter(l=>sc.has(l.Shipper,l.Consignee)):S.lines}
 function shipperFieldHTML(){const s=partnerScope();if(s&&s.shippers.size)return `<select id="f_shipper" class="in">${listOf(s.org.Shippers).map(x=>`<option>${esc(x)}</option>`).join('')}</select>`;return `<input id="f_shipper" class="in" list="dl_shipper" autocomplete="off">`}
 function consigneeFieldHTML(){const s=partnerScope();if(s&&s.receivers.size&&!s.shippers.size)return `<select id="f_consignee" class="in">${listOf(s.org.Receivers).map(x=>`<option>${esc(x)}</option>`).join('')}</select>`;return `<input id="f_consignee" class="in" list="dl_consignee" autocomplete="off">`}
-function defaultPartnerAccess(){return ['tasks','track','request','milestones','editship','team']}
-function defaultPexecAccess(){return ['tasks','track','request','milestones','editship']}
+function defaultPartnerAccess(){return ['tasks','track','request','milestones','editship','team','redirects','redirectreq']}
+function defaultPexecAccess(){return ['tasks','track','request','milestones','editship','redirects','redirectreq']}
 function migrateData(){
   (S.warehouses||[]).forEach(w=>{if(!WH_TYPES.includes(w.type))w.type=whTypeGuess(w)});
   (S.users||[]).forEach(u=>{if(u.Role==='Logistics Partner')u.Role=PARTNER;['Shippers','Receivers','Partner','Phone','Location'].forEach(k=>{if(u[k]===undefined)u[k]=''});u.Type=roleType(u.Role)});
@@ -2706,6 +2712,7 @@ function userAddFromForm(){
   if(type==='Carrier'&&!carrier)return {msg:'Enter the carrier this user belongs to'};
   if(type==='Warehouse'&&!whSel.length)return {msg:'Choose at least one warehouse for this Warehouse user'};
   if(type==='External Logistics Partner'&&!sh&&!rc)return {msg:'Enter at least one shipper or receiver for this logistics partner'};
+  if(type==='External Logistics Partner'&&sh&&rc)return {msg:'A partner works by shipper or by receiver, never both. Fill in only one of the two lists'};
   if(type==='Partner Executive'&&!S.users.some(u=>u.Role===PARTNER&&u.UserEmail===partner))return {msg:'Choose the logistics partner this executive works under'};
   const pe=typeof acctPreCheck==='function'?acctPreCheck():'';if(pe)return {msg:pe};
   S.users.push({UserEmail:em,DisplayName:val('u_name')||em,Role:role,Type:roleType(role),Phone:val('u_phone').trim(),Location:val('u_loc').trim(),Carrier:carrier,Warehouses:type==='Warehouse'?whSel.join('; '):'',Shippers:type==='External Logistics Partner'?sh:'',Receivers:type==='External Logistics Partner'?rc:'',Partner:type==='Partner Executive'?partner:''});
@@ -2716,7 +2723,7 @@ function userTypeFields(){
   const L=S.users.filter(u=>u.Role===PARTNER);
   return `<select id="u_type" class="in" style="width:auto" aria-label="User type">${USER_TYPES.map(t=>`<option>${t}</option>`).join('')}</select>
   <input id="u_phone" class="in" placeholder="Phone" style="width:150px" autocomplete="off"><input id="u_loc" class="in" placeholder="Location" style="width:170px" autocomplete="off">
-  <input id="u_receivers" class="in" placeholder="Receivers (partner only), separated by ;" style="width:280px" autocomplete="off">
+  ${mpd('receivers','<input type="hidden" id="u_receivers">','','Receivers (External Logistics Partner)')}
   <select id="u_partner" class="in" style="width:auto" aria-label="Logistics partner for a Partner Executive"><option value="">Partner (Partner Executive only)</option>${L.map(u=>`<option value="${esc(u.UserEmail)}">${esc(u.DisplayName)}</option>`).join('')}</select>`;
 }
 /* ----- My team: a logistics partner manages its own executives ----- */
@@ -2799,7 +2806,7 @@ function migratePerms(){
 {const m0=migrateData;migrateData=function(){m0.apply(this,arguments);migratePerms()}}
 /* ========== export all data (ZIP or JSON) and restore from a dump ========== */
 const DATASETS=[
- {id:'shipments',file:'shipments.json',label:'Shipment data',keys:['lines','subs','revisions','docs','rg','rgs']},
+ {id:'shipments',file:'shipments.json',label:'Shipment data',keys:['lines','subs','revisions','docs','rg','rgs','redirects']},
  {id:'milestones',file:'milestones.json',label:'Milestones',keys:['events']},
  {id:'slots',file:'delivery_slots.json',label:'Delivery slots',keys:['slots','slotBlocks']},
  {id:'users',file:'user_list.json',label:'User list, roles and access',keys:['users','access','customRoles','accounts']},
@@ -3020,7 +3027,7 @@ function monBarHTML(){
 {const s0=addSampleHistory;addSampleHistory=function(){const r=s0.apply(this,arguments);S.lines.forEach(l=>{if(l.Mode)l.Mode=normMode(l.Mode);if(l.ContainerType)l.ContainerType=normCtype(l.ContainerType)});return r}}
 document.addEventListener('change',e=>{if(e.target&&e.target.id==='f_ctype'){const b=document.getElementById('setptBox');if(b){b.style.display=isReefer(e.target.value)?'':'none';if(!isReefer(e.target.value)){const i=document.getElementById('f_setpt');if(i)i.value=''}}}});
 /* ========== demo sign-in (email and password), problem log, report a problem ========== */
-const APP_BUILD='site build 2026-11-14 18:34 UTC';
+const APP_BUILD='site build 2026-11-14 19:52 UTC';
 const ErrLog={key:'ect.errors',max:60,
   add(kind,msg,src){try{const a=JSON.parse(localStorage.getItem(this.key)||'[]');a.push({t:new Date().toISOString(),kind,msg:String(msg==null?'':msg).slice(0,300),src:String(src||'').slice(0,160),view:(typeof S!=='undefined'&&S&&S.view)||'',role:(typeof S!=='undefined'&&S&&S.role)||''});while(a.length>this.max)a.shift();localStorage.setItem(this.key,JSON.stringify(a))}catch(e){}},
   list(){try{return JSON.parse(localStorage.getItem(this.key)||'[]')}catch(e){return []}},
@@ -3109,7 +3116,7 @@ function errCard(){
 }
 /* ========== shared data between devices (Supabase table ect_state) ========== */
 const SH_KEYS=PERSIST_KEYS.filter(k=>!['today','utcTime','whFail'].includes(k));
-const SH_ID={lines:'LineID',events:'EventID',users:'UserEmail',subs:'SubscriptionID',quotes:'id',invoices:'id',slots:'id',slotBlocks:'id',warehouses:'code',reports:'id',views:'id',customRoles:'name',accounts:'email',docs:'id',rgs:'id'};
+const SH_ID={lines:'LineID',events:'EventID',users:'UserEmail',subs:'SubscriptionID',quotes:'id',invoices:'id',slots:'id',slotBlocks:'id',warehouses:'code',reports:'id',views:'id',customRoles:'name',accounts:'email',docs:'id',rgs:'id',redirects:'id'};
 const SH_APPEND=['revisions','whLog','outbox','audit'];
 const SH_OBJ=['access','remind','whNotified','wh','settings','brand'];
 const Shared={v:0,base:null,baseStr:null,status:'off',err:'',last:null,by:'',busy:false,again:false,force:false,merges:0,renames:[],conflicts:0,polls:0,pushes:0,hold:false,lateRender:false,lastToast:0,trace:[]};
@@ -3648,7 +3655,7 @@ function detailModal(ref){
   <h3 class="sec">History</h3>${ev.length?`<div class="tbw"><table class="tb"><tr><th>Date</th><th>Status</th><th>Location</th><th>Note</th><th>Posted by</th></tr>${ev.map(e=>`<tr><td>${fmt(e.EventDate)}</td><td>${esc(e.Status)}</td><td>${esc(e.Location)}</td><td>${esc(e.Note)}</td><td>${esc(e.PostedBy)}</td></tr>`).join('')}</table></div>`:'<div class="empty">No history yet.</div>'}
   ${can('milestones')&&sh.status!=='Delivered'&&!sh.cancelled?`<h3 class="sec">Record an update</h3>${ufHTML(ref,false)}`:''}
   ${can('request')&&!sh.cancelled?`<h3 class="sec">Shipment details</h3><div class="row"><label class="f">Shipment type<select id="m_stype" class="in" style="width:auto">${(sh.stype?'':'<option value="" selected>Not set</option>')+TYPES.map(x=>`<option ${x===sh.stype?'selected':''}>${x}</option>`).join('')}</select></label><label class="f">Nature of goods<select id="m_nature" class="in" style="width:auto">${(sh.nature?'':'<option value="" selected>Not set</option>')+NATURES.map(x=>`<option ${x===sh.nature?'selected':''}>${x}</option>`).join('')}</select></label><button class="btn" data-act="saveType" data-ref="${esc(ref)}" style="align-self:flex-end">Save details</button></div>`:''}
-  <div class="row sec">${sh.cancelled?'':`<button class="btn" data-act="subOpen" data-ref="${esc(ref)}">Email me updates</button>`}${can('editship')&&!sh.cancelled?`<button class="btn" data-act="editOpen" data-ref="${esc(ref)}">Edit shipment</button>`:''}${can('cancelship')&&!sh.cancelled?`<button class="btn danger" data-act="cancelOpen" data-ref="${esc(ref)}">Cancel this shipment</button>`:''}</div>`);
+  <div class="row sec">${sh.cancelled?'':`<button class="btn" data-act="subOpen" data-ref="${esc(ref)}">Email me updates</button>`}${can('editship')&&!sh.cancelled?`<button class="btn" data-act="editOpen" data-ref="${esc(ref)}">Edit shipment</button>`:''}${rdEligible(sh)&&(can('redirect')||can('redirectreq'))?`<button class="btn" data-act="rdOpen" data-ref="${esc(ref)}">${can('redirect')?'Redirect':'Request redirect'}</button>`:''}${can('cancelship')&&!sh.cancelled?`<button class="btn danger" data-act="cancelOpen" data-ref="${esc(ref)}">Cancel this shipment</button>`:''}</div>`);
 }
 
 /* ----- 2. Request form ----- */
@@ -3657,8 +3664,8 @@ const opts=(arr,sel)=>arr.map(o=>`<option ${o===sel?'selected':''}>${esc(o)}</op
 function dl(id,key){return `<datalist id="${id}">${uniq([...(key==='WarehouseDestination'?S.warehouses.filter(w=>w.active).map(w=>w.code):[]),...visLines().map(l=>l[key])]).sort().map(v=>`<option value="${esc(v)}"${key==='WarehouseDestination'&&whFind(v)?` label="${esc(whFind(v).type||'')}"`:''}>`).join('')}</datalist>`}
 function viewRequest(){
   return pageHead('Shipment Requests','Enter one shipment with as many item lines as needed. The shipment ID is created for you, and each item is saved as its own row.')+
-  `<div class="tabs"><button class="${!['bulk','update'].includes(S.ui.reqTab)?'on':''}" data-act="reqTab" data-t="single">Single entry</button><button class="${S.ui.reqTab==='bulk'?'on':''}" data-act="reqTab" data-t="bulk">Bulk upload</button>${can('editship')?`<button class="${S.ui.reqTab==='update'?'on':''}" data-act="reqTab" data-t="update">Update existing</button>`:''}</div>`+
-  (S.ui.reqTab==='bulk'?bulkPanel():S.ui.reqTab==='update'&&can('editship')?updatePanel():singlePanel());
+  `<div class="tabs"><button class="${!['bulk','update','mine','others'].includes(S.ui.reqTab)?'on':''}" data-act="reqTab" data-t="single">Single entry</button><button class="${S.ui.reqTab==='bulk'?'on':''}" data-act="reqTab" data-t="bulk">Bulk upload</button>${can('editship')?`<button class="${S.ui.reqTab==='update'?'on':''}" data-act="reqTab" data-t="update">Update existing</button>`:''}${partnerScope()?`<button class="${S.ui.reqTab==='mine'?'on':''}" data-act="reqTab" data-t="mine">Entered by Us (${ships().filter(s=>entKind(s)==='us').length})</button><button class="${S.ui.reqTab==='others'?'on':''}" data-act="reqTab" data-t="others">Entered by Others (${ships().filter(s=>entKind(s)!=='us').length})</button>`:''}</div>`+
+  (S.ui.reqTab==='bulk'?bulkPanel():S.ui.reqTab==='update'&&can('editship')?updatePanel():(S.ui.reqTab==='mine'||S.ui.reqTab==='others')&&partnerScope()?enteredPanel(S.ui.reqTab):singlePanel());
 }
 function singlePanel(){
   const saved=S.lastSaved?`<div class="okbox"><b>Saved ${esc(S.lastSaved.ref)}</b> with ${S.lastSaved.rows.length} item row(s). Each row below is one line in the shipments sheet.
@@ -3678,7 +3685,7 @@ function singlePanel(){
    <label class="f">Movement type<select id="f_move">${opts(['Freight','Courier'],'Freight')}</select></label>
    <label class="f">Origin country<input id="f_ocountry" class="in" list="dl_oc"></label><label class="f">Loading port (origin)<input id="f_oport" class="in" list="dl_op"></label>
    <label class="f">Destination country<input id="f_dcountry" class="in" list="dl_dc"></label><label class="f">Destination port<input id="f_dport" class="in" list="dl_dp"></label>
-   <label class="f">Warehouse destination<input id="f_wh" class="in" list="dl_wh"><small id="f_wh_type" class="mu"></small></label></div>
+   <label class="f">Warehouse destination${whFieldHTML()}<small id="f_wh_type" class="mu"></small></label></div>
    <div id="freightNote" class="note" style="display:none;margin:12px 0 0">Freight is arranged by the shipper, so no freight quote or carrier invoice is needed for this shipment.</div>
    ${dl('dl_shipper','Shipper')}${dl('dl_consignee','Consignee')}${dl('dl_carrier','Carrier')}${dl('dl_oc','OriginCountry')}${dl('dl_op','OriginPort')}${dl('dl_dc','DestinationCountry')}${dl('dl_dp','DestinationPort')}${dl('dl_wh','WarehouseDestination')}</div>
   <div class="card"><h3>Schedule and references</h3><div class="g4">
@@ -3721,6 +3728,7 @@ function saveShip(){
   [['f_stype','Shipment type'],['f_nature','Nature of goods'],['f_shipper','Shipper'],['f_consignee','Consignee'],['f_carrier','Carrier'],['f_ocountry','Origin country'],['f_oport','Origin port'],['f_dcountry','Destination country'],['f_dport','Destination port'],['f_wh','Warehouse destination'],['f_pickup','Pickup planned'],['f_eta','ETA']].forEach(([i,l])=>need(i,l));
   {const sc=partnerScope();if(sc&&!sc.has(val('f_shipper'),val('f_consignee'))){e.push('The shipper or receiver must be one assigned to your company');bad.add('f_shipper');bad.add('f_consignee')}}
   {const dc=docFormCheck();if(dc)e.push(dc)}
+  {const pc=partnerEntryCheck({shipper:val('f_shipper'),consignee:val('f_consignee'),wh:val('f_wh')});if(pc)pc.forEach(x=>{if(!e.includes(x))e.push(x)})}
   {const shp=val('f_shipper'),seen=new Set();S.draft.forEach(d=>{const k=normInvNo(d.inv);if(!k||seen.has(k))return;seen.add(k);const hit=invDupFind(shp,d.inv,null);if(hit){e.push(invDupMsg(hit,d.inv));bad.add('i_inv')}})}
   {const sp=val('f_setpt');if(sp!==''){if(!spOk(sp)){e.push('Reefer set point must be a number from -40 to 40');bad.add('f_setpt')}else if(!isReefer(val('f_ctype'))||!isOcean(val('f_mode'))){e.push('A set point can be entered only for a reefer container (20RF or 40RF)');bad.add('f_setpt')}}}
   if(val('f_pickup')&&val('f_eta')&&val('f_eta')<val('f_pickup')){e.push('ETA cannot be before the planned pickup');bad.add('f_eta')}
@@ -3843,7 +3851,7 @@ function readUpload(file,cb){
 }
 const GROUP_KEYS=['ShipmentType','NatureOfGoods','Shipper','Consignee','Carrier','Mode','IncoTerm','OriginPort','DestinationPort'];
 const BULK_DATE_COLS=['PickupPlanned','ETDPlanned','ETA','ESTDelivery','NominatedOn','PickupActual','ETDActual','ETAActual','DeliveredOn'];
-function bulkRowBasic(r){const e=bulkRowBasic0(r),sc=partnerScope();if(sc&&(r.Shipper||r.Consignee)&&!sc.has(r.Shipper,r.Consignee))e.push('Shipper "'+r.Shipper+'" and receiver "'+r.Consignee+'" are not assigned to your company');return e}
+function bulkRowBasic(r){const e=bulkRowBasic0(r),sc=partnerScope();if(sc&&(r.Shipper||r.Consignee))(partnerEntryCheck({shipper:r.Shipper,consignee:r.Consignee,wh:r.WarehouseDestination})||[]).forEach(x=>e.push(x));return e}
 function bulkRowBasic0(r){
   const e=[];
   ['Shipper','Consignee','Carrier','OriginCountry','OriginPort','DestinationCountry','DestinationPort','WarehouseDestination','InvoiceNumber','ItemNumber'].forEach(c=>{if(!r[c])e.push(c+' is empty')});
@@ -4150,13 +4158,13 @@ function bulkCancelRun(reason,note){
 }
 function monHTML(all){
   const D=S.ui.dash,q=D.q.toLowerCase();
-  const rows=(D.status==='Cancelled'?cancelledList():all).filter(sh=>(D.status==='All'||D.status==='Cancelled'||sh.status===D.status||(D.status==='Delayed'&&isLateNow(sh))||(D.status==='Invoice pending'&&can('invoices')&&isInvPending(sh))||(D.status==='At risk'&&riskInfo(sh)&&!isLateNow(sh))||(D.status==='Free time ending'&&['ending','over'].includes((freeInfo(sh)||{}).state)))).filter(sh=>!D.overdueOnly||isLateNow(sh)).filter(sh=>!D.missDocs||missingDocs(sh)).filter(sh=>!D.pendRG||rgPending(sh)).filter(sh=>!D.poMiss||poMissing(sh))
+  const rows=(D.status==='Cancelled'?cancelledList():all).filter(sh=>(D.status==='All'||D.status==='Cancelled'||sh.status===D.status||(D.status==='Delayed'&&isLateNow(sh))||(D.status==='Invoice pending'&&can('invoices')&&isInvPending(sh))||(D.status==='At risk'&&riskInfo(sh)&&!isLateNow(sh))||(D.status==='Free time ending'&&['ending','over'].includes((freeInfo(sh)||{}).state)))).filter(sh=>!D.overdueOnly||isLateNow(sh)).filter(sh=>!D.missDocs||missingDocs(sh)).filter(sh=>!D.pendRG||rgPending(sh)).filter(sh=>!D.poMiss||poMissing(sh)).filter(sh=>!D.ent||entMatch(sh,D.ent))
     .filter(sh=>!q||(sh.ref+' '+sh.carrier+' '+sh.shipper+' '+sh.consignee+' '+sh.route+' '+sh.pos.join(' ')).toLowerCase().includes(q)).sort((a,b)=>(a.due||'9').localeCompare(b.due||'9'));
   if(!rows.length)return monBarHTML()+monEmptyHTML();
   const cb=can('cancelship'),elig=s=>!s.cancelled;D.chk=(D.chk||[]).filter(r=>rows.some(s=>s.ref===r&&elig(s)));
   const allSel=cb&&rows.some(elig)&&rows.filter(elig).every(s=>D.chk.includes(s.ref));
-  return `${monBarHTML()}<div class="tbw"><table class="tb" data-sort="on"><tr>${cb?`<th style="width:34px"><input type="checkbox" id="monAll" data-act="monAll" aria-label="Select all shown shipments" ${allSel?'checked':''}></th>`:''}<th>Shipment</th><th>Mode</th><th>Type</th><th>Route</th><th>Delivered To</th><th>Carrier</th><th>Progress</th><th>Due</th><th>Status</th>${can('invoices')?'<th>Freight invoice</th>':''}${can('cancelship')?'<th></th>':''}</tr>`+rows.map(sh=>`<tr class="click${can('invoices')&&isInvPending(sh)?' tr-pend':''}" data-act="open" data-ref="${sh.ref}">${cb?`<td><input type="checkbox" data-act="monSel" data-ref="${sh.ref}" aria-label="Select ${sh.ref}" ${elig(sh)?'':'disabled'} ${D.chk.includes(sh.ref)?'checked':''}></td>`:''}<td><b>${sh.ref}</b></td><td>${modeBadge(sh.mode)}</td><td>${typeBadge(sh.stype)}${dgTag(sh.nature)}</td><td>${esc(sh.route)}</td><td>${whCell(sh)}</td><td>${esc(sh.carrier)}</td><td>${miniHTML(sh)}</td>
-    <td>${dueCell(sh)}</td><td>${pill(sh)}${docBadge(sh)}${poBadge(sh)}</td>${can('invoices')?`<td>${sh.cancelled?'-':invPill(sh)}</td>`:''}${can('cancelship')?`<td class="r">${sh.cancelled?'':`<button class="btn sm danger" data-act="cancelOpen" data-ref="${sh.ref}">Cancel</button>`}</td>`:''}</tr>`).join('')+'</table></div>';
+  return `${monBarHTML()}<div class="tbw"><table class="tb" data-sort="on"><tr>${cb?`<th style="width:34px"><input type="checkbox" id="monAll" data-act="monAll" aria-label="Select all shown shipments" ${allSel?'checked':''}></th>`:''}<th>Shipment</th><th>Mode</th><th>Type</th><th>Route</th><th>Delivered To</th><th>Carrier</th><th>Entered By</th><th>Progress</th><th>Due</th><th>Status</th>${can('invoices')?'<th>Freight invoice</th>':''}${can('cancelship')?'<th></th>':''}</tr>`+rows.map(sh=>`<tr class="click${can('invoices')&&isInvPending(sh)?' tr-pend':''}" data-act="open" data-ref="${sh.ref}">${cb?`<td><input type="checkbox" data-act="monSel" data-ref="${sh.ref}" aria-label="Select ${sh.ref}" ${elig(sh)?'':'disabled'} ${D.chk.includes(sh.ref)?'checked':''}></td>`:''}<td><b>${sh.ref}</b></td><td>${modeBadge(sh.mode)}</td><td>${typeBadge(sh.stype)}${dgTag(sh.nature)}</td><td>${esc(sh.route)}</td><td>${whCell(sh)}</td><td>${esc(sh.carrier)}</td><td>${enteredCell(sh)}</td><td>${miniHTML(sh)}</td>
+    <td>${dueCell(sh)}</td><td>${pill(sh)}${docBadge(sh)}${poBadge(sh)}${redBadge(sh)}</td>${can('invoices')?`<td>${sh.cancelled?'-':invPill(sh)}</td>`:''}${can('cancelship')?`<td class="r">${sh.cancelled?'':`<button class="btn sm danger" data-act="cancelOpen" data-ref="${sh.ref}">Cancel</button>`}</td>`:''}</tr>`).join('')+'</table></div>';
 }
 function onTime(arr,k){
   let n=0,on=0;const late=[];
@@ -6214,7 +6222,7 @@ function usersTemplateSheets(){
 }
 function userFormSync(){
   const t=(document.getElementById('u_type')||{}).value;if(!t)return;
-  const need={u_role:['Internal'],u_carrier:['Carrier'],u_shippers:['External Logistics Partner'],u_receivers:['External Logistics Partner'],u_partner:['Partner Executive']};
+  const need={u_role:['Internal'],u_carrier:['Carrier'],u_partner:['Partner Executive']};
   Object.entries(need).forEach(([id,ts])=>{const on=ts.includes(t),e=document.getElementById(id);if(!e)return;e.disabled=!on;e.title=on?'':'Not needed for this user type';if(!on&&e.tagName==='INPUT')e.value=''});
   const b=document.querySelector('#u_whdd .whdd-b'),on=t==='Warehouse',sel=document.getElementById('u_wh');
   if(b){b.disabled=!on;b.title=on?'':'Not needed for this user type';if(!on){document.querySelectorAll('#u_whdd input[type=checkbox]').forEach(c=>{c.checked=false});if(sel)[...sel.options].forEach(o=>{o.selected=false});b.textContent='Warehouses';document.querySelector('#u_whdd .whdd-p').hidden=true;b.setAttribute('aria-expanded','false')}}
@@ -6318,6 +6326,220 @@ document.addEventListener('click',e=>{
 
 document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('[data-act=cuView]');if(!t)return;e.stopImmediatePropagation();if((t.dataset.v==='driver')!==driverMode()){const b=document.createElement('button');b.dataset.act='cuDriver';document.body.appendChild(b);b.click();b.remove()}},true);
 {const v0=viewCarrierUpdates;viewCarrierUpdates=function(){const h0=v0(),a=h0.indexOf('data-act="cuDownload"');if(a<0)return h0;const b=h0.lastIndexOf('<div class="row"',a),{all}=cuData();return h0.slice(0,b)+calGen('cu',cuItems(all))+h0.slice(b)}}
+/* ========== redirect shipments; who entered a shipment ========== */
+const RD_REASONS=[['Documents',['Incorrect or missing documents','PO or invoice mismatch']],['Warehouse',['No space or dock occupied','Maintenance or repair','PI or stock-count audit','Holiday or shutdown','Staff or equipment unavailable','Safety inspection']],['Goods',['Dangerous goods cannot be handled','Temperature-controlled space unavailable','Damaged or quality hold']],['Commercial',['Receiver or buyer request','PO cancelled or changed','Stock needed elsewhere']],['Regulatory and transport',['Customs hold or inspection','Port or road disruption','Strike']],['Other',['Wrong destination entered','Other']]];
+const RD_FLAT=RD_REASONS.flatMap(g=>g[1].map(r=>[g[0],r]));
+const rdGroupOf=r=>(RD_FLAT.find(x=>x[1]===r)||[''])[0];
+const rdEligible=sh=>!!sh&&!sh.cancelled&&sh.status!=='Delivered';
+const rdNewId=()=>'RD-'+String(Math.max(0,...(S.redirects||[]).map(r=>Number(String(r.id).split('-').pop())||0))+1).padStart(5,'0');
+function orgKeyNow(){const c=typeof partnerCtx==='function'?partnerCtx():null;if(c&&c.org)return String(c.org.UserEmail).toLowerCase();if(S.role==='Carrier Partner')return 'carrier:'+S.carrier;if(S.role==='Warehouse Team')return 'warehouse:'+String(S.email||'').toLowerCase();return 'logistics'}
+function stampEntered(ref){const o=orgKeyNow();S.lines.forEach(l=>{if(l.ShipmentRef===ref&&!l.EnteredBy){l.EnteredBy=S.email||'';l.EnteredRole=S.role;l.EnteredOrg=o;l.EnteredOn=S.today}})}
+{const c0=createShipment;createShipment=function(b,items){const ref=c0.apply(this,arguments);try{stampEntered(ref)}catch(e){}return ref}}
+const enteredOf=sh=>{const l=(sh&&sh.lines&&sh.lines[0])||{};return {by:l.EnteredBy||'',role:l.EnteredRole||'',org:l.EnteredOrg||'',on:l.EnteredOn||''}};
+function entKind(sh){const r=enteredOf(sh);if(!r.org)return 'norec';const c=typeof partnerCtx==='function'?partnerCtx():null;if(c&&c.org)return r.org===String(c.org.UserEmail).toLowerCase()?'us':'others';return r.org==='logistics'?'logistics':'partner'}
+const enteredName=r=>{const u=S.users.find(x=>String(x.UserEmail).toLowerCase()===String(r.by).toLowerCase());return u?u.DisplayName:(r.by||'')};
+const enteredCell=sh=>{const r=enteredOf(sh);return r.org?`${esc(enteredName(r))}<br><small class="mu">${esc(r.role)}${r.on?', '+fmtS(r.on):''}</small>`:'<span class="mu">Not recorded</span>'};
+function lastTouch(sh){const a=(S.audit||[]).find(x=>x.ref===sh.ref);return a?esc(String(a.user||'').split('@')[0])+'<br><small class="mu">'+esc(String(a.time||'').slice(0,10))+'</small>':'<span class="mu">-</span>'}
+function enteredPanel(which){
+  const all=ships(),us=all.filter(s=>entKind(s)==='us'),ot=all.filter(s=>entKind(s)!=='us'),list=(which==='mine'?us:ot).slice().sort((a,b)=>(a.due||'9').localeCompare(b.due||'9')||a.ref.localeCompare(b.ref));
+  const T=(l,n,cls)=>`<div class="kpi ${cls||''}"><small>${l}</small><b>${n}</b></div>`;
+  return `<div class="kpis" style="margin-bottom:12px">${T('Total',list.length)}${T('Not Delivered',list.filter(s=>s.status!=='Delivered').length)}${T('Delayed',list.filter(isLateNow).length,list.some(isLateNow)?'late':'')}${T('Delivered',list.filter(s=>s.status==='Delivered').length,'ok')}${T('Missing Docs',list.filter(missingDocs).length)}</div>
+  <p class="hint" style="margin:0 0 8px">${which==='mine'?'Shipments entered by your company (you and your executives).':'Shipments in your scope that were entered by the shipper, the receiver or logistics. Shipments entered before this tracking began show Not recorded. You can add and edit these too.'}</p>
+  <div class="card" style="padding:0"><div class="tbw"><table class="tb"><tr><th>Shipment</th><th>References</th><th>Entered By</th><th>Last Updated By</th><th>Due</th><th>Status</th></tr>${list.map(sh=>`<tr class="click" data-act="open" data-ref="${esc(sh.ref)}"><td>${shipIdCell(sh)}</td><td>${refsCell(sh)}</td><td>${enteredCell(sh)}</td><td>${lastTouch(sh)}</td><td>${dueCell(sh)}</td><td>${pill(sh)}${docBadge(sh)}</td></tr>`).join('')||'<tr><td colspan="6" class="empty">Nothing here yet.</td></tr>'}</table></div></div>`;
+}
+const entMatch=(sh,f)=>{const k=entKind(sh);return f==='logistics'?k==='logistics':f==='partner'?k==='partner':f==='norec'?k==='norec':true};
+{const m0=monBarHTML;monBarHTML=function(){let h=m0.apply(this,arguments);const D=S.ui.dash;return h.replace('<label class="sw','<label class="mu sm">Entered by <select data-ch="monEnt" class="in" style="width:auto" aria-label="Entered by"><option value="">Anyone</option><option value="logistics" '+(D.ent==='logistics'?'selected':'')+'>Logistics</option><option value="partner" '+(D.ent==='partner'?'selected':'')+'>Partner companies</option><option value="norec" '+(D.ent==='norec'?'selected':'')+'>Not recorded</option></select></label><label class="sw')}}
+/* ----- redirect ----- */
+function receiverForWarehouse(code,exceptRef){
+  const w=S.warehouses.find(x=>whKey(x.code)===whKey(code));const own=w&&String(w.Receivers||'').split(/[;|]+/).map(x=>x.trim()).filter(Boolean)[0];if(own)return own;
+  const c=new Map();S.lines.forEach(l=>{if(l.ShipmentRef!==exceptRef&&whKey(l.WarehouseDestination)===whKey(code)&&l.Consignee)c.set(l.Consignee,(c.get(l.Consignee)||0)+1)});let b='',n=0;c.forEach((v,k)=>{if(v>n){b=k;n=v}});return b;
+}
+function rdWhOptions(sel,exclude){return S.warehouses.filter(w=>whKey(w.code)!==whKey(exclude)).map(w=>`<option value="${esc(w.code)}" ${w.code===sel?'selected':''}>${esc(w.code)}${w.city?' ('+esc(w.city)+')':''}</option>`).join('')}
+function rdReasonOptions(sel){return '<option value="">Choose a reason</option>'+RD_REASONS.map(([g,l])=>`<optgroup label="${esc(g)}">${l.map(r=>`<option ${r===sel?'selected':''}>${esc(r)}</option>`).join('')}</optgroup>`).join('')}
+function rdCheck(ref,f,mode){
+  const sh=getShip(ref),e=[];if(!sh)return ['Shipment not found'];
+  if(mode==='direct'&&!can('redirect'))return ['Only Logistics Executives, Associates and Analysts can redirect a shipment. You can send a request instead'];
+  if(mode==='request'&&!can('redirectreq'))return ['Your role cannot request a redirect'];
+  if(!rdEligible(sh))return [ref+' is '+(sh.cancelled?'cancelled':'already delivered')+', so it cannot be redirected'];
+  const w=S.warehouses.find(x=>x.code===f.to);if(!w)e.push('Choose the new warehouse');else if(whKey(w.code)===whKey(whCodeOf(sh)))e.push('That is already the destination warehouse');
+  if(!RD_FLAT.some(x=>x[1]===f.reason))e.push('Choose a reason');
+  if(f.reason==='Other'&&String(f.note||'').trim().length<3)e.push('Describe the reason when you choose Other');
+  if(f.newDue&&(!isoOK(f.newDue)||f.newDue<S.today))e.push('The new expected delivery date must be today or later');
+  if(mode==='request'&&S.redirects.some(r=>r.ref===ref&&r.status==='Requested'))e.push('A redirect request for '+ref+' is already waiting for approval');
+  return e;
+}
+const rdLogisticsEmails=()=>S.users.filter(u=>['Logistics Executive','Logistics Associate','Logistics Analyst'].includes(u.Role)).map(u=>u.UserEmail);
+function rdAffected(sh,toCode){const rc=receiverForWarehouse(toCode,sh.ref);return S.users.filter(u=>[PARTNER,PEXEC].includes(u.Role)).filter(u=>{const org=u.Role===PEXEC?S.users.find(x=>String(x.UserEmail).toLowerCase()===String(u.Partner).toLowerCase()):u;if(!org)return false;const sk=shipperKey(sh.shipper),rk=shipperKey(sh.consignee),nk2=shipperKey(rc),L=v=>String(v||'').split(/[;|]+/).map(shipperKey).filter(Boolean);return L(org.Shippers).includes(sk)||L(org.Receivers).includes(rk)||L(org.Receivers).includes(nk2)})}
+function rdApply(ref,f,meta){
+  const sh=getShip(ref),from=whCodeOf(sh),oldRc=sh.consignee,newRc=receiverForWarehouse(f.to,ref),carrierUsers=S.users.filter(u=>u.Role==='Carrier Partner'&&canonCarrier(u.Carrier)===canonCarrier(sh.carrier)).map(u=>u.UserEmail);
+  const partners=rdAffected(sh,f.to).map(u=>u.UserEmail);
+  S.lines.forEach(l=>{if(l.ShipmentRef===ref){l.WarehouseDestination=f.to;if(newRc)l.Consignee=newRc;if(f.newDue)l.ESTDelivery=f.newDue}});
+  let cancelled=0;S.slots.filter(r=>r.ref===ref&&['Requested','Approved','Alternative proposed'].includes(slotEff(r))).forEach(r=>{r.status='Cancelled';slotLog(r,'Cancelled: the shipment was redirected to '+f.to);cancelled++;slotMail(r.by,'Delivery slot cancelled: '+ref,'The shipment has been redirected from '+from+' to '+f.to+' ('+f.reason+'). Please book a new delivery slot or day at '+f.to+'.','Delivery slot cancelled')});
+  const rec=Object.assign({id:meta.id||rdNewId(),ref,from,to:f.to,reason:f.reason,group:rdGroupOf(f.reason),note:String(f.note||'').trim(),newDue:f.newDue||'',status:'Approved',by:S.email,byRole:S.role,byOrg:orgKeyNow(),on:S.today,decidedBy:S.email,decidedOn:S.today,decisionNote:'',fromReceiver:oldRc,toReceiver:newRc||oldRc,slotsCancelled:cancelled},meta.rec||{},{status:'Approved',decidedBy:S.email,decidedOn:S.today,decisionNote:meta.decisionNote||'',slotsCancelled:cancelled});
+  if(meta.rec){Object.assign(meta.rec,rec)}else S.redirects.push(rec);
+  const body='Shipment '+ref+' ('+sh.route+') has been redirected.\n\nFrom: '+from+'\nTo: '+f.to+'\nReason: '+f.reason+(rec.note?' ('+rec.note+')':'')+(f.newDue?'\nNew expected delivery: '+fmt(f.newDue):'')+'\n\nAny delivery slot at the old warehouse was cancelled.';
+  const wo=S.warehouses.find(w=>whKey(w.code)===whKey(from)),wn=S.warehouses.find(w=>w.code===f.to);
+  slotMail([].concat(wo?wo.emails:[],wn?wn.emails:[],carrierUsers,partners,rec.by!==S.email?rec.by:[]),'Shipment redirected: '+ref+' to '+f.to,body,'Shipment redirected');
+  audit('Shipment redirected',ref,from+' to '+f.to+': '+f.reason+(rec.note?' ('+rec.note+')':'')+' ('+rec.id+')');
+  return {ok:true,msg:ref+' redirected from '+from+' to '+f.to+'.'+(cancelled?' '+cancelled+' delivery slot request(s) cancelled.':''),rec};
+}
+function rdRequest(ref,f){
+  const e=rdCheck(ref,f,'request');if(e.length)return {ok:false,msg:e[0],errs:e};
+  const sh=getShip(ref),rec={id:rdNewId(),ref,from:whCodeOf(sh),to:f.to,reason:f.reason,group:rdGroupOf(f.reason),note:String(f.note||'').trim(),newDue:f.newDue||'',status:'Requested',by:S.email,byRole:S.role,byOrg:orgKeyNow(),on:S.today,decidedBy:'',decidedOn:'',decisionNote:'',fromReceiver:sh.consignee,toReceiver:receiverForWarehouse(f.to,ref),slotsCancelled:0};
+  S.redirects.push(rec);
+  slotMail(rdLogisticsEmails(),'Redirect requested: '+ref+' to '+f.to,'A redirect has been requested by '+S.role+' ('+S.email+').\n\nShipment: '+ref+' ('+sh.route+')\nFrom: '+rec.from+'\nTo: '+f.to+'\nReason: '+f.reason+(rec.note?' ('+rec.note+')':'')+'\n\nPlease review it on the Redirects page.','Redirect request');
+  audit('Redirect requested',ref,rec.from+' to '+f.to+': '+f.reason+' ('+rec.id+')');
+  return {ok:true,msg:ref+': redirect request sent for approval.',rec};
+}
+function rdDecide(id,approve,note){
+  if(!can('redirect'))return {ok:false,msg:'Only Logistics Executives, Associates and Analysts can decide a redirect request'};
+  const r=S.redirects.find(x=>x.id===id);if(!r||r.status!=='Requested')return {ok:false,msg:'That request is no longer waiting for a decision'};
+  if(!approve){if(String(note||'').trim().length<3)return {ok:false,msg:'Give a reason for rejecting the request'};r.status='Rejected';r.decidedBy=S.email;r.decidedOn=S.today;r.decisionNote=String(note).trim();slotMail(r.by,'Redirect rejected: '+r.ref,'Your redirect request for '+r.ref+' (to '+r.to+') was rejected.\n\nReason: '+r.decisionNote,'Redirect decision');audit('Redirect rejected',r.ref,r.decisionNote+' ('+r.id+')');return {ok:true,msg:r.ref+': request rejected. The requester has been emailed.'}}
+  const f={to:r.to,reason:r.reason,note:r.note,newDue:r.newDue},e=rdCheck(r.ref,f,'direct');if(e.length)return {ok:false,msg:e[0]};
+  const x=rdApply(r.ref,f,{rec:r,id:r.id,decisionNote:String(note||'').trim()});slotMail(r.by,'Redirect approved: '+r.ref+' to '+r.to,'Your redirect request for '+r.ref+' was approved. The shipment now goes to '+r.to+'.','Redirect decision');return x;
+}
+function rdCancel(id){const r=S.redirects.find(x=>x.id===id);if(!r||r.status!=='Requested')return {ok:false,msg:'That request is no longer waiting'};if(!(r.by===S.email||r.byOrg===orgKeyNow()||can('redirect')))return {ok:false,msg:'You can only cancel your own requests'};r.status='Cancelled';r.decidedBy=S.email;r.decidedOn=S.today;audit('Redirect request cancelled',r.ref,r.id);return {ok:true,msg:'Request cancelled'}}
+function rdBulkPreview(refs,f){return refs.map(ref=>{const sh=getShip(ref),e=rdCheck(ref,f,'direct'),rc=receiverForWarehouse(f.to,ref);return {ref,sh,errs:e,from:sh?whCodeOf(sh):'',rc,rcChange:sh&&rc&&rc!==sh.consignee,slots:S.slots.filter(r=>r.ref===ref&&['Requested','Approved','Alternative proposed'].includes(slotEff(r))).length,partners:sh?rdAffected(sh,f.to).length:0}})}
+function rdBulkApply(refs,f){let ok=0,bad=0,slots=0;refs.forEach(ref=>{const e=rdCheck(ref,f,'direct');if(e.length){bad++;return}const r=rdApply(ref,f,{});if(r.ok){ok++;slots+=r.rec.slotsCancelled}else bad++});return {ok,bad,slots}}
+function redirectModal(ref){
+  const sh=getShip(ref);if(!sh)return;const direct=can('redirect'),w=whFind(whCodeOf(sh));
+  openModal(`<div class="mh"><h2>${direct?'Redirect':'Request a Redirect'}: ${esc(ref)}</h2><button class="x" data-act="close" aria-label="Close">&times;</button></div><p class="mu">Now going to <b>${esc(w?w.code:(whCodeOf(sh)||'-'))}</b>${w&&w.city?' ('+esc(w.city)+')':''}. ${direct?'The change is made straight away.':'Logistics reviews your request and you are emailed the decision.'}</p><div id="rd_err"></div>
+  <div class="g2"><label class="f">New warehouse<select id="rd_to" class="in"><option value="">Choose a warehouse</option>${rdWhOptions('',whCodeOf(sh))}</select></label><label class="f">Reason<select id="rd_reason" class="in">${rdReasonOptions('')}</select></label></div>
+  <div class="g2" style="margin-top:8px"><label class="f">Note (required for Other)<input id="rd_note" class="in" maxlength="200"></label><label class="f">New expected delivery (optional)<input type="date" id="rd_due" class="in" min="${S.today}"></label></div>
+  ${direct?'<div class="note" style="margin-top:8px">A delivery slot booked at the old warehouse is cancelled and the carrier is asked to rebook.</div>':''}<div class="row sec"><button class="btn pri" data-act="rdSave" data-ref="${esc(ref)}">${direct?'Redirect Shipment':'Send Request'}</button><button class="btn" data-act="close">Cancel</button></div>`);
+}
+const rdPill=s=>`<span class="pill ${({Requested:'warn',Approved:'ok',Rejected:'late',Cancelled:''})[s]||''}">${s==='Approved'?'Redirected':s==='Requested'?'Awaiting Approval':s}</span>`;
+function viewRedirects(){
+  const D=S.ui.rd=S.ui.rd||{f:'Awaiting',from:'',sel:[],to:'',reason:'',note:'',due:'',prev:null},may=can('redirect');
+  const all=S.redirects.filter(r=>may||r.byOrg===orgKeyNow()||r.by===S.email).slice().sort((a,b)=>String(b.on+b.id).localeCompare(String(a.on+a.id)));
+  const aw=all.filter(r=>r.status==='Requested'),list=D.f==='Awaiting'?aw:all,T=(l,n,cls)=>`<div class="kpi ${cls||''}"><small>${l}</small><b>${n}</b></div>`;
+  const rows=list.map(r=>{const sh=getShip(r.ref);return `<tr><td>${sh?shipIdCell(sh):esc(r.ref)}</td><td>${sh?refsCell(sh):''}</td><td>${esc(r.from)}<br><b>to ${esc(r.to)}</b></td><td>${esc(r.reason)}<br><small class="mu">${esc(r.group)}${r.note?': '+esc(r.note):''}</small></td><td>${esc(enteredName({by:r.by}))}<br><small class="mu">${esc(r.byRole)}, ${fmtS(r.on)}</small></td><td>${rdPill(r.status)}${r.decidedBy&&r.status!=='Requested'?'<br><small class="mu">'+esc(String(r.decidedBy).split('@')[0])+', '+fmtS(r.decidedOn)+(r.decisionNote?': '+esc(r.decisionNote):'')+'</small>':''}</td><td class="r">${r.status==='Requested'&&may?`<button class="btn sm pri" data-act="rdApprove" data-id="${r.id}">Approve</button> <button class="btn sm danger" data-act="rdRejectOpen" data-id="${r.id}">Reject</button>`:''}${r.status==='Requested'&&!may?`<button class="btn sm" data-act="rdCancelReq" data-id="${r.id}">Cancel Request</button>`:''}</td></tr>`}).join('');
+  let bulk='';
+  if(may){
+    const from=D.from,cand=from?ships().filter(s=>rdEligible(s)&&whKey(whCodeOf(s))===whKey(from)):[];D.sel=(D.sel||[]).filter(r=>cand.some(s=>s.ref===r));
+    const f={to:D.to,reason:D.reason,note:D.note,newDue:D.due};
+    bulk=`<div class="card"><h3>Redirect in Bulk</h3><p class="mu" style="margin:0 0 10px">For a closure or maintenance: pick the warehouse, tick the shipments that are still on their way, choose where they go, and review the preview before anything changes.</p>
+    <div class="row" style="gap:12px;flex-wrap:wrap;align-items:flex-end"><label class="f">From warehouse<select data-ch="rdField" data-k="from" class="in" style="width:auto"><option value="">Choose a warehouse</option>${S.warehouses.map(w=>`<option value="${esc(w.code)}" ${whKey(w.code)===whKey(from)?'selected':''}>${esc(w.code)}</option>`).join('')}</select></label>${from?`<span class="chips" style="margin:0"><button class="chip" data-act="rdBulkAll">Select all (${cand.length})</button><button class="chip" data-act="rdBulkNone">Clear</button></span>`:''}</div>
+    ${from?(cand.length?`<div class="tbw" style="max-height:260px;overflow:auto;margin-top:8px"><table class="tb" data-sort="off"><tr><th></th><th>Shipment</th><th>References</th><th>Carrier</th><th>Due</th><th>Status</th></tr>${cand.map(s=>`<tr><td><input type="checkbox" data-ch="rdTog" data-ref="${esc(s.ref)}" ${D.sel.includes(s.ref)?'checked':''} aria-label="Select ${esc(s.ref)}"></td><td>${shipIdCell(s)}</td><td>${refsCell(s)}</td><td>${esc(s.carrier)}</td><td>${dueCell(s)}</td><td>${pill(s)}</td></tr>`).join('')}</table></div>`:'<div class="empty">No shipments are on their way to this warehouse.</div>'):''}
+    <div class="g4" style="margin-top:10px"><label class="f">New warehouse<select data-ch="rdField" data-k="to" class="in"><option value="">Choose a warehouse</option>${rdWhOptions(D.to,from)}</select></label><label class="f">Reason<select data-ch="rdField" data-k="reason" class="in">${rdReasonOptions(D.reason)}</select></label><label class="f">Note (required for Other)<input data-ch="rdField" data-k="note" class="in" value="${esc(D.note||'')}" maxlength="200"></label><label class="f">New expected delivery<input type="date" data-ch="rdField" data-k="due" class="in" value="${esc(D.due||'')}" min="${S.today}"></label></div>
+    <div class="row sec"><button class="btn pri" data-act="rdBulkPrev" ${D.sel.length?'':'disabled'}>Preview ${D.sel.length} Shipment(s)</button></div>
+    ${D.prev?`<div id="rd_prev" class="note" style="margin-top:10px"><b>Preview.</b> ${D.prev.filter(p=>!p.errs.length).length} shipment(s) will be redirected, ${D.prev.filter(p=>p.errs.length).length} cannot be.<div class="tbw" style="margin-top:6px"><table class="tb" data-sort="off"><tr><th>Shipment</th><th>From</th><th>To</th><th>Receiver</th><th>Slots Cancelled</th><th>Partners Told</th><th>Result</th></tr>${D.prev.map(p=>`<tr><td>${esc(p.ref)}</td><td>${esc(p.from)}</td><td>${esc(f.to)}</td><td>${p.rcChange?esc(p.sh.consignee)+' to '+esc(p.rc):'unchanged'}</td><td>${p.slots}</td><td>${p.partners}</td><td>${p.errs.length?'<span class="late-t">'+esc(p.errs[0])+'</span>':'<span class="ok-t">Ready</span>'}</td></tr>`).join('')}</table></div><div class="row sec"><button class="btn pri" data-act="rdBulkApply" ${D.prev.some(p=>!p.errs.length)?'':'disabled'}>Apply Redirect</button><button class="btn" data-act="rdBulkBack">Back</button></div></div>`:''}</div>`;
+  }
+  return pageHead('Redirects',may?'Review redirect requests and redirect shipments to another warehouse. A redirect changes the destination, cancels any slot booked at the old warehouse, and emails the people affected.':'Request a redirect of a shipment, and follow the decision. Logistics reviews every request.')+
+  `<div class="kpis" style="margin-bottom:12px">${T('Awaiting Approval',aw.length,aw.length?'late':'')}${T('Redirected',all.filter(r=>r.status==='Approved').length,'ok')}${T('Rejected',all.filter(r=>r.status==='Rejected').length)}</div>
+  <div class="tabs"><button class="${D.f==='Awaiting'?'on':''}" data-act="rdFilter" data-v="Awaiting">Awaiting approval (${aw.length})</button><button class="${D.f!=='Awaiting'?'on':''}" data-act="rdFilter" data-v="All">All requests and redirects (${all.length})</button></div>
+  <div class="card" style="padding:0"><div class="tbw"><table class="tb"><tr><th>Shipment</th><th>References</th><th>Redirect</th><th>Reason</th><th>Requested By</th><th>Status</th><th></th></tr>${rows||'<tr><td colspan="7" class="empty">Nothing here.</td></tr>'}</table></div></div>${bulk}${may?'':'<p class="hint">To request a redirect, open a shipment and choose Request redirect.</p>'}`;
+}
+function rdBuildReport(){
+  const rows=S.redirects.slice().sort((a,b)=>String(a.on+a.id).localeCompare(String(b.on+b.id))).map(r=>{const sh=getShip(r.ref);return {'Redirect ID':r.id,Shipment:r.ref,HBL:sh?shipHbl(sh).join('; '):'',MBL:sh?shipMbl(sh).join('; '):'',From:r.from,To:r.to,'Reason Group':r.group,Reason:r.reason,Note:r.note,Status:r.status==='Approved'?'Redirected':r.status,'Requested By':r.by,'Requested On':r.on,'Decided By':r.decidedBy,'Decided On':r.decidedOn,'Decision Note':r.decisionNote,'Slots Cancelled':r.slotsCancelled||0}});
+  return {headers:['Redirect ID','Shipment','HBL','MBL','From','To','Reason Group','Reason','Note','Status','Requested By','Requested On','Decided By','Decided On','Decision Note','Slots Cancelled'],rows,sheet:'Redirects',name:'Redirected_Shipments_'+S.today};
+}
+RPT.push({id:'redirects',label:'Redirected Shipments',desc:'Every redirect and redirect request, with the reason, who asked and who decided.',build:rdBuildReport});
+const redBadge=sh=>{const r=(S.redirects||[]).filter(x=>x.ref===sh.ref&&x.status==='Approved').pop();return r?` <span class="pill info" title="Redirected from ${esc(r.from)}: ${esc(r.reason)}">Redirected</span>`:''};
+{const d0=detailModal;detailModal=function(ref){d0.apply(this,arguments);try{const rs=(S.redirects||[]).filter(x=>x.ref===ref),last=rs.filter(x=>x.status==='Approved').pop(),pend=rs.find(x=>x.status==='Requested'),h=document.querySelector('#modal .mh');if(h&&(last||pend))h.insertAdjacentHTML('afterend',(last?`<div class="note" style="margin:8px 0">Redirected from <b>${esc(last.from)}</b> to <b>${esc(last.to)}</b> on ${fmt(last.decidedOn||last.on)}: ${esc(last.reason)}${last.note?' ('+esc(last.note)+')':''}.</div>`:'')+(pend?`<div class="note" style="margin:8px 0">A redirect to <b>${esc(pend.to)}</b> is waiting for approval (${esc(pend.reason)}).</div>`:''))}catch(e){}}}
+{const m1=migrateData;migrateData=function(){m1.apply(this,arguments);if(!Array.isArray(S.redirects))S.redirects=[];if((S.settings.permV3||0)<1){const give=(roles,ids)=>roles.forEach(r=>{S.access[r]=S.access[r]||[];ids.forEach(i=>{if(!S.access[r].includes(i))S.access[r].push(i)})});give(['Logistics Executive','Logistics Associate','Logistics Analyst'],['redirects','redirect']);give(['Logistics Manager'],['redirects']);give(['Logistics Analyst','Logistics Manager'],['rpt_redirects']);give([PARTNER,PEXEC,'Warehouse Team'],['redirects','redirectreq']);S.settings.permV3=1}}}
+document.addEventListener('click',e=>{
+  const t=e.target.closest&&e.target.closest('[data-act]');if(!t)return;const a=t.dataset.act,d=t.dataset,R=()=>S.ui.rd=S.ui.rd||{f:'Awaiting',from:'',sel:[],to:'',reason:'',note:'',due:'',prev:null};
+  if(!a.startsWith('rd'))return;
+  if(a==='rdOpen'){e.stopImmediatePropagation();if(!can('redirect')&&!can('redirectreq')){toast('Your role is not allowed to do this','bad');return}redirectModal(d.ref);return}
+  if(a==='rdSave'){e.stopImmediatePropagation();const v=id=>(document.getElementById(id)||{value:''}).value,f={to:v('rd_to'),reason:v('rd_reason'),note:v('rd_note'),newDue:v('rd_due')},direct=can('redirect'),er=rdCheck(d.ref,f,direct?'direct':'request');
+    if(er.length){const x=document.getElementById('rd_err');if(x)x.innerHTML=`<div class="err" role="alert" style="margin-bottom:10px">${esc(er[0])}</div>`;return}
+    const r=direct?rdApply(d.ref,f,{}):rdRequest(d.ref,f);closeModal();render();toast(r.msg,r.ok?'':'bad');return}
+  if(a==='rdFilter'){e.stopImmediatePropagation();R().f=d.v;render();return}
+  if(a==='rdApprove'){e.stopImmediatePropagation();const r=rdDecide(d.id,true,'');render();toast(r.msg,r.ok?'':'bad');return}
+  if(a==='rdRejectOpen'){e.stopImmediatePropagation();if(!can('redirect')){toast('Your role is not allowed to do this','bad');return}const r=S.redirects.find(x=>x.id===d.id);openModal(`<div class="mh"><h2>Reject Redirect: ${esc(r?r.ref:'')}</h2><button class="x" data-act="close" aria-label="Close">&times;</button></div><div id="rd_err"></div><label class="f">Reason for rejecting<input id="rd_rej" class="in" maxlength="200"></label><div class="row sec"><button class="btn danger" data-act="rdRejectSave" data-id="${esc(d.id)}">Reject Request</button><button class="btn" data-act="close">Cancel</button></div>`);return}
+  if(a==='rdRejectSave'){e.stopImmediatePropagation();const r=rdDecide(d.id,false,(document.getElementById('rd_rej')||{value:''}).value);if(!r.ok){const x=document.getElementById('rd_err');if(x)x.innerHTML=`<div class="err" role="alert" style="margin-bottom:10px">${esc(r.msg)}</div>`;return}closeModal();render();toast(r.msg);return}
+  if(a==='rdCancelReq'){e.stopImmediatePropagation();const r=rdCancel(d.id);render();toast(r.msg,r.ok?'':'bad');return}
+  if(a==='rdBulkAll'||a==='rdBulkNone'){e.stopImmediatePropagation();const D=R();D.sel=a==='rdBulkAll'?ships().filter(s=>rdEligible(s)&&whKey(whCodeOf(s))===whKey(D.from)).map(s=>s.ref):[];D.prev=null;render();return}
+  if(a==='rdBulkPrev'){e.stopImmediatePropagation();if(!can('redirect')){toast('Your role is not allowed to do this','bad');return}const D=R();D.prev=rdBulkPreview(D.sel,{to:D.to,reason:D.reason,note:D.note,newDue:D.due});render();return}
+  if(a==='rdBulkBack'){e.stopImmediatePropagation();R().prev=null;render();return}
+  if(a==='rdBulkApply'){e.stopImmediatePropagation();if(!can('redirect')){toast('Your role is not allowed to do this','bad');return}const D=R(),res=rdBulkApply(D.sel,{to:D.to,reason:D.reason,note:D.note,newDue:D.due});D.sel=[];D.prev=null;render();toast(res.ok+' shipment(s) redirected'+(res.slots?', '+res.slots+' slot request(s) cancelled':'')+(res.bad?', '+res.bad+' could not be redirected':''),res.bad&&!res.ok?'bad':'');return}
+},true);
+document.addEventListener('change',e=>{
+  const t=e.target;if(!t||!t.dataset)return;const R=()=>S.ui.rd=S.ui.rd||{f:'Awaiting',from:'',sel:[],to:'',reason:'',note:'',due:'',prev:null};
+  if(t.dataset.ch==='rdField'){const D=R();D[t.dataset.k]=t.value;if(t.dataset.k==='from'){D.sel=[];D.to=''}D.prev=null;render();return}
+  if(t.dataset.ch==='rdTog'){const D=R(),i=D.sel.indexOf(t.dataset.ref);if(t.checked&&i<0)D.sel.push(t.dataset.ref);if(!t.checked&&i>=0)D.sel.splice(i,1);D.prev=null;render();return}
+  if(t.dataset.ch==='monEnt'){S.ui.dash.ent=t.value;render();return}
+});
+
+TABS.push({id:'redirects',label:'Redirects'});ACCESS_ITEMS.push({id:'redirects',label:'Redirects: the Redirects page'},{id:'redirect',label:'Redirects: redirect shipments and approve requests'},{id:'redirectreq',label:'Redirects: request a redirect'});
+MODULES.push({id:'redirectmod',label:'Redirect shipments',V:['redirects'],C:['redirectreq'],E:['redirect'],D:[],note:'View: the Redirects page. Create: request a redirect. Edit: redirect shipments and approve or reject requests.'});
+{const g=NAV_GROUPS;const di=g.findIndex(x=>x[0]==='Deliveries');if(di>=0)g[di][1].push('redirects')}
+ICON.redirects='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h12m0 0-4-4m4 4-4 4M20 5v14"/></svg>';
+/* ========== two kinds of partner, multi-select lists, receiver names on warehouses ========== */
+const partnerKindOf=org=>{const s=listOf(org&&org.Shippers).length,r=listOf(org&&org.Receivers).length;return s&&!r?'shipper':r&&!s?'receiver':'legacy'};
+function partyCounts(){const c=new Map(),add=n=>{n=String(n||'').replace(/\s+/g,' ').trim();if(n)c.set(n,(c.get(n)||0)+1)};S.lines.forEach(l=>{add(l.Shipper);add(l.Consignee)});S.users.forEach(u=>{listOf(u.Shippers).forEach(add);listOf(u.Receivers).forEach(add)});(S.warehouses||[]).forEach(w=>String(w.Receivers||'').split(/[;|]+/).forEach(add));return c}
+function canonParty(name,counts){const raw=String(name==null?'':name).replace(/\s+/g,' ').trim();if(!raw)return '';const k=carrKey(raw);let best=null,bc=0;(counts||partyCounts()).forEach((n,sp)=>{if(carrKey(sp)===k&&n>bc){best=sp;bc=n}});return best||raw}
+function partyOptions(kind){
+  const s=new Set(),add=n=>{n=String(n||'').replace(/\s+/g,' ').trim();if(n)s.add(n)};
+  if(kind==='shippers'){S.lines.forEach(l=>add(l.Shipper));S.users.forEach(u=>listOf(u.Shippers).forEach(add))}else{S.lines.forEach(l=>add(l.Consignee));S.users.forEach(u=>listOf(u.Receivers).forEach(add));(S.warehouses||[]).forEach(w=>String(w.Receivers||'').split(/[;|]+/).forEach(add))}
+  const cn=partyCounts(),out=new Map();s.forEach(n=>{const c=canonParty(n,cn);out.set(carrKey(c),c)});return [...out.values()].sort((a,b)=>a.localeCompare(b));
+}
+function receiverWarehouse(name){
+  const k=shipperKey(name);if(!k)return '';
+  const w=(S.warehouses||[]).find(x=>String(x.Receivers||'').split(/[;|]+/).map(shipperKey).includes(k));if(w)return w.code;
+  const c=new Map();S.lines.forEach(l=>{if(shipperKey(l.Consignee)===k&&l.WarehouseDestination)c.set(l.WarehouseDestination,(c.get(l.WarehouseDestination)||0)+1)});let b='',n=0;c.forEach((v,x)=>{if(v>n){b=x;n=v}});return b;
+}
+function partnerEntryCheck(f){
+  const sc=partnerScope();if(!sc)return null;const e=[],sh=String(f.shipper||'').trim(),rc=String(f.consignee||'').trim(),wh=String(f.wh||'').trim();
+  if(sc.kind==='shipper'){if(!sc.shippers.has(shipperKey(sh)))e.push('Shipper "'+sh+'" is not assigned to your company')}
+  else if(sc.kind==='receiver'){if(!sc.receivers.has(shipperKey(rc)))e.push('Receiver "'+rc+'" is not assigned to your company')}
+  else if(!sc.has(sh,rc))e.push('Shipper "'+sh+'" and receiver "'+rc+'" are not assigned to your company');
+  if(wh){if(!S.warehouses.some(w=>whKey(w.code)===whKey(wh)))e.push('Warehouse "'+wh+'" is not in the warehouse list');else if(sc.kind==='receiver'){const mw=receiverWarehouse(rc);if(mw&&whKey(mw)!==whKey(wh))e.push('Receiver "'+rc+'" is delivered to '+mw+', not '+wh)}}
+  return e;
+}
+{const e0=shipEditCheck;shipEditCheck=function(sh,h,ops,reason){const r=e0.apply(this,arguments);const sc=partnerScope();if(sc&&r&&Array.isArray(r.errs)){const hh=h||{},m=partnerEntryCheck({shipper:hh.Shipper!==undefined?hh.Shipper:sh.shipper,consignee:hh.Consignee!==undefined?hh.Consignee:sh.consignee,wh:hh.WarehouseDestination!==undefined?hh.WarehouseDestination:whCodeOf(sh)});(m||[]).forEach(x=>{if(!r.errs.includes(x))r.errs.push(x)})}return r}}
+function whFieldHTML(){
+  const s=partnerScope();const codes=S.warehouses.map(w=>w.code);
+  if(s&&(s.kind==='shipper'||s.kind==='receiver'))return `<select id="f_wh" class="in" aria-label="Warehouse destination"><option value="">Choose a warehouse</option>${codes.map(c=>`<option>${esc(c)}</option>`).join('')}</select>`;
+  return `<input id="f_wh" class="in" list="dl_wh">`;
+}
+function partnerFormSync(){
+  const s=partnerScope(),c=document.getElementById('f_consignee'),w=document.getElementById('f_wh');if(!s||s.kind!=='receiver'||!c||!w||w.tagName!=='SELECT')return;
+  const mw=receiverWarehouse(c.value);if(mw){w.value=mw;w.disabled=true;w.title='Filled in from the receiver'}else{w.disabled=false;w.title=''}
+}
+/* ----- multi-select lists ----- */
+function mpd(kind,hiddenHtml,selected,label){
+  const sel=listOf(selected),opts=[...new Set([...partyOptions(kind),...sel])].sort((a,b)=>a.localeCompare(b));
+  return `<div class="mpd" data-kind="${kind}"><button type="button" class="in mpd-b" data-act="mpdToggle" aria-haspopup="listbox" aria-expanded="false" aria-label="${esc(label)}">${sel.length?sel.length+' '+kind.replace(/s$/,'')+(sel.length===1?'':'s')+' selected':'Choose '+kind}</button><div class="mpd-p" hidden><input class="in mpd-s" placeholder="Search" aria-label="Search ${kind}" data-ch="mpdSearch"><div class="mpd-l">${opts.map(o=>`<label><input type="checkbox" data-ch="mpdPick" value="${esc(o)}" ${sel.some(x=>shipperKey(x)===shipperKey(o))?'checked':''}> ${esc(o)}</label>`).join('')}</div><div class="row" style="margin:6px 0"><button type="button" class="btn sm" data-act="mpdAll">Select all</button><button type="button" class="btn sm" data-act="mpdNone">Clear</button></div><div class="row"><input class="in mpd-n" placeholder="Add a new name" aria-label="Add a new name"><button type="button" class="btn sm pri" data-act="mpdAdd">Add</button></div></div>${hiddenHtml}</div>`;
+}
+function mpdSync(root,fire){
+  const hid=root.querySelector('input[type=hidden]');if(!hid)return;const vals=[...root.querySelectorAll('.mpd-l input:checked')].map(x=>x.value),kind=root.dataset.kind;
+  hid.value=vals.join('; ');root.querySelector('.mpd-b').textContent=vals.length?vals.length+' '+kind.replace(/s$/,'')+(vals.length===1?'':'s')+' selected':'Choose '+kind;
+  if(fire)hid.dispatchEvent(new Event('change',{bubbles:true}));
+}
+function userFormSync2(){
+  const t=(document.getElementById('u_type')||{}).value;if(!t)return;const wb=document.getElementById('u_workby'),elp=t==='External Logistics Partner';
+  if(wb){wb.disabled=!elp;wb.title=elp?'':'Not needed for this user type'}
+  ['shippers','receivers'].forEach(k=>{const hid=document.getElementById(k==='shippers'?'u_shippers':'u_receivers'),box=hid&&hid.closest('.mpd');if(!box)return;const on=elp&&wb&&((wb.value==='Shipper')===(k==='shippers'));box.classList.toggle('locked',!on);box.querySelector('.mpd-b').disabled=!on;box.querySelector('.mpd-b').title=on?'':'Not needed for this user type';if(!on){hid.value='';box.querySelectorAll('.mpd-l input').forEach(c=>{c.checked=false});box.querySelector('.mpd-p').hidden=true;mpdSync(box,false)}})
+}
+{const r0=render;render=function(){r0.apply(this,arguments);try{partnerFormSync();userFormSync2()}catch(e){}}}
+function partnersNeedingKind(){return S.users.filter(u=>u.Role===PARTNER&&partnerKindOf(u)==='legacy')}
+{const u0=usersPanel;usersPanel=function(){const bad=partnersNeedingKind(),b=bad.length?`<div class="note" style="margin-bottom:10px"><b>${bad.length} partner${bad.length===1?'':'s'} ${bad.length===1?'needs':'need'} a kind.</b> A partner works by shipper or by receiver, never both. ${bad.map(u=>esc(u.DisplayName||u.UserEmail)+' ('+(listOf(u.Shippers).length&&listOf(u.Receivers).length?'has both lists':'has no list')+')').join(', ')}. Until you choose, they keep the old behaviour. Clear one list, or fill the missing one.</div>`:'';return b+u0.apply(this,arguments)}}
+{const b0=bulkPanel;bulkPanel=function(){const s=partnerScope();let h=b0.apply(this,arguments);if(!s)return h;const lst=s.kind==='shipper'?['Your shippers',listOf(s.org.Shippers)]:s.kind==='receiver'?['Your receivers',listOf(s.org.Receivers)]:null;
+  const card=`<div class="card"><h3>What You Can Upload</h3><p class="mu" style="margin:0 0 6px">${s.kind==='shipper'?'You work by <b>shipper</b>: each row must be from one of your shippers. The receiver can be anyone.':s.kind==='receiver'?'You work by <b>receiver</b>: each row must go to one of your receivers. The shipper can be anyone, and the warehouse must be the receiver\u2019s warehouse.':'Each row must be from one of your shippers or to one of your receivers.'} A row outside this is rejected in the preview with the reason.</p>${lst?`<p style="margin:0"><b>${lst[0]}:</b> ${lst[1].map(esc).join('; ')||'none'}</p>`:''}<p style="margin:6px 0 0"><b>Warehouses:</b> ${S.warehouses.map(w=>esc(w.code)).join('; ')}</p><div class="row sec"><button class="btn sm" data-act="pAllowedX">Download Allowed Values (Excel)</button></div></div>`;
+  return card+h}}
+function whReceiversCard(){
+  return `<div class="card"><h3>Receiver Names by Warehouse</h3><p class="mu" style="margin:0 0 8px">List the receiver name(s) delivered to each warehouse, separated by semicolons. For a receiver partner the warehouse is filled in from the receiver, and a receiver redirect or entry is checked against it.</p><div class="tbw"><table class="tb" data-sort="off"><tr><th>Warehouse</th><th>Type</th><th>Receiver names</th></tr>${S.warehouses.filter(w=>{const q=String(S.ui.whq||'').toLowerCase();return !q||[w.code,w.name,w.city,w.type].join(' ').toLowerCase().includes(q)}).map(w=>`<tr><td><b>${esc(w.code)}</b></td><td>${esc(w.type||'-')}</td><td><input class="in" data-ch="whRcv" data-code="${esc(w.code)}" value="${esc(w.Receivers||'')}" style="width:100%" aria-label="Receiver names for ${esc(w.code)}"></td></tr>`).join('')}</table></div></div>`;
+}
+{const w0=warehousesPanel;warehousesPanel=function(){return w0.apply(this,arguments)+whReceiversCard()}}
+document.addEventListener('click',e=>{
+  const t=e.target.closest&&e.target.closest('[data-act]'),a=t&&t.dataset.act,root=t&&t.closest&&t.closest('.mpd');
+  if(a==='mpdToggle'){e.stopImmediatePropagation();const p=root.querySelector('.mpd-p');document.querySelectorAll('.mpd-p').forEach(x=>{if(x!==p)x.hidden=true});p.hidden=!p.hidden;t.setAttribute('aria-expanded',String(!p.hidden));if(!p.hidden){const s=p.querySelector('.mpd-s');if(s)s.focus()}return}
+  if(a==='mpdAll'||a==='mpdNone'){e.stopImmediatePropagation();root.querySelectorAll('.mpd-l label').forEach(l=>{if(l.style.display!=='none')l.querySelector('input').checked=a==='mpdAll'});mpdSync(root,true);return}
+  if(a==='mpdAdd'){e.stopImmediatePropagation();const inp=root.querySelector('.mpd-n'),nm=canonParty(inp.value,partyCounts());if(!nm)return;let c=[...root.querySelectorAll('.mpd-l input')].find(x=>shipperKey(x.value)===shipperKey(nm));if(!c){const l=document.createElement('label');l.innerHTML='<input type="checkbox" data-ch="mpdPick"> ';const ip=l.querySelector('input');ip.value=nm;l.appendChild(document.createTextNode(nm));root.querySelector('.mpd-l').prepend(l);c=ip}c.checked=true;inp.value='';mpdSync(root,true);return}
+  if(a==='pAllowedX'){e.stopImmediatePropagation();const s=partnerScope();if(!s)return;xlsxSave('allowed-values.xlsx',[{name:s.kind==='receiver'?'Your Receivers':'Your Shippers',headers:[s.kind==='receiver'?'Receiver':'Shipper'],rows:(s.kind==='receiver'?listOf(s.org.Receivers):listOf(s.org.Shippers)).map(x=>({[s.kind==='receiver'?'Receiver':'Shipper']:x}))},{name:'Warehouses',headers:['Warehouse Code'],rows:S.warehouses.map(w=>({'Warehouse Code':w.code}))}]);return}
+  if(!(e.target.closest&&e.target.closest('.mpd'))){document.querySelectorAll('.mpd-p').forEach(p=>{if(!p.hidden){p.hidden=true;const b=p.parentElement.querySelector('.mpd-b');if(b)b.setAttribute('aria-expanded','false')}})}
+},true);
+document.addEventListener('change',e=>{
+  const t=e.target;if(!t)return;
+  if(t.dataset&&t.dataset.ch==='mpdPick'){mpdSync(t.closest('.mpd'),true);return}
+  if(t.id==='u_workby'||t.id==='u_type')userFormSync2();
+  if(t.id==='f_consignee')partnerFormSync();
+  if(t.dataset&&t.dataset.ch==='whRcv'){if(!can('settingsedit')){toast('Your role is not allowed to do this','bad');return}const w=S.warehouses.find(x=>x.code===t.dataset.code);if(w){const cn=partyCounts();w.Receivers=uniq(String(t.value||'').split(/[;|]+/).map(x=>canonParty(x,cn)).filter(Boolean)).join('; ');t.value=w.Receivers;audit('Warehouse receivers changed',w.code,w.Receivers||'none');toast('Saved')}}
+});
+document.addEventListener('input',e=>{const t=e.target;if(t&&t.dataset&&t.dataset.ch==='mpdSearch'){const q=t.value.toLowerCase();t.closest('.mpd-p').querySelectorAll('.mpd-l label').forEach(l=>{l.style.display=l.textContent.toLowerCase().includes(q)?'':'none'})}});
+
 const pickupCol=()=>colx('Pickup vs plan',sh=>{if(!sh.f.PickupActual||!sh.f.PickupPlanned)return '-';const d=diffDays(sh.f.PickupActual,sh.f.PickupPlanned);return d<=0?'<span class="ok-t">'+(d===0?'On time':(-d)+' day(s) early')+'</span>':'<span class="late-t">'+d+' day(s) late</span>'},sh=>{if(!sh.f.PickupActual||!sh.f.PickupPlanned)return '';const d=diffDays(sh.f.PickupActual,sh.f.PickupPlanned);return d<=0?(d===0?'On time':(-d)+' early'):d+' late'});
 const pickupDatesCol=()=>colx('Pickup planned / actual',sh=>fmtS(sh.f.PickupPlanned)+' / '+fmtS(sh.f.PickupActual),sh=>(sh.f.PickupPlanned||'')+' / '+(sh.f.PickupActual||''));
 document.addEventListener('click',e=>{
@@ -6468,7 +6690,7 @@ function render(){
   $('#demoDate').value=S.today;$('#roleSel').value=S.role;{const dl=$('#demoDate').closest('label');if(dl)dl.style.display=CLOCK.mode==='real'?'none':''}
   {const isC=S.role==='Carrier Partner';$('#carrierLbl').style.display=isC?'':'none';if(isC)$('#carrierSel').innerHTML=carriersList().map(c=>`<option ${c===S.carrier?'selected':''}>${esc(c)}</option>`).join('')}
   {const isW=S.role==='Warehouse Team';$('#whTeamLbl').style.display=isW?'':'none';if(isW)$('#whTeamSel').innerHTML=S.users.filter(u=>u.Role==='Warehouse Team').map(u=>`<option value="${esc(u.UserEmail)}" ${u.UserEmail===S.whTeam?'selected':''}>${esc(u.DisplayName)} (${esc(u.Warehouses||'no warehouse')})</option>`).join('')}
-  const V={track:viewTrack,request:viewRequest,milestones:viewMilestones,carrierupdates:viewCarrierUpdates,warehouse:viewWarehouse,dataquality:viewDataQuality,tasks:viewTasks,reports:viewReports,rptdl:viewRptDl,faudit:viewFAudit,rg:viewRG,slotreq:viewSlotReq,slotmgmt:viewSlotMgmt,freighttrends:viewFreightTrends,dashboard:viewDash,carrier:viewCarrier,transit:viewTransit,commercial:viewCommercial,admin:viewAdmin,team:viewTeam};
+  const V={track:viewTrack,request:viewRequest,milestones:viewMilestones,carrierupdates:viewCarrierUpdates,warehouse:viewWarehouse,dataquality:viewDataQuality,tasks:viewTasks,reports:viewReports,rptdl:viewRptDl,faudit:viewFAudit,rg:viewRG,redirects:viewRedirects,slotreq:viewSlotReq,slotmgmt:viewSlotMgmt,freighttrends:viewFreightTrends,dashboard:viewDash,carrier:viewCarrier,transit:viewTransit,commercial:viewCommercial,admin:viewAdmin,team:viewTeam};
   $('#sampleFlag').innerHTML=hasSample()?'<span class="pill warn">Sample history loaded</span><button class="btn sm" data-act="sampleRemove">Remove</button>':'';
   $('#view').innerHTML=towerStrip()+V[S.view]();
   if(S.view==='request'&&S.ui.reqTab!=='bulk')syncForm();
@@ -6948,13 +7170,13 @@ document.addEventListener('change',e=>{
    case 'invCarrier':S.ui.invCarrier=t.value;render();break;
    case 'invStatus':S.ui.invStatus=t.value;render();break;
    case 'userRole':{if(denied('usersedit'))break;const u=S.users[Number(t.dataset.i)];u.Role=t.value;u.Type=roleType(t.value);u.Carrier=t.value==='Carrier Partner'?(u.Carrier||carriersList()[0]||''):'';audit('Role changed','',u.UserEmail+' to '+t.value);render();toast('Role updated');break}
-   case 'userField':{if(denied('usersedit'))break;const u=S.users[Number(t.dataset.i)];if(!u)break;const f=t.dataset.f;u[f]=(f==='Receivers')?normShippers(t.value):t.value.trim();if(f==='Receivers')t.value=u[f];audit('User details changed','',u.UserEmail+': '+f);toast('Saved');break}
+   case 'userField':{if(denied('usersedit'))break;const u=S.users[Number(t.dataset.i)];if(!u)break;const f=t.dataset.f;if(f==='Receivers'&&normShippers(t.value)&&normShippers(u.Shippers)){toast('A partner works by shipper or by receiver, never both. Clear the shippers first','bad');render();break}u[f]=(f==='Receivers')?normShippers(t.value):t.value.trim();if(f==='Receivers')t.value=u[f];audit('User details changed','',u.UserEmail+': '+f);toast('Saved');break}
    case 'userPartner':{if(denied('usersedit'))break;const u=S.users[Number(t.dataset.i)];if(u){u.Partner=t.value;audit('Partner assigned','',u.UserEmail+' under '+(t.value||'none'));toast('Saved')}break}
    case 'whTypeF':{S.ui.wht=t.value;render();break}
    case 'permRole':{S.ui.permRole=t.value;render();break}
    case 'perm':{if(denied('settingsedit')){render();break}permSet(S.ui.permRole,t.dataset.m,t.dataset.k,t.checked);audit('Permission changed','',S.ui.permRole+': '+t.dataset.m+' '+t.dataset.k+' '+(t.checked?'on':'off'));render();break}
    case 'monTog':{const D=S.ui.dash;if(t.dataset.k==='miss')D.missDocs=t.checked;if(t.dataset.k==='late')D.overdueOnly=t.checked;if(t.dataset.k==='rg')D.pendRG=t.checked;if(t.dataset.k==='po')D.poMiss=t.checked;render();break}
-   case 'userShippers':{if(denied('usersedit'))break;const u=S.users[Number(t.dataset.i)];u.Shippers=normShippers(t.value);t.value=u.Shippers;audit('Shippers assigned','',u.UserEmail+': '+(u.Shippers||'none'));toast('Shippers saved');break}
+   case 'userShippers':{if(denied('usersedit'))break;const u=S.users[Number(t.dataset.i)];if(normShippers(t.value)&&normShippers(u.Receivers)){toast('A partner works by shipper or by receiver, never both. Clear the receivers first','bad');render();break}u.Shippers=normShippers(t.value);t.value=u.Shippers;audit('Shippers assigned','',u.UserEmail+': '+(u.Shippers||'none'));toast('Shippers saved');break}
    case 'userCarrier':{if(denied('usersedit'))break;const u=S.users[Number(t.dataset.i)];u.Carrier=t.value;audit('Carrier assigned','',u.UserEmail+' to '+t.value);toast('Carrier assigned');break}
    case 'acc':{if(denied('settingsedit'))break;const r=t.dataset.role,id=t.dataset.id,a=S.access[r];const i=a.indexOf(id);if(t.checked&&i<0)a.push(id);if(!t.checked&&i>=0)a.splice(i,1);audit('Access changed','',r+(t.checked?' can open ':' cannot open ')+id);renderNav();if(!canTab(S.view)){const al=TABS.find(x=>canTab(x.id));S.view=al?al.id:'track';render()}break}
   }
