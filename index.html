@@ -355,6 +355,54 @@ body.compact .tb td,body.compact .tb th{padding:4px 8px;font-size:12px;line-heig
 .fa-i{font-size:12px;color:var(--muted)}.fa-v{font-size:20px;font-weight:700;color:var(--ink);margin-top:4px}.fa-s{font-size:11px;color:var(--muted);margin-top:2px}
 .fa-insight{margin-bottom:14px;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.fa-insight .tb th,.fa-insight .tb td{padding:6px 8px}.fa-insight .tb th{white-space:nowrap}.fa-tb td,.fa-tb th{vertical-align:top}.fa-bar{margin-bottom:10px}
 
+.ctr-ok{background:var(--ok-bg)}.ctr-late{background:var(--late-bg)}.ctr-low{opacity:.6}.ctr-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:baseline}
+.mchip.ctr input:checked+span{background:var(--chip);border-color:var(--ink);color:var(--ink);font-weight:600}.mchip.ctr span{display:inline-flex;align-items:center}
+
+.itemrow{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}.itemrow .f{min-width:0}
+@media (max-width:980px){.itemrow{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:620px){.itemrow{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.live-mode .demobar,.live-mode [data-act=resetMine]{display:none!important}.sw-zero{opacity:.55}
+.doccards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:6px}@media (max-width:620px){.doccards{grid-template-columns:1fr}}
+.doccard{border:1px solid var(--line);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:6px;background:var(--panel)}.doccard input[type=file]{max-width:100%;font-size:12px}
+.docitem{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px;padding:2px 0;border-top:1px dashed var(--line)}.docitem .x{background:none;border:0;font-size:18px;line-height:1;cursor:pointer;color:var(--muted)}
+
+.refs{display:flex;flex-direction:column;gap:2px;min-width:150px;max-width:210px}.rf{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}.rf i{font-style:normal;color:var(--muted);display:inline-block;min-width:32px;font-size:11px}.rfm{font-size:10px;background:var(--chip);border-radius:999px;padding:0 6px;color:var(--muted);font-weight:600}
+
+/* ===== hamburger menu ===== */
+.hamb{flex:none;width:42px;height:42px;display:inline-flex;align-items:center;justify-content:center;background:var(--panel);border:1px solid var(--line2);border-radius:10px;color:var(--ink);cursor:pointer;padding:0}
+.hamb:hover{background:var(--chip)}.hamb:focus-visible,.nav-close:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.nav-close,.nav-scrim{display:none}
+.titlebar{justify-content:flex-start!important;gap:12px!important}.titlebar .tb-right{margin-left:auto}
+.app{transition:grid-template-columns .2s ease}.nav-gh.has-cur{display:flex}
+@media (min-width:981px){
+  body.nav-collapsed .app{grid-template-columns:68px minmax(0,1fr)}
+  body.nav-collapsed .brand{padding:14px 8px;align-items:center}body.nav-collapsed .brand>*:not(.brand-row),body.nav-collapsed .brand-co{display:none}body.nav-collapsed .brand-logo{max-width:44px}
+  body.nav-collapsed .nav-gh{height:1px;min-height:0;padding:0;margin:10px 16px;background:rgba(255,255,255,.14);overflow:hidden;font-size:0;pointer-events:none}body.nav-collapsed .nav-gh>*{display:none}
+  body.nav-collapsed .nav-grp,body.nav-collapsed .nav-sec,body.nav-collapsed .nav-sec.closed,body.nav-collapsed .nav-in{display:block}body.nav-collapsed .nav-sec.closed .nav-in{visibility:visible}
+  body.nav-collapsed .nav-i{justify-content:center;padding:11px 0;margin:2px 10px;width:calc(100% - 20px)}body.nav-collapsed .nav-i>span:not(.nav-badge){display:none}
+  body.nav-collapsed .nav-i .nav-badge{position:absolute;top:1px;right:2px;margin:0;padding:0 5px;font-size:10px;line-height:15px}
+}
+@media (max-width:980px){
+  .side{position:fixed!important;left:0;top:0;bottom:0;height:100dvh!important;width:min(86vw,320px);z-index:60;transform:translateX(-104%);transition:transform .22s ease;overflow-y:auto;display:flex;box-shadow:none}
+  body.nav-open .side{transform:none;box-shadow:6px 0 28px rgba(0,0,0,.35)}
+  body.nav-open{overflow:hidden}
+  .nav-scrim{display:block;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:55;opacity:0;pointer-events:none;transition:opacity .2s}body.nav-open .nav-scrim{opacity:1;pointer-events:auto}
+  .nav-close{display:inline-flex;align-items:center;justify-content:center;position:absolute;top:10px;right:10px;width:40px;height:40px;background:rgba(255,255,255,.08);border:0;border-radius:10px;color:#fff;cursor:pointer;z-index:2}
+  .brand{padding:20px 64px 16px 20px!important}
+  nav{display:block!important;overflow:visible!important;padding:6px 0 24px}
+  .nav-grp{display:block!important}
+  .nav-gh{display:flex!important;align-items:center;min-height:48px;padding:12px 20px!important;font-size:14px;color:#C9D0D4;letter-spacing:0}
+  .nav-gh.has-cur>span:first-child{color:#fff;font-weight:600}.nav-gh.has-cur::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--accent);margin-right:4px;flex:none}
+  .nav-gh .chev{margin-left:auto}.nav-gbadge{display:inline-flex!important}
+  .nav-sec{display:grid!important;grid-template-rows:1fr;transition:grid-template-rows .2s ease}.nav-sec.closed{grid-template-rows:0fr!important}
+  .nav-in{display:block!important;overflow:hidden;min-height:0}.nav-sec.closed .nav-in{visibility:hidden!important}
+  .nav-i{width:calc(100% - 20px)!important;white-space:normal!important;margin:1px 10px!important;border-bottom:0!important;border-radius:8px!important;padding:13px 14px!important;min-height:46px;font-size:14.5px}
+  .nav-i.on{background:rgba(255,255,255,.1)!important;color:#fff}
+  .crumb{display:flex!important;min-width:0;flex:1}.crumb>*:not(b){display:none}.crumb b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:15px}
+  .titlebar{padding:8px 12px!important;flex-wrap:nowrap!important}
+}
+@media (prefers-reduced-motion:reduce){.side,.nav-scrim,.app,.nav-sec{transition:none!important}}
+
 /* chosen dark theme */
 :root[data-theme="dark"]{
 --bg:#151719;--panel:#1E2124;--panel2:#23272A;--ink:#ECEDED;--muted:#9DA3A4;--line:#33393C;--line2:#454C50;
@@ -368,8 +416,10 @@ body.compact .tb td,body.compact .tb th{padding:4px 8px;font-size:12px;line-heig
 </style>
 </head>
 <body>
+<div id="navScrim" class="nav-scrim" data-act="navClose"></div>
 <div class="app">
-  <aside class="side">
+  <aside class="side" id="side">
+    <button type="button" class="nav-close" data-act="navClose" aria-label="Close menu"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg></button>
     <div class="brand" id="brand"></div>
     <nav id="nav" aria-label="Main"></nav>
   </aside>
@@ -389,7 +439,7 @@ body.compact .tb td,body.compact .tb th{padding:4px 8px;font-size:12px;line-heig
           <button class="btn sm" data-act="reset">Reset demo data</button>
         </div>
       </div>
-      <div class="titlebar"><div id="crumb" class="crumb"></div><div class="tb-right"><div id="asof" class="asof"></div><div class="profile" id="profile"><button type="button" class="prof-btn" id="profBtn" data-act="profMenu" aria-haspopup="menu" aria-expanded="false" aria-label="Account menu"><span class="av" id="profAv">U</span><svg class="chev" viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8l5 5 5-5"/></svg></button><div class="who prof-menu" id="who" role="menu" aria-label="Account"></div></div></div></div>
+      <div class="titlebar"><button type="button" class="hamb" id="navToggle" data-act="navToggle" aria-label="Collapse menu" aria-controls="side" aria-expanded="true"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg></button><div id="crumb" class="crumb"></div><div class="tb-right"><div id="asof" class="asof"></div><div class="profile" id="profile"><button type="button" class="prof-btn" id="profBtn" data-act="profMenu" aria-haspopup="menu" aria-expanded="false" aria-label="Account menu"><span class="av" id="profAv">U</span><svg class="chev" viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8l5 5 5-5"/></svg></button><div class="who prof-menu" id="who" role="menu" aria-label="Account"></div></div></div></div>
     </header>
     <div id="view" class="view"></div>
   </main>
@@ -884,7 +934,7 @@ function parseCSV(t){
   row.push(cur);if(row.some(x=>x!==''))rows.push(row);
   return rows;
 }
-const csvCell=v=>{v=v==null?'':String(v);return /[",\n\r]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
+const csvCell=v=>{v=v==null?'':String(v);if(/^[=+\-@\t\r]/.test(v)&&!/^[+-]?\d+([.,]\d+)?$/.test(v))v="'"+v;return /[",\n\r]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
 const toCSV=(cols,rows)=>[cols.join(',')].concat(rows.map(r=>cols.map(c=>csvCell(r[c])).join(','))).join('\n');
 function csvObjects(text){
   const rows=parseCSV(text);if(rows.length<2)return {err:'The file needs a header row and at least one data row.'};
@@ -1135,7 +1185,7 @@ const slotDaysOf=w=>Array.isArray(w.slotDays)&&w.slotDays.length?w.slotDays:[0,1
 const slotStartOf=w=>w.slotStart||'08:00';
 const slotFrom=(w,n)=>toMin(slotStartOf(w))+(n-1)*60;
 const slotLabel=(w,n)=>fromMin(slotFrom(w,n))+' to '+fromMin(slotFrom(w,n)+60);
-const slotWhen=(w,date,n)=>dayLab(date)+' '+slotLabel(w,n);
+const slotWhen=(w,date,n)=>typeof n==='string'?(n==='D'?dayLab(date)+' (time to be confirmed)':dayLab(date)+' '+n.slice(1).replace('-',' to ')):dayLab(date)+' '+slotLabel(w,n);
 const isWT=()=>S.role==='Warehouse Team';
 const myWhCodes=()=>{if(isWT()){const u=S.users.find(x=>x.UserEmail.toLowerCase()===String(S.email).toLowerCase());return u?whList(u):[]}return S.warehouses.map(w=>w.code)};
 const slotFind=id=>S.slots.find(r=>r.id===id);
@@ -1454,17 +1504,18 @@ function dmBlockModal(ctx){
 function dmPropCollect(){const P=S.ui.dm.prop,g=id=>document.getElementById(id);if(P&&g('dm_reason')){P.reason=g('dm_reason').value;P.note=g('dm_note').value}}
 /* ========== real date and time ========== */
 const DEMO0='2026-10-17';
-const CLOCK={mode:'real',pin:'',today:DEMO0,utc:'12:00',offset:0};
-(function(){const L=window.ECT_LOGIN||{},q=/[?&]today=(\d{4}-\d{2}-\d{2})/.exec(location.search);CLOCK.pin=q&&!isNaN(Date.parse(q[1]))?q[1]:'';CLOCK.mode=CLOCK.pin?'pinned':(L.clock==='demo'?'demo':'real')})();
-function clockNow(){if(CLOCK.mode==='real'){const d=new Date();return {today:d.toISOString().slice(0,10),utc:d.toISOString().slice(11,16)}}return {today:CLOCK.pin||DEMO0,utc:'12:00'}}
+const CLOCK={mode:'real',pin:'',today:DEMO0,utc:'12:00',offset:0,tz:'Asia/Kolkata'};
+(function(){const L=window.ECT_LOGIN||{},q=/[?&]today=(\d{4}-\d{2}-\d{2})/.exec(location.search);CLOCK.pin=q&&!isNaN(Date.parse(q[1]))?q[1]:'';CLOCK.mode=CLOCK.pin?'pinned':(L.clock==='demo'?'demo':'real');try{CLOCK.tz=L.timezone||'Asia/Kolkata';new Intl.DateTimeFormat('en-GB',{timeZone:CLOCK.tz})}catch(e){CLOCK.tz='Asia/Kolkata'}})();
+function clockTzDate(d){try{const o={};new Intl.DateTimeFormat('en-CA',{timeZone:CLOCK.tz,year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(d).forEach(p=>{o[p.type]=p.value});return o.year+'-'+o.month+'-'+o.day}catch(e){return d.toISOString().slice(0,10)}}
+function clockNow(){if(CLOCK.mode==='real'){const d=new Date();return {today:clockTzDate(d),utc:d.toISOString().slice(11,16)}}return {today:CLOCK.pin||DEMO0,utc:'12:00'}}
 function clockRefresh(){const n=clockNow();CLOCK.today=n.today;CLOCK.utc=n.utc;CLOCK.offset=Math.round((Date.parse(n.today)-Date.parse(DEMO0))/86400000)}
 clockRefresh();
 function clockSync(){if(CLOCK.mode==='demo')return false;const n=clockNow(),ch=n.today!==S.today;S.today=n.today;S.utcTime=n.utc;return ch}
 function clockLabel(){
-  if(CLOCK.mode==='real'){const d=new Date();return 'Today: '+d.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})+', '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}
+  if(CLOCK.mode==='real'){const d=new Date(),o={timeZone:CLOCK.tz},tzn=new Intl.DateTimeFormat('en-GB',{timeZone:CLOCK.tz,timeZoneName:'short'}).formatToParts(d).find(p=>p.type==='timeZoneName'),nm=CLOCK.tz==='Asia/Kolkata'?'IST':(tzn?tzn.value:CLOCK.tz);return 'Today: '+d.toLocaleDateString('en-GB',Object.assign({weekday:'long',day:'numeric',month:'long',year:'numeric'},o))+', '+d.toLocaleTimeString('en-GB',Object.assign({hour:'2-digit',minute:'2-digit'},o))+' '+nm}
   return (CLOCK.mode==='pinned'?'Date fixed for testing: ':'Demo date: ')+new Date(dnum(S.today)*86400000).toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric',timeZone:'UTC'});
 }
-function clockShow(){const a=document.getElementById('asof');if(!a)return;a.textContent=clockLabel();a.title=CLOCK.mode==='real'?'Your local date and time. The app counts days in UTC: it is now '+S.today+' '+S.utcTime+' UTC.':''}
+function clockShow(){const a=document.getElementById('asof');if(!a)return;a.textContent=clockLabel();a.title=CLOCK.mode==='real'?'Company time zone: '+CLOCK.tz+'. Days are counted in this time zone, so a new day starts at local midnight. Right now it is '+S.today+' here.':''}
 function clockTick(){
   if(CLOCK.mode!=='real'||typeof S==='undefined')return;
   const ch=clockSync();clockShow();
@@ -1640,12 +1691,12 @@ function usersFiltered(){const q=String(S.ui.usq||'').toLowerCase().split(/\s+/)
 function usersTableHTML(){
   const roles=ROLES.filter(r=>r!=='In Organization'),codes=S.warehouses.map(w=>w.code),list=usersFiltered();
   return `<p class="hint" style="margin:0 0 8px">${S.ui.usq?'Showing '+list.length+' of '+S.users.length+' users.':S.users.length+' users.'}</p>${list.length?`<div class="tbw"><table class="tb"><tr><th>Email</th><th>Name</th><th>Type</th><th>Role</th><th>Carrier</th><th>Warehouses</th><th>Shippers</th><th>Receivers</th><th>Partner</th><th>Phone</th><th>Location</th><th></th></tr>
-  ${list.map(({u,i})=>`<tr><td>${esc(u.UserEmail)}</td><td>${esc(u.DisplayName)}</td><td>${esc(u.Type||roleType(u.Role))}</td><td><select data-ch="userRole" data-i="${i}" class="in" style="width:auto">${roles.map(r=>`<option ${r===u.Role?'selected':''}>${r}</option>`).join('')}</select></td>
-   <td>${u.Role==='Carrier Partner'?`<select data-ch="userCarrier" data-i="${i}" class="in" style="width:auto">${uniq([...carriersList(),u.Carrier].filter(Boolean)).map(c=>`<option ${c===u.Carrier?'selected':''}>${esc(c)}</option>`).join('')}</select>`:'<span class="mu">-</span>'}</td>
+  ${list.map(({u,i})=>`<tr><td>${esc(u.UserEmail)}</td><td>${esc(u.DisplayName)}</td><td>${esc(u.Type||roleType(u.Role))}</td><td><select data-ch="userRole" data-i="${i}" aria-label="Role" class="in" style="width:auto">${roles.map(r=>`<option ${r===u.Role?'selected':''}>${r}</option>`).join('')}</select></td>
+   <td>${u.Role==='Carrier Partner'?`<select data-ch="userCarrier" data-i="${i}" aria-label="Carrier" class="in" style="width:auto">${uniq([...carriersList(),u.Carrier].filter(Boolean)).map(c=>`<option ${c===u.Carrier?'selected':''}>${esc(c)}</option>`).join('')}</select>`:'<span class="mu">-</span>'}</td>
    <td>${u.Role==='Warehouse Team'?`<select multiple size="3" data-ch="userWh" data-i="${i}" class="in" style="width:auto;min-width:170px" aria-label="Warehouses for ${esc(u.UserEmail)}">${codes.map(c=>`<option ${whList(u).some(x=>whKey(x)===whKey(c))?'selected':''}>${esc(c)}</option>`).join('')}</select>`:'<span class="mu">-</span>'}</td>
    <td>${u.Role===PARTNER?`<input class="in" data-ch="userShippers" data-i="${i}" value="${esc(u.Shippers||'')}" list="dl_shp_users" style="min-width:230px" aria-label="Shippers for ${esc(u.UserEmail)}" placeholder="Shipper names, separated by ;">`:'<span class="mu">-</span>'}</td>
    <td>${u.Role===PARTNER?`<input class="in" data-ch="userField" data-f="Receivers" data-i="${i}" value="${esc(u.Receivers||'')}" style="min-width:200px" aria-label="Receivers for ${esc(u.UserEmail)}" placeholder="Receiver names, separated by ;">`:'<span class="mu">-</span>'}</td>
-   <td>${u.Role===PEXEC?`<select class="in" data-ch="userPartner" data-i="${i}" style="width:auto"><option value="">Choose</option>${S.users.filter(x=>x.Role===PARTNER).map(x=>`<option value="${esc(x.UserEmail)}" ${x.UserEmail===u.Partner?'selected':''}>${esc(x.DisplayName)}</option>`).join('')}</select>`:'<span class="mu">-</span>'}</td>
+   <td>${u.Role===PEXEC?`<select class="in" data-ch="userPartner" data-i="${i}" aria-label="External logistics partner" style="width:auto"><option value="">Choose</option>${S.users.filter(x=>x.Role===PARTNER).map(x=>`<option value="${esc(x.UserEmail)}" ${x.UserEmail===u.Partner?'selected':''}>${esc(x.DisplayName)}</option>`).join('')}</select>`:'<span class="mu">-</span>'}</td>
    <td><input class="in" data-ch="userField" data-f="Phone" data-i="${i}" value="${esc(u.Phone||'')}" style="width:130px" aria-label="Phone for ${esc(u.UserEmail)}"></td><td><input class="in" data-ch="userField" data-f="Location" data-i="${i}" value="${esc(u.Location||'')}" style="width:140px" aria-label="Location for ${esc(u.UserEmail)}"></td>
    <td class="r">${typeof acctRowBtn==='function'?acctRowBtn(u):''}<button class="btn sm danger" data-act="userDel" data-i="${i}">Remove</button></td></tr>`).join('')}</table></div>`:'<div class="empty">No user matches the search.</div>'}`;
 }
@@ -1924,13 +1975,15 @@ function updatePanel(){
   <ul class="hint" style="margin:12px 0 0 18px"><li>Empty cells keep the current value, so you only fill in what changes.</li><li>Changing a planned date corrects the original plan, so give a reason on that row. To move a date because of a delay, use Milestone Management.</li><li>Delivered shipments keep their carrier, mode, warehouse and planned dates. Cancelled shipments cannot be edited.</li></ul></div>`;
 }
 /* ----- data quality ----- */
-const DQ_CHECKS={dup_tracking:['Tracking number on several shipments','Medium'],cbm:['CBM missing for Air or LCL freight','Medium'],plan:['No planned arrival date','High'],wh_unknown:['Warehouse not in the warehouse list','High'],wh_inactive:['Warehouse is inactive','Medium'],wh_contact:['Warehouse has no team email','Medium'],container:['Ocean shipment without container details','Medium'],weight:['Packages or weight missing','Medium'],tracking:['No tracking number although it has left','Low'],type:['Shipment type or nature of goods not set','Low'],order:['Dates out of order','High'],po_dup:['Same PO and item on several shipments','Low'],no_user:['Carrier has no Carrier Partner user','Low'],po_missing:['PO number missing','Medium'],dup_invoice:['Duplicate invoice number','Medium']};
-const DQ_FIELD={dup_tracking:'el_0_hbl',cbm:'Cbm',plan:'ETA',wh_unknown:'WarehouseDestination',wh_inactive:'WarehouseDestination',wh_contact:'WarehouseDestination',container:'ContainerType',weight:'WeightKg',tracking:'el_0_hbl',type:'ShipmentType',order:'PickupPlanned',po_dup:'el_0_po',no_user:'Carrier',po_missing:'el_0_po',dup_invoice:'el_0_inv'};
+const DQ_CHECKS={dup_tracking:['Tracking number on several shipments','Medium'],cbm:['CBM missing for Air or LCL freight','Medium'],plan:['No planned arrival date','High'],wh_unknown:['Warehouse not in the warehouse list','High'],wh_inactive:['Warehouse is inactive','Medium'],wh_contact:['Warehouse has no team email','Medium'],container:['Ocean shipment without container details','Medium'],weight:['Packages or weight missing','Medium'],tracking:['No tracking number although it has left','Low'],type:['Shipment type or nature of goods not set','Low'],order:['Dates out of order','High'],po_dup:['Same PO and item on several shipments','Low'],no_user:['Carrier has no Carrier Partner user','Low'],po_missing:['PO number missing','Medium'],dup_invoice:['Duplicate invoice number','Medium'],carrier_dup:['Carrier name spelled two ways','Low']};
+const DQ_FIELD={dup_tracking:'el_0_hbl',cbm:'Cbm',plan:'ETA',wh_unknown:'WarehouseDestination',wh_inactive:'WarehouseDestination',wh_contact:'WarehouseDestination',container:'ContainerType',weight:'WeightKg',tracking:'el_0_hbl',type:'ShipmentType',order:'PickupPlanned',po_dup:'el_0_po',no_user:'Carrier',po_missing:'el_0_po',dup_invoice:'el_0_inv',carrier_dup:'Carrier'};
 function dqIssues(){
   const all=ships(),out=[],add=(c,s,detail)=>out.push({check:c,label:DQ_CHECKS[c][0],sev:DQ_CHECKS[c][1],ref:s.ref,carrier:s.carrier,detail});
   const trk={},po={};
   all.forEach(s=>{shipTrackNos(s).split('; ').filter(Boolean).forEach(t=>{(trk[t.toLowerCase()]=trk[t.toLowerCase()]||new Set()).add(s.ref)});s.lines.forEach(l=>{if(l.PONumber&&l.ItemNumber){const k=l.PONumber+'|'+l.ItemNumber;(po[k]=po[k]||new Set()).add(s.ref)}})});
   const carUsers=new Set(S.users.filter(u=>u.Role==='Carrier Partner').map(u=>u.Carrier));
+  const carSpell={};all.forEach(x=>{(carSpell[nk(x.carrier)]=carSpell[nk(x.carrier)]||new Set()).add(x.carrier)});
+  const invIx=invIndex(all);
   all.forEach(s=>{
     const f=s.lines[0],act=s.status!=='Delivered',lcl=isOcean(s.mode)&&/LCL/i.test(f.ContainerType||'');
     shipTrackNos(s).split('; ').filter(Boolean).forEach(t=>{const refs=trk[t.toLowerCase()];if(refs&&refs.size>1)add('dup_tracking',s,t+' is also on '+[...refs].filter(x=>x!==s.ref).join(', '))});
@@ -1947,7 +2000,8 @@ function dqIssues(){
     s.lines.forEach(l=>{const refs=po[l.PONumber+'|'+l.ItemNumber];if(refs&&refs.size>1&&l===s.lines.find(x=>x.PONumber===l.PONumber&&x.ItemNumber===l.ItemNumber))add('po_dup',s,'PO '+l.PONumber+' item '+l.ItemNumber+' is also on '+[...refs].filter(x=>x!==s.ref).join(', '))});
     if(s.carrier&&!carUsers.has(s.carrier))add('no_user',s,s.carrier+' cannot update this shipment itself');
     {const n=s.lines.filter(l=>!String(l.PONumber||'').trim()).length;if(n)add('po_missing',s,n+' item line(s) have no PO number. Please add it')}
-    {const d=uniq(s.lines.map(l=>l.InvoiceNumber).filter(Boolean)).filter(i=>invDupFind(s.shipper,i,s.ref));if(d.length)add('dup_invoice',s,'Invoice number '+d.join(', ')+' is also on another shipment of the same shipper')}
+    {const alt=[...(carSpell[nk(s.carrier)]||[])].filter(x=>x!==s.carrier);if(alt.length)add('carrier_dup',s,'Carrier "'+s.carrier+'" is also spelled "'+alt[0]+'" on other shipments')}
+    {const d=uniq(s.lines.map(l=>l.InvoiceNumber).filter(Boolean)).filter(i=>invDupIn(invIx,s.shipper,i,s.ref));if(d.length)add('dup_invoice',s,'Invoice number '+d.join(', ')+' is also on another shipment of the same shipper')}
   });
   const so={High:0,Medium:1,Low:2};return out.sort((a,b)=>so[a.sev]-so[b.sev]||a.ref.localeCompare(b.ref));
 }
@@ -2124,9 +2178,9 @@ function carrierScorecard(){
     const cancelled=rq.filter(r=>r.status==='Cancelled'&&r.decision&&/Cancelled by the requester|Declined/.test(r.decision.reason||'')).length;
     let iN=0,iOk=0;
     if(inv)L.filter(s=>s.carrier===c.name&&s.status==='Delivered'&&s.freight==='Your Company').forEach(s=>{const q=selQuote(s.ref);if(!q||invState(s)!=='Recorded')return;iN++;if(Math.abs(invTotal(s.ref)-q.amount)<=q.amount*SC_TOL)iOk++});
-    const m={ontime:c.dueN?c.onTime/c.dueN:null,upd:n?on/n:null,slot:decided.length?first.length/decided.length:null,inv:iN?iOk/iN:null};
+    const m={ontime:c.dueN?c.onTime/c.dueN:null,pick:c.puN?c.puOn/c.puN:null,upd:n?on/n:null,slot:decided.length?first.length/decided.length:null,inv:iN?iOk/iN:null};
     let tw=0,sc=0;Object.keys(SC_W).forEach(k=>{if(m[k]!=null){tw+=SC_W[k];sc+=SC_W[k]*m[k]}});
-    rows.push({name:c.name,n:c.n,m,counts:{ontime:[c.onTime,c.dueN],upd:[on,n],slot:[first.length,decided.length],inv:[iOk,iN]},cancelled,sample,score:tw?Math.round(sc/tw*100):null});
+    rows.push({name:c.name,n:c.n,m,counts:{ontime:[c.onTime,c.dueN],pick:[c.puOn,c.puN],upd:[on,n],slot:[first.length,decided.length],inv:[iOk,iN]},cancelled,sample,score:tw?Math.round(sc/tw*100):null});
   });
   return rows.sort((a,b)=>(b.score==null?-1:b.score)-(a.score==null?-1:a.score)||a.name.localeCompare(b.name));
 }
@@ -2134,8 +2188,8 @@ function scorecardCard(){
   const rows=carrierScorecard(),inv=can('invoices'),pc=(k,r)=>r.m[k]==null?'<span class="mu">-</span>':`${Math.round(r.m[k]*100)}%<br><small class="mu">${r.counts[k][0]} of ${r.counts[k][1]}</small>`;
   const sample=rows.reduce((a,r)=>a+r.sample,0);
   return `<div class="card" style="padding:0"><div style="padding:14px 16px 0"><h3 style="margin:0 0 4px">Carrier scorecard</h3><p class="mu" style="margin:0 0 10px">One view of how reliable each carrier is: delivering on time, keeping updates current, and getting delivery slots accepted${inv?', and billing what was quoted':''}.</p></div>
-  <div class="tbw"><table class="tb"><tr><th>Carrier</th><th class="r">Shipments</th><th class="r">On-time delivery</th><th class="r">Updates posted within a day</th><th class="r">Slot requests accepted first time</th>${inv?'<th class="r">Invoice within 5% of quote</th>':''}<th class="r">Slots cancelled by the carrier</th><th style="min-width:150px">Score</th></tr>
-  ${rows.length?rows.map(r=>`<tr><td><b>${esc(r.name)}</b></td><td class="r">${r.n}</td><td class="r">${pc('ontime',r)}</td><td class="r">${pc('upd',r)}</td><td class="r">${pc('slot',r)}</td>${inv?`<td class="r">${pc('inv',r)}</td>`:''}<td class="r">${r.cancelled||'-'}</td><td>${r.score==null?'<span class="mu">Not enough data</span>':`<b>${r.score}</b> / 100<div class="bar" style="margin-top:4px"><i style="width:${r.score}%"></i></div>`}</td></tr>`).join(''):'<tr><td colspan="8" class="empty">No carriers in this selection.</td></tr>'}</table></div>
+  <div class="tbw"><table class="tb"><tr><th>Carrier</th><th class="r">Shipments</th><th class="r">On-time delivery</th><th class="r">Pickup on time</th><th class="r">Updates posted within a day</th><th class="r">Slot requests accepted first time</th>${inv?'<th class="r">Invoice within 5% of quote</th>':''}<th class="r">Slots cancelled by the carrier</th><th style="min-width:150px">Score</th></tr>
+  ${rows.length?rows.map(r=>`<tr><td><b>${esc(r.name)}</b></td><td class="r">${r.n}</td><td class="r">${pc('ontime',r)}</td><td class="r">${pc('pick',r)}</td><td class="r">${pc('upd',r)}</td><td class="r">${pc('slot',r)}</td>${inv?`<td class="r">${pc('inv',r)}</td>`:''}<td class="r">${r.cancelled||'-'}</td><td>${r.score==null?'<span class="mu">Not enough data</span>':`<b>${r.score}</b> / 100<div class="bar" style="margin-top:4px"><i style="width:${r.score}%"></i></div>`}</td></tr>`).join(''):'<tr><td colspan="8" class="empty">No carriers in this selection.</td></tr>'}</table></div>
   <p class="hint" style="padding:0 16px 14px">Score = weighted average of the measures that have data: on-time delivery 40%${inv?', invoice accuracy 20%':''}, updates posted within a day 25%, slot requests accepted first time 15%. Missing measures are left out and the rest are re-weighted. Arriving in the booked hour is not scored yet because gate check-in is not recorded.${sample?' Posting dates of the demo history are sample values ('+sample+' events); updates posted from now on use the real date.':''}</p></div>`;
 }
 /* ----- saved views ----- */
@@ -2212,11 +2266,11 @@ function reportEmail(r){
 function reportSend(id){
   const r=(S.reports||[]).find(x=>x.id===id);if(!r)return {ok:false,msg:'Schedule not found'};
   const ck=reportCheck(r);if(ck.errs.length)return {ok:false,msg:ck.errs[0]};
-  const m=reportEmail(r);r.recipients.forEach(e=>mail(e,m.subject,m.body,'Scheduled report'));r.lastSent=S.today;
+  const m=reportEmail(r);r.recipients.forEach(e=>mail(e,m.subject,m.body,'Scheduled report'));r.lastSent=utcDateOf();
   audit('Report sent',r.id,r.name+' to '+r.recipients.length+' recipient(s), '+m.count+' item(s)');
   return {ok:true,msg:r.name+' sent to '+r.recipients.length+' recipient(s) ('+m.count+' item'+(m.count===1?'':'s')+')',count:m.count};
 }
-const reportsDue=()=>(S.reports||[]).filter(r=>r.active&&isoDow(S.today)===r.day&&S.utcTime>=r.time&&r.lastSent!==S.today);
+const reportsDue=()=>(S.reports||[]).filter(r=>r.active&&isoDow(utcDateOf())===r.day&&S.utcTime>=r.time&&r.lastSent!==utcDateOf());
 function seedReports(){
   S.views=[];S.reports=[
    {id:'RP-001',name:'Weekly overdue milestones',report:'overdue',day:0,time:'07:00',recipients:['logistics.exec@yourcompany.com','logistics.assoc@yourcompany.com'],active:true,lastSent:'',owner:'demo.user@yourcompany.com'},
@@ -2323,7 +2377,7 @@ function persistLoad(){
 function persistBoot(){
   if(Store.mode()!=='browser')return;
   const r=persistLoad();Store.boot=r;
-  if(!r.ok&&r.msg!=='Nothing saved yet')setTimeout(()=>toast(r.msg+' Starting with the demo data.','bad'),400);
+  if(!r.ok&&r.msg!=='Nothing saved yet'){const raw=Store.raw();try{localStorage.setItem('ect.state.damaged.'+Date.now(),raw||'')}catch(e){}Store.damaged={msg:r.msg,kb:Math.round((raw||'').length/1024)};setTimeout(()=>toast(r.msg+' Starting with the demo data.','bad'),400)}
 }
 function restoreApply(o){
   const c=restoreCheck(o);if(!c.ok)return c;
@@ -2545,7 +2599,7 @@ function profilesCard(){
   const used=r=>S.users.filter(u=>u.Role===r).length;
   return `<div class="card"><h3>Profiles</h3><p class="mu" style="margin-bottom:10px">Create a profile such as Finance or SCM, then tick what it can open in the table below. A profile sees every shipment; it is not limited to one carrier, warehouse or shipper. Assign it to people in Users and roles.</p>
   ${S.customRoles.length?`<div class="tbw"><table class="tb" data-sort="off"><tr><th>Profile</th><th>Users</th><th>Can open</th><th></th></tr>${S.customRoles.map(r=>`<tr><td><b>${esc(r.name)}</b></td><td>${used(r.name)}</td><td class="mu">${esc((S.access[r.name]||[]).map(id=>(ACCESS_ITEMS.find(t=>t.id===id)||{label:id}).label.replace(/ \(.*/,'')).join(', ')||'Nothing')}</td><td class="r"><button class="btn sm danger" data-act="roleDel" data-n="${esc(r.name)}">Delete</button></td></tr>`).join('')}</table></div>`:'<p class="mu">No profiles yet.</p>'}
-  <div class="row sec"><input id="cr_name" class="in grow" placeholder="Profile name, for example Finance" maxlength="40"><select id="cr_base" class="in" style="width:auto"><option value="">Start with Track &amp; Trace only</option>${ROLES.filter(r=>r!=='In Organization').map(r=>`<option>${esc(r)}</option>`).join('')}</select><button class="btn pri" data-act="roleAdd">Create profile</button></div>
+  <div class="row sec"><input id="cr_name" class="in grow" placeholder="Profile name, for example Finance" maxlength="40"><select id="cr_base" aria-label="Start the new role from" class="in" style="width:auto"><option value="">Start with Track &amp; Trace only</option>${ROLES.filter(r=>r!=='In Organization').map(r=>`<option>${esc(r)}</option>`).join('')}</select><button class="btn pri" data-act="roleAdd">Create profile</button></div>
   <div class="row" style="margin-top:8px"><span class="mu sm">Quick start:</span>${Object.keys(PROFILE_PRESETS).filter(k=>!ROLES.includes(k)).map(k=>`<button class="btn sm" data-act="rolePreset" data-p="${k}">Add the ${k} profile</button>`).join('')||'<span class="mu sm">both are created</span>'}</div>
   <p class="hint">Finance starts with Control Tower Overview, Freight Commercials with invoices, Freight Trends and Scheduled reports. SCM starts with requests, milestones, the dashboards, carrier and transit analysis, delivery slot requests and warehouse operations. Change either in the table below.</p></div>`;
 }
@@ -2850,7 +2904,7 @@ function navHTML(){
   if(S.ui.navLast!==S.view){const g=navGroupOf(S.view);if(g)open[g]=true;S.ui.navLast=S.view}
   let h='';
   NAV_GROUPS.forEach(([g,ids],gi)=>{
-    const items=TABS.filter(t=>ids.includes(t.id)&&canTab(t.id));if(!items.length)return;
+    const items=ids.map(id=>TABS.find(t=>t.id===id)).filter(t=>t&&canTab(t.id));if(!items.length)return;
     const isOpen=open[g]!==undefined?open[g]:navGroupOf(S.view)===g;let badge=0;
     items.forEach(t=>{if(t.id==='tasks')badge+=(window._tasks||[]).filter(x=>x.sev!=='Info').length;if(t.id==='commercial'&&can('invoices'))badge+=pendingList().length});
     h+=`<div class="nav-grp"><button type="button" class="nav-gh" data-act="navSec" data-g="${esc(g)}" aria-expanded="${isOpen}" aria-controls="navs${gi}"><span>${esc(g)}</span>${badge?`<span class="nav-gbadge" title="${badge} need attention">${badge}</span>`:''}${CHEV}</button><div class="nav-sec${isOpen?'':' closed'}" id="navs${gi}" data-g="${esc(g)}"><div class="nav-in">${items.map(navItemHTML).join('')}</div></div></div>`;
@@ -2884,7 +2938,7 @@ document.addEventListener('keydown',e=>{
   if((e.key==='ArrowDown'||e.key==='ArrowUp')&&w.contains(document.activeElement)){const it=[...w.querySelectorAll('[role=menuitem]')];if(it.length){e.preventDefault();const i=it.indexOf(document.activeElement);it[(i+(e.key==='ArrowDown'?1:-1)+it.length)%it.length].focus()}}
 });
 /* ========== delete shipment, shipping documents, quotation id ========== */
-const DOC_TYPES=['Bill of Lading / AWB','Commercial invoice','Packing list','Other'];
+const DOC_TYPES=['Shipment invoice','Packing list','BL / HAWB / AWB','Others'];
 const DOC_MAX=5*1024*1024,DOC_PER=10,DOC_EXT=['pdf','xls','xlsx','csv','png','jpg','jpeg','gif','webp'];
 const DOC_ACCEPT=DOC_EXT.map(x=>'.'+x).join(',');
 const docsOf=ref=>(S.docs||[]).filter(d=>d.ref===ref);
@@ -2907,15 +2961,14 @@ function docCheck(files,ref){
   files.forEach(f=>{if(!DOC_EXT.includes(docExt(f.name)))e.push(f.name+': only PDF, Excel (xls, xlsx, csv) and image files (png, jpg, gif, webp) are allowed');else if(f.size>DOC_MAX)e.push(f.name+': larger than 5 MB ('+kbTxt(f.size)+')');else if(f.size===0)e.push(f.name+': the file is empty')});
   return e;
 }
-function docFormCheck(){const i=document.getElementById('f_docs');if(!i||!i.files||!i.files.length)return '';const e=docCheck([...i.files],'__new__');return e.length?'Documents: '+e[0]:''}
-async function docAdd(ref,file,type){
+async function docAdd(ref,file,type,desc){
   const id='DOC-'+Date.now().toString(36)+Math.random().toString(36).slice(2,7),safe=file.name.replace(/[^A-Za-z0-9._-]+/g,'_').slice(0,80),store=Docs.remote?'remote':'local';
-  const d={id,ref,type:DOC_TYPES.includes(type)?type:'Other',name:file.name,size:file.size,mime:file.type||'',path:ref+'/'+id+'-'+safe,store,by:S.email,on:S.today};
+  const d={id,ref,type:DOC_TYPES.includes(type)?type:'Others',desc:String(desc||'').slice(0,80),name:file.name,size:file.size,mime:file.type||'',path:ref+'/'+id+'-'+safe,store,by:S.email,on:S.today};
   await Docs.put(d,file);S.docs=S.docs||[];S.docs.push(d);audit('Document added',ref,d.type+': '+d.name+' ('+kbTxt(d.size)+')');return d;
 }
-async function docsUpload(ref,files,type){
+async function docsUpload(ref,files,type,desc){
   const ok=[],bad=[];
-  for(const f of files){try{ok.push(await docAdd(ref,f,type))}catch(e){bad.push(f.name+': '+(e.message||'upload failed'))}}
+  for(const f of files){try{ok.push(await docAdd(ref,f,type,desc))}catch(e){bad.push(f.name+': '+(e.message||'upload failed'))}}
   return {ok,bad};
 }
 async function docOpenFile(id){
@@ -2929,19 +2982,9 @@ async function docRemove(id){
   try{await Docs.remove(d)}catch(e){return {ok:false,msg:'The file could not be removed: '+(e.message||'storage error')}}
   S.docs=S.docs.filter(x=>x.id!==id);audit('Document deleted',d.ref,d.type+': '+d.name);return {ok:true,msg:d.name+' deleted'};
 }
-function docsBlock(sh){
-  const L=docsOf(sh.ref),may=(can('editship')||can('request'))&&!sh.cancelled;
-  return `<h3 class="sec">Documents ${missingDocs(sh)?'<span class="pill warn">Missing Docs</span>':`<span class="pill chip">${L.length}</span>`}</h3>
-  ${L.length?`<div class="tbw"><table class="tb" data-sort="off"><tr><th>Type</th><th>File</th><th class="r">Size</th><th>Added</th><th></th></tr>${L.map(d=>`<tr><td>${esc(d.type)}</td><td>${esc(d.name)}</td><td class="r">${kbTxt(d.size)}</td><td>${esc(d.by)}<br><small class="mu">${fmt(d.on)}</small></td><td class="r"><button class="btn sm" data-act="docOpen" data-id="${d.id}">Download</button>${may?` <button class="btn sm danger" data-act="docDel" data-id="${d.id}">Delete</button>`:''}</td></tr>`).join('')}</table></div>`:'<div class="note">No shipping documents are attached yet (bill of lading or airway bill, invoice, packing list).</div>'}
-  ${may?`<div class="row sec"><select id="doc_type" class="in" style="width:auto" aria-label="Document type">${DOC_TYPES.map(t=>`<option>${t}</option>`).join('')}</select><input type="file" id="doc_files" multiple accept="${DOC_ACCEPT}" aria-label="Choose files"><button class="btn pri" data-act="docUpload" data-ref="${esc(sh.ref)}">Upload</button></div><p class="hint">PDF, Excel or image files, up to 5 MB each and ${DOC_PER} per shipment. ${Docs.remote?'Stored in the shared database storage. Anyone with the database key can open the files, so use sample documents only.':'Stored in this browser only, so other devices will not see the file.'}</p>`:''}`;
-}
-function docsFormHTML(){
-  return `<div class="f" style="margin-top:12px"><span>Shipping documents (optional)</span><div class="row"><select id="f_doctype" class="in" style="width:auto" aria-label="Document type">${DOC_TYPES.map(t=>`<option>${t}</option>`).join('')}</select><input type="file" id="f_docs" multiple accept="${DOC_ACCEPT}" aria-label="Shipping documents"></div><small class="hint">Bill of lading or airway bill, invoice, packing list. PDF, Excel or images, up to 5 MB each. You can save without them: the shipment shows Missing Docs until one is added.</small></div>`;
-}
 {const c0=createShipment;createShipment=function(b,items){
-  const ref=c0(b,items),inp=document.getElementById('f_docs');
-  if(inp&&inp.files&&inp.files.length){const files=[...inp.files],type=(document.getElementById('f_doctype')||{}).value;
-    docsUpload(ref,files,type).then(r=>{render();if(r.bad.length)toast('Shipment saved, but '+r.bad.length+' document(s) could not be uploaded ('+r.bad[0]+'). Add them from the shipment details.','bad');else toast(ref+' saved with '+r.ok.length+' document(s)')})}
+  const ref=c0(b,items),gs=docGroups('f');
+  if(gs.length)docsUploadGroups(ref,gs).then(r=>{render();if(r.bad.length)toast('Shipment saved, but '+r.bad.length+' document(s) could not be uploaded ('+r.bad[0]+'). Add them from the shipment details.','bad');else toast(ref+' saved with '+r.ok+' document(s)')});
   return ref}}
 /* ----- quick-filter switches above the shipment monitor ----- */
 function monBarHTML(){
@@ -2957,7 +3000,7 @@ function monBarHTML(){
 {const s0=addSampleHistory;addSampleHistory=function(){const r=s0.apply(this,arguments);S.lines.forEach(l=>{if(l.Mode)l.Mode=normMode(l.Mode);if(l.ContainerType)l.ContainerType=normCtype(l.ContainerType)});return r}}
 document.addEventListener('change',e=>{if(e.target&&e.target.id==='f_ctype'){const b=document.getElementById('setptBox');if(b){b.style.display=isReefer(e.target.value)?'':'none';if(!isReefer(e.target.value)){const i=document.getElementById('f_setpt');if(i)i.value=''}}}});
 /* ========== demo sign-in (email and password), problem log, report a problem ========== */
-const APP_BUILD='site build 2026-11-13 18:51 UTC';
+const APP_BUILD='site build 2026-11-14 10:02 UTC';
 const ErrLog={key:'ect.errors',max:60,
   add(kind,msg,src){try{const a=JSON.parse(localStorage.getItem(this.key)||'[]');a.push({t:new Date().toISOString(),kind,msg:String(msg==null?'':msg).slice(0,300),src:String(src||'').slice(0,160),view:(typeof S!=='undefined'&&S&&S.view)||'',role:(typeof S!=='undefined'&&S&&S.role)||''});while(a.length>this.max)a.shift();localStorage.setItem(this.key,JSON.stringify(a))}catch(e){}},
   list(){try{return JSON.parse(localStorage.getItem(this.key)||'[]')}catch(e){return []}},
@@ -3626,7 +3669,7 @@ function singlePanel(){
    <label class="f">Packages<input id="f_pkgs" class="in" inputmode="numeric"></label><label class="f">Gross weight (kg)<input id="f_wt" class="in" inputmode="decimal"></label><label class="f">Volume (CBM, optional)<input id="f_cbm" class="in" inputmode="decimal"></label></div>
    <label class="f" style="margin-top:12px">Notes (optional)<input id="f_notes" class="in"></label>${docsFormHTML()}
    <p class="hint">Packages, weight and CBM are saved on the first item row only, as in your sheet.</p></div>
-  <div class="card"><h3>Item lines</h3><div class="g4" style="grid-template-columns:repeat(6,minmax(0,1fr))">
+  <div class="card"><h3>Item lines</h3><div class="itemrow">
    <label class="f">Item type<select id="i_stype" class="in"><option value="">Same as shipment type</option>${TYPES.map(x=>`<option>${x}</option>`).join('')}</select></label><label class="f">PO number (optional)<input id="i_po" class="in"></label><label class="f">Invoice number<input id="i_inv" class="in"></label>
    <label class="f">Invoice date (optional)<input type="date" id="i_date" class="in"></label><label class="f">Item number<input id="i_item" class="in"></label><label class="f">Quantity<input id="i_qty" class="in" inputmode="numeric"></label></div>
    <div class="row sec"><button class="btn" data-act="draftAdd">Add item line</button><span class="hint">PO and invoice stay filled so you can add several items quickly.</span></div>
@@ -3814,7 +3857,7 @@ function validateBulkRow(r){
   return bulkRowBasic(r).concat(bulkDateRules(v,has));
 }
 function bulkCheck(objs,hdr,fileName){
-  const bulkInvSeen={};
+  const bulkInvSeen={},bulkInvIx=invIndex();
   const miss=['ShipmentType','NatureOfGoods','Shipper','Consignee','Carrier','Mode','IncoTerm','PickupPlanned','ETA','PONumber','InvoiceNumber','ItemNumber','ItemQty'].filter(c=>!hdr.includes(c));
   if(miss.length){toast('Missing columns: '+miss.join(', ')+'. Use the template.','bad');return false}
   let skipped=0;const items=[];
@@ -3830,7 +3873,7 @@ function bulkCheck(objs,hdr,fileName){
   groups.forEach(xs=>{
     const g=xs[0].r.ShipmentGroup,first=xs[0].r;
     if(g)xs.slice(1).forEach(x=>GROUP_KEYS.forEach(c=>{if(c!=='ShipmentType'&&x.r[c]&&first[c]&&x.r[c]!==first[c])x.errs.push(c+' differs from the first row of group '+g)}));
-    {const shp=first.Shipper;xs.forEach(x=>{const inv=x.r.InvoiceNumber;if(!inv)return;const hit=invDupFind(shp,inv,null);if(hit)x.errs.push(invDupMsg(hit,inv));const k=normShipper(shp)+'|'+normInvNo(inv);if(bulkInvSeen[k]!==undefined&&bulkInvSeen[k]!==(g||x.r._row))x.errs.push('Invoice number '+inv+' is used for two shipments in this file');bulkInvSeen[k]=g||x.r._row})}
+    {const shp=first.Shipper;xs.forEach(x=>{const inv=x.r.InvoiceNumber;if(!inv)return;const hr=invDupIn(bulkInvIx,shp,inv,null);if(hr){const hit=getShip(hr);if(hit)x.errs.push(invDupMsg(hit,inv))}const k=normShipper(shp)+'|'+normInvNo(inv);if(bulkInvSeen[k]!==undefined&&bulkInvSeen[k]!==(g||x.r._row))x.errs.push('Invoice number '+inv+' is used for two shipments in this file');bulkInvSeen[k]=g||x.r._row})}
     const mg=bulkMerge(xs.map(x=>x.r)),has={};BULK_DATE_COLS.forEach(c=>{has[c]=xs.some(x=>x.r[c])});
     bulkDateRules(mg.m,has).forEach(m=>xs[0].errs.push(m));
     const notes=mg.notes.map(n=>n.col+' differs in group '+g+' ('+n.vals.join(', ')+'): the latest, '+n.used+', is used');
@@ -3925,7 +3968,7 @@ function viewMilestones(){
   const notNom=act.filter(s=>s.freight==='Your Company'&&!s.nominated).length;
   const soon=act.filter(s=>s.dueL&&diffDays(s.dueL,S.today)>=0&&diffDays(s.dueL,S.today)<=3).length;
   const f=S.ui.msFilter;
-  const rows=act.filter(s=>f==='overdue'?isLateNow(s)||od.some(o=>o.sh.ref===s.ref):true).sort((a,b)=>(a.due||'9').localeCompare(b.due||'9'));
+  const rows=act.filter(s=>f==='overdue'?isLateNow(s)||od.some(o=>o.sh.ref===s.ref):true).filter(s=>!S.ui.msQ||shipHay(s).includes(String(S.ui.msQ).toLowerCase())).sort((a,b)=>(a.due||'9').localeCompare(b.due||'9'));
   return pageHead('Milestone Management','Record forwarder nomination, pickup, ETD, ETA and delivery. Download the overdue list, fill in the dates, and upload it back to update many shipments at once.')+
   `${kt('ms',(()=>{
   const odMap=new Map();od.forEach(o=>{if(!odMap.has(o.sh.ref))odMap.set(o.sh.ref,{sh:o.sh,ks:[]});odMap.get(o.sh.ref).ks.push(o.k)});
@@ -3939,22 +3982,22 @@ function viewMilestones(){
    {id:'free',label:'Free time ending or over',value:fr.length,cls:'late',title:'Arrived shipments whose free time is ending or over',rows:fr,extra:[colx('Free time',sh=>freeCell(sh),sh=>freeText(sh))]},
    {id:'active',label:'Active shipments',value:act.length,title:'Active shipments',rows:act}]})())}
   <div class="row" style="margin-bottom:12px"><button class="btn pri" data-act="msDownload">Download overdue (CSV)</button><button class="btn" data-act="msBulkOpen">Upload updates</button>
-   <span style="margin-left:auto" class="row"><label class="mu sm">Show <select id="msFilter" data-ch="msFilter" class="in" style="width:auto"><option value="active" ${f==='active'?'selected':''}>All active shipments</option><option value="overdue" ${f==='overdue'?'selected':''}>Only overdue</option></select></label></span></div>
+   <span style="margin-left:auto" class="row"><input id="ms_q" class="in" placeholder="Search HBL, MBL, invoice or container" value="${esc(S.ui.msQ||'')}" style="width:290px" aria-label="Search shipments"><label class="sw"><input type="checkbox" role="switch" data-ch="msRefs" ${showRefs()?'checked':''}><span class="sw-t"></span><span>Show Reference Numbers</span></label><label class="mu sm">Show <select id="msFilter" data-ch="msFilter" class="in" style="width:auto"><option value="active" ${f==='active'?'selected':''}>All active shipments</option><option value="overdue" ${f==='overdue'?'selected':''}>Only overdue</option></select></label></span></div>
   ${S.msResult?`<div class="${S.msResult.fail?'note':'okbox'}"><b>${S.msResult.ok} update(s) applied, ${S.msResult.fail} rejected.</b>${S.msResult.msgs.length?`<ul style="margin:6px 0 0 18px">${S.msResult.msgs.map(m=>`<li>${esc(m)}</li>`).join('')}</ul>`:''}</div>`:''}
-  <div class="card" style="padding:0"><div class="tbw"><table class="tb"><tr><th>Shipment</th><th>Carrier</th><th>Nominated</th><th>Pickup</th><th>ETD</th><th>ETA</th><th>Delivery due</th><th>Status</th><th></th></tr>
-  ${rows.length?rows.map(sh=>`<tr><td><b>${sh.ref}</b><br><small class="mu">${esc(sh.mode)}, ${esc(sh.stype||'Type not set')}${sh.nature==='DG'?', DG':''}, ${esc(sh.route)}</small></td><td>${esc(sh.carrier)}</td>
+  <div class="card" style="padding:0"><div class="tbw"><table class="tb"><tr><th>Shipment</th>${showRefs()?'<th>References</th>':''}<th>Carrier</th><th>Nominated</th><th>Pickup</th><th>ETD</th><th>ETA</th><th>Delivery due</th><th>Status</th><th></th></tr>
+  ${rows.length?rows.map(sh=>`<tr><td>${shipIdCell(sh)}</td>${showRefs()?`<td>${refsCell(sh)}</td>`:''}<td>${esc(sh.carrier)}</td>
    <td>${sh.nominated?`<span class="ok-t">${fmtS(sh.nominated)} done</span>`:sh.freight==='Shipper'?'<span class="mu">By shipper</span>':'<span class="pill warn">Not nominated</span>'}</td>
    <td>${msCell(sh,'Pickup')}</td><td>${msCell(sh,'ETD')}</td><td>${msCell(sh,'ETA')}</td><td>${msCell(sh,'Delivery')}</td><td>${pill(sh)}</td>
-   <td class="r"><button class="btn sm" data-act="open" data-ref="${sh.ref}">Update</button></td></tr>`).join(''):'<tr><td colspan="9" class="empty">Nothing to show.</td></tr>'}</table></div></div>`;
+   <td class="r"><button class="btn sm" data-act="open" data-ref="${sh.ref}">Update</button></td></tr>`).join(''):'<tr><td colspan="10" class="empty">Nothing to show.</td></tr>'}</table></div></div>`;
 }
 const shipInvNos=sh=>uniq(sh.lines.map(l=>l.InvoiceNumber).filter(Boolean)).join('; ');
 const shipTrackNos=sh=>uniq(sh.lines.map(l=>l.HBL_HAWB_Tracking).filter(Boolean)).join('; ');
-const MS_REP_COLS=['Shipment Reference','Invoice Number','Tracking Number','Carrier','Milestone','Planned Date','Actual Date'];
-function msReportRows(carrier){return overdueRows(carrier).map(({sh,k})=>({'Shipment Reference':sh.ref,'Invoice Number':shipInvNos(sh),'Tracking Number':shipTrackNos(sh),Carrier:sh.carrier,Milestone:k,'Planned Date':msPlanL(sh,k),'Actual Date':''}))}
+const MS_REP_COLS=['Shipment Reference','HBL','MBL','Container Number','Invoice Number','Carrier','Milestone','Planned Date','Actual Date'];
+function msReportRows(carrier){return overdueRows(carrier).map(({sh,k})=>({'Shipment Reference':sh.ref,HBL:shipHbl(sh).join('; '),MBL:shipMbl(sh).join('; '),'Container Number':shipCont(sh).join('; '),'Invoice Number':shipInvNos(sh),Carrier:sh.carrier,Milestone:k,'Planned Date':msPlanL(sh,k),'Actual Date':''}))}
 function msDownload(carrier){
   const rows=msReportRows(carrier);
   if(!rows.length){toast('No overdue milestones as of '+fmt(S.today));return}
-  showCsv('Overdue milestones','overdue-milestones-'+S.today+'.csv',toCSV(MS_REP_COLS,rows),'Fill in Actual Date (yyyy-mm-dd) for the milestones that have happened, then use Upload updates. Milestone is Pickup, ETD, ETA, Delivery or Nominated. Invoice Number and Tracking Number list every number on the shipment. Planned Date is the latest planned or estimated date.',{name:'overdue-milestones-'+S.today+'.xlsx',sheets:[{name:'Overdue milestones',headers:MS_REP_COLS,rows}]});
+  showCsv('Overdue milestones','overdue-milestones-'+S.today+'.csv',toCSV(MS_REP_COLS,rows),'Fill in Actual Date (yyyy-mm-dd) for the milestones that have happened, then use Upload updates. Milestone is Pickup, ETD, ETA, Delivery or Nominated. HBL, MBL, Container Number and Invoice Number list every number on the shipment, separated by semicolons. The upload finds a shipment by Shipment Reference, or by HBL or MBL when the reference is empty.',{name:'overdue-milestones-'+S.today+'.xlsx',sheets:[{name:'Overdue milestones',headers:MS_REP_COLS,rows}]});
 }
 function msBulkModal(carrier){
   window._msScope=carrier||'';
@@ -3969,16 +4012,18 @@ const msKey=h=>String(h||'').toLowerCase().replace(/[^a-z]/g,'');
 function msRun(text,scope){
   const o=csvObjects(text);if(o.err){toast(o.err,'bad');return}
   const hm={};o.hdr.forEach(h=>{hm[msKey(h)]=h});const col=(...ns)=>{for(const n of ns)if(hm[n])return hm[n];return null};
-  const cRef=col('shipmentreference','shipmentref'),cMs=col('milestone'),cAct=col('actualdate'),cLoc=col('location'),cNote=col('note'),cCar=col('carrier');
-  if(!cRef||!cMs||!cAct){toast('The file needs the columns Shipment Reference, Milestone and Actual Date','bad');return}
+  const cRef=col('shipmentreference','shipmentref'),cHbl=col('hbl','hblhawb','hblhawbtracking','hawb'),cMbl=col('mbl','mblmawb','mawb'),cMs=col('milestone'),cAct=col('actualdate'),cLoc=col('location'),cNote=col('note'),cCar=col('carrier');
+  if((!cRef&&!cHbl&&!cMbl)||!cMs||!cAct){toast('The file needs Milestone, Actual Date and a Shipment Reference, HBL or MBL column','bad');return}
   let ok=0,fail=0;const msgs=[];
   o.objs.forEach(r=>{
     if(!r[cAct])return;
     const k=r[cMs]==='Nominated'?'Nominated':Object.keys(MS).find(x=>x.toLowerCase()===String(r[cMs]).toLowerCase());
     if(!k){fail++;msgs.push('Row '+r._row+': unknown milestone "'+r[cMs]+'"');return}
-    const sh=getShip(r[cRef]);
+    let ref=cRef?String(r[cRef]||'').trim():'';
+    if(!ref){const f0=rgResolve(cHbl?String(r[cHbl]||'').trim():'',cMbl?String(r[cMbl]||'').trim():'','');if(f0.err){fail++;msgs.push('Row '+r._row+': '+f0.err);return}ref=f0.sh.ref}
+    const sh=getShip(ref);
     if(sh&&cCar&&r[cCar]&&String(r[cCar]).trim().toLowerCase()!==sh.carrier.toLowerCase()){fail++;msgs.push('Row '+r._row+': carrier "'+r[cCar]+'" does not match '+sh.ref+' ('+sh.carrier+')');return}
-    const res=applyMilestone(r[cRef],k,r[cAct],cLoc?r[cLoc]:'',cNote?r[cNote]:'Bulk update',scope?{carrier:scope}:undefined);
+    const res=applyMilestone(ref,k,r[cAct],cLoc?r[cLoc]:'',cNote?r[cNote]:'Bulk update',scope?{carrier:scope}:undefined);
     if(res.ok)ok++;else{fail++;msgs.push('Row '+r._row+': '+res.msg)}
   });
   S.msResult={ok,fail,msgs};closeModal();render();toast(ok+' update(s) applied'+(fail?', '+fail+' rejected':''),fail&&!ok?'bad':'');
@@ -3988,14 +4033,14 @@ function msRun(text,scope){
 function cuData(){
   const me=myCarrier(),all=assignedTo(me),od=overdueRows(me),U=S.ui.cu,q=(U.q||'').toLowerCase();
   const rows=all.filter(s=>U.filter==='active'?s.status!=='Delivered':U.filter==='overdue'?od.some(o=>o.sh.ref===s.ref):U.filter==='delivered'?s.status==='Delivered':true)
-    .filter(sh=>!q||(sh.ref+' '+sh.route+' '+sh.stype+' '+sh.pos.join(' ')+' '+sh.containers.join(' ')+' '+(sh.f.HBL_HAWB_Tracking||'')+' '+(sh.f.MBL_MAWB||'')).toLowerCase().includes(q))
+    .filter(sh=>!q||(shipHay(sh)+' '+sh.stype).toLowerCase().includes(q))
     .sort((a,b)=>(a.due||'9').localeCompare(b.due||'9'));
   return {me,all,od,rows};
 }
 function cuTable(rows){
   if(!rows.length)return '<div class="empty">No shipments match. Shipments appear here once Your Company nominates your company.</div>';
-  return `<div class="tbw"><table class="tb"><tr><th>Shipment</th><th>What is shipping</th><th>Pickup</th><th>ETD</th><th>ETA</th><th>Delivery due</th><th>Status</th><th></th></tr>`+rows.map(sh=>`<tr>
-   <td><b>${sh.ref}</b><br><small class="mu">${modeBadge(sh.mode)} ${esc(sh.route)}</small></td><td>${typeBadge(sh.stype)}${dgTag(sh.nature)}<br><small class="mu">${sh.weight?kg(sh.weight):'-'}${sh.containers.length?', '+esc(sh.containers.join(', ')):''}</small></td>
+  return `<div class="tbw"><table class="tb"><tr><th>Shipment</th>${showRefs()?'<th>References</th>':''}<th>What is shipping</th><th>Pickup</th><th>ETD</th><th>ETA</th><th>Delivery due</th><th>Status</th><th></th></tr>`+rows.map(sh=>`<tr>
+   <td>${shipIdCell(sh,modeBadge(sh.mode)+' '+esc(sh.route))}</td>${showRefs()?`<td>${refsCell(sh)}</td>`:''}<td>${typeBadge(sh.stype)}${dgTag(sh.nature)}<br><small class="mu">${sh.weight?kg(sh.weight):'-'}${sh.containers.length?', '+esc(sh.containers.join(', ')):''}</small></td>
    <td>${msCell(sh,'Pickup')}</td><td>${msCell(sh,'ETD')}</td><td>${msCell(sh,'ETA')}</td><td>${msCell(sh,'Delivery')}</td><td>${pill(sh)}</td>
    <td class="r"><button class="btn sm ${sh.status==='Delivered'?'':'pri'}" data-act="cuOpen" data-ref="${sh.ref}">${sh.status==='Delivered'?'View':'Update'}</button></td></tr>`).join('')+'</table></div>';
 }
@@ -4014,7 +4059,7 @@ function viewCarrierUpdates(){
    {id:'d',label:'Delivered',value:all.filter(s=>s.status==='Delivered').length,cls:'ok',title:'Delivered shipments',rows:all.filter(s=>s.status==='Delivered')}]})(),'cuOpen')}
   ${S.msResult?`<div class="${S.msResult.fail?'note':'okbox'}"><b>${S.msResult.ok} update(s) applied, ${S.msResult.fail} rejected.</b>${S.msResult.msgs.length?`<ul style="margin:6px 0 0 18px">${S.msResult.msgs.map(m=>`<li>${esc(m)}</li>`).join('')}</ul>`:''}</div>`:''}
   <div class="row" style="margin-bottom:12px"><button class="btn pri" data-act="cuDownload">Download overdue (CSV)</button><button class="btn" data-act="cuDriver">${driverMode()?'Table view':'Driver view'}</button><button class="btn" data-act="cuBulkOpen">Upload updates</button>
-   <span class="row" style="margin-left:auto"><input id="cu_q" class="in" placeholder="Search shipment, container, tracking" value="${esc(U.q||'')}" style="width:270px" aria-label="Search your shipments"><select data-ch="cufilter" class="in" style="width:auto" aria-label="Show">${[['active','Active shipments'],['overdue','Overdue updates'],['delivered','Delivered'],['all','All']].map(([v,l])=>`<option value="${v}" ${v===U.filter?'selected':''}>${l}</option>`).join('')}</select></span></div>
+   <span class="row" style="margin-left:auto"><input id="cu_q" class="in" placeholder="Search HBL, MBL, invoice or container" value="${esc(U.q||'')}" style="width:270px" aria-label="Search your shipments"><select data-ch="cufilter" class="in" style="width:auto" aria-label="Show">${[['active','Active shipments'],['overdue','Overdue updates'],['delivered','Delivered'],['all','All']].map(([v,l])=>`<option value="${v}" ${v===U.filter?'selected':''}>${l}</option>`).join('')}</select></span></div>
   <div id="cuTable" ${driverMode()?'':'class="card" style="padding:0"'}>${cuBody(rows)}</div>
   <p class="hint">${hidden&&!isCar?hidden+' shipment(s) list '+esc(me)+' as the carrier but are not nominated yet, so they stay hidden. ':''}Shipments appear here once Your Company nominates your company. Dates cannot be in the future, and a recorded date can only be corrected by Your Company logistics.</p>`;
 }
@@ -4087,7 +4132,7 @@ function monHTML(all){
   const D=S.ui.dash,q=D.q.toLowerCase();
   const rows=(D.status==='Cancelled'?cancelledList():all).filter(sh=>(D.status==='All'||D.status==='Cancelled'||sh.status===D.status||(D.status==='Delayed'&&isLateNow(sh))||(D.status==='Invoice pending'&&can('invoices')&&isInvPending(sh))||(D.status==='At risk'&&riskInfo(sh)&&!isLateNow(sh))||(D.status==='Free time ending'&&['ending','over'].includes((freeInfo(sh)||{}).state)))).filter(sh=>!D.overdueOnly||isLateNow(sh)).filter(sh=>!D.missDocs||missingDocs(sh)).filter(sh=>!D.pendRG||rgPending(sh)).filter(sh=>!D.poMiss||poMissing(sh))
     .filter(sh=>!q||(sh.ref+' '+sh.carrier+' '+sh.shipper+' '+sh.consignee+' '+sh.route+' '+sh.pos.join(' ')).toLowerCase().includes(q)).sort((a,b)=>(a.due||'9').localeCompare(b.due||'9'));
-  if(!rows.length)return '<div class="empty">No shipments match these filters.</div>';
+  if(!rows.length)return monBarHTML()+monEmptyHTML();
   const cb=can('cancelship'),elig=s=>!s.cancelled;D.chk=(D.chk||[]).filter(r=>rows.some(s=>s.ref===r&&elig(s)));
   const allSel=cb&&rows.some(elig)&&rows.filter(elig).every(s=>D.chk.includes(s.ref));
   return `${monBarHTML()}<div class="tbw"><table class="tb" data-sort="on"><tr>${cb?`<th style="width:34px"><input type="checkbox" id="monAll" data-act="monAll" aria-label="Select all shown shipments" ${allSel?'checked':''}></th>`:''}<th>Shipment</th><th>Mode</th><th>Type</th><th>Route</th><th>Carrier</th><th>Progress</th><th>Due</th><th>Status</th>${can('invoices')?'<th>Freight invoice</th>':''}${can('cancelship')?'<th></th>':''}</tr>`+rows.map(sh=>`<tr class="click${can('invoices')&&isInvPending(sh)?' tr-pend':''}" data-act="open" data-ref="${sh.ref}">${cb?`<td><input type="checkbox" data-act="monSel" data-ref="${sh.ref}" aria-label="Select ${sh.ref}" ${elig(sh)?'':'disabled'} ${D.chk.includes(sh.ref)?'checked':''}></td>`:''}<td><b>${sh.ref}</b></td><td>${modeBadge(sh.mode)}</td><td>${typeBadge(sh.stype)}${dgTag(sh.nature)}</td><td>${esc(sh.route)}</td><td>${esc(sh.carrier)}</td><td>${miniHTML(sh)}</td>
@@ -4170,8 +4215,8 @@ function viewDash(){
    ${typeCard(all)}
    <div class="card"><h3>Volume by mode</h3>${modeRows.map(r=>`<div class="row" style="margin-bottom:8px"><span style="min-width:132px;flex:none">${modeBadge(r.md)}</span><div class="bar grow" style="min-width:60px"><i style="width:${r.w/maxW*100}%"></i></div><span style="min-width:150px;flex:none;text-align:right;white-space:nowrap">${r.n} shipments, ${(r.w/1000).toFixed(1)} t</span></div>`).join('')}</div></div></div>
   <div class="card"><h3>Shipment monitor</h3><div class="row" style="margin-bottom:10px"><input id="d_q" class="in grow" placeholder="Search shipment, carrier, party, PO" value="${esc(D.q)}" aria-label="Search monitor">
-    <select id="d_status" data-ch="dstatus" class="in" style="width:auto">${['All',...STAGES,'Delayed',...(can('invoices')?['Invoice pending']:[]),'At risk','Free time ending','Cancelled'].map(o=>`<option ${o===D.status?'selected':''}>${o}</option>`).join('')}</select>${cancelledList().length?`<span class="mu sm" title="Cancelled shipments stay on record and are not counted in any figure on this page">${cancelledList().length} cancelled on record</span>`:''}
-    <label class="mu sm row"><input type="checkbox" id="d_over" data-ch="dover" ${D.overdueOnly?'checked':''} style="width:auto"> Delayed only</label></div><div id="mon">${monHTML(all)}</div></div>`;
+    <select id="d_status" aria-label="Status" data-ch="dstatus" class="in" style="width:auto">${['All',...STAGES,'Delayed',...(can('invoices')?['Invoice pending']:[]),'At risk','Free time ending','Cancelled'].map(o=>`<option ${o===D.status?'selected':''}>${o}</option>`).join('')}</select>${cancelledList().length?`<span class="mu sm" title="Cancelled shipments stay on record and are not counted in any figure on this page">${cancelledList().length} cancelled on record</span>`:''}
+    </div><div id="mon">${monHTML(all)}</div></div>`;
 }
 
 /* ----- 5. Carrier dashboard ----- */
@@ -4185,12 +4230,12 @@ function carrierStats(){
   const list=carrierList();
   const by={};
   list.forEach(sh=>{
-    const c=by[sh.carrier]||(by[sh.carrier]={name:sh.carrier,n:0,w:0,active:0,late:0,deliv:0,dueN:0,onTime:0,puN:0,puOn:0,tr:[],lateDays:[],modes:new Set(),months:{}});
+    const c=by[sh.carrier]||(by[sh.carrier]={name:sh.carrier,n:0,w:0,active:0,late:0,deliv:0,dueN:0,onTime:0,puN:0,puOn:0,tr:[],lateDays:[],modes:new Set(),months:{},pm:{}});
     c.n++;c.w+=sh.weight;c.modes.add(sh.mode);
     if(sh.status==='Delivered'){c.deliv++;const dd=sh.f.DeliveredOn;if(dd&&sh.due){c.dueN++;const on=dd<=sh.due;if(on)c.onTime++;const mo=dd.slice(0,7);const b=c.months[mo]||(c.months[mo]={n:0,on:0});b.n++;if(on)b.on++}if(dd&&sh.f.PickupActual)c.tr.push(diffDays(dd,sh.f.PickupActual))}
     else c.active++;
     if(isLateNow(sh)){c.late++;c.lateDays.push(diffDays(S.today,sh.due))}
-    if(sh.f.PickupActual&&sh.f.PickupPlanned){c.puN++;if(sh.f.PickupActual<=sh.f.PickupPlanned)c.puOn++}
+    if(sh.f.PickupActual&&sh.f.PickupPlanned){c.puN++;const pon=sh.f.PickupActual<=sh.f.PickupPlanned;if(pon)c.puOn++;const pmo=sh.f.PickupActual.slice(0,7),pb=c.pm[pmo]||(c.pm[pmo]={n:0,on:0});pb.n++;if(pon)pb.on++}
   });
   return Object.values(by).sort((a,b)=>b.n-a.n);
 }
@@ -4322,15 +4367,14 @@ function carrierCharts(st){
    <div class="chips" style="margin:0 0 14px">${Object.entries(CMET).map(([k,m])=>`<button class="chip ${k===(C.metric||'ontime')?'on':''}" data-act="cMetric" data-m="${k}" aria-pressed="${k===(C.metric||'ontime')}">${m.label}</button>`).join('')}</div>
    ${rank}
    <p class="hint">${M.pct?`Green bars meet the ${tgt}% target, red bars miss it, and the dark line marks the target. `:''}${M.hi?'Best first.':'Lowest first, which is best.'} Hover a bar for details.</p></div>
-  <div class="two"><div class="card"><h3>On-time delivery and pickup by carrier</h3>${groupedSVG(st,tgt)}<div><span class="lgd"><i style="background:var(--accent)"></i>On-time delivery</span><span class="lgd"><i style="background:var(--muted)"></i>Pickup on time</span></div></div>
-   <div class="card"><h3>Monthly on-time delivery by carrier</h3>${trendChart(st,tgt)}${months.length<3&&!hasSample()?'<p class="hint">Only '+months.length+' month(s) of delivered shipments so far. <button class="btn sm" data-act="sampleAdd">Load sample history</button> to see a longer trend.</p>':'<p class="hint">Each point is the share of that month\'s deliveries that arrived on or before the due date.</p>'}</div></div>`;
+  ${carrierTrendCard(st)}`;
 }
 function viewCarrier(){
   const C=S.ui.carrier,st=carrierStats();
   const avg=a=>a.length?(a.reduce((x,y)=>x+y,0)/a.length):null;
   const pct=(a,b)=>b?Math.round(a/b*100)+'%':'-';
   const maxW=Math.max(1,...st.map(c=>c.w));
-  const tot=st.reduce((a,c)=>({n:a.n+c.n,late:a.late+c.late,deliv:a.deliv+c.deliv,onT:a.onT+c.onTime,dueN:a.dueN+c.dueN}),{n:0,late:0,deliv:0,onT:0,dueN:0});
+  const tot=st.reduce((a,c)=>({n:a.n+c.n,late:a.late+c.late,deliv:a.deliv+c.deliv,onT:a.onT+c.onTime,dueN:a.dueN+c.dueN,puOn:a.puOn+c.puOn,puN:a.puN+c.puN}),{n:0,late:0,deliv:0,onT:0,dueN:0,puOn:0,puN:0});
   return pageHead('Carrier Performance','How each carrier is performing by mode and time window: volumes handled, delays and on-time delivery. Costs are not shown here.')+periodBar({basis:true})+
   `<div class="card"><div class="row"><label class="f">Mode<select data-ch="cmode">${['All',...MODES].map(o=>`<option ${o===C.mode?'selected':''}>${o}</option>`).join('')}</select></label>
    <label class="f">Shipment type<select data-ch="ctype">${['All',...TYPES,'Mixed'].map(o=>`<option ${o===(C.type||'All')?'selected':''}>${o}</option>`).join('')}</select></label>
@@ -4340,7 +4384,8 @@ function viewCarrier(){
   return [{id:'carriers',label:'Carriers used',value:st.length,title:'Shipments by carrier',rows:byC(L)},
    {id:'handled',label:'Shipments handled',value:tot.n,title:'Shipments handled',rows:byC(L)},
    {id:'late',label:'Delayed now',value:tot.late,cls:'late',title:'Delayed now',rows:byC(L.filter(isLateNow))},
-   {id:'ontime',label:'Delivered on time',value:pct(tot.onT,tot.dueN),cls:'ok',title:'Delivered shipments, on time and late',rows:byC(L.filter(s=>s.status==='Delivered'&&s.due&&s.f.DeliveredOn)),extra:[onTimeCol()]}]})())}
+   {id:'ontime',label:'Delivered on time',value:pct(tot.onT,tot.dueN),cls:'ok',title:'Delivered shipments, on time and late',rows:byC(L.filter(s=>s.status==='Delivered'&&s.due&&s.f.DeliveredOn)),extra:[onTimeCol()]},
+    {id:'pickup',label:'Picked up on time',value:pct(tot.puOn,tot.puN),sub:tot.puN?tot.puOn+' of '+tot.puN:'',cls:'ok',title:'Picked up, on time and late',rows:byC(L.filter(s=>s.f.PickupActual&&s.f.PickupPlanned)),extra:[pickupDatesCol(),pickupCol()]}]})())}
   ${carrierCharts(st)}
   ${scorecardCard()}
   ${monthlyCard('car')}
@@ -4525,9 +4570,9 @@ function settingsPanel(){
   <div class="card"><h3>Settings</h3><div class="row"><label class="f grow">Allowed email domain for subscriptions<input id="s_domain" class="in" value="${esc(S.settings.domain)}"></label><button class="btn pri" data-act="saveDomain" style="align-self:flex-end">Save</button></div>
   <p class="hint">Only addresses ending in @${esc(S.settings.domain)} can subscribe. Other addresses are blocked and logged.</p></div>
   <div class="card"><h3>Free time and risk rules</h3><p class="mu" style="margin-bottom:10px">Free days start on the day a shipment arrives (the actual ETA) and end at gate-out or delivery. A shipment can override its free days when you edit it. A shipment is flagged as stale when it has had no update for the number of days below.</p>
-  <div class="tbw"><table class="tb" data-sort="off"><tr><th>Mode</th><th>Free days after arrival</th><th>Charge per day after that (USD)</th><th>Stale after (days without an update)</th></tr>${MODES.map(m=>`<tr><td>${modeBadge(m)}</td><td><input id="fs_free_${m}" class="in" inputmode="numeric" value="${fdSet().freeDays[m]}" style="max-width:100px"></td><td><input id="fs_rate_${m}" class="in" inputmode="decimal" value="${fdSet().demRate[m]}" style="max-width:100px"></td><td><input id="fs_stale_${m}" class="in" inputmode="numeric" value="${fdSet().staleDays[m]}" style="max-width:100px"></td></tr>`).join('')}</table></div>
+  <div class="tbw"><table class="tb" data-sort="off"><tr><th>Mode</th><th>Free days after arrival</th><th>Charge per day after that (USD)</th><th>Stale after (days without an update)</th></tr>${MODES.map(m=>`<tr><td>${modeBadge(m)}</td><td><input id="fs_free_${m}" aria-label="Free days for ${m}" class="in" inputmode="numeric" value="${fdSet().freeDays[m]}" style="max-width:100px"></td><td><input id="fs_rate_${m}" aria-label="Charge per day after the free days for ${m}" class="in" inputmode="decimal" value="${fdSet().demRate[m]}" style="max-width:100px"></td><td><input id="fs_stale_${m}" class="in" inputmode="numeric" value="${fdSet().staleDays[m]}" style="max-width:100px"></td></tr>`).join('')}</table></div>
   <div class="row sec"><button class="btn pri" data-act="ftSetSave">Save rules</button></div><p class="hint">The charge per day is only used for the estimate shown to roles with invoice access. 0 free days switches the countdown off for that mode.</p></div>
-  <div class="card"><h3>Sample history</h3><p class="mu" style="margin-bottom:10px">Adds 60 delivered shipments (SMP-0001 to SMP-0060) with realistic transit times, so the Transit Analytics, Carrier Performance and on-time figures have enough data to be meaningful. They come with freight quotes and invoices, so Freight Commercials and Freight Trends have data.</p>${hasSample()?'<button class="btn danger" data-act="sampleRemove">Remove sample history</button>':'<button class="btn pri" data-act="sampleAdd">Load sample history</button>'}</div>
+  <div class="card"><h3>Sample history</h3><p class="mu" style="margin-bottom:10px">Adds 60 delivered shipments (SMP-0001 to SMP-0060) with realistic transit times, so the Transit Analytics, Carrier Performance and on-time figures have enough data to be meaningful. They come with freight quotes and invoices, so Freight Commercials and Freight Trends have data.</p>${liveMode()?'':hasSample()?'<button class="btn danger" data-act="sampleRemove">Remove sample history</button>':'<button class="btn pri" data-act="sampleAdd">Load sample history</button>'}</div>
   <div class="card"><h3>Data in this demo</h3><p class="mu">${S.lines.length} item rows, ${ships().length} shipments, ${S.events.length} history events, ${S.subs.length} subscriptions. All changes live in memory and disappear when the page reloads. The production version writes to the Excel files in SharePoint. Use the Master file button at the top to watch each change as it would be written.</p></div>`;
 }
 
@@ -4546,7 +4591,8 @@ const tzWin=z=>(TZ_LIST.find(x=>x[0]===z)||[z,z])[1];
 const _tzf={};
 function tzFmt(tz){if(!_tzf[tz]){try{_tzf[tz]=new Intl.DateTimeFormat('en-CA',{timeZone:tz,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'})}catch(e){_tzf[tz]=tzFmt('UTC')}}return _tzf[tz]}
 function tzParts(inst,tz){const o={};tzFmt(tz||'UTC').formatToParts(inst).forEach(p=>{o[p.type]=p.value});return {date:o.year+'-'+o.month+'-'+o.day,time:(o.hour==='24'?'00':o.hour)+':'+o.minute}}
-const whNowUtc=()=>new Date(S.today+'T'+(S.utcTime||'12:00')+':00Z');
+const utcDateOf=()=>(typeof CLOCK!=='undefined'&&CLOCK.mode==='real')?new Date().toISOString().slice(0,10):S.today;
+const whNowUtc=()=>(typeof CLOCK!=='undefined'&&CLOCK.mode==='real')?new Date():new Date(S.today+'T'+(S.utcTime||'12:00')+':00Z');
 const whLocal=(w,inst)=>tzParts(inst||whNowUtc(),w&&w.tz);
 function localToUtc(date,time,tz){const [y,m,d]=date.split('-').map(Number),[hh,mm]=time.split(':').map(Number),T=Date.UTC(y,m-1,d,hh,mm);let g=T;for(let i=0;i<3;i++){const l=tzParts(new Date(g),tz),lu=Date.UTC(+l.date.slice(0,4),+l.date.slice(5,7)-1,+l.date.slice(8,10),+l.time.slice(0,2),+l.time.slice(3,5));g-=lu-T}return new Date(g)}
 const utcTxt=d=>d.toISOString().slice(0,16).replace('T',' ')+' UTC';
@@ -4904,7 +4950,7 @@ function viewFreightTrends(){
    <div class="g4" style="margin-top:12px">${sel('Nature of goods','nature',[['All','All'],['DG','DG'],['Non-DG','Non-DG']],F.nature)}${sel('Mode','mode',['All',...MODES].map(o=>[o,o]),F.mode)}${sel('Volume','vol',['All',...VOLS].map(o=>[o,o]),F.vol)}<span></span></div>
    <div class="g4" style="margin-top:12px">${sel('Show','series',Object.entries(FT_SERIES),F.series)}${sel('Measure','metric',Object.entries(FT_METRIC),F.metric)}${sel('Group by','group',Object.entries(FT_GROUP),F.group)}<button class="btn" data-act="ftClear" style="align-self:flex-end">Clear all filters</button></div></div>
   ${kt('ft',defs)}
-  ${D.months.length<4&&!hasSample()?'<div class="note">Only '+D.months.length+' month(s) of freight data so far. <button class="btn sm" data-act="sampleAdd">Load sample history</button> adds 60 delivered shipments with freight quotes, invoices, volumes and CBM so you can see a longer trend.</div>':''}
+  ${D.months.length<4&&!hasSample()&&!liveMode()?'<div class="note">Only '+D.months.length+' month(s) of freight data so far. <button class="btn sm" data-act="sampleAdd">Load sample history</button> adds 60 delivered shipments with freight quotes, invoices, volumes and CBM so you can see a longer trend.</div>':''}
   <div class="card"><h3>${esc(FT_SERIES[F.series])}, ${esc(FT_METRIC[F.metric].replace(/^./,c=>c.toLowerCase()))}${D.months.length?', '+mmLabel(D.months[0])+' to '+mmLabel(D.months[D.months.length-1]):''}</h3>${D.use.length?ftSVG(D)+'<div>'+leg+'</div>':'<div class="empty">No shipments have the data needed for this view. Change the filters or measure, record quotes and invoices in Freight Commercials, or load sample history.</div>'}
    ${notes.length?'<div class="note" style="margin-top:10px">'+notes.join('<br>')+'</div>':''}
    <p class="hint">${F.group!=='none'&&D.groups.length>(F.series==='both'?4:6)?'The chart shows the '+(F.series==='both'?4:6)+' busiest of '+D.groups.length+' groups; the matrix below lists more. ':''}Months follow the ${perBasisLabel()} (${esc(perLabel())}). "Quote and actual" compares only shipments that have both, so the two lines are like for like. Rate per kg = freight divided by chargeable weight, the greater of actual weight and CBM &times; ${CBM_KG} kg (the same for Air and LCL). If CBM is blank, actual weight is used and the shipment is flagged. 20FT and 40FT show the rate per container.</p></div>
@@ -5043,7 +5089,7 @@ function viewTransit(){
 function rng32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 const hasSample=()=>S.lines.some(l=>l.Notes==='Sample history');
 function addSampleHistory(){
-  if(hasSample())return 0;
+  if(liveMode()||hasSample())return 0;
   const R=rng32(7),ri=(a,b)=>a+Math.floor(R()*(b-a+1)),sk=(a,b)=>a+Math.floor(Math.pow(R(),1.6)*(b-a+1));
   const tpl=ships().filter(s=>!s.sample),R2=rng32(11),r2=(a,b)=>a+Math.floor(R2()*(b-a+1));let seaN=0;
   const P={Sea:{pu:1,etd:[2,7],tr:[16,34],ds:[2,9],w:[800,9000]},Air:{pu:1,etd:[0,2],tr:[1,5],ds:[0,3],w:[40,900]},Road:{pu:1,etd:[0,1],tr:[1,5],ds:[0,2],w:[300,4000]}};
@@ -5180,7 +5226,7 @@ const RPT=[
  {id:'schedule',label:'Delivery Schedule (7 Days)',desc:'Deliveries booked for the next seven days.',std:'schedule'},
  {id:'slotspend',label:'Slot Requests Awaiting Approval',desc:'Delivery slot requests waiting for the warehouse team.',std:'slots_pending'},
  {id:'dq',label:'Data Quality Issues',desc:'High and medium severity data issues.',std:'dq'},
- {id:'scorecard',label:'Carrier Scorecard',desc:'On-time delivery, updates, slot acceptance and invoice accuracy for each carrier.',build:()=>({headers:['Carrier','Shipments','On-Time Delivery %','Updates Within a Day %','Slot Requests Accepted First Time %','Invoice Within 5% of Quote %','Score'],rows:carrierScorecard().map(r=>{const p=k=>r.m[k]==null?'':Math.round(r.m[k]*100);return {Carrier:r.name,Shipments:r.n,'On-Time Delivery %':p('ontime'),'Updates Within a Day %':p('upd'),'Slot Requests Accepted First Time %':p('slot'),'Invoice Within 5% of Quote %':can('invoices')?p('inv'):'',Score:r.score==null?'':r.score}}),sheet:'Scorecard',name:'Carrier_Scorecard_'+S.today})},
+ {id:'scorecard',label:'Carrier Scorecard',desc:'On-time delivery, updates, slot acceptance and invoice accuracy for each carrier.',build:()=>({headers:['Carrier','Shipments','On-Time Delivery %','Pickup On-Time %','Updates Within a Day %','Slot Requests Accepted First Time %','Invoice Within 5% of Quote %','Score'],rows:carrierScorecard().map(r=>{const p=k=>r.m[k]==null?'':Math.round(r.m[k]*100);return {Carrier:r.name,Shipments:r.n,'On-Time Delivery %':p('ontime'),'Pickup On-Time %':p('pick'),'Updates Within a Day %':p('upd'),'Slot Requests Accepted First Time %':p('slot'),'Invoice Within 5% of Quote %':can('invoices')?p('inv'):'',Score:r.score==null?'':r.score}}),sheet:'Scorecard',name:'Carrier_Scorecard_'+S.today})},
  {id:'invpend',label:'Pending Invoices Report',desc:'Delivered shipments still waiting for a carrier invoice.',money:true,build:()=>({headers:['Shipment','Carrier','Delivered On','Days Since Delivery','Quote (Est.)','Quotation ID','Remarks'],rows:faScope().filter(s=>faState(s)==='Invoice Pending').sort((a,b)=>(a.f.DeliveredOn||'').localeCompare(b.f.DeliveredOn||'')).map(s=>{const q=selQuote(s.ref),i=faPrimary(s.ref);return {Shipment:s.ref,Carrier:s.carrier,'Delivered On':s.f.DeliveredOn||'','Days Since Delivery':s.f.DeliveredOn?diffDays(S.today,s.f.DeliveredOn):'','Quote (Est.)':q?q.amount:'','Quotation ID':q&&q.qid||'',Remarks:i&&i.remarks||''}}),sheet:'Pending Invoices',name:'Pending_Invoices_'+S.today})},
  {id:'paypend',label:'Payment Pending Report',desc:'Invoiced shipments that are not yet paid.',money:true,build:()=>({headers:['Shipment','Carrier','Carrier Invoice No.','Actual Freight (USD)','Delivered On','Days Since Delivery','Remarks'],rows:faScope().filter(s=>faState(s)==='Payment Pending').map(s=>{const i=faPrimary(s.ref);return {Shipment:s.ref,Carrier:s.carrier,'Carrier Invoice No.':invList(s.ref).map(x=>x.invRef).filter(Boolean).join('; '),'Actual Freight (USD)':invTotal(s.ref),'Delivered On':s.f.DeliveredOn||'','Days Since Delivery':s.f.DeliveredOn?diffDays(S.today,s.f.DeliveredOn):'',Remarks:i&&i.remarks||''}}),sheet:'Payment Pending',name:'Payment_Pending_'+S.today})},
  {id:'spend',label:'Freight Spend by Carrier',desc:'Quoted and invoiced freight for each carrier.',money:true,std:'spend'},
@@ -5237,7 +5283,7 @@ function reportAccessCard(){
 /* ----- wiring: tabs, nav, icons, default access ----- */
 [['rptdl','Reports'],['faudit','Freight Audit'],['rg','RG Pending']].forEach(([id,label])=>{TABS.push({id,label});ACCESS_ITEMS.push({id,label})});
 ACCESS_ITEMS.push({id:'auditedit',label:'Freight Audit: record costs, invoices and payments'},{id:'rgedit',label:'RG: record and upload RG details'});
-{const g=NAV_GROUPS;g[0][1].splice(g[0][1].indexOf('dataquality')+1,0,'rg');g[2][1].splice(g[2][1].indexOf('reports'),0,'rptdl');g[3][1].splice(g[3][1].indexOf('commercial')+1,0,'faudit');g[3][0]='Commercial and Access'}
+{const g=NAV_GROUPS;g[0][1].splice(g[0][1].indexOf('dataquality')+1,0,'rg');g[2][1].splice(g[2][1].indexOf('reports'),0,'rptdl');g[3][1].splice(g[3][1].indexOf('commercial')+1,0,'faudit');g[3][0]='Freight Cost';g[3][1].splice(g[3][1].indexOf('admin'),1);g.push(['Settings',['admin']])}
 ICON.rptdl='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-4-4m4 4 4-4M5 21h14"/></svg>';
 ICON.faudit='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h3m1 2 2 2 3-3"/></svg>';
 ICON.rg='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l2 2 4-4"/><path d="M5 4h14v16H5z"/></svg>';
@@ -5277,22 +5323,27 @@ uiApply();
 /* ----- quick-filter switch: pending RG ----- */
 {const m0=monBarHTML;monBarHTML=function(){let h=m0();if(!can('rg'))return h;const D=S.ui.dash;return h.replace('</div></div>',`<label class="sw"><input type="checkbox" role="switch" data-ch="monTog" data-k="rg" ${D.pendRG?'checked':''}><span class="sw-t"></span><span>Pending RG Only</span></label></div></div>`)}}
 /* ----- headline-style capitalisation of titles and subheadings ----- */
-const TC_MINOR=new Set('a an the and but or nor for so yet as if at by in of off on per to up via vs with from into onto over'.split(' '));
-function tcToken(tok,first,last){
+const TC_MINOR=new Set('a an the and but or nor for so yet as if at by in of off on per to via vs with from into onto over'.split(' '));
+const TC_UNITS=new Set(['kg','t','km','cm','mm','lb','lbs','kgs','pkg','pcs','hrs']);
+const TC_PHRASAL=new Set('picked pick set log sign check roll rolled drill follow followed hand handed carried carry send sent fill filled type typed look shut turn turned back mark marked pay paid break add added sort sorted'.split(' '));
+const TC_PARTICLES=['in','out','off','on','over','up','down'];
+function tcToken(tok,first,last,prev){
   const m=/^([^A-Za-z]*)(.*?)([^A-Za-z0-9]*)$/.exec(tok);if(!m||!m[2])return tok;let [,pre,core,post]=m;
   if(/[0-9@#_.\/]/.test(core)||/[A-Z]/.test(core.slice(1)))return tok;           // refs, emails, acronyms and mixed case stay as written
-  const parts=core.split('-'),out=parts.map((p,i)=>{if(!p)return p;const low=p.toLowerCase();if(!(first&&i===0)&&!(last&&i===parts.length-1)&&TC_MINOR.has(low))return low;return low.charAt(0).toUpperCase()+low.slice(1)});
+  if(!first&&core===core.toLowerCase()&&TC_UNITS.has(core))return tok;              // units such as kg and t stay lowercase
+  const parts=core.split('-'),out=parts.map((p,i)=>{if(!p)return p;const low=p.toLowerCase(),particle=TC_PARTICLES.includes(low)&&prev&&TC_PHRASAL.has(prev);if(!particle&&!(first&&i===0)&&!(last&&i===parts.length-1)&&TC_MINOR.has(low))return low;return low.charAt(0).toUpperCase()+low.slice(1)});
   if(parts.length===1&&/^[A-Z]+$/.test(core)&&core.length>1)return tok;
   return pre+out.join('-')+post;
 }
-function tcText(s,first,last){const toks=s.split(/(\s+)/);const words=toks.map((x,i)=>({x,i})).filter(o=>!/^\s+$/.test(o.x)&&o.x!=='');let prevColon=false;words.forEach((o,k)=>{const f=(first&&k===0)||prevColon,l=last&&k===words.length-1;toks[o.i]=tcToken(o.x,f,l);prevColon=/:$/.test(o.x)});return toks.join('')}
+function tcText(s,first,last){const toks=s.split(/(\s+)/);const words=toks.map((x,i)=>({x,i})).filter(o=>!/^\s+$/.test(o.x)&&o.x!=='');let prevColon=false,prev='';words.forEach((o,k)=>{const f=(first&&k===0)||prevColon,l=last&&k===words.length-1;toks[o.i]=tcToken(o.x,f,l,prev);prevColon=/:$/.test(o.x);prev=o.x.toLowerCase().replace(/[^a-z]/g,'')});return toks.join('')}
+
 function capEl(el){
   const nodes=[];const w=document.createTreeWalker(el,NodeFilter.SHOW_TEXT,null);let n;while(n=w.nextNode()){if(n.nodeValue.trim())nodes.push(n)}
   nodes.forEach((n,i)=>{const v=tcText(n.nodeValue,i===0,i===nodes.length-1);if(v!==n.nodeValue)n.nodeValue=v});
 }
-const TC_SEL='#view h1,#view h2,#view h3,#view h4,#modal h2,#modal h3,#view .tabs button,#modal .tabs button,#nav .nav-gh>span:first-child,#nav .nav-i>span:not(.nav-badge),.crumb b';
+const TC_SEL='#view th,#modal th,#view h1,#view h2,#view h3,#view h4,#modal h2,#modal h3,#view .tabs button,#modal .tabs button,#nav .nav-gh>span:first-child,#nav .nav-i>span:not(.nav-badge),.crumb b';
 const TC_ON=!/[?&]nocap=1/.test(location.search);
-function capAll(){if(!TC_ON)return;document.querySelectorAll(TC_SEL).forEach(capEl)}
+function capAll(){if(!TC_ON)return;document.querySelectorAll(TC_SEL).forEach(capEl);document.querySelectorAll('#view small,#modal small').forEach(s=>{const p=s.parentElement;if(p&&p.firstElementChild===s&&s.nextElementSibling&&s.nextElementSibling.tagName==='B')capEl(s)})}
 {let tm=null;new MutationObserver(()=>{clearTimeout(tm);tm=setTimeout(capAll,25)}).observe(document.body,{childList:true,subtree:true});setTimeout(capAll,50)}
 /* ========== freight audit (detailed), PO follow-up ========== */
 const usd2=n=>'$'+Number(n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -5482,7 +5533,7 @@ document.addEventListener('click',e=>{
   if(a==='faOpen'){if(denyAudit())return;faModal(d.ref);return}
   if(a==='faSave'){const r=faSave(d.ref,faForm());if(!r.ok){const x=document.getElementById('fa_err');if(x)x.innerHTML=`<div class="err" role="alert" style="margin-bottom:10px">${esc(r.msg)}</div>`;return}closeModal();render();toast(r.msg);return}
   if(a==='faRemoveInv'){if(denyAudit())return;if(!confirm('Remove this invoice record?'))return;const r=faRemoveInv(d.ref,d.id);closeModal();render();toast(r.msg,r.ok?'':'bad');return}
-  if(a==='faAttach'){if(denyAudit())return;const inp=document.getElementById('fa_file'),files=inp?[...inp.files]:[],er=docCheck(files,d.ref);if(er.length){toast(er[0],'bad');return}docsUpload(d.ref,files,'Carrier freight invoice').then(r=>{render();faModal(d.ref,val('fa_id')||undefined);toast(r.bad.length?r.bad[0]:r.ok.length+' file(s) attached',r.bad.length?'bad':'')});return}
+  if(a==='faAttach'){if(denyAudit())return;const inp=document.getElementById('fa_file'),files=inp?[...inp.files]:[],er=docCheck(files,d.ref);if(er.length){toast(er[0],'bad');return}if(window._docBusy)return;window._docBusy=1;docsUpload(d.ref,files,'Carrier freight invoice').then(r=>{render();faModal(d.ref,val('fa_id')||undefined);toast(r.bad.length?r.bad[0]:r.ok.length+' file(s) attached',r.bad.length?'bad':'')}).finally(()=>{window._docBusy=0});return}
   if(a==='faAll'){const f=F(),k={c:'cars',o:'modes',y:'years',q:'quarters',m:'months'}[d.f];const all={c:()=>uniq(faScope().map(s=>s.carrier)).sort(),o:()=>MODES.slice(),y:()=>uniq(faScope().map(s=>Number((s.f.DeliveredOn||'').slice(0,4))).filter(Boolean)),q:()=>[1,2,3,4],m:()=>[1,2,3,4,5,6,7,8,9,10,11,12]}[d.f]();f[k]=all;render();return}
   if(a==='faNone'){const f=F(),k={c:'cars',o:'modes',y:'years',q:'quarters',m:'months'}[d.f];f[k]=[];render();return}
   if(a==='faClear'){S.ui.fa=null;faSt();render();return}
@@ -5508,10 +5559,9 @@ document.addEventListener('change',e=>{
 /* ========== duplicate shipment invoice numbers, freight audit upload ========== */
 const normInvNo=s=>String(s||'').toLowerCase().replace(/[\s\-\/.]/g,'');
 const normShipper=s=>String(s==null?'':s).trim().toLowerCase();
-function invDupFind(shipper,inv,exceptRef){
-  const k=normInvNo(inv);if(!k)return null;const sp=normShipper(shipper);
-  return shipsAll().find(s=>!s.cancelled&&s.ref!==exceptRef&&normShipper(s.shipper)===sp&&s.lines.some(l=>normInvNo(l.InvoiceNumber)===k))||null;
-}
+function invIndex(list){const ix=new Map();(list||shipsAll()).forEach(x=>{if(x.cancelled)return;const sp=normShipper(x.shipper);new Set(x.lines.map(l=>normInvNo(l.InvoiceNumber)).filter(Boolean)).forEach(k=>{const key=sp+'|'+k;let a=ix.get(key);if(!a){a=[];ix.set(key,a)}a.push(x.ref)})});return ix}
+function invDupIn(ix,shipper,inv,exceptRef){const k=normInvNo(inv);if(!k)return null;const a=ix.get(normShipper(shipper)+'|'+k);if(!a)return null;return a.find(x=>x!==exceptRef)||null}
+function invDupFind(shipper,inv,exceptRef){const r=invDupIn(invIndex(),shipper,inv,exceptRef);return r?(getShip(r)||shipsAll().find(s=>s.ref===r)||null):null}
 function invDupMsg(hit,inv){
   const sc=typeof partnerScope==='function'?partnerScope():null,vis=!sc||sc.has(hit.shipper,hit.consignee);
   const on=(hit.lines[0].RegisteredOn||'').slice(0,10),h=faHblOf(hit);
@@ -5861,6 +5911,322 @@ document.addEventListener('change',e=>{
   if(t.dataset.ch==='rgSelAllRows'){const f=S.ui.rg=S.ui.rg||{f:'Pending',q:'',sel:[]},keys=[...document.querySelectorAll('[data-ch=rgSel]')].map(c=>c.dataset.k);f.sel=t.checked?uniq([...(f.sel||[]),...keys]):(f.sel||[]).filter(k=>!keys.includes(k));render();return}
   if(t.dataset.ch==='rgNa'){const on=t.checked,trig=t.dataset.trig==='1';['rg_no','rg_date','rg_to','rg_pl'].forEach(id=>{const i=document.getElementById(id);if(i){i.disabled=on||!trig;if(on)i.value=''}});document.querySelectorAll('[id^=rgq_]').forEach(i=>{i.disabled=on});const r=document.getElementById('rg_rem');if(r){r.disabled=!on;if(!on)r.value='';else r.focus()}return}
 });
+/* ========== carrier performance: month-by-month view, pickup on time ========== */
+const CTR_PAL=['#1F77B4','#E4572E','#2CA02C','#9467BD','#8C564B','#17BECF','#D4A017','#E377C2','#556B2F','#C2185B','#00796B','#5D6D7E'],CTR_MIN=3;
+const CTR_MEAS={del:{label:'On-time delivery',pct:true,note:'by delivery month'},pick:{label:'On-time pickup',pct:true,note:'by pickup month'},cnt:{label:'Shipments delivered',pct:false,note:'by delivery month'}};
+const ctrMonLabel=m=>MON[Number(m.slice(5))-1]+' '+m.slice(2,4);
+function ctrState(st){
+  const C=S.ui.carrier,T=C.tr=C.tr||{};if(!CTR_MEAS[T.measure])T.measure='del';
+  const names=[...st].sort((a,b)=>b.n-a.n||a.name.localeCompare(b.name)).map(c=>c.name);
+  if(!Array.isArray(T.cars))T.cars=names.slice(0,5);else T.cars=T.cars.filter(x=>names.includes(x));
+  if(T.overall===undefined)T.overall=true;if(T.from===undefined)T.from='';if(T.to===undefined)T.to='';
+  T.names=names;return T;
+}
+function ctrData(st,T){
+  const meas=CTR_MEAS[T.measure],src=c=>T.measure==='pick'?c.pm:c.months;
+  const allM=uniq(st.flatMap(c=>Object.keys(src(c)))).sort(),months=allM.filter(m=>(!T.from||m>=T.from)&&(!T.to||m<=T.to));
+  const pt=(b,m)=>b?{m,n:b.n,on:b.on,v:meas.pct?b.on/b.n*100:b.n}:null;
+  const mk=(name,col,list,extra)=>({name,col,pts:months.map(m=>{const b=list.reduce((a,c)=>{const x=src(c)[m];return x?{n:a.n+x.n,on:a.on+x.on}:a},{n:0,on:0});return b.n?pt(b,m):null}),...extra});
+  const series=[];
+  if(T.overall)series.push(mk('All carriers','var(--ink)',st,{dash:true}));
+  T.cars.forEach(nm=>{const c=st.find(x=>x.name===nm);if(c)series.push(mk(nm,CTR_PAL[T.names.indexOf(nm)%CTR_PAL.length],[c]))});
+  return {meas,allM,months,series};
+}
+function ctrChartSvg(D,tgt){
+  const {meas,months,series}=D,W=760,H=290,L=46,R=150,Tp=14,B=30,n=months.length,pct=meas.pct;
+  const vals=series.flatMap(s=>s.pts.filter(Boolean).map(p=>p.v)),max=pct?100:Math.max(5,Math.ceil(Math.max(0,...vals)/5)*5);
+  const X=i=>n===1?L+(W-L-R)/2:L+(W-L-R)*i/(n-1),Y=v=>Tp+(H-Tp-B)*(1-v/max);
+  let g='';[0,0.25,0.5,0.75,1].forEach(f=>{const y=Y(max*f);g+=`<line x1="${L}" x2="${W-R}" y1="${y}" y2="${y}" stroke="var(--line)"/><text x="${L-8}" y="${y+4}" text-anchor="end" font-size="11" fill="var(--muted)">${Math.round(max*f)}${pct?'%':''}</text>`});
+  if(pct)g+=`<line x1="${L}" x2="${W-R}" y1="${Y(tgt)}" y2="${Y(tgt)}" stroke="var(--ok)" stroke-dasharray="5 4" stroke-width="1.5"/><text x="${L+6}" y="${Y(tgt)+13}" font-size="11" fill="var(--ok)">Target ${tgt}%</text>`;
+  months.forEach((m,i)=>{g+=`<text x="${X(i)}" y="${H-10}" text-anchor="middle" font-size="11" fill="var(--muted)">${ctrMonLabel(m)}</text>`});
+  const ends=[];
+  series.forEach(s=>{
+    let d='',pen=false;s.pts.forEach((p,i)=>{if(!p){pen=false;return}d+=(pen?'L':'M')+X(i)+' '+Y(p.v);pen=true});
+    if(d)g+=`<path d="${d}" fill="none" stroke="${s.col}" stroke-width="${s.dash?2.5:2}" ${s.dash?'stroke-dasharray="7 4"':''} stroke-linejoin="round" stroke-linecap="round"/>`;
+    s.pts.forEach((p,i)=>{if(!p)return;const low=p.n<CTR_MIN;g+=`<circle cx="${X(i)}" cy="${Y(p.v)}" r="4.5" fill="${low?'var(--panel)':s.col}" stroke="${s.col}" stroke-width="2"><title>${esc(s.name)}, ${ctrMonLabel(p.m)}: ${pct?Math.round(p.v)+'% ('+p.on+' of '+p.n+')':p.n+' shipment'+(p.n===1?'':'s')}${low?' (fewer than '+CTR_MIN+' shipments, treat with care)':''}</title></circle>`});
+    const last=[...s.pts].reverse().find(Boolean);if(last)ends.push({s,y:Y(last.v),last});
+  });
+  ends.sort((a,b)=>a.y-b.y);for(let i=1;i<ends.length;i++)if(ends[i].y-ends[i-1].y<13)ends[i].y=ends[i-1].y+13;
+  ends.forEach(e=>{g+=`<text x="${W-R+8}" y="${e.y+4}" font-size="11.5" font-weight="600" fill="${e.s.col}">${esc(e.s.name.length>16?e.s.name.slice(0,15)+'…':e.s.name)} ${pct?Math.round(e.last.v)+'%':e.last.n}</text>`});
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="${esc(meas.label)} by month for the chosen carriers" style="max-height:340px">${g}</svg>`;
+}
+function ctrTableHtml(D,tgt){
+  const {meas,months,series}=D,pct=meas.pct,cell=p=>{if(!p)return '<td class="r mu">-</td>';const low=p.n<CTR_MIN;
+    return `<td class="r ${pct?(p.v>=tgt?'ctr-ok':'ctr-late'):''} ${low?'ctr-low':''}" title="${low?'Fewer than '+CTR_MIN+' shipments, treat with care':''}">${pct?Math.round(p.v)+'%':p.n}${pct?`<br><small class="mu">${p.on} of ${p.n}${low?' *':''}</small>`:low?' *':''}</td>`};
+  return `<div class="tbw"><table class="tb" data-sort="off"><tr><th>Carrier</th>${months.map(m=>`<th class="r">${ctrMonLabel(m)}</th>`).join('')}<th class="r">All Months</th></tr>${series.map(s=>{const tot=s.pts.filter(Boolean).reduce((a,p)=>({n:a.n+p.n,on:a.on+p.on}),{n:0,on:0});return `<tr><td><b>${s.dash?'':`<i style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${s.col};margin-right:6px"></i>`}${esc(s.name)}</b></td>${s.pts.map(cell).join('')}${cell(tot.n?{n:tot.n,on:tot.on,v:pct?tot.on/tot.n*100:tot.n,m:''}:null)}</tr>`}).join('')||`<tr><td colspan="${months.length+2}" class="empty">Tick at least one carrier or the combined line.</td></tr>`}</table></div>`;
+}
+function carrierTrendCard(st){
+  const C=S.ui.carrier,tgt=C.target,T=ctrState(st),D=ctrData(st,T),view=T.view||(D.months.length<3?'table':'chart');
+  const mopt=D.allM.map(m=>`<option value="${m}">${ctrMonLabel(m)}</option>`).join('');
+  const chips=T.names.map(nm=>`<label class="mchip ctr"><input type="checkbox" data-ch="ctrCar" data-c="${esc(nm)}" ${T.cars.includes(nm)?'checked':''}><span style="${T.cars.includes(nm)?'':''}"><i class="ctr-dot" style="background:${CTR_PAL[T.names.indexOf(nm)%CTR_PAL.length]}"></i>${esc(nm)}</span></label>`).join('');
+  return `<div class="card"><div class="row" style="justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap"><h3 style="margin:0">Monthly Trend by Carrier</h3><span class="row" style="gap:6px"><button class="btn sm ${view==='chart'?'pri':''}" data-act="ctrView" data-v="chart" ${D.months.length<2?'':''}>Chart</button><button class="btn sm ${view==='table'?'pri':''}" data-act="ctrView" data-v="table">Table</button></span></div>
+  <div class="row" style="gap:14px;margin-top:10px;flex-wrap:wrap;align-items:flex-end"><label class="f">Measure<select data-ch="ctrM" class="in" style="width:auto">${Object.entries(CTR_MEAS).map(([k,v])=>`<option value="${k}" ${T.measure===k?'selected':''}>${v.label}</option>`).join('')}</select></label>
+   <label class="f">From<select data-ch="ctrFrom" class="in" style="width:auto"><option value="">Earliest</option>${mopt.replace(`value="${T.from}"`,`value="${T.from}" selected`)}</select></label><label class="f">To<select data-ch="ctrTo" class="in" style="width:auto"><option value="">Latest</option>${mopt.replace(`value="${T.to}"`,`value="${T.to}" selected`)}</select></label>
+   <label class="sw"><input type="checkbox" role="switch" data-ch="ctrOverall" ${T.overall?'checked':''}><span class="sw-t"></span><span>Show All Carriers Combined</span></label></div>
+  <div class="f" style="margin-top:10px"><span>Carriers <small class="mu">(${T.cars.length} of ${T.names.length} shown)</small> <button class="btn sm" data-act="ctrTop">Top 5</button> <button class="btn sm" data-act="ctrAll">All</button> <button class="btn sm" data-act="ctrNone">None</button></span><div class="mchips">${chips}</div></div>
+  <div style="margin-top:12px">${D.months.length===0?'<div class="empty">No months of data for this measure with the current filters.</div>':view==='chart'?ctrChartSvg(D,tgt):ctrTableHtml(D,tgt)}</div>
+  <p class="hint">${CTR_MEAS[T.measure].label}, ${CTR_MEAS[T.measure].note}.${CTR_MEAS[T.measure].pct?' Green cells meet the '+tgt+'% target and red cells miss it.':''} Hollow points and cells marked * are months with fewer than ${CTR_MIN} shipments for that carrier, so one late shipment can swing the figure.${D.allM.length<3&&!hasSample()&&!liveMode()?' Only '+D.allM.length+' month(s) of data so far. <button class="btn sm" data-act="sampleAdd">Load sample history</button> to see a longer trend.':''}</p></div>`;
+}
+/* ========== hamburger menu: drawer on phones and tablets, collapsible sidebar on desktop ========== */
+const drawerMode=()=>window.matchMedia('(max-width:980px)').matches;
+function drawerState(){
+  const open=S.ui.drawerG||null;
+  document.querySelectorAll('#nav .nav-grp').forEach(gr=>{const sec=gr.querySelector('.nav-sec'),gh=gr.querySelector('.nav-gh');if(!sec||!gh)return;const isO=sec.dataset.g===open;sec.classList.toggle('closed',!isO);gh.setAttribute('aria-expanded',String(isO));gh.classList.toggle('has-cur',!!sec.querySelector('.nav-i.on'))});
+}
+function navApply(){
+  const dm=drawerMode(),col=!dm&&!!uiGet().navCollapsed,b=document.getElementById('navToggle'),open=document.body.classList.contains('nav-open');
+  document.body.classList.toggle('nav-collapsed',col);if(!dm&&open)navClose(true);
+  if(b){if(dm){b.setAttribute('aria-label','Open menu');b.setAttribute('aria-expanded',String(open))}else{b.setAttribute('aria-label',col?'Expand menu':'Collapse menu');b.setAttribute('aria-expanded',String(!col))}}
+  document.querySelectorAll('#nav .nav-i').forEach(i=>{const sec=i.closest('.nav-sec'),lab=(i.querySelector('span:not(.nav-badge)')||{}).textContent||'';if(col)i.title=(sec?sec.dataset.g+', ':'')+lab;else i.removeAttribute('title')});
+  if(dm)drawerState();
+}
+function navOpen(){
+  if(!drawerMode())return;S.ui.drawerG=null;drawerState();
+  const s=document.getElementById('side');document.body.classList.add('nav-open');s.setAttribute('role','dialog');s.setAttribute('aria-modal','true');s.setAttribute('aria-label','Menu');
+  const m=document.querySelector('.main');if(m)m.inert=true;
+  const b=document.getElementById('navToggle');if(b)b.setAttribute('aria-expanded','true');
+  const f=s.querySelector('.nav-gh');if(f)f.focus();
+}
+function navClose(noFocus){
+  const s=document.getElementById('side');document.body.classList.remove('nav-open');if(s){s.removeAttribute('role');s.removeAttribute('aria-modal');s.removeAttribute('aria-label')}
+  const m=document.querySelector('.main');if(m)m.inert=false;
+  const b=document.getElementById('navToggle');if(b){b.setAttribute('aria-expanded','false');if(!noFocus)b.focus()}
+}
+{const r0=render;render=function(){r0.apply(this,arguments);try{navApply()}catch(e){}}}
+{const n0=renderNav;renderNav=function(){n0.apply(this,arguments);try{navApply()}catch(e){}}}
+document.addEventListener('click',e=>{
+  const t=e.target.closest&&e.target.closest('[data-act]');if(!t)return;const a=t.dataset.act;
+  if(a==='navToggle'){e.stopImmediatePropagation();if(drawerMode()){document.body.classList.contains('nav-open')?navClose():navOpen()}else{uiSet({navCollapsed:!uiGet().navCollapsed});navApply()}return}
+  if(a==='navClose'){e.stopImmediatePropagation();navClose();return}
+  if(a==='navSec'&&drawerMode()){e.stopImmediatePropagation();const g=t.dataset.g;S.ui.drawerG=S.ui.drawerG===g?null:g;drawerState();return}
+  if(a==='nav'&&drawerMode())setTimeout(()=>navClose(true),0);
+},true);
+document.addEventListener('keydown',e=>{
+  if(!document.body.classList.contains('nav-open'))return;
+  if(e.key==='Escape'){e.preventDefault();navClose()}
+  if(e.key==='Tab'){const f=[...document.querySelectorAll('#side button')].filter(x=>x.getBoundingClientRect().width>0&&!x.disabled);if(!f.length)return;const first=f[0],last=f[f.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}}
+});
+{let x0=null;const s=document.getElementById('side');if(s){s.addEventListener('touchstart',e=>{x0=e.touches[0].clientX},{passive:true});s.addEventListener('touchend',e=>{if(x0!==null&&e.changedTouches[0].clientX-x0<-60)navClose();x0=null},{passive:true})}}
+window.matchMedia('(max-width:980px)').addEventListener('change',()=>{navClose(true);navApply()});
+
+/* ========== delivery slots by warehouse type ========== */
+const whIsDC=w=>!w||!w.type||w.type==='Distribution Center';
+const SD_PERIODS=['No preference','Morning','Afternoon'];
+const sdSlot=(time,end)=>'T'+time+(end?'-'+end:'');
+function slotDayPanel(sh,w){
+  const U=S.ui.sl,list=slotBookable(),L=whLocal(w).date;
+  const head=`<div class="card"><label class="f" style="max-width:640px">Shipment to deliver<select data-ch="slShip"><option value="">Choose a shipment</option>${list.map(s=>`<option value="${esc(s.ref)}" ${s.ref===U.ship?'selected':''}>${esc(s.ref)}, ${esc(s.route)}, ${esc(whCodeOf(s))}, due ${s.dueL?fmtS(s.dueL):'no date'}</option>`).join('')}</select></label></div>`;
+  const D=U.day||(U.day={date:'',date2:'',period:'No preference',vehicle:'',driver:'',phone:'',note:''});
+  return head+`<div class="card"><div class="row" style="justify-content:space-between"><h3 style="margin:0">${esc(sh.ref)} to ${esc(w.code)}</h3><span>${dgTag(sh.nature)} ${typeBadge(sh.stype)}</span></div>
+   <dl class="kv" style="margin-top:8px"><div><small>Route</small><dd>${esc(sh.route)}, ${esc(sh.carrier)}</dd></div><div><small>Expected delivery</small><dd>${sh.dueL?esc(dayFull(sh.dueL)):'No date yet'}</dd></div><div><small>Packages, weight</small><dd>${esc((sh.packages||'-')+', '+(sh.weight?kg(sh.weight):'-'))}</dd></div><div><small>Containers</small><dd>${esc(sh.containers.filter(Boolean).join(', ')||'-')}</dd></div><div><small>PO numbers</small><dd>${esc(sh.pos.join(', ')||'-')}</dd></div><div><small>Warehouse type</small><dd>${esc(w.type||'-')}</dd></div></dl>
+   <div class="note" style="margin-top:8px">This ${esc((w.type||'warehouse').toLowerCase())} does not use time slots. Choose the day you want to deliver. The receiving team will review your request and confirm the date and the time.</div>${sh.nature==='DG'?'<div class="note" style="margin-top:8px">Dangerous goods. The warehouse team is told when you request.</div>':''}</div>
+  <div class="card"><h3>Request a Delivery Day</h3><div id="sd_err"></div><div class="g4"><label class="f">Delivery day<input type="date" id="sd_date" class="in" min="${L}" value="${esc(D.date)}"></label><label class="f">Second choice (optional)<input type="date" id="sd_date2" class="in" min="${L}" value="${esc(D.date2)}"></label><label class="f">Preferred time of day<select id="sd_period" class="in">${SD_PERIODS.map(x=>`<option ${D.period===x?'selected':''}>${x}</option>`).join('')}</select></label><span></span></div>
+   <div class="g4" style="margin-top:8px"><label class="f">Vehicle<input id="sd_vehicle" class="in" value="${esc(D.vehicle)}" placeholder="Plate or type"></label><label class="f">Driver<input id="sd_driver" class="in" value="${esc(D.driver)}"></label><label class="f">Driver phone<input id="sd_phone" class="in" value="${esc(D.phone)}"></label><label class="f">Note for the warehouse<input id="sd_note" class="in" value="${esc(D.note)}" placeholder="Optional"></label></div>
+   <div class="row sec"><button class="btn pri" data-act="sdSubmit">Request This Day</button></div><p class="hint">The warehouse team can confirm the day and time, propose another date or time, or reject the request. You are emailed each time.</p></div>`;
+}
+{const b0=slotBookPanel;slotBookPanel=function(){const U=S.ui.sl,sh=U.ship?getShip(U.ship):null,w=sh?whFind(whCodeOf(sh)):null;if(sh&&w&&!whIsDC(w)&&slotEligible(sh)&&!slotActive(sh.ref))return slotDayPanel(sh,w);return b0.apply(this,arguments)}}
+function slotBookDay(ref,f,info){
+  if(!can('slotreq'))return slotErr('Your role cannot request delivery slots');
+  const sh=getShip(ref);if(!sh)return slotErr('Choose a shipment');
+  if(!slotEligible(sh))return slotErr(ref+' cannot be booked: it is delivered, its warehouse is not set up, or it is not assigned to you');
+  if(slotActive(ref))return slotErr(ref+' already has a request in progress. Cancel it first to make another');
+  const w=whFind(whCodeOf(sh));if(whIsDC(w))return slotErr('This warehouse uses time slots. Pick a slot instead');
+  f=f||{};const L=whLocal(w).date;
+  if(!isoOK(f.date))return slotErr('Choose the delivery day');if(f.date<L)return slotErr('The delivery day cannot be in the past');
+  let alt=null;if(f.alt){if(!isoOK(f.alt))return slotErr('The second choice is not a valid date');if(f.alt<L)return slotErr('The second choice cannot be in the past');if(f.alt===f.date)return slotErr('The second choice must be a different day');alt={date:f.alt,slot:'D'}}
+  const period=SD_PERIODS.includes(f.period)?f.period:'No preference';info=info||{};
+  const r={id:slotNewId(),ref,code:w.code,date:f.date,slot:'D',alt,kind:'day',period,status:'Requested',by:S.email,byRole:S.role==='Carrier Partner'?'Carrier, '+S.carrier:'Logistics',on:S.today,vehicle:info.vehicle||'',driver:info.driver||'',phone:info.phone||'',note:info.note||'',proposal:null,decision:null,flag:'',history:[]};
+  slotLog(r,'Requested '+dayLab(r.date)+(period!=='No preference'?' ('+period.toLowerCase()+')':'')+(alt?', second choice '+dayLab(alt.date):''));S.slots.push(r);
+  slotMail(w.emails,'Delivery day requested: '+ref+', '+dayLab(r.date),'Hello '+(w.contact||'warehouse team')+',\n\nA delivery day has been requested at '+w.code+' by '+r.byRole+'. Please confirm the date and time, propose another, or reject it in Delivery Management.\n\n'+slotText(r)+(period!=='No preference'?'\nPreferred: '+period.toLowerCase():'')+(alt?'\nSecond choice: '+dayLab(alt.date):''),'Delivery day request');
+  audit('Delivery day requested',ref,dayLab(r.date)+' at '+w.code+' ('+r.id+')');
+  return {ok:true,msg:ref+': delivery day requested ('+dayLab(r.date)+'). The receiving team will confirm the date and time.',r};
+}
+const sdCheckTime=(time,end)=>{if(!/^\d{2}:\d{2}$/.test(String(time||'')))return 'Enter the delivery time';if(end&&!/^\d{2}:\d{2}$/.test(String(end)))return 'The end time is not valid';if(end&&toMin(end)<=toMin(time))return 'The end time must be after the start time';return ''};
+function sdWarn(w,date,time,end){
+  const o=[];try{if(!slotDaysOf(w).includes(isoDow(date)))o.push('That day is not one of the warehouse\u2019s usual working days');}catch(e){}
+  const b=(S.slotBlocks||[]).find(x=>whKey(x.code)===whKey(w.code)&&x.date===date);if(b)o.push('The warehouse has this day marked as blocked ('+b.reason+')');
+  if(w.hours&&time){const m=/(\d{1,2}:\d{2})\s*(?:to|-|\u2013)\s*(\d{1,2}:\d{2})/.exec(String(w.hours));if(m&&(toMin(time)<toMin(m[1].padStart(5,'0'))||toMin(end||time)>toMin(m[2].padStart(5,'0'))))o.push('The time is outside the receiving hours ('+w.hours+')')}
+  return o;
+}
+function slotConfirmDay(id,date,time,end){
+  const r=slotFind(id);if(!r||r.kind!=='day')return slotErr('Request not found');
+  if(!slotCanManage(r.code))return slotErr('You cannot manage deliveries at '+r.code);
+  if(slotEff(r)!=='Requested')return slotErr('Only a requested delivery day can be confirmed');
+  const w=whFind(r.code);if(!isoOK(date))return slotErr('Choose the delivery date');if(date<whLocal(w).date)return slotErr('The delivery date cannot be in the past');
+  const te=sdCheckTime(time,end);if(te)return slotErr(te);
+  const was={date:r.date,slot:r.slot};r.date=date;r.slot=sdSlot(time,end);r.status='Approved';r.conf={date,time,end:end||'',by:S.email,on:S.today};r.decision={by:S.email,on:S.today,reason:''};
+  slotLog(r,'Confirmed '+slotWhen(w,date,r.slot)+(was.date!==date?' (requested '+dayLab(was.date)+')':''));
+  slotMail(r.by,'Delivery confirmed: '+r.ref+', '+slotWhen(w,date,r.slot),'Your delivery request '+r.id+' is confirmed for '+slotWhen(w,date,r.slot)+' (local time, '+(w.tz||'')+')'+(was.date!==date?'. You asked for '+dayLab(was.date)+'.':'.')+'\n\n'+slotText(r),'Delivery confirmed');
+  audit('Delivery confirmed',r.ref,slotWhen(w,date,r.slot)+' at '+r.code+' ('+r.id+')');
+  return {ok:true,msg:r.ref+': confirmed for '+slotWhen(w,date,r.slot)+'. The requester has been emailed.',r};
+}
+function slotProposeDay(id,date,time,end,reason){
+  const r=slotFind(id);if(!r||r.kind!=='day')return slotErr('Request not found');
+  if(!slotCanManage(r.code))return slotErr('You cannot manage deliveries at '+r.code);
+  if(!['Requested','Approved'].includes(slotEff(r)))return slotErr('A new date or time can be proposed for a requested or confirmed delivery');
+  if(!String(reason||'').trim())return slotErr('Give a reason for the new schedule');
+  const w=whFind(r.code);if(!isoOK(date))return slotErr('Choose the proposed date');if(date<whLocal(w).date)return slotErr('The proposed date cannot be in the past');
+  const te=sdCheckTime(time,end);if(te)return slotErr(te);
+  const slot=sdSlot(time,end);r.proposal={date,slot,reason:String(reason).trim(),by:S.email,on:S.today,from:{date:r.date,slot:r.slot,status:r.status}};r.status='Alternative proposed';
+  slotLog(r,'Proposed '+slotWhen(w,date,slot)+': '+r.proposal.reason);
+  slotMail(r.by,'New delivery date proposed: '+r.ref+', '+slotWhen(w,date,slot),'The receiving team cannot take your delivery as requested and proposes a new date and time.\n\nRequested: '+slotWhen(w,r.date,r.slot)+'\nProposed: '+slotWhen(w,date,slot)+'\nReason: '+r.proposal.reason+'\n\n'+slotText(r)+'\n\nAccept or decline it in Delivery Slot Requests.','Delivery proposal');
+  audit('Slot proposal',r.ref,'proposed '+slotWhen(w,date,slot)+' at '+r.code+': '+r.proposal.reason+' ('+r.id+')');
+  return {ok:true,msg:r.ref+': new date and time proposed ('+slotWhen(w,date,slot)+'). The requester has been emailed.',r};
+}
+{const a0=slotApprove;slotApprove=function(id){const r=slotFind(id);if(r&&r.kind==='day')return slotErr('Confirm the date and time for this delivery first');return a0.apply(this,arguments)}}
+function sdModal(id,mode){
+  const r=slotFind(id);if(!r)return;const w=whFind(r.code)||{},sh=getShip(r.ref),conf=mode==='confirm',prop=r.proposal;
+  const D=S.ui.sd=S.ui.sd&&S.ui.sd.id===id&&S.ui.sd.mode===mode?S.ui.sd:(S.ui.sd={id,mode,date:r.date,time:'',end:'',reason:'',note:''});
+  openModal(`<div class="mh"><h2>${conf?'Confirm Date and Time':'Propose Another Date or Time'}: ${esc(r.ref)}</h2><button class="x" data-act="close" aria-label="Close">&times;</button></div>
+  <p class="mu">Requested: <b>${esc(slotWhen(w,r.date,r.slot))}</b> by ${esc(r.byRole)}${r.period&&r.period!=='No preference'?', preferred '+esc(r.period.toLowerCase()):''}${r.alt?', second choice '+esc(dayLab(r.alt.date)):''}${sh?'. '+esc(sh.packages||'-')+' packages, '+esc(sh.weight?kg(sh.weight):'-'):''}${sh&&sh.nature==='DG'?' <span class="dg">DG</span>':''}</p>
+  ${w.hours?`<p class="mu">Receiving hours: ${esc(w.hours)} (local time${w.tz?', '+esc(w.tz):''})</p>`:''}<div id="sd_merr"></div>
+  <div class="g4"><label class="f">Date<input type="date" id="sdm_date" class="in" min="${whLocal(w).date}" value="${esc(D.date)}"></label><label class="f">Time<input type="time" id="sdm_time" class="in" value="${esc(D.time)}"></label><label class="f">End time (optional)<input type="time" id="sdm_end" class="in" value="${esc(D.end)}"></label><span></span></div>
+  ${conf?'':`<div class="g2" style="margin-top:8px"><label class="f">Reason<select id="sdm_reason" class="in"><option value="">Choose a reason</option>${['Dock is busy','Holiday','Audit','Maintenance','Staff not available','Other'].map(x=>`<option ${D.reason===x?'selected':''}>${x}</option>`).join('')}</select></label><label class="f">Details for the requester<input id="sdm_note" class="in" value="${esc(D.note)}" placeholder="Optional"></label></div>`}
+  <div id="sd_warn"></div><div class="row sec"><button class="btn pri" data-act="sdSave" data-id="${esc(id)}" data-mode="${mode}">${conf?'Confirm':'Send Proposal'}</button><button class="btn" data-act="close">Cancel</button></div>`);
+}
+{const d0=dmSteps;dmSteps=function(r){
+  if(r.kind!=='day')return d0.apply(this,arguments);
+  const e=slotEff(r),a=[`<button class="btn sm" data-act="dmOpen" data-id="${r.id}">Details</button>`];
+  if(e==='Requested')a.push(`<button class="btn sm pri" data-act="sdOpen" data-mode="confirm" data-id="${r.id}">Confirm Date and Time</button><button class="btn sm" data-act="sdOpen" data-mode="propose" data-id="${r.id}">Propose Another</button><button class="btn sm danger" data-act="dmRejectOpen" data-id="${r.id}">Reject</button>`);
+  else if(e==='Approved')a.push(`<button class="btn sm" data-act="sdOpen" data-mode="propose" data-id="${r.id}">Propose Another</button><button class="btn sm danger" data-act="dmRejectOpen" data-id="${r.id}">Reject</button>`);
+  else if(e==='Alternative proposed')a.push('<span class="mu">Waiting for the requester</span>');
+  return a.join(' ');
+}}
+const sdNote=(t,codes)=>`<div class="card"><h3>${t}</h3><p class="mu" style="margin:0">Slot options apply to Distribution Centers only. The other warehouses (${esc(codes.join(', '))}) do not use a slot grid. Their carriers request a delivery day and the receiving team confirms the date and time in Review.</p></div>`;
+{const s0=dmSettingsPanel;dmSettingsPanel=function(codes){const dc=codes.filter(c=>whIsDC(whFind(c))),no=codes.filter(c=>!dc.includes(c));return (dc.length?s0.call(this,dc):'')+(no.length?sdNote('Slot Settings',no):'')}}
+{const b0=dmBlocksPanel;dmBlocksPanel=function(codes){const dc=codes.filter(c=>whIsDC(whFind(c)));return dc.length?b0.call(this,dc):sdNote('Blocked Slots',codes)}}
+{const p0=dmSchedulePanel;dmSchedulePanel=function(codes){const w=whFind(dmCode());if(w&&!whIsDC(w))return sdNote('Schedule',[w.code]);return p0.apply(this,arguments)}}
+document.addEventListener('click',e=>{
+  const t=e.target.closest&&e.target.closest('[data-act]');if(!t)return;const a=t.dataset.act,d=t.dataset;
+  if(a==='sdOpen'){e.stopImmediatePropagation();S.ui.sd=null;sdModal(d.id,d.mode);return}
+  if(a==='dmApprove'||a==='dmProposeOpen'){const r=slotFind(d.id);if(r&&r.kind==='day'){e.stopImmediatePropagation();S.ui.sd=null;sdModal(d.id,a==='dmApprove'?'confirm':'propose')}return}
+  if(a==='sdSave'){e.stopImmediatePropagation();const v=id=>(document.getElementById(id)||{value:''}).value,date=v('sdm_date'),time=v('sdm_time'),end=v('sdm_end');
+    const r0=slotFind(d.id),w=r0?whFind(r0.code):null,warns=w?sdWarn(w,date,time,end):[],box=document.getElementById('sd_warn');
+    const res=d.mode==='confirm'?slotConfirmDay(d.id,date,time,end):slotProposeDay(d.id,date,time,end,[v('sdm_reason'),v('sdm_note')].filter(Boolean).join(': ')&&v('sdm_reason')?(v('sdm_reason')+(v('sdm_note')?': '+v('sdm_note'):'')):'');
+    if(!res.ok){const x=document.getElementById('sd_merr');if(x)x.innerHTML=`<div class="err" role="alert" style="margin-bottom:10px">${esc(res.msg)}</div>`;return}
+    S.ui.sd=null;closeModal();render();toast(res.msg+(warns.length?' Note: '+warns[0]:''));return}
+  if(a==='sdSubmit'){e.stopImmediatePropagation();const v=id=>(document.getElementById(id)||{value:''}).value,U=S.ui.sl,D=U.day||(U.day={});Object.assign(D,{date:v('sd_date'),date2:v('sd_date2'),period:v('sd_period'),vehicle:v('sd_vehicle'),driver:v('sd_driver'),phone:v('sd_phone'),note:v('sd_note')});
+    const r=slotBookDay(U.ship,{date:D.date,alt:D.date2,period:D.period},D);if(!r.ok){const x=document.getElementById('sd_err');if(x)x.innerHTML=`<div class="err" role="alert" style="margin-bottom:10px">${esc(r.msg)}</div>`;return}
+    S.ui.sl.day=null;U.ship='';render();toast(r.msg);return}
+},true);
+
+const pickupCol=()=>colx('Pickup vs plan',sh=>{if(!sh.f.PickupActual||!sh.f.PickupPlanned)return '-';const d=diffDays(sh.f.PickupActual,sh.f.PickupPlanned);return d<=0?'<span class="ok-t">'+(d===0?'On time':(-d)+' day(s) early')+'</span>':'<span class="late-t">'+d+' day(s) late</span>'},sh=>{if(!sh.f.PickupActual||!sh.f.PickupPlanned)return '';const d=diffDays(sh.f.PickupActual,sh.f.PickupPlanned);return d<=0?(d===0?'On time':(-d)+' early'):d+' late'});
+const pickupDatesCol=()=>colx('Pickup planned / actual',sh=>fmtS(sh.f.PickupPlanned)+' / '+fmtS(sh.f.PickupActual),sh=>(sh.f.PickupPlanned||'')+' / '+(sh.f.PickupActual||''));
+document.addEventListener('click',e=>{
+  const t=e.target.closest&&e.target.closest('[data-act]');if(!t)return;const a=t.dataset.act;if(!['ctrView','ctrTop','ctrAll','ctrNone'].includes(a))return;
+  const T=ctrState(carrierStats());
+  if(a==='ctrView')T.view=t.dataset.v;if(a==='ctrTop')T.cars=T.names.slice(0,5);if(a==='ctrAll')T.cars=T.names.slice();if(a==='ctrNone')T.cars=[];
+  render();
+},true);
+document.addEventListener('change',e=>{
+  const t=e.target;if(!t||!t.dataset)return;const k=t.dataset.ch;if(!['ctrM','ctrFrom','ctrTo','ctrCar','ctrOverall'].includes(k))return;
+  const T=ctrState(carrierStats());
+  if(k==='ctrM'){T.measure=t.value;T.from='';T.to=''}if(k==='ctrFrom')T.from=t.value;if(k==='ctrTo')T.to=t.value;if(k==='ctrOverall')T.overall=t.checked;
+  if(k==='ctrCar'){const i=T.cars.indexOf(t.dataset.c);if(t.checked&&i<0)T.cars.push(t.dataset.c);if(!t.checked&&i>=0)T.cars.splice(i,1)}
+  if(T.from&&T.to&&T.from>T.to){const x=T.from;T.from=T.to;T.to=x}
+  render();
+});
+/* ========== stabilisation: live mode, monitor filters, damaged data, data size ========== */
+const liveMode=()=>!!(typeof S!=='undefined'&&S&&S.settings&&S.settings.live);
+function applyLive(){document.body.classList.toggle('live-mode',liveMode())}
+function monActive(){const D=S.ui.dash,a=[];if(D.status&&D.status!=='All')a.push(['status','Status: '+D.status]);if(D.q)a.push(['q','Search: "'+D.q+'"']);if(D.overdueOnly)a.push(['late','Delayed only']);if(D.missDocs)a.push(['miss','Missing Docs only']);if(D.pendRG)a.push(['rg','Pending RG only']);if(D.poMiss)a.push(['po','PO Missing only']);return a}
+function monEmptyHTML(){
+  const act=monActive();let msg='No shipments match these filters.';
+  if(act.length===1){const k=act[0][0];if(k==='po')msg='No shipments have a blank PO number. Nothing needs follow-up.';else if(k==='miss')msg='Every shipment has at least one document.';else if(k==='rg')msg='No RG is pending.';else if(k==='late')msg='No shipment is delayed right now.'}
+  return `<div class="empty"><p>${esc(msg)}</p>${act.length?`<p class="mu">Filters in use: ${act.map(x=>esc(x[1])).join(', ')}</p><button class="btn pri" data-act="monClearAll">Clear Filters</button>`:''}</div>`;
+}
+{const m0=monBarHTML;monBarHTML=function(){
+  let h=m0();const all=ships(),cnt={miss:all.filter(missingDocs).length,late:all.filter(isLateNow).length,rg:can('rg')?all.filter(rgPending).length:0,po:all.filter(poMissing).length},D=S.ui.dash,on={miss:D.missDocs,late:D.overdueOnly,rg:D.pendRG,po:D.poMiss};
+  Object.keys(cnt).forEach(k=>{h=h.replace(new RegExp('(<label class=")sw("><input[^>]*data-k="'+k+'"[^>]*><span class="sw-t"></span><span>)([^<]+)(</span>)'),(m,a,b,t,c)=>a+'sw'+(cnt[k]===0&&!on[k]?' sw-zero':'')+b+t+' ('+cnt[k]+')'+c)});
+  return h}}
+/* ----- damaged saved data ----- */
+function dmgBanner(){
+  const v=document.getElementById('view');if(!v||!Store.damaged||Store.damagedHidden||document.getElementById('dmgBanner'))return;
+  v.insertAdjacentHTML('afterbegin',`<div class="err" id="dmgBanner" role="alert" style="margin-bottom:14px"><b>Your saved data could not be read, so the app started with the sample data.</b> A copy of the damaged data (${Store.damaged.kb} KB) was kept on this device. Do not enter real work until you restore a backup (Administration, Settings, Data backup) or download the damaged copy and send it for repair.<div class="row" style="margin-top:8px"><button class="btn sm" data-act="dmgDownload">Download Damaged Copy</button><button class="btn sm" data-act="dmgDismiss">Hide This Message</button></div></div>`);
+}
+{const r0=render;render=function(){r0.apply(this,arguments);try{applyLive();dmgBanner()}catch(e){}}}
+/* ----- data size ----- */
+function dataSizeCard(){
+  const kb=Math.round(JSON.stringify(persistPayload()).length/1024),sh=ships().length,ln=S.lines.length,lvl=kb>4000?['late','Almost full']:kb>2500?['warn','Getting large']:['ok','Comfortable'],shared=typeof Store.mode==='function'&&Store.mode()==='shared';
+  return `<div class="card"><h3>Data Size</h3><p class="mu" style="margin:0 0 8px">${sh} shipment${sh===1?'':'s'} and ${ln} item line${ln===1?'':'s'} use <b>${(kb/1024).toFixed(1)} MB</b> <span class="pill ${lvl[0]}">${lvl[1]}</span></p><p class="hint" style="margin:0">Each item line takes about 1 KB. Browser storage holds about 5 MB, so keep below about 4 MB. With shared data, every change sends and every other device downloads the whole data set, so a large data set slows saving and uses the database's monthly transfer allowance. Past about 4 MB, ask for the data to be split into separate records.</p></div>`;
+}
+{const g0=goLivePanel;goLivePanel=function(){
+  return g0()+`<div class="card"><h3>Live Mode</h3><p class="mu" style="margin:0 0 8px">Turn this on when real work starts. It hides the demo tools: the demo date, Preview as, Reset demo data, the demo guide and the Load sample history buttons, so nobody can add sample shipments or wipe the data by mistake. Turn it off to bring them back.</p><label class="sw"><input type="checkbox" role="switch" data-ch="liveMode" ${liveMode()?'checked':''}><span class="sw-t"></span><span>Live Mode</span></label></div>`+dataSizeCard()}}
+document.addEventListener('click',e=>{
+  const t=e.target.closest&&e.target.closest('[data-act]');if(!t)return;const a=t.dataset.act;
+  if(a==='monClearAll'){const D=S.ui.dash;D.status='All';D.q='';D.overdueOnly=D.missDocs=D.pendRG=D.poMiss=false;render();return}
+  if(a==='dmgDismiss'){Store.damagedHidden=true;const b=document.getElementById('dmgBanner');if(b)b.remove();return}
+  if(a==='dmgDownload'){const k=Object.keys(localStorage).filter(x=>x.startsWith('ect.state.damaged.')).sort().pop();if(k)downloadText('damaged-saved-data.json',localStorage.getItem(k)||'','application/json');return}
+},true);
+document.addEventListener('change',e=>{
+  const t=e.target;if(!t||!t.dataset||t.dataset.ch!=='liveMode')return;
+  if(!can('settingsedit')){toast('Your role is not allowed to do this','bad');t.checked=liveMode();return}
+  S.settings.live=t.checked;audit('Live mode',t.checked?'on':'off','');applyLive();render();toast(t.checked?'Live Mode is on. Demo tools are hidden.':'Live Mode is off. Demo tools are back.');
+});
+Object.values(REPORTS).forEach(r=>{const b=r.build;if(!b||r.__tc)return;r.__tc=1;r.build=function(){const d=b.apply(this,arguments);if(d&&Array.isArray(d.headers))d.headers=d.headers.map(x=>tcText(String(x),true,true));return d}});
+/* ========== shipping documents: four separate upload fields ========== */
+const DOC_FIELDS=[['inv','Shipment Invoice','Shipment invoice','The shipper\u2019s invoice'],['pl','Packing List','Packing list','Packing list for the shipment'],['bl','BL / HAWB / AWB','BL / HAWB / AWB','Bill of lading or airway bill'],['oth','Others','Others','Any other shipping document']];
+const docSize=n=>kbTxt(n);
+function docFieldsHTML(p){
+  return `<div class="doccards">${DOC_FIELDS.map(([k,l,t,hint])=>`<div class="doccard"><b>${l}</b><small class="mu">${hint}</small><input type="file" id="${p}_doc_${k}" data-ch="docPick" data-p="${p}" data-k="${k}" multiple accept="${DOC_ACCEPT}" aria-label="${l}"><div class="doclist" id="${p}_dl_${k}"></div>${k==='oth'?`<input id="${p}_doc_othdesc" class="in" maxlength="80" placeholder="Describe it, for example Certificate of origin" aria-label="Describe the other document">`:''}</div>`).join('')}</div>`;
+}
+function docGroups(p){return DOC_FIELDS.map(([k,l,t])=>{const i=document.getElementById(p+'_doc_'+k);return {k,label:l,type:t,files:i&&i.files?[...i.files]:[],desc:k==='oth'?String((document.getElementById(p+'_doc_othdesc')||{}).value||'').trim():''}}).filter(g=>g.files.length)}
+function docGroupsCheck(groups,ref){
+  const all=groups.flatMap(g=>g.files),e=[];if(!all.length)return ['Choose a file to upload'];
+  const have=docsOf(ref).length;if(have+all.length>DOC_PER)e.push('A shipment can hold '+DOC_PER+' documents ('+have+' already attached)');
+  groups.forEach(g=>g.files.forEach(f=>{if(!DOC_EXT.includes(docExt(f.name)))e.push(g.label+': '+f.name+' is not allowed. Use PDF, Excel (xls, xlsx, csv) or image files (png, jpg, gif, webp)');else if(f.size>DOC_MAX)e.push(g.label+': '+f.name+' is larger than 5 MB ('+kbTxt(f.size)+')');else if(f.size===0)e.push(g.label+': '+f.name+' is empty')}));
+  return e;
+}
+function docFormCheck(){const g=docGroups('f');if(!g.length)return '';const e=docGroupsCheck(g,'__new__');return e.length?e[0]:''}
+async function docsUploadGroups(ref,groups){let ok=0;const bad=[];for(const g of groups){const r=await docsUpload(ref,g.files,g.type,g.desc);ok+=r.ok.length;bad.push(...r.bad)}return {ok,bad}}
+function docPickList(p,k){
+  const i=document.getElementById(p+'_doc_'+k),l=document.getElementById(p+'_dl_'+k);if(!i||!l)return;
+  l.innerHTML=[...i.files].map((f,j)=>`<div class="docitem"><span>${esc(f.name)} <small class="mu">${kbTxt(f.size)}</small></span><button type="button" class="x" data-act="docPickRm" data-p="${p}" data-k="${k}" data-i="${j}" aria-label="Remove ${esc(f.name)}">&times;</button></div>`).join('');
+}
+function docChecklist(sh){
+  const L=docsOf(sh.ref),has=t=>L.some(d=>d.type===t);
+  return `<div class="row" style="gap:8px;flex-wrap:wrap;margin:0 0 8px">${[['Shipment invoice','Shipment Invoice'],['Packing list','Packing List'],['BL / HAWB / AWB','BL / HAWB / AWB']].map(([t,l])=>`<span class="pill ${has(t)?'ok':'warn'}">${l}: ${has(t)?'attached':'missing'}</span>`).join('')}</div>`;
+}
+function docsFormHTML(){
+  return `<div class="f" style="margin-top:12px"><span>Shipping documents (optional)</span>${docFieldsHTML('f')}<small class="hint">PDF, Excel or images, up to 5 MB each and ${DOC_PER} files in all. You can save without them: the shipment shows Missing Docs until one is added. The carrier invoice is added later in Freight Audit.</small></div>`;
+}
+function docsBlock(sh){
+  const L=docsOf(sh.ref),may=(can('editship')||can('request'))&&!sh.cancelled;
+  return `<h3 class="sec">Documents ${missingDocs(sh)?'<span class="pill warn">Missing Docs</span>':`<span class="pill chip">${L.length}</span>`}</h3>${docChecklist(sh)}
+  ${L.length?`<div class="tbw"><table class="tb" data-sort="off"><tr><th>Type</th><th>File</th><th class="r">Size</th><th>Added</th><th></th></tr>${L.map(d=>`<tr><td>${esc(d.type)}</td><td>${esc(d.name)}${d.desc?'<br><small class="mu">'+esc(d.desc)+'</small>':''}</td><td class="r">${kbTxt(d.size)}</td><td>${esc(d.by)}<br><small class="mu">${fmt(d.on)}</small></td><td class="r"><button class="btn sm" data-act="docOpen" data-id="${d.id}">Download</button>${may?` <button class="btn sm danger" data-act="docDel" data-id="${d.id}">Delete</button>`:''}</td></tr>`).join('')}</table></div>`:'<div class="note">No shipping documents are attached yet.</div>'}
+  ${may?`<div style="margin-top:10px">${docFieldsHTML('doc')}<div class="row sec"><button class="btn pri" data-act="docUpload" data-ref="${esc(sh.ref)}">Upload</button></div></div><p class="hint">PDF, Excel or image files, up to 5 MB each and ${DOC_PER} per shipment. ${Docs.remote?'Stored in the shared database storage. Anyone with the database key can open the files, so use sample documents only.':'Stored in this browser only, so other devices will not see the file.'}</p>`:''}`;
+}
+{const m=migrateData;migrateData=function(){m.apply(this,arguments);(S.docs||[]).forEach(d=>{d.type=({'Commercial invoice':'Shipment invoice','Bill of Lading / AWB':'BL / HAWB / AWB','Other':'Others'})[d.type]||d.type})}}
+document.addEventListener('change',e=>{const t=e.target;if(t&&t.dataset&&t.dataset.ch==='docPick')docPickList(t.dataset.p,t.dataset.k)});
+/* ========== milestone management and carrier updates: reference numbers ========== */
+const shipHbl=sh=>uniq(sh.lines.map(l=>l.HBL_HAWB_Tracking).filter(Boolean));
+const shipMbl=sh=>uniq(sh.lines.map(l=>l.MBL_MAWB).filter(Boolean));
+const shipCont=sh=>uniq([...sh.lines.map(l=>l.ContainerNumber).filter(Boolean).flatMap(x=>String(x).split(/[;,]\s*/)),...(sh.containers||[])].filter(Boolean));
+const shipInvL=sh=>uniq(sh.lines.map(l=>l.InvoiceNumber).filter(Boolean));
+const showRefs=()=>{try{return JSON.parse(localStorage.getItem('ect.ui')||'{}').refs!==false}catch(e){return true}};
+function refPill(label,arr){
+  if(!arr.length)return `<span class="rf"><i>${label}</i> <span class="mu">-</span></span>`;
+  const more=arr.length>1?` <b class="rfm" title="${esc(arr.join(', '))}">+${arr.length-1}</b>`:'';
+  return `<span class="rf" title="${esc(arr.join(', '))}"><i>${label}</i> <span class="rfv">${esc(arr[0])}</span>${more}</span>`;
+}
+const refsCell=sh=>`<div class="refs">${refPill('MBL',shipMbl(sh))}${refPill('Inv',shipInvL(sh))}${refPill('Cont',shipCont(sh))}</div>`;
+function shipIdCell(sh,line2){
+  const h=shipHbl(sh);
+  return `<b>${h.length?esc(h[0]):'<span class="mu">No HBL</span>'}</b>${h.length>1?' <b class="rfm" title="'+esc(h.join(', '))+'">+'+(h.length-1)+'</b>':''} <small class="mu nw">Ref ${esc(sh.ref)}</small><br><small class="mu">${line2||[esc(sh.mode),esc(sh.stype||'Type not set')+(sh.nature==='DG'?' · DG':''),esc(sh.route)].join(' · ')}</small>`;
+}
+const shipHay=sh=>[sh.ref,sh.carrier,sh.route,sh.pos.join(' '),shipHbl(sh).join(' '),shipMbl(sh).join(' '),shipInvL(sh).join(' '),shipCont(sh).join(' ')].join(' ').toLowerCase();
+document.addEventListener('input',e=>{const t=e.target;if(t&&t.id==='ms_q'){S.ui.msQ=t.value;clearTimeout(window._mst);window._mst=setTimeout(()=>{const p=t.selectionStart;render();const n=document.getElementById('ms_q');if(n){n.focus();try{n.setSelectionRange(p,p)}catch(x){}}},250)}});
+document.addEventListener('change',e=>{const t=e.target;if(t&&t.dataset&&t.dataset.ch==='msRefs'){uiSet({refs:t.checked});render()}});
+
+document.addEventListener('click',e=>{
+  const t=e.target.closest&&e.target.closest('[data-act]');if(!t)return;const a=t.dataset.act,d=t.dataset;
+  if(a==='docPickRm'){const i=document.getElementById(d.p+'_doc_'+d.k);if(!i)return;const dt=new DataTransfer();[...i.files].forEach((f,j)=>{if(j!==Number(d.i))dt.items.add(f)});i.files=dt.files;docPickList(d.p,d.k);return}
+  if(a==='docUpload'){e.stopImmediatePropagation();const g=docGroups('doc'),er=docGroupsCheck(g,d.ref);if(er.length){toast(er[0],'bad');return}
+    if(window._docBusy)return;window._docBusy=1;docsUploadGroups(d.ref,g).then(r=>{render();detailModal(d.ref);toast(r.bad.length?r.bad[0]:r.ok+' document(s) uploaded',r.bad.length?'bad':'')}).finally(()=>{window._docBusy=0});return}
+},true);
+
+
+
 
 
 
@@ -6006,7 +6372,7 @@ document.addEventListener('click',e=>{
    case 'storeBackup':{const ok=downloadText('YourCompany-control-tower-backup-'+S.today+'.json',JSON.stringify(backupPayload()),'application/json');toast(ok?'Backup downloaded. If nothing happened, your browser blocked the download.':'Download is blocked here.',ok?'':'bad');break}
    case 'storeClear':{if(!confirm('Delete the data saved in this browser? The app keeps working with what is on screen until you reload.'))break;Store.clear();render();toast('Saved data cleared');break}
    case 'storeRestoreApply':{if(denied('settingsedit'))break;const o=S._restore,r=restoreApply(o);S._restore=null;closeModal();render();if(r.ok)restoreResultModal(r,o);else toast(r.msg,'bad');break}
-   case 'authAddGroup':{authCollect();authSet().groupRoles.push({group:'',label:'',role:'Logistics Executive'});render();break}
+   case 'authAddGroup':{if(denied('settingsedit'))break;authCollect();authSet().groupRoles.push({group:'',label:'',role:'Logistics Executive'});render();break}
    case 'authDelGroup':{authCollect();authSet().groupRoles.splice(Number(d.i),1);render();break}
    case 'authSave':{authCollect();const A=authSet(),e=authGroupCheck(A.groupRoles);
      if(A.mode==='microsoft')authConfigCheck(A).forEach(x=>e.push(x));
@@ -6035,7 +6401,7 @@ document.addEventListener('click',e=>{
    case 'exportAll':exportAll();break
    case 'navSec':{const g=d.g,open=navOpenMap(),sec=[...document.querySelectorAll('.nav-sec')].find(x=>x.dataset.g===g);if(!sec)break;const now=sec.classList.contains('closed');open[g]=now;sec.classList.toggle('closed',!now);t.setAttribute('aria-expanded',String(now));navSave();break}
    case 'profMenu':profOpen();break
-   case 'docUpload':{const inp=document.getElementById('doc_files'),files=inp?[...inp.files]:[],e=docCheck(files,d.ref);if(e.length){toast(e[0],'bad');break}const ty=val('doc_type');docsUpload(d.ref,files,ty).then(r=>{render();detailModal(d.ref);toast(r.bad.length?r.bad[0]:r.ok.length+' document(s) uploaded',r.bad.length?'bad':'')});break}
+   case 'docUpload':{const inp=document.getElementById('doc_files'),files=inp?[...inp.files]:[],e=docCheck(files,d.ref);if(e.length){toast(e[0],'bad');break}if(window._docBusy)break;window._docBusy=1;const ty=val('doc_type');docsUpload(d.ref,files,ty).then(r=>{render();detailModal(d.ref);toast(r.bad.length?r.bad[0]:r.ok.length+' document(s) uploaded',r.bad.length?'bad':'')}).finally(()=>{window._docBusy=0});break}
    case 'docOpen':docOpenFile(d.id).then(r=>{if(!r.ok)toast(r.msg,'bad')});break
    case 'docDel':{if(!confirm('Delete this document?'))break;const dd=(S.docs||[]).find(x=>x.id===d.id),dref=dd&&dd.ref;docRemove(d.id).then(r=>{render();toast(r.msg,r.ok?'':'bad');if(dref)detailModal(dref)});break}
    case 'probOpen':problemModal();break;
@@ -6195,11 +6561,11 @@ document.addEventListener('click',e=>{
    case 'trExport':{const T=S.ui.tr,{groups}=trGroups(),ps=[...T.pcts].sort((a,b)=>a-b);
      const rows=groups.map(g=>{const pj=m=>Object.entries(m).sort((x,y)=>y[1]-x[1]||x[0].localeCompare(y[0])).map(x=>x[0]).join('; '),o={Group:g.name,LoadingPorts:pj(g.ops),DestinationPorts:pj(g.dps),Shipments:g.n,MinDays:dayTxt(g.min),AverageDays:dayTxt(g.avg)};ps.forEach(p=>o['P'+p]=dayTxt(g.p[p]));o.MaxDays=dayTxt(g.max);return o});
      showCsv('Transit time percentiles','transit-percentiles-'+S.today+'.csv',toCSV(['Group','LoadingPorts','DestinationPorts','Shipments','MinDays','AverageDays',...ps.map(p=>'P'+p),'MaxDays'],rows));break}
-   case 'sampleAdd':{const n=addSampleHistory();render();toast(n?n+' sample shipments loaded':'Sample history is already loaded');break}
-   case 'sampleRemove':{const n=removeSampleHistory();render();toast(n+' sample row(s) removed');break}
+   case 'sampleAdd':{if(denied('settingsedit'))break;const n=addSampleHistory();render();toast(n?n+' sample shipments loaded':'Sample history is already loaded');break}
+   case 'sampleRemove':{if(denied('settingsedit'))break;const n=removeSampleHistory();render();toast(n+' sample row(s) removed');break}
    case 'brandSave':{if(denied('settingsedit'))break;const hex=val('b_accent_t')||val('b_accent');if(!/^#[0-9a-f]{6}$/i.test(hex)){toast('Enter the accent colour as a hex code such as #F37021','bad');break}
      S.brand.company=val('b_company')||S.brand.company;S.brand.title=val('b_title')||S.brand.title;S.brand.accent=hex;applyBrand();render();toast('Branding applied');break}
-   case 'logoRemove':S.brand.logo='';applyBrand();render();break;
+   case 'logoRemove':if(denied('settingsedit'))break;S.brand.logo='';applyBrand();render();break;
    case 'brandDownload':{const ok=downloadText('global-shipment-control-tower.html',brandedHTML(),'text/html');toast(ok?'A copy with your branding was downloaded. If nothing happened, your browser blocked it.':'Download is blocked here.',ok?'':'bad');break}
    case 'pickday':S.ui.dash.sel=d.d;S.ui.dash.ym=d.d.slice(0,7);render();break;
    case 'calPrev':case 'calNext':{const [y,m]=S.ui.dash.ym.split('-').map(Number),n=a==='calPrev'?-1:1,dt=new Date(Date.UTC(y,m-1+n,1));S.ui.dash.ym=dt.getUTCFullYear()+'-'+pad(dt.getUTCMonth()+1);render();break}
@@ -6236,7 +6602,7 @@ document.addEventListener('click',e=>{
      add('Carrier',D.byC,k=>k);add('Delivered month',D.byM,k=>k);add('Mode',D.byMode,k=>k);
      showCsv('Freight spend summary','freight-spend-summary-'+S.today+'.csv',toCSV(['View','Group','Shipments','TotalQuote','TotalInvoiced','AdditionalCostVsQuote','PendingInvoice','NotYetDelivered'],rows),'Carrier: '+S.ui.sp.carrier+'. Pending invoice is calculated from the quote.');break}
    case 'pendRemind':{const n=remindCarrier(d.c);render();toast(n?'Reminder queued for '+d.c+' ('+n+' shipments)':'Nothing pending for '+d.c);break}
-   case 'pendRemindAll':{let n=0,c=0;[...new Set(pendingList().map(p=>p.s.carrier))].forEach(x=>{n+=remindCarrier(x);c++});render();toast(n+' shipment(s) in '+c+' reminder email(s)');break}
+   case 'pendRemindAll':{if(denied('invoices'))break;let n=0,c=0;[...new Set(pendingList().map(p=>p.s.carrier))].forEach(x=>{n+=remindCarrier(x);c++});render();toast(n+' shipment(s) in '+c+' reminder email(s)');break}
    case 'ftClear':{const F=S.ui.ft;['oc','op','dc','dp','nature','mode','vol'].forEach(k=>F[k]='All');render();break}
    case 'ftExport':{const D=ftCompute(),M=FT_METRIC[S.ui.ft.metric],rows=[];
      D.groups.forEach(g=>D.months.forEach(m=>{const rs=(D.by[g]||{})[m];if(!rs)return;rows.push({Group:g,Month:m,Shipments:rs.length,Quote:ftNum(D.agg(rs,'q')),Actual:ftNum(D.agg(rs,'a')),AdditionalCost:ftNum(D.agg(rs,'x')),ActualKg:Math.round(rs.reduce((a,r)=>a+r.actKg,0)),ChargeableKg:Math.round(rs.reduce((a,r)=>a+(r.unit==='kg'?r.kgC:0),0)),CbmMissingShipments:rs.filter(r=>r.cbmMissing).length})}));
