@@ -22,7 +22,16 @@ To share data between devices, run `supabase-setup.sql` once in a free Supabase 
 This is a demo with sample data. The sign-in is not real security: users.js is public and anyone with the shared database key can change its data, so use throwaway passwords and no real company information.
 
 
-## Newest changes
+## Newest changes (15 Nov)
+- **At risk, in plain words.** The shipment window has a "Why it is at risk" panel with the level (High or Medium), one short line per warning sign (planned delivery may be too early, no update for N days, free time running out) and a one-line suggestion. Status labels read "In transit" and "At risk: High". The Shipment Monitor shows the short reason under the status, and the At risk tile list has Level and Why columns.
+- **Control Tower, All milestones.** The Milestone dropdown starts with All milestones (the starting choice, remembered per device). The calendar counts every milestone; the Overdue and Due-on-day lists have a Milestone column, quick filter chips and a count of milestones and shipments.
+- **Carrier Performance, compare.** Mode, Shipment type and Nature filters take several choices. The Month by Month chart can compare Carriers, Modes, Shipment types or DG and Non-DG (up to 6 as grouped bars with a legend, more as a table), with a Top 5 button and a table of the figures.
+- **Shipment Monitor, Show References** switch (off to begin with, remembered): adds a References column (Inv, MBL, HBL, Cont). The search also finds HBL, MBL, invoice and container.
+- **Warehouse lists are in A to Z order** everywhere. A user's warehouses are saved in that order.
+- **Roles.** Profiles are now Roles. Create a New Role (name, start from, description), Set Access, Rename, Duplicate and Delete. The add-user form has "Create a new role..." and returns with the new role selected. A role sees every shipment, and its access can be changed at any time.
+
+## Changes before that
+## Newest changes (14 Nov)
 - **Two kinds of External Logistics Partner.** A partner works by **shipper** or by **receiver**, never both (the kind is whichever list is filled in; saving both is refused in the add form and the user upload). A shipper partner adds and edits shipments only from their shippers, to any receiver. A receiver partner adds and edits shipments only to their receivers (several allowed), from any shipper, and the warehouse is filled in from the receiver. Partner Executives follow their partner. The same rule applies in the entry form, bulk upload (a row outside it is rejected with the reason; a warehouse not in the list is rejected), Edit Shipment, and what the partner can see. The Shipment Requests bulk tab shows what a partner may upload, with a downloadable list of allowed values. Partners who already have both lists, or none, keep the old behaviour, and a banner in Administration, Users and roles lists them so you can choose.
 - **Receiver names by warehouse** (Administration, Warehouses, and in the warehouse export and upload): list the receiver name(s) delivered to each warehouse. This drives the warehouse that a receiver partner's form fills in.
 - **Shippers and receivers are picked from dropdowns** (search, Select all, Clear, Add a new name) in the add-user form and the users table, and names typed in another spelling take the existing spelling. In the add form, "Works by" Shipper or Receiver opens the matching list and locks the other.

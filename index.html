@@ -427,6 +427,13 @@ body.compact .tb td,body.compact .tb th{padding:4px 8px;font-size:12px;line-heig
 .mpd-l{max-height:210px;overflow:auto;margin-top:6px}.mpd-l label{display:flex;gap:8px;align-items:center;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:13px}.mpd-l label:hover{background:var(--chip)}
 .mpd.locked .mpd-b{background:var(--chip);opacity:.55;cursor:not-allowed}
 
+.riskbox{background:#FFF5F4;border:1px solid #F1C4BF;border-radius:14px;padding:18px 20px;margin:14px 0;display:flex;flex-direction:column;gap:12px}
+.riskh{display:flex;align-items:center;gap:10px;font-size:17px;font-weight:700}.riskic{width:30px;height:30px;border-radius:50%;background:#C62828;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:700}
+.riski{display:flex;gap:12px;align-items:flex-start;font-size:14.5px;line-height:1.5}.rdot{flex:none;width:10px;height:10px;border-radius:50%;background:#B7791F;margin-top:7px}.rdot.hi{background:#C62828}
+.riskadv{font-size:13.5px;color:var(--muted)}.rsk{font-size:12px;color:var(--late);margin-top:4px;max-width:340px}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .riskbox{background:#2A1615;border-color:#6B2B27}}
+:root[data-theme="dark"] .riskbox{background:#2A1615;border-color:#6B2B27}
+
 /* chosen dark theme */
 :root[data-theme="dark"]{
 --bg:#151719;--panel:#1E2124;--panel2:#23272A;--ink:#ECEDED;--muted:#9DA3A4;--line:#33393C;--line2:#454C50;
@@ -586,7 +593,7 @@ function init(){
   S={brand:clone(BRAND_DEFAULT),today:CLOCK.today,role:'Logistics Analyst',email:'demo.user@yourcompany.com',baseEmail:'demo.user@yourcompany.com',carrier:'',view:'track',
      lines:clone(RAW.lines),events:clone(RAW.events),users:clone(RAW.users),access:{},customRoles:[],accounts:[],docs:[],rg:{},rgs:[],redirects:[],subs:clone(RAW.subs),
      quotes:[],invoices:[],remind:{},revisions:[],uf:null,warehouses:[],slots:[],slotBlocks:[],whTeam:'',whLog:[],whNotified:{},wh:{lead:1,weekDay:4,overdue:true},utcTime:CLOCK.utc,whFail:false,mf:{log:[],ver:{master:1,commercial:1},hl:{},dock:false,closed:false,file:'master',tab:'tblShipments',q:'',only:false},outbox:[],audit:[],settings:{domain:'yourcompany.com',strip:{track:true},permV:2},draft:[],lastSaved:null,bulkResult:null,msResult:null,
-     ui:{q:'',dash:{ym:CLOCK.today.slice(0,7),sel:CLOCK.today,mode:'All',ms:'Delivery',q:'',status:'All',overdueOnly:false,tile:null,type:'All',nature:'All',mm:{measure:'ships',basis:'pickup',dim:'mode',carrier:'All',sel:null}},
+     ui:{q:'',dash:{ym:CLOCK.today.slice(0,7),sel:CLOCK.today,mode:'All',ms:'All',q:'',status:'All',overdueOnly:false,tile:null,type:'All',nature:'All',mm:{measure:'ships',basis:'pickup',dim:'mode',carrier:'All',sel:null}},
          carrier:{mode:'All',win:'All',type:'All',nature:'All',metric:'ontime',target:90,mm:{measure:'weight',basis:'pickup',dim:'carrier',carrier:'All',sel:null}},tr:{seg:'d2d',basis:'actual',group:'mode',pcts:[50,90,95],mode:'All',carrier:'All',stype:'All',nature:'All',oc:'All',dc:'All',op:'All',dp:'All',win:'All'},com:'quotes',invCarrier:'All',invStatus:'All',admin:'users',msFilter:'active',cu:{carrier:'',filter:'active',q:''},ft:{series:'both',metric:'avg',group:'none',oc:'All',op:'All',dc:'All',dp:'All',nature:'All',mode:'All',vol:'All'},kt:{},sp:{carrier:'All'},wh:{tab:'schedule',code:'All',days:14},per:{kind:'all',y:+CLOCK.today.slice(0,4),q:Math.ceil(+CLOCK.today.slice(5,7)/3),m:+CLOCK.today.slice(5,7),basis:'pickup'},sort:{},sl:{tab:'my',f:'All',ship:'',week:'',pick:'first',first:null,second:null,vehicle:'',driver:'',phone:'',note:''},dm:{tab:'review',f:'Open',code:'All',week:'',sel:[],prop:null}}};
   if(CLOCK.offset){shiftDates(S.lines,CLOCK.offset);shiftDates(S.events,CLOCK.offset);shiftDates(S.subs,CLOCK.offset)}
   const cnt={};S.lines.forEach(l=>{cnt[l.ShipmentRef]=(cnt[l.ShipmentRef]||0)+1;l.LineID=l.ShipmentRef+'-'+pad(cnt[l.ShipmentRef])});
@@ -1211,7 +1218,7 @@ const slotFrom=(w,n)=>toMin(slotStartOf(w))+(n-1)*60;
 const slotLabel=(w,n)=>fromMin(slotFrom(w,n))+' to '+fromMin(slotFrom(w,n)+60);
 const slotWhen=(w,date,n)=>typeof n==='string'?(n==='D'?dayLab(date)+' (time to be confirmed)':dayLab(date)+' '+n.slice(1).replace('-',' to ')):dayLab(date)+' '+slotLabel(w,n);
 const isWT=()=>S.role==='Warehouse Team';
-const myWhCodes=()=>{if(isWT()){const u=S.users.find(x=>x.UserEmail.toLowerCase()===String(S.email).toLowerCase());return u?whList(u):[]}return S.warehouses.map(w=>w.code)};
+const myWhCodes=()=>{if(isWT()){const u=S.users.find(x=>x.UserEmail.toLowerCase()===String(S.email).toLowerCase());return u?whList(u):[]}return whSorted().map(w=>w.code)};
 const slotFind=id=>S.slots.find(r=>r.id===id);
 function slotEff(r){const sh=getShip(r.ref);if(sh&&sh.cancelled&&SLOT_HOLD.includes(r.status))return 'Cancelled';if(sh&&sh.status==='Delivered'&&SLOT_HOLD.includes(r.status))return r.status==='Approved'?'Completed':'Cancelled';return r.status}
 const slotHeld=r=>SLOT_HOLD.includes(slotEff(r));
@@ -1448,7 +1455,7 @@ function viewSlotReq(){
    <div class="card" style="padding:0"><div class="tbw"><table class="tb"><tr><th>Request</th><th>Shipment</th><th>Warehouse</th><th>Slot (local time)</th><th>Status</th><th>Requested by</th><th>Vehicle and driver</th><th>Latest update</th><th></th></tr>${rows.map(slReqRow).join('')||'<tr><td colspan="9" class="empty">No requests yet. Use Book a slot.</td></tr>'}</table></div></div>`);
 }
 /* ----- delivery management ----- */
-const dmCodes=()=>{const all=S.warehouses.filter(w=>w.active).map(w=>w.code),mine=myWhCodes();return isWT()?all.filter(c=>mine.some(m=>whKey(m)===whKey(c))):all};
+const dmCodes=()=>{const all=whSortCodes(S.warehouses.filter(w=>w.active).map(w=>w.code)),mine=myWhCodes();return isWT()?all.filter(c=>mine.some(m=>whKey(m)===whKey(c))):all};
 function dmCode(){const D=S.ui.dm,cs=dmCodes();return D.code!=='All'&&cs.some(c=>whKey(c)===whKey(D.code))?D.code:cs[0]}
 function dmSteps(r){
   const e=slotEff(r),a=[`<button class="btn sm" data-act="dmOpen" data-id="${r.id}">Details</button>`];
@@ -1671,12 +1678,12 @@ const fcToolbar=()=>can('commercial')?`<div class="row" style="margin-bottom:12p
 /* ----- Administration: users ----- */
 const USER_COLS=['User Name','Email Address','Role Assignment','Carrier','Warehouses','Shippers','Receivers','Partner','Phone','Location','Action'];
 const USER_ALIAS={name:['username','name','displayname'],email:['emailaddress','email','useremail'],role:['roleassignment','role'],car:['carrier'],wh:['warehouses','warehouse'],shp:['shippers','shipper'],rcv:['receivers','receiver'],prt:['partner','partneremail'],phn:['phone'],loc:['location'],act:['action']};
-const USER_HELP=[['User Name','Display name.'],['Email Address','The key. Rows are matched on it.'],['Role Assignment','One of: '+'Logistics Executive, Logistics Associate, Logistics Analyst, Logistics Manager, Carrier Partner, Warehouse Team, External Logistics Partner, or a profile you created.'],['Shippers','Required for a External Logistics Partner: the shipper names they work for, separated by a semicolon.'],['Carrier','Required for a Carrier Partner. A carrier used on shipments, or the name of a new carrier.'],['Warehouses','Required for a Warehouse Team user. Warehouse codes separated by semicolons or commas.'],['Action','Empty, Add or Update saves the row (adds a new email, updates an existing one). Delete removes the user. Empty cells on an existing user keep the current value.']];
+const USER_HELP=[['User Name','Display name.'],['Email Address','The key. Rows are matched on it.'],['Role Assignment','One of: '+'Logistics Executive, Logistics Associate, Logistics Analyst, Logistics Manager, Carrier Partner, Warehouse Team, External Logistics Partner, or a role you created.'],['Shippers','Required for a External Logistics Partner: the shipper names they work for, separated by a semicolon.'],['Carrier','Required for a Carrier Partner. A carrier used on shipments, or the name of a new carrier.'],['Warehouses','Required for a Warehouse Team user. Warehouse codes separated by semicolons or commas.'],['Action','Empty, Add or Update saves the row (adds a new email, updates an existing one). Delete removes the user. Empty cells on an existing user keep the current value.']];
 const usersExportRows=()=>S.users.map(u=>({'User Name':u.DisplayName,'Email Address':u.UserEmail,'Role Assignment':u.Role,Carrier:u.Carrier||'',Warehouses:whList(u).join('; '),Shippers:u.Role===PARTNER?normShippers(u.Shippers):'',Receivers:u.Role===PARTNER?normShippers(u.Receivers):'',Partner:u.Role===PEXEC?(u.Partner||''):'',Phone:u.Phone||'',Location:u.Location||'',Action:''}));
 const usersSheets=()=>[{name:'Users',headers:USER_COLS,rows:usersExportRows()},{name:'Help',headers:['Column','What to enter'],rows:USER_HELP.map(x=>({Column:x[0],'What to enter':x[1]}))}];
 function usersImportCheck(objs,hdr){
   const C=impCols(hdr,USER_ALIAS);if(!C.email)return {err:'The file needs an Email Address column. Export the users first to get the template.'};
-  const roles=ROLES.filter(r=>r!=='In Organization'),cars=carriersList(),codes=S.warehouses.map(w=>w.code),items=[],seen={};
+  const roles=ROLES.filter(r=>r!=='In Organization'),cars=carriersList(),codes=whSorted().map(w=>w.code),items=[],seen={};
   objs.forEach(r=>{
     const email=impVal(r,C,'email').toLowerCase(),act=impAction(impVal(r,C,'act')),cur=S.users.find(u=>u.UserEmail.toLowerCase()===email);
     const it={row:r._row,r,errs:[],op:'',changes:[],email,rec:null,cells:[]};
@@ -1713,7 +1720,7 @@ function usersImportApply(P){
 }
 function usersFiltered(){const q=String(S.ui.usq||'').toLowerCase().split(/\s+/).filter(Boolean);return S.users.map((u,i)=>({u,i})).filter(({u})=>{const h=[u.DisplayName,u.UserEmail,u.Role,u.Type,u.Carrier,u.Warehouses,u.Shippers,u.Receivers,u.Phone,u.Location].join(' ').toLowerCase();return q.every(t=>h.includes(t))})}
 function usersTableHTML(){
-  const roles=ROLES.filter(r=>r!=='In Organization'),codes=S.warehouses.map(w=>w.code),list=usersFiltered();
+  const roles=ROLES.filter(r=>r!=='In Organization'),codes=whSorted().map(w=>w.code),list=usersFiltered();
   return `<p class="hint" style="margin:0 0 8px">${S.ui.usq?'Showing '+list.length+' of '+S.users.length+' users.':S.users.length+' users.'}</p>${list.length?`<div class="tbw"><table class="tb"><tr><th>Email</th><th>Name</th><th>Type</th><th>Role</th><th>Carrier</th><th>Warehouses</th><th>Shippers</th><th>Receivers</th><th>Partner</th><th>Phone</th><th>Location</th><th></th></tr>
   ${list.map(({u,i})=>`<tr><td>${esc(u.UserEmail)}</td><td>${esc(u.DisplayName)}</td><td>${esc(u.Type||roleType(u.Role))}</td><td><select data-ch="userRole" data-i="${i}" aria-label="Role" class="in" style="width:auto">${roles.map(r=>`<option ${r===u.Role?'selected':''}>${r}</option>`).join('')}</select></td>
    <td>${u.Role==='Carrier Partner'?`<select data-ch="userCarrier" data-i="${i}" aria-label="Carrier" class="in" style="width:auto">${uniq([...carriersList(),u.Carrier].filter(Boolean)).map(c=>`<option ${c===u.Carrier?'selected':''}>${esc(c)}</option>`).join('')}</select>`:'<span class="mu">-</span>'}</td>
@@ -1725,18 +1732,18 @@ function usersTableHTML(){
    <td class="r">${typeof acctRowBtn==='function'?acctRowBtn(u):''}<button class="btn sm danger" data-act="userDel" data-i="${i}">Remove</button></td></tr>`).join('')}</table></div>`:'<div class="empty">No user matches the search.</div>'}`;
 }
 function usersPanel(){
-  const roles=ROLES.filter(r=>r!=='In Organization'),codes=S.warehouses.map(w=>w.code);
+  const roles=ROLES.filter(r=>r!=='In Organization'),codes=whSorted().map(w=>w.code);
   return `<div class="card"><div class="row" style="justify-content:space-between;margin-bottom:10px"><h3 style="margin:0">Users and roles</h3><span class="row"><button class="btn sm" data-act="usersTemplateX">Download Template</button><button class="btn sm" data-act="usersTemplateCsv">Template (CSV)</button><button class="btn sm" data-act="usersExportX">Export (Excel)</button><button class="btn sm" data-act="usersExportCsv">Export (CSV)</button><label class="btn sm pri" style="cursor:pointer">Upload New Users<input type="file" id="impUsers" accept=".xlsx,.xls,.csv" hidden></label></span></div>
   <div class="row" style="margin-bottom:10px"><input id="us_q" class="in grow" placeholder="Search by name, email, role, carrier or warehouse" value="${esc(S.ui.usq||'')}" aria-label="Search users"></div>
   <div id="usersTbl">${usersTableHTML()}</div>
-  <div class="row sec uform"><input id="u_email" class="in grow" placeholder="email@${esc(S.settings.domain)}"><input id="u_name" class="in grow" placeholder="Name">${userTypeFields()}<select id="u_role" class="in" style="width:auto" aria-label="Role (internal users)">${INTERNAL_ROLES().map(r=>`<option>${esc(r)}</option>`).join('')}</select><input id="u_carrier" class="in" list="dl_car_users" placeholder="Carrier (type a new name to add one)" style="width:290px" autocomplete="off"><datalist id="dl_car_users">${carriersList().map(c=>`<option value="${esc(c)}">`).join('')}</datalist><div class="whdd" id="u_whdd"><button type="button" class="in whdd-b" data-act="whddToggle" aria-haspopup="listbox" aria-expanded="false" aria-label="Warehouses (Warehouse Team only)">Warehouses</button><div class="whdd-p" hidden>${codes.map(c=>`<label><input type="checkbox" data-ch="whddPick" value="${esc(c)}"> ${esc(c)}</label>`).join('')}</div><select id="u_wh" multiple hidden aria-hidden="true">${codes.map(c=>`<option>${esc(c)}</option>`).join('')}</select></div><select id="u_workby" class="in" style="width:auto" aria-label="A partner works by"><option>Shipper</option><option>Receiver</option></select>${mpd('shippers','<input type="hidden" id="u_shippers">','','Shippers (External Logistics Partner)')}<datalist id="dl_shp_users">${uniq(S.lines.map(l=>l.Shipper)).sort().map(x=>`<option value="${esc(x)}">`).join('')}</datalist>${typeof acctFormHTML==='function'?acctFormHTML():''}<button class="btn pri" data-act="userAdd">Add user</button></div>
-  <p class="hint">Export the list, add, change or delete rows (Action = Delete) in Excel, and import it back to make many changes at once. Anyone with a company email who is not listed gets the In Organization role, which opens Track &amp; Trace only. A Carrier Partner opens Carrier Updates and Delivery Slot Requests, and sees only the shipments nominated to their carrier. A Warehouse Team user opens Delivery Management for the warehouses assigned to them (hold Ctrl or Cmd to pick several). A External Logistics Partner works like a Logistics Executive, but only for the shippers registered under them: separate several shipper names with a semicolon. Profiles you create under Role access (for example Finance or SCM) can be assigned here too.</p></div>`;
+  <div class="row sec uform"><input id="u_email" class="in grow" placeholder="email@${esc(S.settings.domain)}"><input id="u_name" class="in grow" placeholder="Name">${userTypeFields()}<select id="u_role" class="in" style="width:auto" aria-label="Role (internal users)">${INTERNAL_ROLES().map(r=>`<option>${esc(r)}</option>`).join('')}<option value="__new__">Create a new role…</option></select><input id="u_carrier" class="in" list="dl_car_users" placeholder="Carrier (type a new name to add one)" style="width:290px" autocomplete="off"><datalist id="dl_car_users">${carriersList().map(c=>`<option value="${esc(c)}">`).join('')}</datalist><div class="whdd" id="u_whdd"><button type="button" class="in whdd-b" data-act="whddToggle" aria-haspopup="listbox" aria-expanded="false" aria-label="Warehouses (Warehouse Team only)">Warehouses</button><div class="whdd-p" hidden>${codes.map(c=>`<label><input type="checkbox" data-ch="whddPick" value="${esc(c)}"> ${esc(c)}</label>`).join('')}</div><select id="u_wh" multiple hidden aria-hidden="true">${codes.map(c=>`<option>${esc(c)}</option>`).join('')}</select></div><select id="u_workby" class="in" style="width:auto" aria-label="A partner works by"><option>Shipper</option><option>Receiver</option></select>${mpd('shippers','<input type="hidden" id="u_shippers">','','Shippers (External Logistics Partner)')}<datalist id="dl_shp_users">${uniq(S.lines.map(l=>l.Shipper)).sort().map(x=>`<option value="${esc(x)}">`).join('')}</datalist>${typeof acctFormHTML==='function'?acctFormHTML():''}<button class="btn pri" data-act="userAdd">Add user</button></div>
+  <p class="hint">Export the list, add, change or delete rows (Action = Delete) in Excel, and import it back to make many changes at once. Anyone with a company email who is not listed gets the In Organization role, which opens Track &amp; Trace only. A Carrier Partner opens Carrier Updates and Delivery Slot Requests, and sees only the shipments nominated to their carrier. A Warehouse Team user opens Delivery Management for the warehouses assigned to them (hold Ctrl or Cmd to pick several). A External Logistics Partner works like a Logistics Executive, but only for the shippers registered under them: separate several shipper names with a semicolon. Roles you create under Role Access (for example Finance or SCM) can be assigned here too.</p></div>`;
 }
 /* ----- Administration: warehouses ----- */
 const WH_COLS=['Warehouse Code','Warehouse Name','Warehouse Type','City','Country','Address','Receiving Hours','Team Contact Name','Phone','Team email addresses (separate with commas)','Time zone','Delivery due notice at','Weekly updates on','Weekly update at local','Quiet Hours from (local)','Quiet Hours to (local)','Receiver Names (separate with ;)','Action'];
 const WH_ALIAS={rcv:['receivernamesseparatewith','receivernames','receivers'],code:['warehousecode','code'],name:['warehousename','name'],type:['warehousetype','type'],city:['city'],country:['country'],addr:['address'],hours:['receivinghours','hours'],contact:['teamcontactname','teamcontact','contact'],phone:['phone'],emails:['teamemailaddressesseparatewithcommas','teamemailaddresses','teamemails','emails'],tz:['timezone'],due:['deliveryduenoticeat','deliveryduenotice'],wday:['weeklyupdateson','weeklyupdateon','weeklyday'],wtime:['weeklyupdateatlocal','weeklyupdateat','weeklyupdatetime'],qfrom:['quiethoursfromlocal','quiethoursfrom'],qto:['quiethourstolocal','quiethoursto','quiethoursuntil'],act:['action']};
 const WH_HELP=[['Warehouse Type','One of: Distribution Center, Manufacturing Site, Research Center, Supplier. Empty keeps the current type; a new warehouse gets a type guessed from its code.'],['Warehouse Code','The key. Letters, numbers, spaces and - _ . / (up to 40 characters). Used as the receiving warehouse on shipments.'],['Team email addresses (separate with commas)','The team that receives notices and slot requests.'],['Time zone','For example America/Chicago, or the Windows name such as Central Standard Time.'],['Delivery due notice at','Local time, hh:mm.'],['Weekly updates on','A day name, Monday to Sunday.'],['Weekly update at local','Local time, hh:mm.'],['Quiet Hours from (local)','Local time, hh:mm.'],['Quiet Hours to (local)','Local time, hh:mm.'],['Action','Empty, Add or Update saves the row. Delete removes the warehouse, only if no shipment, slot record or user uses it. Empty cells on an existing warehouse keep the current value; a new warehouse gets the standard defaults.']];
-const whExportRows=()=>S.warehouses.map(w=>({'Warehouse Code':w.code,'Warehouse Name':w.name,'Warehouse Type':w.type||whTypeGuess(w),City:w.city,Country:w.country,Address:w.address,'Receiving Hours':w.hours,'Receiver Names (separate with ;)':w.Receivers||'','Team Contact Name':w.contact,Phone:w.phone,'Team email addresses (separate with commas)':w.emails.join(', '),'Time zone':w.tz,'Delivery due notice at':w.dueTime,'Weekly updates on':WH_DAYS[w.weekDay],'Weekly update at local':w.weekTime,'Quiet Hours from (local)':w.quietFrom,'Quiet Hours to (local)':w.quietTo,Action:''}));
+const whExportRows=()=>whSorted().map(w=>({'Warehouse Code':w.code,'Warehouse Name':w.name,'Warehouse Type':w.type||whTypeGuess(w),City:w.city,Country:w.country,Address:w.address,'Receiving Hours':w.hours,'Receiver Names (separate with ;)':w.Receivers||'','Team Contact Name':w.contact,Phone:w.phone,'Team email addresses (separate with commas)':w.emails.join(', '),'Time zone':w.tz,'Delivery due notice at':w.dueTime,'Weekly updates on':WH_DAYS[w.weekDay],'Weekly update at local':w.weekTime,'Quiet Hours from (local)':w.quietFrom,'Quiet Hours to (local)':w.quietTo,Action:''}));
 const whSheets=()=>[{name:'Warehouses',headers:WH_COLS,rows:whExportRows()},{name:'Help',headers:['Column','What to enter'],rows:WH_HELP.map(x=>({Column:x[0],'What to enter':x[1]}))}];
 const impTz=v=>{const x=String(v).trim().toLowerCase(),f=TZ_LIST.find(z=>z[0].toLowerCase()===x||z[1].toLowerCase()===x);return f?f[0]:null};
 const impTime=v=>{const s=String(v).trim();if(/^\d*\.?\d+$/.test(s)&&Number(s)>=0&&Number(s)<1&&s.includes('.')){const m=Math.round(Number(s)*1440);return pad(Math.floor(m/60))+':'+pad(m%60)}const m=/^(\d{1,2}):(\d{2})(?::\d{2})?$/.exec(s);if(!m||+m[1]>23||+m[2]>59)return null;return pad(+m[1])+':'+m[2]};
@@ -1901,7 +1908,7 @@ function editRender(){
   const fld=([k,l,t,req])=>{const v=E.h[k],dis=locked.includes(k)?' disabled':'',id='e_'+k;
     let c;
     if(SH_LISTS[k])c=`<select id="${id}" class="in"${dis}>${(k==='ContainerType'?['',...SH_LISTS[k]()]:SH_LISTS[k]()).map(x=>`<option ${x===v?'selected':''}>${esc(x)}</option>`).join('')}</select>`;
-    else if(k==='WarehouseDestination')c=`<select id="${id}" class="in"${dis}>${!whFind(v)&&v?`<option selected>${esc(v)}</option>`:''}${S.warehouses.map(w=>`<option ${whKey(w.code)===whKey(v)?'selected':''}>${esc(w.code)}</option>`).join('')}</select>`;
+    else if(k==='WarehouseDestination')c=`<select id="${id}" class="in"${dis}>${!whFind(v)&&v?`<option selected>${esc(v)}</option>`:''}${whSorted().map(w=>`<option ${whKey(w.code)===whKey(v)?'selected':''}>${esc(w.code)}</option>`).join('')}</select>`;
     else if(t==='date')c=`<input type="date" id="${id}" class="in" value="${esc(v)}"${dis}>`;
     else if(k==='Carrier')c=`<input id="${id}" class="in" list="e_carriers" value="${esc(v)}"${dis}><datalist id="e_carriers">${carriersList().map(x=>`<option>${esc(x)}</option>`).join('')}</datalist>`;
     else c=`<input id="${id}" class="in" value="${esc(v)}" ${t==='num'||t==='int'?'inputmode="decimal"':''}${dis}>`;
@@ -2116,7 +2123,7 @@ function riskInfo(sh){
   if(fi&&(fi.state==='ending'||fi.state==='over')){reasons.push(fi.state==='over'?'Past the last free day by '+fi.over+' day(s)':'Last free day is '+(fi.left===0?'today':'in '+fi.left+' day(s)')+' ('+fmtS(fi.last)+')');if(fi.state==='over')high=true}
   return reasons.length?{reasons,level:high?'High':'Medium'}:null;
 }
-function riskPill(sh){const r=(can('dashboard')||can('milestones'))&&riskInfo(sh);return r?` <span class="pill ${r.level==='High'?'late':'warn'}" title="${esc(r.reasons.join('. '))}">At risk</span>`:''}
+function riskPill(sh){const r=(can('dashboard')||can('milestones'))&&riskInfo(sh);return r?` <span class="pill ${r.level==='High'?'late':'warn'}" title="${esc(r.simple||r.reasons.join('. '))}">At risk: ${r.level}</span>`:''}
 /* ========== My tasks ========== */
 function taskList(){
   const out=[],R=S.role,isCar=R==='Carrier Partner',me=isCar?S.carrier:'';
@@ -2249,7 +2256,7 @@ function viewSave(name,shared){
 /* ----- scheduled reports ----- */
 const REPORTS={
  overdue:{label:'Overdue milestones',build:()=>({headers:['Shipment','Carrier','Milestone','Planned date','Days overdue','Invoice number','Tracking number'],rows:overdueRows().map(({sh,k})=>[sh.ref,sh.carrier,MSL(k),msPlanL(sh,k),diffDays(S.today,msPlanL(sh,k)),shipInvNos(sh),shipTrackNos(sh)])})},
- atrisk:{label:'Shipments at risk',build:()=>({headers:['Shipment','Carrier','Route','Planned delivery','Level','Why'],rows:ships().filter(s=>riskInfo(s)&&!isLateNow(s)).map(s=>[s.ref,s.carrier,s.route,s.dueL,riskInfo(s).level,riskInfo(s).reasons.join('. ')])})},
+ atrisk:{label:'Shipments at risk',build:()=>({headers:['Shipment','Carrier','Route','Planned delivery','Level','Why'],rows:ships().filter(s=>riskInfo(s)&&!isLateNow(s)).map(s=>[s.ref,s.carrier,s.route,s.dueL,riskInfo(s).level,riskInfo(s).simple])})},
  freetime:{label:'Free time ending or over',build:()=>({headers:['Shipment','Carrier','Arrived','Last free day','Free time'],rows:ships().filter(s=>['ending','over'].includes((freeInfo(s)||{}).state)).map(s=>[s.ref,s.carrier,freeInfo(s).arrived,freeInfo(s).last,freeText(s)])})},
  slots_pending:{label:'Delivery slot requests waiting for approval',build:()=>({headers:['Request','Shipment','Warehouse','Slot (local time)','Requested by'],rows:S.slots.filter(r=>slotEff(r)==='Requested').map(r=>[r.id,r.ref,r.code,slotWhen(whFind(r.code)||{},r.date,r.slot),r.byRole])})},
  schedule:{label:'Deliveries booked for the next 7 days',build:()=>({headers:['Date','Slot (local time)','Warehouse','Shipment','Carrier','Slot status'],rows:S.slots.filter(r=>['Approved','Requested'].includes(slotEff(r))&&slotAt(r).date>=S.today&&slotAt(r).date<=addDays(S.today,7)).sort((a,b)=>slotAt(a).date.localeCompare(slotAt(b).date)||slotAt(a).slot-slotAt(b).slot).map(r=>{const w=whFind(r.code)||{},sh=getShip(r.ref)||{};return [slotAt(r).date,slotLabel(w,slotAt(r).slot),r.code,r.ref,sh.carrier||'',slotEff(r)]})})},
@@ -2633,7 +2640,7 @@ function profilesCard(){
 function backupPayload(){const p=persistPayload(),cb=document.getElementById('bk_acc');if(cb&&!cb.checked)delete p.data.accounts;return p}
 function backupCard(){
   const c={ship:new Set(S.lines.map(l=>l.ShipmentRef)).size,ev:S.events.length,sl:S.slots.length,us:S.users.length,wh:S.warehouses.length,q:S.quotes.length,inv:S.invoices.length};
-  return `<div class="card"><h3>Data backup</h3><p class="mu" style="margin-bottom:10px">One export holds everything: ${c.ship} shipments with their item lines, ${c.ev} milestones, ${c.sl} delivery slot requests and the blocks, ${c.us} users, ${S.customRoles.length} profiles and all role access, ${c.wh} warehouses, ${c.q} freight quotes, ${c.inv} freight invoices, subscriptions, report schedules, saved views, settings, branding and the audit log. Upload the file to a newer version of the app to bring everything back in one step.</p>
+  return `<div class="card"><h3>Data backup</h3><p class="mu" style="margin-bottom:10px">One export holds everything: ${c.ship} shipments with their item lines, ${c.ev} milestones, ${c.sl} delivery slot requests and the blocks, ${c.us} users, ${S.customRoles.length} roles and all role access, ${c.wh} warehouses, ${c.q} freight quotes, ${c.inv} freight invoices, subscriptions, report schedules, saved views, settings, branding and the audit log. Upload the file to a newer version of the app to bring everything back in one step.</p>
   <div class="row"><label class="f" style="flex-direction:row;align-items:center;gap:8px">Format<select id="bk_fmt" class="in" style="width:auto"><option value="zip">ZIP (separate files)</option><option value="json">JSON (one file)</option></select></label><button class="btn pri" data-act="exportAll">Export all data</button><label class="btn" style="cursor:pointer">Upload dump<input type="file" id="restoreFile2" accept=".json,.zip,application/json,application/zip" hidden></label><button class="btn" data-act="exportAllX">Download everything as Excel</button></div>
   ${(S.accounts||[]).length||window.ECT_LOGIN?`<label class="row" style="margin-top:10px;gap:8px"><input type="checkbox" id="bk_acc" checked style="width:auto"> Include the sign-in accounts (scrambled passwords) in the backup</label>`:''}
   <p class="hint">The JSON file is the one to keep and to restore from. The Excel file is for reading and analysis: every table on its own sheet, plus carrier and monthly analysis. It cannot be uploaded back. Restoring replaces everything on screen. Keep the backup file private: it holds all shipment and cost data.</p></div>`;
@@ -2648,9 +2655,9 @@ function allSheets(){
   const A1=Object.values(byC).map(c=>({Carrier:c.Carrier,Shipments:c.Shipments,Delivered:c.Delivered,'On-time delivery %':c.Delivered?Math.round(100*c['On time']/c.Delivered):'','Average transit days':c['With transit']?Math.round(10*c['Transit days']/c['With transit'])/10:''}));
   const byM={};ships().forEach(s=>{const m=String(s.f.PickupActual||s.f.PickupPlanned||'').slice(0,7)||'No date',r=byM[m]=byM[m]||{Month:m,Shipments:0,'Weight kg':0,'Freight spend':0};r.Shipments++;r['Weight kg']+=s.lines.reduce((a,l)=>a+num(l.WeightKg),0);if(com){try{const q=selQuote(s.ref);if(q)r['Freight spend']+=num(q.amount)}catch(e){}}});
   const A2=Object.values(byM).sort((a,b)=>a.Month.localeCompare(b.Month)).map(r=>{if(!com)delete r['Freight spend'];return r});
-  const readme=[['Shipments','One row per shipment (cancelled ones included, marked).'],['Item lines','Every item line exactly as stored.'],['Milestones','The event history of every shipment.'],['Date revisions','Planned dates that were changed, with the reason.'],['Delivery slots','All delivery slot requests.'],['Slot blocks','Blocked delivery slots.'],['Users','The user list. No passwords.'],['Profiles and access','What each role and profile can open.'],['Warehouses','The warehouse list with type and team contacts.'],['Freight quotes / Freight invoices','Included only when your role can see commercial data.'],['Subscriptions','Email follow-ups.'],['Audit log','Who changed what.'],['Analysis - carriers','Delivered shipments, on-time delivery and transit days per carrier, at the time of export.'],['Analysis - monthly','Shipments, weight and freight spend per pickup month, at the time of export.'],['Note','This workbook is for reading. To restore everything use the JSON backup.']].map(x=>({Sheet:x[0],Content:x[1]}));
+  const readme=[['Shipments','One row per shipment (cancelled ones included, marked).'],['Item lines','Every item line exactly as stored.'],['Milestones','The event history of every shipment.'],['Date revisions','Planned dates that were changed, with the reason.'],['Delivery slots','All delivery slot requests.'],['Slot blocks','Blocked delivery slots.'],['Users','The user list. No passwords.'],['Roles and access','What each role can open.'],['Warehouses','The warehouse list with type and team contacts.'],['Freight quotes / Freight invoices','Included only when your role can see commercial data.'],['Subscriptions','Email follow-ups.'],['Audit log','Who changed what.'],['Analysis - carriers','Delivered shipments, on-time delivery and transit days per carrier, at the time of export.'],['Analysis - monthly','Shipments, weight and freight spend per pickup month, at the time of export.'],['Note','This workbook is for reading. To restore everything use the JSON backup.']].map(x=>({Sheet:x[0],Content:x[1]}));
   const acc=ROLES.map(r=>({Role:r,Custom:S.customRoles.some(c=>c.name===r)?'Yes':'','Can open':(S.access[r]||[]).join(', ')}));
-  const out=[{name:'Read me',headers:['Sheet','Content'],rows:readme},tbl('Shipments',S1),tbl('Item lines',S.lines),tbl('Milestones',S.events),tbl('Date revisions',S.revisions),tbl('Delivery slots',S.slots.map(r=>({ID:r.id,Shipment:r.ref,Warehouse:r.code,Date:r.date,Slot:r.slot,Status:r.status,'Requested by':r.by,Vehicle:r.vehicle,Driver:r.driver,Note:r.note,Flag:r.flag||''}))),tbl('Slot blocks',S.slotBlocks),tbl('Users',S.users),tbl('Profiles and access',acc),tbl('Warehouses',S.warehouses.map(w=>Object.assign({},w,{emails:(w.emails||[]).join('; ')})))];
+  const out=[{name:'Read me',headers:['Sheet','Content'],rows:readme},tbl('Shipments',S1),tbl('Item lines',S.lines),tbl('Milestones',S.events),tbl('Date revisions',S.revisions),tbl('Delivery slots',S.slots.map(r=>({ID:r.id,Shipment:r.ref,Warehouse:r.code,Date:r.date,Slot:r.slot,Status:r.status,'Requested by':r.by,Vehicle:r.vehicle,Driver:r.driver,Note:r.note,Flag:r.flag||''}))),tbl('Slot blocks',S.slotBlocks),tbl('Users',S.users),tbl('Roles and access',acc),tbl('Warehouses',whSorted().map(w=>Object.assign({},w,{emails:(w.emails||[]).join('; ')})))];
   if(com){out.push(tbl('Freight quotes',S.quotes));out.push(tbl('Freight invoices',S.invoices))}
   out.push(tbl('Subscriptions',S.subs),tbl('Audit log',S.audit),tbl('Analysis - carriers',A1),tbl('Analysis - monthly',A2));
   return out;
@@ -2820,7 +2827,7 @@ function dsCounts(id,d){
   if(id==='shipments')return [['Shipments',new Set(L.map(l=>l.ShipmentRef)).size],['Item lines',arrN(L)],['Email subscriptions',arrN(d.subs)],['Date revisions',arrN(d.revisions)],['Documents (records)',arrN(d.docs)]];
   if(id==='milestones')return [['Milestone events',arrN(d.events)]];
   if(id==='slots')return [['Delivery slot requests',arrN(d.slots)],['Slot blocks',arrN(d.slotBlocks)]];
-  if(id==='users')return [['Users',arrN(d.users)],['Profiles you created',arrN(d.customRoles)],['Roles with access settings',d.access?Object.keys(d.access).length:0],['Sign-in accounts',arrN(d.accounts)]];
+  if(id==='users')return [['Users',arrN(d.users)],['Roles you created',arrN(d.customRoles)],['Roles with access settings',d.access?Object.keys(d.access).length:0],['Sign-in accounts',arrN(d.accounts)]];
   if(id==='warehouses')return [['Warehouses',arrN(d.warehouses)]];
   if(id==='freight')return [['Freight quotes',arrN(d.quotes)],['Freight invoices',arrN(d.invoices)]];
   if(id==='settings')return [['Saved views',arrN(d.views)],['Report schedules',arrN(d.reports)],['Audit log entries',arrN(d.audit)],['Emails in the outbox',arrN(d.outbox)]];
@@ -3027,7 +3034,7 @@ function monBarHTML(){
 {const s0=addSampleHistory;addSampleHistory=function(){const r=s0.apply(this,arguments);S.lines.forEach(l=>{if(l.Mode)l.Mode=normMode(l.Mode);if(l.ContainerType)l.ContainerType=normCtype(l.ContainerType)});return r}}
 document.addEventListener('change',e=>{if(e.target&&e.target.id==='f_ctype'){const b=document.getElementById('setptBox');if(b){b.style.display=isReefer(e.target.value)?'':'none';if(!isReefer(e.target.value)){const i=document.getElementById('f_setpt');if(i)i.value=''}}}});
 /* ========== demo sign-in (email and password), problem log, report a problem ========== */
-const APP_BUILD='site build 2026-11-14 19:52 UTC';
+const APP_BUILD='site build 2026-11-15 11:27 UTC';
 const ErrLog={key:'ect.errors',max:60,
   add(kind,msg,src){try{const a=JSON.parse(localStorage.getItem(this.key)||'[]');a.push({t:new Date().toISOString(),kind,msg:String(msg==null?'':msg).slice(0,300),src:String(src||'').slice(0,160),view:(typeof S!=='undefined'&&S&&S.view)||'',role:(typeof S!=='undefined'&&S&&S.role)||''});while(a.length>this.max)a.shift();localStorage.setItem(this.key,JSON.stringify(a))}catch(e){}},
   list(){try{return JSON.parse(localStorage.getItem(this.key)||'[]')}catch(e){return []}},
@@ -4006,7 +4013,7 @@ function viewMilestones(){
   return [{id:'overdue',label:'Overdue milestones',value:od.length,cls:'late',title:'Shipments with an overdue milestone',rows:[...odMap.values()].map(x=>x.sh),extra:[oc]},
    {id:'notnom',label:'Forwarder not nominated',value:notNom,cls:'acc',title:'Forwarder not nominated yet',rows:act.filter(s=>s.freight==='Your Company'&&!s.nominated)},
    {id:'soon',label:'Delivery due in 3 days',value:soon,title:'Delivery due in the next 3 days',rows:soonRows},
-   {id:'atrisk',label:'At risk',value:ar.length,cls:'acc',title:'Active shipments at risk of missing their plan',rows:ar,extra:[colx('Why',sh=>esc(riskInfo(sh).reasons.join('. ')),sh=>riskInfo(sh).reasons.join('. '))]},
+   {id:'atrisk',label:'At risk',value:ar.length,cls:'acc',title:'Active shipments at risk of missing their plan',rows:ar,extra:[colx('Level',sh=>`<span class="pill ${riskInfo(sh).level==='High'?'late':'warn'}">${riskInfo(sh).level}</span>`,sh=>riskInfo(sh).level),colx('Why',sh=>esc(riskInfo(sh).simple),sh=>riskInfo(sh).simple)]},
    {id:'free',label:'Free time ending or over',value:fr.length,cls:'late',title:'Arrived shipments whose free time is ending or over',rows:fr,extra:[colx('Free time',sh=>freeCell(sh),sh=>freeText(sh))]},
    {id:'active',label:'Active shipments',value:act.length,title:'Active shipments',rows:act}]})())}
   <div class="row" style="margin-bottom:12px"><button class="btn pri" data-act="msDownload">Download overdue (CSV)</button><button class="btn" data-act="msBulkOpen">Upload updates</button>
@@ -4159,12 +4166,12 @@ function bulkCancelRun(reason,note){
 function monHTML(all){
   const D=S.ui.dash,q=D.q.toLowerCase();
   const rows=(D.status==='Cancelled'?cancelledList():all).filter(sh=>(D.status==='All'||D.status==='Cancelled'||sh.status===D.status||(D.status==='Delayed'&&isLateNow(sh))||(D.status==='Invoice pending'&&can('invoices')&&isInvPending(sh))||(D.status==='At risk'&&riskInfo(sh)&&!isLateNow(sh))||(D.status==='Free time ending'&&['ending','over'].includes((freeInfo(sh)||{}).state)))).filter(sh=>!D.overdueOnly||isLateNow(sh)).filter(sh=>!D.missDocs||missingDocs(sh)).filter(sh=>!D.pendRG||rgPending(sh)).filter(sh=>!D.poMiss||poMissing(sh)).filter(sh=>!D.ent||entMatch(sh,D.ent))
-    .filter(sh=>!q||(sh.ref+' '+sh.carrier+' '+sh.shipper+' '+sh.consignee+' '+sh.route+' '+sh.pos.join(' ')).toLowerCase().includes(q)).sort((a,b)=>(a.due||'9').localeCompare(b.due||'9'));
+    .filter(sh=>!q||(sh.ref+' '+sh.carrier+' '+sh.shipper+' '+sh.consignee+' '+sh.route+' '+sh.pos.join(' ')+' '+shipHay(sh)).toLowerCase().includes(q)).sort((a,b)=>(a.due||'9').localeCompare(b.due||'9'));
   if(!rows.length)return monBarHTML()+monEmptyHTML();
   const cb=can('cancelship'),elig=s=>!s.cancelled;D.chk=(D.chk||[]).filter(r=>rows.some(s=>s.ref===r&&elig(s)));
   const allSel=cb&&rows.some(elig)&&rows.filter(elig).every(s=>D.chk.includes(s.ref));
-  return `${monBarHTML()}<div class="tbw"><table class="tb" data-sort="on"><tr>${cb?`<th style="width:34px"><input type="checkbox" id="monAll" data-act="monAll" aria-label="Select all shown shipments" ${allSel?'checked':''}></th>`:''}<th>Shipment</th><th>Mode</th><th>Type</th><th>Route</th><th>Delivered To</th><th>Carrier</th><th>Entered By</th><th>Progress</th><th>Due</th><th>Status</th>${can('invoices')?'<th>Freight invoice</th>':''}${can('cancelship')?'<th></th>':''}</tr>`+rows.map(sh=>`<tr class="click${can('invoices')&&isInvPending(sh)?' tr-pend':''}" data-act="open" data-ref="${sh.ref}">${cb?`<td><input type="checkbox" data-act="monSel" data-ref="${sh.ref}" aria-label="Select ${sh.ref}" ${elig(sh)?'':'disabled'} ${D.chk.includes(sh.ref)?'checked':''}></td>`:''}<td><b>${sh.ref}</b></td><td>${modeBadge(sh.mode)}</td><td>${typeBadge(sh.stype)}${dgTag(sh.nature)}</td><td>${esc(sh.route)}</td><td>${whCell(sh)}</td><td>${esc(sh.carrier)}</td><td>${enteredCell(sh)}</td><td>${miniHTML(sh)}</td>
-    <td>${dueCell(sh)}</td><td>${pill(sh)}${docBadge(sh)}${poBadge(sh)}${redBadge(sh)}</td>${can('invoices')?`<td>${sh.cancelled?'-':invPill(sh)}</td>`:''}${can('cancelship')?`<td class="r">${sh.cancelled?'':`<button class="btn sm danger" data-act="cancelOpen" data-ref="${sh.ref}">Cancel</button>`}</td>`:''}</tr>`).join('')+'</table></div>';
+  return `${monBarHTML()}<div class="tbw"><table class="tb" data-sort="on"><tr>${cb?`<th style="width:34px"><input type="checkbox" id="monAll" data-act="monAll" aria-label="Select all shown shipments" ${allSel?'checked':''}></th>`:''}<th>Shipment</th>${monRefsOn()?'<th>References</th>':''}<th>Mode</th><th>Type</th><th>Route</th><th>Delivered To</th><th>Carrier</th><th>Entered By</th><th>Progress</th><th>Due</th><th>Status</th>${can('invoices')?'<th>Freight invoice</th>':''}${can('cancelship')?'<th></th>':''}</tr>`+rows.map(sh=>`<tr class="click${can('invoices')&&isInvPending(sh)?' tr-pend':''}" data-act="open" data-ref="${sh.ref}">${cb?`<td><input type="checkbox" data-act="monSel" data-ref="${sh.ref}" aria-label="Select ${sh.ref}" ${elig(sh)?'':'disabled'} ${D.chk.includes(sh.ref)?'checked':''}></td>`:''}<td><b>${sh.ref}</b></td>${monRefsOn()?`<td>${refsCell(sh)}</td>`:''}<td>${modeBadge(sh.mode)}</td><td>${typeBadge(sh.stype)}${dgTag(sh.nature)}</td><td>${esc(sh.route)}</td><td>${whCell(sh)}</td><td>${esc(sh.carrier)}</td><td>${enteredCell(sh)}</td><td>${miniHTML(sh)}</td>
+    <td>${dueCell(sh)}</td><td>${pill(sh)}${docBadge(sh)}${poBadge(sh)}${redBadge(sh)}${riskLine(sh)}</td>${can('invoices')?`<td>${sh.cancelled?'-':invPill(sh)}</td>`:''}${can('cancelship')?`<td class="r">${sh.cancelled?'':`<button class="btn sm danger" data-act="cancelOpen" data-ref="${sh.ref}">Cancel</button>`}</td>`:''}</tr>`).join('')+'</table></div>';
 }
 function onTime(arr,k){
   let n=0,on=0;const late=[];
@@ -4178,8 +4185,8 @@ function tileSet(all){
    delayed:{label:'Delayed now',rows:all.filter(isLateNow)},
    atrisk:{label:'At risk of missing the plan',rows:all.filter(s=>riskInfo(s)&&!isLateNow(s))},
    freeend:{label:'Free time ending or over',rows:all.filter(s=>['ending','over'].includes((freeInfo(s)||{}).state))},
-   overdue:{label:'Overdue as of '+fmt(D.sel)+' ('+MS[D.ms].label+')',rows:all.filter(sh=>overdueAt(sh,D.ms,D.sel))},
-   dueOn:{label:'Due on '+fmt(D.sel)+' ('+MS[D.ms].label+')',rows:all.filter(sh=>msPlanL(sh,D.ms)===D.sel)},
+   overdue:{label:'Overdue as of '+fmt(D.sel)+' ('+ctLabel()+')',rows:all.filter(sh=>ctKeys().some(k=>overdueAt(sh,k,D.sel)))},
+   dueOn:{label:'Due on '+fmt(D.sel)+' ('+ctLabel()+')',rows:all.filter(sh=>ctKeys().some(k=>msPlanL(sh,k)===D.sel))},
    delivered:{label:'Delivered',rows:deliv},
    invoiced:{label:'Invoiced shipments',rows:deliv.filter(s=>invState(s)==='Recorded')},
    invpend:{label:'Delivered, invoice pending',rows:deliv.filter(isInvPending)},
@@ -4193,9 +4200,9 @@ function tilePanel(all){
   if(!D.tile)return '<p class="hint" style="margin:-6px 0 16px">Click a tile to see the shipments behind it.</p>';
   const t=tileSet(all)[D.tile],rows=t.rows,ot=D.tile==='ontime',inv=can('invoices')&&rows.some(r=>r.status==='Delivered');
   return `<div class="card" id="tilePanel"><div class="row" style="justify-content:space-between;margin-bottom:10px"><h3 style="margin:0">${esc(t.label)} (${rows.length})</h3><span class="row"><button class="btn sm" data-act="tileExport">Export (CSV)</button><button class="btn sm" data-act="tileClear">Clear selection</button></span></div>`+
-  (rows.length?`<div class="tbw"><table class="tb"><tr><th>Shipment</th><th>Mode</th><th>Type</th><th>Route</th><th>Carrier</th><th>Due</th><th class="r">Weight</th>${ot?'<th>Delivered vs due</th>':''}<th>Status</th>${inv?'<th>Freight invoice</th>':''}</tr>`+rows.map(sh=>{
+  (rows.length?`<div class="tbw"><table class="tb"><tr><th>Shipment</th><th>Mode</th><th>Type</th><th>Route</th><th>Carrier</th><th>Due</th><th class="r">Weight</th>${ot?'<th>Delivered vs due</th>':''}${D.tile==='atrisk'?'<th>Level</th><th>Why</th>':''}<th>Status</th>${inv?'<th>Freight invoice</th>':''}</tr>`+rows.map(sh=>{
     let dv='';if(ot){const d=diffDays(sh.f.DeliveredOn,sh.due);dv=`<td>${d<=0?`<span class="ok-t">${d===0?'On time':(-d)+' day(s) early'}</span>`:`<span class="late-t">${d} day(s) late</span>`}</td>`}
-    return `<tr class="click${inv&&isInvPending(sh)?' tr-pend':''}" data-act="open" data-ref="${sh.ref}"><td><b>${sh.ref}</b></td><td>${modeBadge(sh.mode)}</td><td>${typeBadge(sh.stype)}${dgTag(sh.nature)}</td><td>${esc(sh.route)}</td><td>${esc(sh.carrier)}</td><td>${dueCell(sh)}</td><td class="r">${sh.weight?kg(sh.weight):'-'}</td>${dv}<td>${pill(sh)}</td>${inv?`<td>${invPill(sh)}</td>`:''}</tr>`}).join('')+'</table></div>':'<div class="empty">No shipments in this tile.</div>')+'</div>';
+    return `<tr class="click${inv&&isInvPending(sh)?' tr-pend':''}" data-act="open" data-ref="${sh.ref}"><td><b>${sh.ref}</b></td><td>${modeBadge(sh.mode)}</td><td>${typeBadge(sh.stype)}${dgTag(sh.nature)}</td><td>${esc(sh.route)}</td><td>${esc(sh.carrier)}</td><td>${dueCell(sh)}</td><td class="r">${sh.weight?kg(sh.weight):'-'}</td>${dv}${D.tile==='atrisk'?riskCells(sh):''}<td>${pill(sh)}</td>${inv?`<td>${invPill(sh)}</td>`:''}</tr>`}).join('')+'</table></div>':'<div class="empty">No shipments in this tile.</div>')+'</div>';
 }
 function perfCard(all){
   const ms=['Pickup','ETD','ETA','Delivery'].map(k=>Object.assign({k},onTime(all,k)));
@@ -4230,19 +4237,19 @@ function viewDash(){
     <label class="f">Mode<select id="d_mode" data-ch="dmode">${['All',...MODES].map(o=>`<option ${o===D.mode?'selected':''}>${o}</option>`).join('')}</select></label>
     <label class="f">Shipment type<select id="d_type" data-ch="dtype">${['All',...TYPES,'Mixed'].map(o=>`<option ${o===(D.type||'All')?'selected':''}>${o}</option>`).join('')}</select></label>
     <label class="f">Nature of goods<select id="d_nature" data-ch="dnature">${['All',...NATURES].map(o=>`<option ${o===(D.nature||'All')?'selected':''}>${o}</option>`).join('')}</select></label>
-    <label class="f">Milestone<select id="d_ms" data-ch="dms">${Object.keys(MS).map(k=>`<option value="${k}" ${k===D.ms?'selected':''}>${MS[k].label}${k==='Delivery'?' (due date)':' (planned date)'}</option>`).join('')}</select></label>
+    <label class="f">Milestone<select id="d_ms" data-ch="dms"><option value="All" ${D.ms==='All'?'selected':''}>All milestones</option>${Object.keys(MS).map(k=>`<option value="${k}" ${k===D.ms?'selected':''}>${MS[k].label}${k==='Delivery'?' (due date)':' (planned date)'}</option>`).join('')}</select></label>
     <label class="f">Selected date<input type="date" id="d_sel" class="in" value="${D.sel}" data-ch="dsel"></label>
     <button class="btn" data-act="calToday" style="align-self:flex-end">Go to today</button></div></div>
   <div class="kpis">${(can('invoices')?[...tiles.slice(0,5),['invoiced','Invoiced',TS.invoiced.rows.length,'ok'],['invpend','Invoice pending',TS.invpend.rows.length,'late'],...tiles.slice(5)]:tiles).map(([id,l,v,cls])=>`<button class="kpi tile ${cls} ${D.tile===id?'sel':''}" data-act="tile" data-t="${id}" aria-pressed="${D.tile===id}"><small>${l}</small><b>${v}</b>${id==='ontime'?`<small>${onN} of ${dwith.length} delivered</small>`:''}</button>`).join('')}</div>
   ${tilePanel(all)}
   <div class="split"><div class="card"><div class="row" style="justify-content:space-between;margin-bottom:10px"><button class="btn sm" data-act="calPrev" aria-label="Previous month">Previous</button><b>${MONL[m-1]} ${y}</b><button class="btn sm" data-act="calNext" aria-label="Next month">Next</button></div>${calHTML(all)}
      ${calLegend()}</div>
-   <div><div class="card"><h3>Overdue as of ${fmt(D.sel)} (${over.length})</h3>${listRows(over,'over')}</div><div class="card"><h3>Due on ${fmt(D.sel)} (${dueOn.length})</h3>${listRows(dueOn,'due')}</div></div></div>
+   <div><div class="card" id="ctOver"><h3>Overdue as of ${fmt(D.sel)} (${over.length})</h3>${listRows(over,'over')}</div><div class="card" id="ctDue"><h3>Due on ${fmt(D.sel)} (${dueOn.length})</h3>${listRows(dueOn,'due')}</div></div></div>
   ${monthlyCard('dash')}
   <div class="split">${perfCard(all)}<div><div class="card"><h3>Shipments by stage</h3>${STAGES.map(st=>{const n=all.filter(s=>s.status===st).length;return `<div class="row" style="margin-bottom:8px"><span style="width:120px">${st}</span><div class="bar grow" style="min-width:80px"><i style="width:${all.length?n/all.length*100:0}%"></i></div><b style="width:28px;text-align:right">${n}</b></div>`}).join('')}</div>
    ${typeCard(all)}
    <div class="card"><h3>Volume by mode</h3>${modeRows.map(r=>`<div class="row" style="margin-bottom:8px"><span style="min-width:132px;flex:none">${modeBadge(r.md)}</span><div class="bar grow" style="min-width:60px"><i style="width:${r.w/maxW*100}%"></i></div><span style="min-width:150px;flex:none;text-align:right;white-space:nowrap">${r.n} shipments, ${(r.w/1000).toFixed(1)} t</span></div>`).join('')}</div></div></div>
-  <div class="card"><h3>Shipment monitor</h3><div class="row" style="margin-bottom:10px"><input id="d_q" class="in grow" placeholder="Search shipment, carrier, party, PO" value="${esc(D.q)}" aria-label="Search monitor">
+  <div class="card"><h3>Shipment monitor</h3><div class="row" style="margin-bottom:10px"><input id="d_q" class="in grow" placeholder="Search shipment, carrier, party, PO, HBL, MBL, invoice or container" value="${esc(D.q)}" aria-label="Search monitor">
     <select id="d_status" aria-label="Status" data-ch="dstatus" class="in" style="width:auto">${['All',...STAGES,'Delayed',...(can('invoices')?['Invoice pending']:[]),'At risk','Free time ending','Cancelled'].map(o=>`<option ${o===D.status?'selected':''}>${o}</option>`).join('')}</select>${cancelledList().length?`<span class="mu sm" title="Cancelled shipments stay on record and are not counted in any figure on this page">${cancelledList().length} cancelled on record</span>`:''}
     </div><div id="mon">${monHTML(all)}</div></div>`;
 }
@@ -4404,9 +4411,9 @@ function viewCarrier(){
   const maxW=Math.max(1,...st.map(c=>c.w));
   const tot=st.reduce((a,c)=>({n:a.n+c.n,late:a.late+c.late,deliv:a.deliv+c.deliv,onT:a.onT+c.onTime,dueN:a.dueN+c.dueN,puOn:a.puOn+c.puOn,puN:a.puN+c.puN}),{n:0,late:0,deliv:0,onT:0,dueN:0,puOn:0,puN:0});
   return pageHead('Carrier Performance','How each carrier is performing by mode and time window: volumes handled, delays and on-time delivery. Costs are not shown here.')+periodBar({basis:true})+
-  `<div class="card"><div class="row"><label class="f">Mode<select data-ch="cmode">${['All',...MODES].map(o=>`<option ${o===C.mode?'selected':''}>${o}</option>`).join('')}</select></label>
-   <label class="f">Shipment type<select data-ch="ctype">${['All',...TYPES,'Mixed'].map(o=>`<option ${o===(C.type||'All')?'selected':''}>${o}</option>`).join('')}</select></label>
-   <label class="f">Nature of goods<select data-ch="cnature">${['All',...NATURES].map(o=>`<option ${o===(C.nature||'All')?'selected':''}>${o}</option>`).join('')}</select></label></div></div>
+  `<div class="card"><div class="row">${cfPick('modes','cfMode','Mode')}
+   ${cfPick('types','cfType','Shipment type')}
+   ${cfPick('natures','cfNature','Nature of goods')}</div></div>
   ${kt('cp',(()=>{
   const L=carrierList(),byC=a=>[...a].sort((x,y)=>x.carrier.localeCompare(y.carrier)||(x.due||'9').localeCompare(y.due||'9'));
   return [{id:'carriers',label:'Carriers used',value:st.length,title:'Shipments by carrier',rows:byC(L)},
@@ -4762,8 +4769,8 @@ function whSchedulePanel(plan,ready){
    {id:'late',label:'Overdue arrivals',value:on(d=>d<S.today).length,cls:'late',title:'Past their expected date, not yet delivered',rows:on(d=>d<S.today),extra:cols},
    {id:'attn',label:'Needs attention',value:attn.length,sub:'no contact, no date or not in master',cls:attn.length?'late':'ok',title:'Shipments the warehouse cannot be notified about',rows:attn,extra:cols}];
   const horizon=addDays(S.today,F.days),win=sc.filter(s=>s.dueL&&s.dueL<=horizon).sort((a,b)=>a.dueL.localeCompare(b.dueL)||a.ref.localeCompare(b.ref)),nodate=sc.filter(s=>!s.dueL);
-  const allCodes=uniq([...S.warehouses.map(w=>w.code),...sc.map(whCodeOf).filter(Boolean)]);
-  const groups=uniq([...S.warehouses.map(w=>w.code),...win.map(whCodeOf)]).filter(c=>win.some(s=>whKey(whCodeOf(s))===whKey(c)));
+  const allCodes=whSortCodes(uniq([...whSorted().map(w=>w.code),...sc.map(whCodeOf).filter(Boolean)]));
+  const groups=uniq([...whSorted().map(w=>w.code),...win.map(whCodeOf)]).filter(c=>win.some(s=>whKey(whCodeOf(s))===whKey(c)));
   const noteRow=s=>{const n=whNotice(s);return `<span class="${n.c}">${esc(n.t)}</span>`};
   const grp=c=>{const rows=win.filter(s=>whKey(whCodeOf(s))===whKey(c)),w=whFind(c);
     return `<div class="card"><div class="whgrp"><h3>${esc(c||'No warehouse set')}</h3><span class="mu">${w?esc([w.name,w.city,w.country].filter(Boolean).join(', ')):'<span class="late-t">Not in the warehouse master</span>'}</span>
@@ -5366,7 +5373,7 @@ function tcToken(tok,first,last,prev){
 function tcText(s,first,last){const toks=s.split(/(\s+)/);const words=toks.map((x,i)=>({x,i})).filter(o=>!/^\s+$/.test(o.x)&&o.x!=='');let prevColon=false,prev='';words.forEach((o,k)=>{const f=(first&&k===0)||prevColon,l=last&&k===words.length-1;toks[o.i]=tcToken(o.x,f,l,prev);prevColon=/:$/.test(o.x);prev=o.x.toLowerCase().replace(/[^a-z]/g,'')});return toks.join('')}
 
 function capEl(el){
-  const nodes=[];const w=document.createTreeWalker(el,NodeFilter.SHOW_TEXT,null);let n;while(n=w.nextNode()){if(n.nodeValue.trim())nodes.push(n)}
+  const nodes=[];const w=document.createTreeWalker(el,NodeFilter.SHOW_TEXT,null);let n;while(n=w.nextNode()){if(n.nodeValue.trim()&&!(n.parentElement&&n.parentElement.closest('.pill')))nodes.push(n)}
   nodes.forEach((n,i)=>{const v=tcText(n.nodeValue,i===0,i===nodes.length-1);if(v!==n.nodeValue)n.nodeValue=v});
 }
 const TC_SEL='#view th,#modal th,#view h1,#view h2,#view h3,#view h4,#modal h2,#modal h3,#view .tabs button,#modal .tabs button,#nav .nav-gh>span:first-child,#nav .nav-i>span:not(.nav-badge),.crumb b';
@@ -6152,8 +6159,8 @@ function calHTML(all){
   let h='<div class="cal-h">'+['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d=>`<div>${d}</div>`).join('')+'</div><div class="cal">';
   for(let i=0;i<startDow;i++)h+='<div class="cal-c empty"></div>';
   for(let d=1;d<=dim;d++){
-    const iso=`${y}-${pad(m)}-${pad(d)}`,due=all.filter(sh=>msPlanL(sh,D.ms)===iso),n=calCounts(due.map(sh=>({date:iso,done:doneBy(sh,D.ms,S.today)})));
-    h+=`<button class="cal-c ${iso===D.sel?'sel':''} ${iso===S.today?'today':''} ${calTint(n)}" data-act="pickday" data-d="${iso}" style="text-align:left" aria-label="${fmt(iso)}: ${due.length} due, ${n.done} done, ${n.late} overdue, ${n.today} due today, ${n.up} upcoming"><span class="dn">${d}</span>${calBadges(n)}</button>`;
+    const iso=`${y}-${pad(m)}-${pad(d)}`,its=ctKeys().flatMap(k=>all.filter(sh=>msPlanL(sh,k)===iso).map(sh=>({k,sh,date:iso,done:doneBy(sh,k,S.today)}))),due=its,n=calCounts(its);
+    h+=`<button class="cal-c ${iso===D.sel?'sel':''} ${iso===S.today?'today':''} ${calTint(n)}" data-act="pickday" data-d="${iso}" style="text-align:left" title="${D.ms==='All'?CT_KEYS.map(k=>[k,its.filter(i=>i.k===k).length]).filter(x=>x[1]).map(x=>x[0]+' '+x[1]).join(', '):''}" aria-label="${fmt(iso)}: ${due.length} due, ${n.done} done, ${n.late} overdue, ${n.today} due today, ${n.up} upcoming"><span class="dn">${d}</span>${calBadges(n)}</button>`;
   }
   return h+'</div>';
 }
@@ -6217,7 +6224,7 @@ document.addEventListener('input',e=>{const t=e.target;if(t&&t.id==='dm_inq'){S.
 
 /* ========== users: template, role-aware add form, warehouse dropdown; simple monthly bar chart ========== */
 function usersTemplateSheets(){
-  const roles=ROLES.filter(r=>r!=='In Organization'),whs=S.warehouses.map(w=>w.code),cars=carriersList();
+  const roles=ROLES.filter(r=>r!=='In Organization'),whs=whSorted().map(w=>w.code),cars=carriersList();
   return [{name:'New Users',headers:USER_COLS,rows:[]},{name:'Help',headers:['Column','What to enter'],rows:[...USER_HELP.map(x=>({Column:x[0],'What to enter':x[1]})),{Column:'Allowed roles',"What to enter":roles.join(', ')},{Column:'Warehouses to choose from',"What to enter":whs.join('; ')+' (separate several with a semicolon)'},{Column:'Carriers already in the app',"What to enter":cars.join(', ')},{Column:'Leave the Action column empty','What to enter':'A new email address is added. An email that already exists is updated. Type Delete in Action to remove a user.'},{Column:'Passwords','What to enter':'New users get a temporary password when you upload. Share it with them and they change it at first sign-in.'}]}];
 }
 function userFormSync(){
@@ -6354,7 +6361,7 @@ function receiverForWarehouse(code,exceptRef){
   const w=S.warehouses.find(x=>whKey(x.code)===whKey(code));const own=w&&String(w.Receivers||'').split(/[;|]+/).map(x=>x.trim()).filter(Boolean)[0];if(own)return own;
   const c=new Map();S.lines.forEach(l=>{if(l.ShipmentRef!==exceptRef&&whKey(l.WarehouseDestination)===whKey(code)&&l.Consignee)c.set(l.Consignee,(c.get(l.Consignee)||0)+1)});let b='',n=0;c.forEach((v,k)=>{if(v>n){b=k;n=v}});return b;
 }
-function rdWhOptions(sel,exclude){return S.warehouses.filter(w=>whKey(w.code)!==whKey(exclude)).map(w=>`<option value="${esc(w.code)}" ${w.code===sel?'selected':''}>${esc(w.code)}${w.city?' ('+esc(w.city)+')':''}</option>`).join('')}
+function rdWhOptions(sel,exclude){return whSorted().filter(w=>whKey(w.code)!==whKey(exclude)).map(w=>`<option value="${esc(w.code)}" ${w.code===sel?'selected':''}>${esc(w.code)}${w.city?' ('+esc(w.city)+')':''}</option>`).join('')}
 function rdReasonOptions(sel){return '<option value="">Choose a reason</option>'+RD_REASONS.map(([g,l])=>`<optgroup label="${esc(g)}">${l.map(r=>`<option ${r===sel?'selected':''}>${esc(r)}</option>`).join('')}</optgroup>`).join('')}
 function rdCheck(ref,f,mode){
   const sh=getShip(ref),e=[];if(!sh)return ['Shipment not found'];
@@ -6419,7 +6426,7 @@ function viewRedirects(){
     const from=D.from,cand=from?ships().filter(s=>rdEligible(s)&&whKey(whCodeOf(s))===whKey(from)):[];D.sel=(D.sel||[]).filter(r=>cand.some(s=>s.ref===r));
     const f={to:D.to,reason:D.reason,note:D.note,newDue:D.due};
     bulk=`<div class="card"><h3>Redirect in Bulk</h3><p class="mu" style="margin:0 0 10px">For a closure or maintenance: pick the warehouse, tick the shipments that are still on their way, choose where they go, and review the preview before anything changes.</p>
-    <div class="row" style="gap:12px;flex-wrap:wrap;align-items:flex-end"><label class="f">From warehouse<select data-ch="rdField" data-k="from" class="in" style="width:auto"><option value="">Choose a warehouse</option>${S.warehouses.map(w=>`<option value="${esc(w.code)}" ${whKey(w.code)===whKey(from)?'selected':''}>${esc(w.code)}</option>`).join('')}</select></label>${from?`<span class="chips" style="margin:0"><button class="chip" data-act="rdBulkAll">Select all (${cand.length})</button><button class="chip" data-act="rdBulkNone">Clear</button></span>`:''}</div>
+    <div class="row" style="gap:12px;flex-wrap:wrap;align-items:flex-end"><label class="f">From warehouse<select data-ch="rdField" data-k="from" class="in" style="width:auto"><option value="">Choose a warehouse</option>${whSorted().map(w=>`<option value="${esc(w.code)}" ${whKey(w.code)===whKey(from)?'selected':''}>${esc(w.code)}</option>`).join('')}</select></label>${from?`<span class="chips" style="margin:0"><button class="chip" data-act="rdBulkAll">Select all (${cand.length})</button><button class="chip" data-act="rdBulkNone">Clear</button></span>`:''}</div>
     ${from?(cand.length?`<div class="tbw" style="max-height:260px;overflow:auto;margin-top:8px"><table class="tb" data-sort="off"><tr><th></th><th>Shipment</th><th>References</th><th>Carrier</th><th>Due</th><th>Status</th></tr>${cand.map(s=>`<tr><td><input type="checkbox" data-ch="rdTog" data-ref="${esc(s.ref)}" ${D.sel.includes(s.ref)?'checked':''} aria-label="Select ${esc(s.ref)}"></td><td>${shipIdCell(s)}</td><td>${refsCell(s)}</td><td>${esc(s.carrier)}</td><td>${dueCell(s)}</td><td>${pill(s)}</td></tr>`).join('')}</table></div>`:'<div class="empty">No shipments are on their way to this warehouse.</div>'):''}
     <div class="g4" style="margin-top:10px"><label class="f">New warehouse<select data-ch="rdField" data-k="to" class="in"><option value="">Choose a warehouse</option>${rdWhOptions(D.to,from)}</select></label><label class="f">Reason<select data-ch="rdField" data-k="reason" class="in">${rdReasonOptions(D.reason)}</select></label><label class="f">Note (required for Other)<input data-ch="rdField" data-k="note" class="in" value="${esc(D.note||'')}" maxlength="200"></label><label class="f">New expected delivery<input type="date" data-ch="rdField" data-k="due" class="in" value="${esc(D.due||'')}" min="${S.today}"></label></div>
     <div class="row sec"><button class="btn pri" data-act="rdBulkPrev" ${D.sel.length?'':'disabled'}>Preview ${D.sel.length} Shipment(s)</button></div>
@@ -6490,7 +6497,7 @@ function partnerEntryCheck(f){
 }
 {const e0=shipEditCheck;shipEditCheck=function(sh,h,ops,reason){const r=e0.apply(this,arguments);const sc=partnerScope();if(sc&&r&&Array.isArray(r.errs)){const hh=h||{},m=partnerEntryCheck({shipper:hh.Shipper!==undefined?hh.Shipper:sh.shipper,consignee:hh.Consignee!==undefined?hh.Consignee:sh.consignee,wh:hh.WarehouseDestination!==undefined?hh.WarehouseDestination:whCodeOf(sh)});(m||[]).forEach(x=>{if(!r.errs.includes(x))r.errs.push(x)})}return r}}
 function whFieldHTML(){
-  const s=partnerScope();const codes=S.warehouses.map(w=>w.code);
+  const s=partnerScope();const codes=whSorted().map(w=>w.code);
   if(s&&(s.kind==='shipper'||s.kind==='receiver'))return `<select id="f_wh" class="in" aria-label="Warehouse destination"><option value="">Choose a warehouse</option>${codes.map(c=>`<option>${esc(c)}</option>`).join('')}</select>`;
   return `<input id="f_wh" class="in" list="dl_wh">`;
 }
@@ -6500,12 +6507,12 @@ function partnerFormSync(){
 }
 /* ----- multi-select lists ----- */
 function mpd(kind,hiddenHtml,selected,label){
-  const sel=listOf(selected),opts=[...new Set([...partyOptions(kind),...sel])].sort((a,b)=>a.localeCompare(b));
-  return `<div class="mpd" data-kind="${kind}"><button type="button" class="in mpd-b" data-act="mpdToggle" aria-haspopup="listbox" aria-expanded="false" aria-label="${esc(label)}">${sel.length?sel.length+' '+kind.replace(/s$/,'')+(sel.length===1?'':'s')+' selected':'Choose '+kind}</button><div class="mpd-p" hidden><input class="in mpd-s" placeholder="Search" aria-label="Search ${kind}" data-ch="mpdSearch"><div class="mpd-l">${opts.map(o=>`<label><input type="checkbox" data-ch="mpdPick" value="${esc(o)}" ${sel.some(x=>shipperKey(x)===shipperKey(o))?'checked':''}> ${esc(o)}</label>`).join('')}</div><div class="row" style="margin:6px 0"><button type="button" class="btn sm" data-act="mpdAll">Select all</button><button type="button" class="btn sm" data-act="mpdNone">Clear</button></div><div class="row"><input class="in mpd-n" placeholder="Add a new name" aria-label="Add a new name"><button type="button" class="btn sm pri" data-act="mpdAdd">Add</button></div></div>${hiddenHtml}</div>`;
+  const sel=listOf(selected),opts=[...new Set([...(MPD_OPTS[kind]||partyOptions(kind)),...sel])].sort((a,b)=>a.localeCompare(b));
+  return `<div class="mpd" data-kind="${kind}"><button type="button" class="in mpd-b" data-act="mpdToggle" aria-haspopup="listbox" aria-expanded="false" aria-label="${esc(label)}">${mpdText(kind,sel.length)}</button><div class="mpd-p" hidden><input class="in mpd-s" placeholder="Search" aria-label="Search ${kind}" data-ch="mpdSearch"><div class="mpd-l">${opts.map(o=>`<label><input type="checkbox" data-ch="mpdPick" value="${esc(o)}" ${sel.some(x=>shipperKey(x)===shipperKey(o))?'checked':''}> ${esc(o)}</label>`).join('')}</div><div class="row" style="margin:6px 0"><button type="button" class="btn sm" data-act="mpdAll">Select all</button><button type="button" class="btn sm" data-act="mpdNone">Clear</button></div><div class="row"><input class="in mpd-n" placeholder="Add a new name" aria-label="Add a new name"><button type="button" class="btn sm pri" data-act="mpdAdd">Add</button></div></div>${hiddenHtml}</div>`;
 }
 function mpdSync(root,fire){
   const hid=root.querySelector('input[type=hidden]');if(!hid)return;const vals=[...root.querySelectorAll('.mpd-l input:checked')].map(x=>x.value),kind=root.dataset.kind;
-  hid.value=vals.join('; ');root.querySelector('.mpd-b').textContent=vals.length?vals.length+' '+kind.replace(/s$/,'')+(vals.length===1?'':'s')+' selected':'Choose '+kind;
+  hid.value=vals.join('; ');root.querySelector('.mpd-b').textContent=mpdText(kind,vals.length);
   if(fire)hid.dispatchEvent(new Event('change',{bubbles:true}));
 }
 function userFormSync2(){
@@ -6517,10 +6524,10 @@ function userFormSync2(){
 function partnersNeedingKind(){return S.users.filter(u=>u.Role===PARTNER&&partnerKindOf(u)==='legacy')}
 {const u0=usersPanel;usersPanel=function(){const bad=partnersNeedingKind(),b=bad.length?`<div class="note" style="margin-bottom:10px"><b>${bad.length} partner${bad.length===1?'':'s'} ${bad.length===1?'needs':'need'} a kind.</b> A partner works by shipper or by receiver, never both. ${bad.map(u=>esc(u.DisplayName||u.UserEmail)+' ('+(listOf(u.Shippers).length&&listOf(u.Receivers).length?'has both lists':'has no list')+')').join(', ')}. Until you choose, they keep the old behaviour. Clear one list, or fill the missing one.</div>`:'';return b+u0.apply(this,arguments)}}
 {const b0=bulkPanel;bulkPanel=function(){const s=partnerScope();let h=b0.apply(this,arguments);if(!s)return h;const lst=s.kind==='shipper'?['Your shippers',listOf(s.org.Shippers)]:s.kind==='receiver'?['Your receivers',listOf(s.org.Receivers)]:null;
-  const card=`<div class="card"><h3>What You Can Upload</h3><p class="mu" style="margin:0 0 6px">${s.kind==='shipper'?'You work by <b>shipper</b>: each row must be from one of your shippers. The receiver can be anyone.':s.kind==='receiver'?'You work by <b>receiver</b>: each row must go to one of your receivers. The shipper can be anyone, and the warehouse must be the receiver\u2019s warehouse.':'Each row must be from one of your shippers or to one of your receivers.'} A row outside this is rejected in the preview with the reason.</p>${lst?`<p style="margin:0"><b>${lst[0]}:</b> ${lst[1].map(esc).join('; ')||'none'}</p>`:''}<p style="margin:6px 0 0"><b>Warehouses:</b> ${S.warehouses.map(w=>esc(w.code)).join('; ')}</p><div class="row sec"><button class="btn sm" data-act="pAllowedX">Download Allowed Values (Excel)</button></div></div>`;
+  const card=`<div class="card"><h3>What You Can Upload</h3><p class="mu" style="margin:0 0 6px">${s.kind==='shipper'?'You work by <b>shipper</b>: each row must be from one of your shippers. The receiver can be anyone.':s.kind==='receiver'?'You work by <b>receiver</b>: each row must go to one of your receivers. The shipper can be anyone, and the warehouse must be the receiver\u2019s warehouse.':'Each row must be from one of your shippers or to one of your receivers.'} A row outside this is rejected in the preview with the reason.</p>${lst?`<p style="margin:0"><b>${lst[0]}:</b> ${lst[1].map(esc).join('; ')||'none'}</p>`:''}<p style="margin:6px 0 0"><b>Warehouses:</b> ${whSorted().map(w=>esc(w.code)).join('; ')}</p><div class="row sec"><button class="btn sm" data-act="pAllowedX">Download Allowed Values (Excel)</button></div></div>`;
   return card+h}}
 function whReceiversCard(){
-  return `<div class="card"><h3>Receiver Names by Warehouse</h3><p class="mu" style="margin:0 0 8px">List the receiver name(s) delivered to each warehouse, separated by semicolons. For a receiver partner the warehouse is filled in from the receiver, and a receiver redirect or entry is checked against it.</p><div class="tbw"><table class="tb" data-sort="off"><tr><th>Warehouse</th><th>Type</th><th>Receiver names</th></tr>${S.warehouses.filter(w=>{const q=String(S.ui.whq||'').toLowerCase();return !q||[w.code,w.name,w.city,w.type].join(' ').toLowerCase().includes(q)}).map(w=>`<tr><td><b>${esc(w.code)}</b></td><td>${esc(w.type||'-')}</td><td><input class="in" data-ch="whRcv" data-code="${esc(w.code)}" value="${esc(w.Receivers||'')}" style="width:100%" aria-label="Receiver names for ${esc(w.code)}"></td></tr>`).join('')}</table></div></div>`;
+  return `<div class="card"><h3>Receiver Names by Warehouse</h3><p class="mu" style="margin:0 0 8px">List the receiver name(s) delivered to each warehouse, separated by semicolons. For a receiver partner the warehouse is filled in from the receiver, and a receiver redirect or entry is checked against it.</p><div class="tbw"><table class="tb" data-sort="off"><tr><th>Warehouse</th><th>Type</th><th>Receiver names</th></tr>${whSorted().filter(w=>{const q=String(S.ui.whq||'').toLowerCase();return !q||[w.code,w.name,w.city,w.type].join(' ').toLowerCase().includes(q)}).map(w=>`<tr><td><b>${esc(w.code)}</b></td><td>${esc(w.type||'-')}</td><td><input class="in" data-ch="whRcv" data-code="${esc(w.code)}" value="${esc(w.Receivers||'')}" style="width:100%" aria-label="Receiver names for ${esc(w.code)}"></td></tr>`).join('')}</table></div></div>`;
 }
 {const w0=warehousesPanel;warehousesPanel=function(){return w0.apply(this,arguments)+whReceiversCard()}}
 document.addEventListener('click',e=>{
@@ -6528,7 +6535,7 @@ document.addEventListener('click',e=>{
   if(a==='mpdToggle'){e.stopImmediatePropagation();const p=root.querySelector('.mpd-p');document.querySelectorAll('.mpd-p').forEach(x=>{if(x!==p)x.hidden=true});p.hidden=!p.hidden;t.setAttribute('aria-expanded',String(!p.hidden));if(!p.hidden){const s=p.querySelector('.mpd-s');if(s)s.focus()}return}
   if(a==='mpdAll'||a==='mpdNone'){e.stopImmediatePropagation();root.querySelectorAll('.mpd-l label').forEach(l=>{if(l.style.display!=='none')l.querySelector('input').checked=a==='mpdAll'});mpdSync(root,true);return}
   if(a==='mpdAdd'){e.stopImmediatePropagation();const inp=root.querySelector('.mpd-n'),nm=canonParty(inp.value,partyCounts());if(!nm)return;let c=[...root.querySelectorAll('.mpd-l input')].find(x=>shipperKey(x.value)===shipperKey(nm));if(!c){const l=document.createElement('label');l.innerHTML='<input type="checkbox" data-ch="mpdPick"> ';const ip=l.querySelector('input');ip.value=nm;l.appendChild(document.createTextNode(nm));root.querySelector('.mpd-l').prepend(l);c=ip}c.checked=true;inp.value='';mpdSync(root,true);return}
-  if(a==='pAllowedX'){e.stopImmediatePropagation();const s=partnerScope();if(!s)return;xlsxSave('allowed-values.xlsx',[{name:s.kind==='receiver'?'Your Receivers':'Your Shippers',headers:[s.kind==='receiver'?'Receiver':'Shipper'],rows:(s.kind==='receiver'?listOf(s.org.Receivers):listOf(s.org.Shippers)).map(x=>({[s.kind==='receiver'?'Receiver':'Shipper']:x}))},{name:'Warehouses',headers:['Warehouse Code'],rows:S.warehouses.map(w=>({'Warehouse Code':w.code}))}]);return}
+  if(a==='pAllowedX'){e.stopImmediatePropagation();const s=partnerScope();if(!s)return;xlsxSave('allowed-values.xlsx',[{name:s.kind==='receiver'?'Your Receivers':'Your Shippers',headers:[s.kind==='receiver'?'Receiver':'Shipper'],rows:(s.kind==='receiver'?listOf(s.org.Receivers):listOf(s.org.Shippers)).map(x=>({[s.kind==='receiver'?'Receiver':'Shipper']:x}))},{name:'Warehouses',headers:['Warehouse Code'],rows:whSorted().map(w=>({'Warehouse Code':w.code}))}]);return}
   if(!(e.target.closest&&e.target.closest('.mpd'))){document.querySelectorAll('.mpd-p').forEach(p=>{if(!p.hidden){p.hidden=true;const b=p.parentElement.querySelector('.mpd-b');if(b)b.setAttribute('aria-expanded','false')}})}
 },true);
 document.addEventListener('change',e=>{
@@ -6540,6 +6547,177 @@ document.addEventListener('change',e=>{
 });
 document.addEventListener('input',e=>{const t=e.target;if(t&&t.dataset&&t.dataset.ch==='mpdSearch'){const q=t.value.toLowerCase();t.closest('.mpd-p').querySelectorAll('.mpd-l label').forEach(l=>{l.style.display=l.textContent.toLowerCase().includes(q)?'':'none'})}});
 
+/* ========== risk reasons, monitor references, A to Z warehouses, All milestones, Roles ========== */
+/* ----- risk in plain words ----- */
+function riskItems(r){const out=[];r.reasons.forEach(x=>{let m;
+  if(m=/^The planned delivery \((.+?)\) is (\d+) days? earlier than 9 in 10 shipments on .+ achieved \((.+?)\)$/.exec(x))out.push({k:'time',t:'Planned delivery may be too early',d:'It is planned for '+m[1]+', but similar shipments usually arrive by '+m[3]+', '+m[2]+' day'+(m[2]==='1'?'':'s')+' later.'});
+  else if(m=/^No update for (\d+) days \(the usual limit for .+ is (\d+)\)$/.exec(x))out.push({k:'quiet',t:'No update for '+m[1]+' days',d:'The usual limit is '+m[2]+' days.'});
+  else if(m=/^Past the last free day by (\d+) day/.exec(x))out.push({k:'free',t:'Past the last free day by '+m[1]+' day'+(m[1]==='1'?'':'s'),d:'Free time at the port has ended.'});
+  else if(m=/^Last free day is (today|in \d+ day\(s\)) \((.+)\)$/.exec(x))out.push({k:'free',t:'Last free day is '+m[1].replace('day(s)','days'),d:'Free time at the port ends on '+m[2]+'.'});
+  else out.push({k:'x',t:x,d:''})});return out}
+{const r0=riskInfo;riskInfo=function(sh){const r=r0(sh);if(r&&!r.items){r.items=riskItems(r);r.simple=r.items.map(i=>i.t).join('. ')+'.'}return r}}
+function riskAdvice(sh,r){const ks=r.items.map(i=>i.k);return ks.includes('time')?'Ask '+sh.carrier+' for a realistic delivery date, or revise the planned delivery.':ks.includes('free')?'Arrange collection before the free time ends.':ks.includes('quiet')?'Ask '+sh.carrier+' to post an update.':''}
+const riskLine=sh=>{const r=(can('dashboard')||can('milestones'))&&riskInfo(sh);return r?`<div class="rsk">${esc(r.simple)}</div>`:''};
+function riskPanelHTML(sh){
+  const r=(can('dashboard')||can('milestones'))&&riskInfo(sh);if(!r)return '';
+  return `<div class="riskbox" id="riskBox"><div class="riskh"><span class="riskic" aria-hidden="true">!</span><span>Why it is at risk</span><span class="pill ${r.level==='High'?'late':'warn'}">${r.level}</span></div>${r.items.map(i=>`<div class="riski"><span class="rdot ${r.level==='High'&&i.k==='time'?'hi':''}" aria-hidden="true"></span><div><b>${esc(i.t)}.</b> ${esc(i.d)}</div></div>`).join('')}${riskAdvice(sh,r)?`<div class="riskadv">Suggested: ${esc(riskAdvice(sh,r))}</div>`:''}</div>`;
+}
+{const d1=detailModal;detailModal=function(ref){d1.apply(this,arguments);try{const sh=getShip(ref),box=document.getElementById('riskBox');if(box)box.remove();const h=riskPanelHTML(sh);if(!h)return;const kv=document.querySelector('#modal dl.kv'),mh=document.querySelector('#modal .mh');if(kv)kv.insertAdjacentHTML('afterend',h);else if(mh)mh.insertAdjacentHTML('afterend',h)}catch(e){}}}
+/* ----- monitor: Show References ----- */
+const monRefsOn=()=>{try{return JSON.parse(localStorage.getItem('ect.ui')||'{}').monRefs===true}catch(e){return false}};
+{const m0=monBarHTML;monBarHTML=function(){const h=m0.apply(this,arguments);return h.replace('<label class="mu sm">Entered by','<label class="sw"><input type="checkbox" role="switch" data-ch="monRefs" '+(monRefsOn()?'checked':'')+'><span class="sw-t"></span><span>Show References</span></label><label class="mu sm">Entered by')}}
+/* ----- warehouses A to Z ----- */
+const whCmp=(a,b)=>String(a).localeCompare(String(b),undefined,{numeric:true,sensitivity:'base'});
+const whSorted=()=>[...S.warehouses].sort((a,b)=>whCmp(a.code,b.code));
+const whSortCodes=a=>[...a].sort(whCmp);
+/* ----- Control Tower: All milestones ----- */
+const CT_KEYS=['Pickup','ETD','ETA','Delivery'];
+const ctKeys=()=>S.ui.dash.ms==='All'?CT_KEYS:[S.ui.dash.ms];
+const ctLabel=()=>S.ui.dash.ms==='All'?'All milestones':MS[S.ui.dash.ms].label;
+const CT_SHORT={Pickup:'Pickup',ETD:'ETD',ETA:'ETA',Delivery:'Delivery'};
+function listRows(arr,kind){
+  const D=S.ui.dash,items=[];
+  arr.forEach(sh=>ctKeys().forEach(k=>{const p=msPlanL(sh,k);if(kind==='over'?overdueAt(sh,k,D.sel):p===D.sel)items.push({sh,k,p})}));
+  const all=D.ms==='All',cnt={All:items.length};CT_KEYS.forEach(k=>{cnt[k]=items.filter(i=>i.k===k).length});
+  const f=all&&D.mf&&D.mf!=='All'?D.mf:'All',list=(f==='All'?items:items.filter(i=>i.k===f)).sort((a,b)=>kind==='over'?(a.p||'').localeCompare(b.p||'')||a.sh.ref.localeCompare(b.sh.ref):CT_KEYS.indexOf(a.k)-CT_KEYS.indexOf(b.k)||a.sh.ref.localeCompare(b.sh.ref));
+  const chips=all?`<div class="row" style="gap:6px;flex-wrap:wrap;margin-bottom:8px"><span class="chips" style="margin:0">${['All',...CT_KEYS].map(k=>`<button class="chip ${f===k?'on':''}" data-act="dashMf" data-k="${k}">${k==='All'?'All':CT_SHORT[k]} (${cnt[k]})</button>`).join('')}</span><small class="mu">${items.length} milestone${items.length===1?'':'s'} across ${new Set(items.map(i=>i.sh.ref)).size} shipment${new Set(items.map(i=>i.sh.ref)).size===1?'':'s'}</small></div>`:'';
+  if(!list.length)return chips+`<div class="empty">${kind==='over'?'Nothing is overdue on this date.':'Nothing is due on this date.'}</div>`;
+  return chips+`<div class="tbw"><table class="tb"><tr><th>Milestone</th><th>Shipment</th><th>Carrier</th><th>Planned</th><th>${kind==='over'?'Overdue by':'Status on date'}</th><th>Status</th></tr>`+list.map(({sh,k,p})=>{
+    const a=msAct(sh,k),gap=kind==='over'?`<span class="late-t">${diffDays(D.sel,p)} day(s)</span>`:(doneBy(sh,k,D.sel)?`<span class="ok-t">Done ${fmtS(a)}</span>`:'<span class="pill warn">Open</span>');
+    return `<tr class="click" data-act="open" data-ref="${sh.ref}"><td><span class="pill info">${CT_SHORT[k]}</span></td><td><b>${sh.ref}</b><br><small class="mu">${esc(sh.route)}</small></td><td>${esc(sh.carrier)}</td><td>${fmtS(p)}</td><td>${gap}</td><td>${pill(sh)}</td></tr>`}).join('')+'</table></div>';
+}
+/* ----- Roles ----- */
+const roleNameOK=(name,old)=>{name=String(name||'').replace(/\s+/g,' ').trim();if(!name)return {err:'Enter a name for the role'};if(name.length>40)return {err:'The name can be up to 40 characters'};if(ROLES.some(r=>r.toLowerCase()===name.toLowerCase()&&r!==old))return {err:'A role called '+name+' already exists'};return {name}};
+function roleCreate(name,base,access,desc){
+  const c=roleNameOK(name);if(c.err)return {ok:false,msg:c.err};
+  S.customRoles.push({name:c.name,base:base||'',desc:String(desc||'').trim().slice(0,120),created:S.today,by:S.email});
+  S.access[c.name]=(access||(base&&S.access[base]?S.access[base].slice():['tasks','track'])).slice();syncRoles();S.ui.permRole=c.name;
+  audit('Role created','',c.name+(base?' (copied from '+base+')':''));
+  return {ok:true,msg:'Role '+c.name+' created. Tick what it can do in the table below.',name:c.name};
+}
+function roleDelete(name){
+  const cr=S.customRoles.find(r=>r.name===name);if(!cr)return {ok:false,msg:'Only roles you created can be deleted'};
+  const n=S.users.filter(u=>u.Role===name).length;if(n)return {ok:false,msg:n+' user(s) still have the role '+name+'. Change their role first'};
+  S.customRoles=S.customRoles.filter(r=>r.name!==name);delete S.access[name];syncRoles();audit('Role deleted','',name);return {ok:true,msg:'Role '+name+' deleted'};
+}
+function roleRename(old,nw){
+  const cr=S.customRoles.find(r=>r.name===old);if(!cr)return {ok:false,msg:'Only roles you created can be renamed'};const c=roleNameOK(nw,old);if(c.err)return {ok:false,msg:c.err};
+  if(c.name===old)return {ok:true,msg:'No change'};cr.name=c.name;S.access[c.name]=S.access[old];delete S.access[old];S.users.forEach(u=>{if(u.Role===old)u.Role=c.name});if(S.ui.permRole===old)S.ui.permRole=c.name;syncRoles();audit('Role renamed','',old+' to '+c.name);return {ok:true,msg:'Role renamed to '+c.name+'. People who had it keep it.'};
+}
+function roleDuplicate(old,nw){const cr=S.customRoles.find(r=>r.name===old),src=cr||{name:old};return roleCreate(nw,old,(S.access[old]||[]).slice(),cr?cr.desc:'')}
+function profilesCard(){
+  const used=r=>S.users.filter(u=>u.Role===r).length,lock=!can('settingsedit');
+  return `<div class="card" id="rolesCard"><h3>Roles</h3><p class="mu" style="margin-bottom:10px">Create a role whenever a new one is needed, for example Finance Analyst, Finance Executive or SCM. Then tick what it can do in the table below, and change it at any time. A role sees every shipment. Assign it to people in Users and roles.</p>
+  ${S.customRoles.length?`<div class="tbw"><table class="tb" data-sort="off"><tr><th>Role</th><th>What it is for</th><th>Users</th><th>Can open</th><th></th></tr>${S.customRoles.map(r=>`<tr><td><b>${esc(r.name)}</b></td><td class="mu">${esc(r.desc||'-')}</td><td>${used(r.name)}</td><td class="mu">${esc((S.access[r.name]||[]).map(id=>(ACCESS_ITEMS.find(t=>t.id===id)||{label:id}).label.replace(/ \(.*/,'')).join(', ')||'Nothing')}</td><td class="r"><button class="btn sm pri" data-act="roleSetAcc" data-n="${esc(r.name)}">Set Access</button> <button class="btn sm" data-act="roleModal" data-m="rename" data-n="${esc(r.name)}" ${lock?'disabled':''}>Rename</button> <button class="btn sm" data-act="roleModal" data-m="dup" data-n="${esc(r.name)}" ${lock?'disabled':''}>Duplicate</button> <button class="btn sm danger" data-act="roleDel" data-n="${esc(r.name)}" ${lock?'disabled':''}>Delete</button></td></tr>`).join('')}</table></div>`:'<p class="mu">No roles of your own yet.</p>'}
+  <div class="row sec"><button class="btn pri" data-act="roleModal" data-m="new">Create a New Role</button></div>
+  <div class="row" style="margin-top:8px"><span class="mu sm">Quick start:</span>${Object.keys(PROFILE_PRESETS).filter(k=>!ROLES.includes(k)).map(k=>`<button class="btn sm" data-act="rolePreset" data-p="${k}">Add the ${k} role</button>`).join('')||'<span class="mu sm">all are created</span>'}</div>
+  <p class="hint">Finance starts with Control Tower Overview, Freight Commercials with invoices, Freight Trends and Scheduled reports. SCM starts with requests, milestones, the dashboards, carrier and transit analysis, delivery slot requests and warehouse operations. Change either in the table below.</p></div>`;
+}
+function roleModal(mode,name,fromForm){
+  const src=name||'',cr=S.customRoles.find(r=>r.name===src),title=mode==='rename'?'Rename Role':mode==='dup'?'Duplicate Role':'Create a New Role';
+  openModal(`<div class="mh"><h2>${title}${mode!=='new'?': '+esc(src):''}</h2><button class="x" data-act="close" aria-label="Close">&times;</button></div><div id="rl_err"></div>
+  <label class="f">${mode==='rename'?'New name':'Role name'}<input id="rl_name" class="in" maxlength="40" value="${mode==='rename'?esc(src):mode==='dup'?esc(src+' copy'):''}" placeholder="For example Finance Analyst"></label>
+  ${mode==='new'?`<label class="f" style="margin-top:8px">Start from<select id="rl_base" class="in"><option value="">Track &amp; Trace only</option>${ROLES.filter(r=>r!=='In Organization').map(r=>`<option>${esc(r)}</option>`).join('')}</select></label>`:''}
+  ${mode!=='rename'?`<label class="f" style="margin-top:8px">What it is for (optional)<input id="rl_desc" class="in" maxlength="120" value="${mode==='dup'&&cr?esc(cr.desc||''):''}"></label>`:''}
+  <div class="row sec"><button class="btn pri" data-act="roleSave" data-m="${mode}" data-n="${esc(src)}" data-f="${fromForm?1:''}">${mode==='rename'?'Rename':mode==='dup'?'Duplicate':'Create Role'}</button><button class="btn" data-act="close">Cancel</button></div>`);
+}
+{const r0=render;render=function(){r0.apply(this,arguments);try{const sel=document.getElementById('u_role');if(sel&&S.ui.newRoleFor){const o=[...sel.options].find(x=>x.value===S.ui.newRoleFor||x.text===S.ui.newRoleFor);if(o)sel.value=o.value;S.ui.newRoleFor=null}}catch(e){}}}
+const WHEN_ROLE_OPTS=1;
+document.addEventListener('click',e=>{
+  const t=e.target.closest&&e.target.closest('[data-act]');if(!t)return;const a=t.dataset.act,d=t.dataset;
+  if(a==='dashMf'){e.stopImmediatePropagation();S.ui.dash.mf=d.k;render();return}
+  if(!['roleAdd','rolePreset','roleDel','roleSetAcc','roleModal','roleSave'].includes(a))return;
+  e.stopImmediatePropagation();
+  if(!can('settingsedit')&&a!=='roleSetAcc'){toast('Your role is not allowed to do this','bad');return}
+  const done=r=>{toast(r.msg,r.ok?'':'bad');if(r.ok){closeModal();render();setTimeout(()=>{const x=document.getElementById('perm_role');if(x&&x.scrollIntoView)x.scrollIntoView({block:'center',behavior:'smooth'})},50)}return r};
+  if(a==='roleAdd')return done(roleCreate(val('cr_name'),val('cr_base')));
+  if(a==='rolePreset')return done(roleCreate(d.p,'',PROFILE_PRESETS[d.p]));
+  if(a==='roleDel'){if(!confirm('Delete the role '+d.n+'?'))return;const r=roleDelete(d.n);toast(r.msg,r.ok?'':'bad');render();return}
+  if(a==='roleSetAcc'){S.ui.permRole=d.n;render();setTimeout(()=>{const x=document.getElementById('perm_role');if(x&&x.scrollIntoView)x.scrollIntoView({block:'center',behavior:'smooth'})},50);return}
+  if(a==='roleModal'){roleModal(d.m,d.n,false);return}
+  if(a==='roleSave'){const nm=(document.getElementById('rl_name')||{value:''}).value,desc=(document.getElementById('rl_desc')||{value:''}).value,base=(document.getElementById('rl_base')||{value:''}).value;
+    const r=d.m==='rename'?roleRename(d.n,nm):d.m==='dup'?roleDuplicate(d.n,nm):roleCreate(nm,base,null,desc);
+    if(!r.ok){const x=document.getElementById('rl_err');if(x)x.innerHTML=`<div class="err" role="alert" style="margin-bottom:10px">${esc(r.msg)}</div>`;return}
+    if(d.f)S.ui.newRoleFor=r.name;done(r);return}
+},true);
+document.addEventListener('change',e=>{
+  const t=e.target;if(!t)return;
+  if(t.dataset&&t.dataset.ch==='monRefs'){uiSet({monRefs:t.checked});render();return}
+  if(t.id==='u_role'&&t.value==='__new__'){t.selectedIndex=0;if(!can('settingsedit')){toast('Your role is not allowed to do this','bad');return}roleModal('new','',true)}
+  if(t.dataset&&t.dataset.ch==='dms'){uiSet({dashMs:t.value})}
+},true);
+{const m1=migrateData;migrateData=function(){m1.apply(this,arguments);if(!S.ui.dash._msInit){S.ui.dash._msInit=1;let m='All';try{m=JSON.parse(localStorage.getItem('ect.ui')||'{}').dashMs||'All'}catch(e){}S.ui.dash.ms=(m==='All'||MS[m])?m:'All'}}}
+
+/* ========== carrier chart: compare carriers, modes, shipment types, DG ========== */
+const MPD_OPTS={},MPD_LABEL={carriers:['carrier','carriers'],modes:['mode','modes'],types:['shipment type','shipment types'],natures:['nature','natures']},MPD_ALL={modes:'All modes',types:'All shipment types',natures:'DG and Non-DG',carriers:'All carriers combined'};
+const mpdText=(kind,n)=>{const L=MPD_LABEL[kind]||[kind.replace(/s$/,''),kind];return n?n+' '+(n===1?L[0]:L[1])+' selected':(MPD_ALL[kind]||'Choose '+L[1])};
+const cfSel=(C,one,arr)=>Array.isArray(C[arr])&&C[arr].length?C[arr]:(!C[one]||C[one]==='All'?[]:[C[one]]);
+function carrierList(){
+  const C=S.ui.carrier,mm=cfSel(C,'mode','modes'),tt=cfSel(C,'type','types'),nn=cfSel(C,'nature','natures');
+  return ships().filter(s=>(!mm.length||mm.includes(s.mode))&&(!tt.length||tt.includes(s.stype))&&(!nn.length||nn.includes(s.nature))).filter(perOK);
+}
+function cfPick(kind,ch,label){
+  const C=S.ui.carrier;MPD_OPTS.modes=MODES;MPD_OPTS.types=[...TYPES,'Mixed'];MPD_OPTS.natures=NATURES;
+  const arr=kind==='modes'?cfSel(C,'mode','modes'):kind==='types'?cfSel(C,'type','types'):cfSel(C,'nature','natures');
+  return `<div class="f"><span>${label}</span>${mpd(kind,`<input type="hidden" data-ch="${ch}" value="${esc(arr.join('; '))}">`,arr.join('; '),label)}</div>`;
+}
+const CTR_DIMS={car:{label:'Carriers',kind:'carriers',key:sh=>sh.carrier},mode:{label:'Modes',kind:'modes',key:sh=>sh.mode},type:{label:'Shipment types',kind:'types',key:sh=>sh.stype||'Mixed'},nature:{label:'DG and Non-DG',kind:'natures',key:sh=>sh.nature==='DG'?'DG':'Non-DG'}};
+const CTR_COL=['#2B6CB0','#D9822B','#2F855A','#8E44AD','#C0392B','#3D4A57'];
+function ctrGroups(dim){
+  const D=CTR_DIMS[dim],by=new Map(),all={name:'All combined',n:0,months:{},pm:{}};
+  carrierList().forEach(sh=>{const k=D.key(sh);let g=by.get(k);if(!g){g={name:k,n:0,months:{},pm:{}};by.set(k,g)}
+    [g,all].forEach(x=>{x.n++;if(sh.status==='Delivered'){const dd=sh.f.DeliveredOn;if(dd&&sh.due){const on=dd<=sh.due,mo=dd.slice(0,7),b=x.months[mo]||(x.months[mo]={n:0,on:0});b.n++;if(on)b.on++}}
+      if(sh.f.PickupActual&&sh.f.PickupPlanned){const pon=sh.f.PickupActual<=sh.f.PickupPlanned,pmo=sh.f.PickupActual.slice(0,7),pb=x.pm[pmo]||(x.pm[pmo]={n:0,on:0});pb.n++;if(pon)pb.on++}})});
+  return {groups:[...by.values()].sort((a,b)=>b.n-a.n||a.name.localeCompare(b.name)),all};
+}
+function ctrGroupedSVG(series,months,src,meas,tgt){
+  const W=900,H=320,L=48,R=20,Tp=26,B=56,n=months.length,k=series.length,pct=meas.pct,vals=series.flatMap(g=>months.map(m=>{const x=src(g)[m];return x?(pct?(x.n?x.on/x.n*100:0):x.n):0})),max=pct?100:Math.max(5,Math.ceil(Math.max(0,...vals)/5)*5),plotW=W-L-R,slot=plotW/Math.max(n,1),gap=slot*0.2,bw=Math.min(44,(slot-gap)/k),Y=v=>Tp+(H-Tp-B)*(1-v/max);
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Month by month comparison of ${k} items" style="max-width:${W}px;display:block">`;
+  [0,25,50,75,100].filter(()=>pct).forEach(t=>{s+=`<line x1="${L}" x2="${W-R}" y1="${Y(t)}" y2="${Y(t)}" stroke="var(--line)"/><text x="${L-8}" y="${Y(t)+4}" font-size="11" text-anchor="end" fill="var(--muted)">${t}%</text>`});
+  months.forEach((m,i)=>{const x0=L+slot*i+(slot-bw*k)/2;series.forEach((g,j)=>{const x=src(g)[m],v=x?(pct?(x.n?x.on/x.n*100:0):x.n):0,few=x&&x.n<CTR_MIN,miss=pct&&x&&v<tgt;if(!x)return;
+    s+=`<rect x="${x0+bw*j+1}" y="${Y(v)}" width="${bw-2}" height="${Math.max(1,Y(0)-Y(v))}" rx="3" fill="${CTR_COL[j%6]}" ${few?'opacity=".45"':''} ${miss?'stroke="#C62828" stroke-width="2" stroke-dasharray="4 2"':''}><title>${esc(g.name)}, ${ctrMonLabel(m)}: ${pct?Math.round(v)+'% ('+x.on+' of '+x.n+')':x.n}</title></rect>`;
+    if(bw>=26)s+=`<text x="${x0+bw*j+bw/2}" y="${Y(v)-4}" font-size="10.5" font-weight="600" text-anchor="middle" fill="var(--ink)">${pct?Math.round(v)+'%':v}${few?'*':''}</text>`});
+    s+=`<text x="${L+slot*i+slot/2}" y="${H-B+20}" font-size="12" text-anchor="middle" fill="var(--ink)">${ctrMonLabel(m)}</text>`});
+  if(pct)s+=`<line x1="${L}" x2="${W-R}" y1="${Y(tgt)}" y2="${Y(tgt)}" stroke="var(--ink)" stroke-dasharray="6 4"/><text x="${W-R}" y="${Y(tgt)-5}" font-size="11" text-anchor="end" fill="var(--ink)">Target ${tgt}%</text>`;
+  return s+'</svg>';
+}
+function ctrTable(series,months,src,meas,tgt,open){
+  return `<details ${open?'open':''} style="margin-top:10px"><summary style="cursor:pointer;font-weight:600;font-size:13px">${open?'The figures':'See the figures'}</summary><div class="tbw"><table class="tb" data-sort="off"><tr><th></th>${months.map(m=>`<th>${ctrMonLabel(m)}</th>`).join('')}</tr>${series.map(g=>`<tr><td><b>${esc(g.name)}</b></td>${months.map(m=>{const x=src(g)[m];if(!x)return '<td class="mu">-</td>';if(!meas.pct)return `<td>${x.n}</td>`;const v=x.n?x.on/x.n*100:0,cls=x.n<CTR_MIN?'mu':v>=tgt?'ok-t':'late-t';return `<td class="${cls}"><b>${Math.round(v)}%</b><br><small>${x.on} of ${x.n}${x.n<CTR_MIN?' *':''}</small></td>`}).join('')}</tr>`).join('')}</table></div></details>`;
+}
+function carrierTrendCard(st){
+  const C=S.ui.carrier,tgt=C.target,T=C.tr3=C.tr3||{measure:'del',dim:'car',picks:[],from:'',to:''};
+  if(!CTR_MEAS[T.measure])T.measure='del';if(!CTR_DIMS[T.dim])T.dim='car';
+  const meas=CTR_MEAS[T.measure],dim=CTR_DIMS[T.dim],G=ctrGroups(T.dim),names=G.groups.map(g=>g.name);T.picks=(T.picks||[]).filter(p=>names.includes(p));
+  const src=g=>T.measure==='pick'?g.pm:g.months,series=T.picks.length?G.groups.filter(g=>T.picks.includes(g.name)):[G.all];
+  const allM=uniq(series.flatMap(g=>Object.keys(src(g)))).sort(),months=allM.filter(m=>(!T.from||m>=T.from)&&(!T.to||m<=T.to));
+  const mopt=v=>allM.map(m=>`<option value="${m}" ${v===m?'selected':''}>${ctrMonLabel(m)}</option>`).join('');
+  MPD_OPTS[dim.kind]=names;
+  const what=T.measure==='pick'?'pickups':'delivered shipments',who=T.picks.length?T.picks.join(', '):'all '+dim.label.toLowerCase()+' combined';
+  const fm=cfSel(C,'mode','modes'),ft=cfSel(C,'type','types'),fn=cfSel(C,'nature','natures'),filt=`${fm.length?fm.join(', '):'All modes'} · ${ft.length?ft.join(', '):'All shipment types'} · ${fn.length?fn.join(', '):'DG and Non-DG'}`;
+  let body;
+  if(!months.length)body='<div class="empty">No months of data for this choice yet.</div>';
+  else if(series.length===1){const g=series[0];body=ctrBars(months.map(m=>{const x=src(g)[m]||{n:0,on:0};return {m,n:x.n,on:x.on,v:meas.pct?(x.n?x.on/x.n*100:0):x.n}}),meas,tgt)}
+  else if(series.length<=6)body=`<div class="row" style="gap:14px;flex-wrap:wrap;margin-bottom:6px">${series.map((g,j)=>`<span style="display:inline-flex;align-items:center;gap:6px;font-size:13px"><span style="width:12px;height:12px;border-radius:3px;background:${CTR_COL[j%6]}"></span>${esc(g.name)}</span>`).join('')}</div>${ctrGroupedSVG(series,months,src,meas,tgt)}`;
+  else body='<p class="mu" style="margin:0">More than 6 items are shown as a table, so it stays readable.</p>';
+  return `<div class="card" id="ctrCard"><h3 style="margin:0 0 4px">Month by Month</h3><p class="mu" style="margin:0 0 4px">${meas.pct?`Each bar is the share of ${what} that were on time in that month, for ${esc(who)}. ${series.length>1?`Bars with a dashed red outline miss the ${tgt}% target.`:`Green bars meet the ${tgt}% target and red bars miss it.`}`:`Each bar is the number of shipments delivered in that month, for ${esc(who)}.`}</p><p class="hint" style="margin:0 0 10px">Showing: ${esc(filt)}. Change these with the filters at the top of the page.</p>
+  <div class="row" style="gap:14px;flex-wrap:wrap;align-items:flex-end"><label class="f">Measure<select data-ch="ctrM3" class="in" style="width:auto">${Object.entries(CTR_MEAS).map(([k,v])=>`<option value="${k}" ${T.measure===k?'selected':''}>${v.label}</option>`).join('')}</select></label><label class="f">Compare<select data-ch="ctrD3" class="in" style="width:auto">${Object.entries(CTR_DIMS).map(([k,v])=>`<option value="${k}" ${T.dim===k?'selected':''}>${v.label}</option>`).join('')}</select></label><div class="f"><span>${esc(dim.label)} to compare</span>${mpd(dim.kind,`<input type="hidden" data-ch="ctrP3" value="${esc(T.picks.join('; '))}">`,T.picks.join('; '),dim.label+' to compare')}</div><label class="f">From<select data-ch="ctrF3" class="in" style="width:auto"><option value="">Earliest</option>${mopt(T.from)}</select></label><label class="f">To<select data-ch="ctrT3" class="in" style="width:auto"><option value="">Latest</option>${mopt(T.to)}</select></label><span class="chips" style="margin:0"><button class="chip" data-act="ctrTop" ${names.length>1?'':'disabled'}>Top 5</button></span></div>
+  <div style="margin-top:12px">${body}</div>${months.length&&series.length>1?ctrTable(series,months,src,meas,tgt,series.length>6):''}
+  <p class="hint">A lighter bar marked * has fewer than ${CTR_MIN} shipments that month, so one late shipment can swing the figure.${allM.length<3&&!hasSample()&&!liveMode()?' Only '+allM.length+' month(s) of data so far. <button class="btn sm" data-act="sampleAdd">Load sample history</button> to see more months.':''}</p></div>`;
+}
+document.addEventListener('change',e=>{
+  const t=e.target;if(!t||!t.dataset||!t.dataset.ch)return;const C=S.ui.carrier,k=t.dataset.ch,arr=()=>t.value.split(';').map(x=>x.trim()).filter(Boolean);
+  if(['cfMode','cfType','cfNature'].includes(k)){const a=arr();if(k==='cfMode'){C.modes=a;C.mode=a.length===1?a[0]:'All'}if(k==='cfType'){C.types=a;C.type=a.length===1?a[0]:'All'}if(k==='cfNature'){C.natures=a;C.nature=a.length===1?a[0]:'All'}C._dirty=true;return}
+  if(['ctrM3','ctrD3','ctrP3','ctrF3','ctrT3'].includes(k)){const T=C.tr3=C.tr3||{measure:'del',dim:'car',picks:[],from:'',to:''};
+    if(k==='ctrM3'){T.measure=t.value;T.from='';T.to='';render();return}if(k==='ctrD3'){T.dim=t.value;T.picks=[];render();return}if(k==='ctrP3'){T.picks=arr();C._dirty=true;return}
+    if(k==='ctrF3')T.from=t.value;if(k==='ctrT3')T.to=t.value;if(T.from&&T.to&&T.from>T.to){const x=T.from;T.from=T.to;T.to=x}render()}
+},true);
+document.addEventListener('click',e=>{
+  const C=S.ui&&S.ui.carrier;
+  if(C&&C._dirty&&!(e.target.closest&&e.target.closest('.mpd'))){C._dirty=false;setTimeout(render,0)}
+  const t=e.target.closest&&e.target.closest('[data-act=ctrTop]');if(t){e.stopImmediatePropagation();const T=C.tr3=C.tr3||{measure:'del',dim:'car',picks:[],from:'',to:''};T.picks=ctrGroups(T.dim).groups.slice(0,5).map(g=>g.name);render()}
+},true);
+
+const riskCells=sh=>{const r=riskInfo(sh);return r?`<td><span class="pill ${r.level==='High'?'late':'warn'}">${r.level}</span></td><td>${esc(r.simple)}</td>`:'<td></td><td></td>'};
 const pickupCol=()=>colx('Pickup vs plan',sh=>{if(!sh.f.PickupActual||!sh.f.PickupPlanned)return '-';const d=diffDays(sh.f.PickupActual,sh.f.PickupPlanned);return d<=0?'<span class="ok-t">'+(d===0?'On time':(-d)+' day(s) early')+'</span>':'<span class="late-t">'+d+' day(s) late</span>'},sh=>{if(!sh.f.PickupActual||!sh.f.PickupPlanned)return '';const d=diffDays(sh.f.PickupActual,sh.f.PickupPlanned);return d<=0?(d===0?'On time':(-d)+' early'):d+' late'});
 const pickupDatesCol=()=>colx('Pickup planned / actual',sh=>fmtS(sh.f.PickupPlanned)+' / '+fmtS(sh.f.PickupActual),sh=>(sh.f.PickupPlanned||'')+' / '+(sh.f.PickupActual||''));
 document.addEventListener('click',e=>{
