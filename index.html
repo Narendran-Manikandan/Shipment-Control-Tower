@@ -434,9 +434,6 @@ body.compact .tb td,body.compact .tb th{padding:4px 8px;font-size:12px;line-heig
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .riskbox{background:#2A1615;border-color:#6B2B27}}
 :root[data-theme="dark"] .riskbox{background:#2A1615;border-color:#6B2B27}
 
-.chatw{display:grid;grid-template-columns:300px minmax(0,1fr);gap:12px;align-items:start}.chatitem{display:block;width:100%;text-align:left;border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:8px 10px;margin:0 0 6px;cursor:pointer;color:var(--ink)}.chatitem.on{border-color:var(--accent);background:var(--chip)}
-@media (max-width:900px){.chatw{grid-template-columns:1fr}}
-
 /* chosen dark theme */
 :root[data-theme="dark"]{
 --bg:#151719;--panel:#1E2124;--panel2:#23272A;--ink:#ECEDED;--muted:#9DA3A4;--line:#33393C;--line2:#454C50;
@@ -631,7 +628,7 @@ let S;
 function init(){
   clockRefresh();
   S={brand:clone(BRAND_DEFAULT),today:CLOCK.today,role:'Logistics Analyst',email:'demo.user@yourcompany.com',baseEmail:'demo.user@yourcompany.com',carrier:'',view:'track',
-     lines:clone(RAW.lines),events:clone(RAW.events),users:clone(RAW.users),access:{},customRoles:[],accounts:[],docs:[],rg:{},rgs:[],redirects:[],remarks:[],msgs:[],msgReads:{},chats:[],chatMsgs:[],chatReads:{},calls:[],subs:clone(RAW.subs),
+     lines:clone(RAW.lines),events:clone(RAW.events),users:clone(RAW.users),access:{},customRoles:[],accounts:[],docs:[],rg:{},rgs:[],redirects:[],remarks:[],msgs:[],msgReads:{},subs:clone(RAW.subs),
      quotes:[],invoices:[],remind:{},revisions:[],uf:null,warehouses:[],slots:[],slotBlocks:[],whTeam:'',whLog:[],whNotified:{},wh:{lead:1,weekDay:4,overdue:true},utcTime:CLOCK.utc,whFail:false,mf:{log:[],ver:{master:1,commercial:1},hl:{},dock:false,closed:false,file:'master',tab:'tblShipments',q:'',only:false},outbox:[],audit:[],settings:{domain:'yourcompany.com',strip:{track:true},permV:2},draft:[],lastSaved:null,bulkResult:null,msResult:null,
      ui:{q:'',dash:{ym:CLOCK.today.slice(0,7),sel:CLOCK.today,mode:'All',ms:'All',q:'',status:'All',overdueOnly:false,tile:null,type:'All',nature:'All',mm:{measure:'ships',basis:'pickup',dim:'mode',carrier:'All',sel:null}},
          carrier:{mode:'All',win:'All',type:'All',nature:'All',metric:'ontime',target:90,mm:{measure:'weight',basis:'pickup',dim:'carrier',carrier:'All',sel:null}},tr:{seg:'d2d',basis:'actual',group:'mode',pcts:[50,90,95],mode:'All',carrier:'All',stype:'All',nature:'All',oc:'All',dc:'All',op:'All',dp:'All',win:'All'},com:'quotes',invCarrier:'All',invStatus:'All',admin:'users',msFilter:'active',cu:{carrier:'',filter:'active',q:''},ft:{series:'both',metric:'avg',group:'none',oc:'All',op:'All',dc:'All',dp:'All',nature:'All',mode:'All',vol:'All'},kt:{},sp:{carrier:'All'},wh:{tab:'schedule',code:'All',days:14},per:{kind:'all',y:+CLOCK.today.slice(0,4),q:Math.ceil(+CLOCK.today.slice(5,7)/3),m:+CLOCK.today.slice(5,7),basis:'pickup'},sort:{},sl:{tab:'my',f:'All',ship:'',week:'',pick:'first',first:null,second:null,vehicle:'',driver:'',phone:'',note:''},dm:{tab:'review',f:'Open',code:'All',week:'',sel:[],prop:null}}};
@@ -2416,7 +2413,7 @@ function dvLocate(){
   navigator.geolocation.getCurrentPosition(p=>{document.getElementById('dv_loc').value=p.coords.latitude.toFixed(4)+', '+p.coords.longitude.toFixed(4);out.textContent='Location added'},()=>{out.textContent='Location is switched off. Type where you are.'},{timeout:8000});
 }
 /* ========== go live: storage, sign-in and roles, flows ========== */
-const PERSIST_KEYS=['today','lines','events','users','access','subs','quotes','invoices','remind','revisions','warehouses','slots','slotBlocks','whLog','whNotified','wh','utcTime','whFail','outbox','audit','settings','brand','views','reports','whSince','customRoles','accounts','docs','rg','rgs','redirects','remarks','msgs','msgReads','chats','chatMsgs','chatReads','calls'];
+const PERSIST_KEYS=['today','lines','events','users','access','subs','quotes','invoices','remind','revisions','warehouses','slots','slotBlocks','whLog','whNotified','wh','utcTime','whFail','outbox','audit','settings','brand','views','reports','whSince','customRoles','accounts','docs','rg','rgs','redirects','remarks','msgs','msgReads'];
 const Store={key:'ect.state.v1',modeKey:'ect.mode',last:null,err:'',
   available(){try{localStorage.setItem('ect.test','1');localStorage.removeItem('ect.test');return true}catch(e){return false}},
   mode(){if(window.ECT_LOGIN&&window.ECT_LOGIN.storage==='shared'&&window.ECT_LOGIN.shared&&window.ECT_LOGIN.shared.url)return 'shared';const d=window.ECT_LOGIN&&window.ECT_LOGIN.storage==='browser'?'browser':'demo';try{return localStorage.getItem(this.modeKey)||d}catch(e){return d}},
@@ -2723,8 +2720,8 @@ function partnerShippers(){const s=partnerScope();return s?listOf(s.org&&s.org.S
 function visLines(){const sc=partnerScope();return sc?S.lines.filter(l=>sc.has(l.Shipper,l.Consignee)):S.lines}
 function shipperFieldHTML(){const s=partnerScope();if(s&&s.shippers.size)return `<select id="f_shipper" class="in">${listOf(s.org.Shippers).map(x=>`<option>${esc(x)}</option>`).join('')}</select>`;return `<input id="f_shipper" class="in" list="dl_shipper" autocomplete="off">`}
 function consigneeFieldHTML(){const s=partnerScope();if(s&&s.receivers.size&&!s.shippers.size)return `<select id="f_consignee" class="in">${listOf(s.org.Receivers).map(x=>`<option>${esc(x)}</option>`).join('')}</select>`;return `<input id="f_consignee" class="in" list="dl_consignee" autocomplete="off">`}
-function defaultPartnerAccess(){return ['tasks','track','request','milestones','editship','team','redirects','redirectreq','chat']}
-function defaultPexecAccess(){return ['tasks','track','request','milestones','editship','redirects','redirectreq','chat']}
+function defaultPartnerAccess(){return ['tasks','track','request','milestones','editship','team','redirects','redirectreq']}
+function defaultPexecAccess(){return ['tasks','track','request','milestones','editship','redirects','redirectreq']}
 function migrateData(){
   (S.warehouses||[]).forEach(w=>{if(!WH_TYPES.includes(w.type))w.type=whTypeGuess(w)});
   (S.users||[]).forEach(u=>{if(u.Role==='Logistics Partner')u.Role=PARTNER;['Shippers','Receivers','Partner','Phone','Location'].forEach(k=>{if(u[k]===undefined)u[k]=''});u.Type=roleType(u.Role)});
@@ -2853,7 +2850,7 @@ function migratePerms(){
 {const m0=migrateData;migrateData=function(){m0.apply(this,arguments);migratePerms()}}
 /* ========== export all data (ZIP or JSON) and restore from a dump ========== */
 const DATASETS=[
- {id:'shipments',file:'shipments.json',label:'Shipment data',keys:['lines','subs','revisions','docs','rg','rgs','redirects','remarks','msgs','msgReads','chats','chatMsgs','chatReads','calls']},
+ {id:'shipments',file:'shipments.json',label:'Shipment data',keys:['lines','subs','revisions','docs','rg','rgs','redirects','remarks','msgs','msgReads']},
  {id:'milestones',file:'milestones.json',label:'Milestones',keys:['events']},
  {id:'slots',file:'delivery_slots.json',label:'Delivery slots',keys:['slots','slotBlocks']},
  {id:'users',file:'user_list.json',label:'User list, roles and access',keys:['users','access','customRoles','accounts']},
@@ -3074,7 +3071,7 @@ function monBarHTML(){
 {const s0=addSampleHistory;addSampleHistory=function(){const r=s0.apply(this,arguments);S.lines.forEach(l=>{if(l.Mode)l.Mode=normMode(l.Mode);if(l.ContainerType)l.ContainerType=normCtype(l.ContainerType)});return r}}
 document.addEventListener('change',e=>{if(e.target&&e.target.id==='f_ctype'){const b=document.getElementById('setptBox');if(b){b.style.display=isReefer(e.target.value)?'':'none';if(!isReefer(e.target.value)){const i=document.getElementById('f_setpt');if(i)i.value=''}}}});
 /* ========== demo sign-in (email and password), problem log, report a problem ========== */
-const APP_BUILD='site build 2026-11-20 17:02 UTC';
+const APP_BUILD='site build 2026-11-20 17:44 UTC';
 const ErrLog={key:'ect.errors',max:60,
   add(kind,msg,src){try{const a=JSON.parse(localStorage.getItem(this.key)||'[]');a.push({t:new Date().toISOString(),kind,msg:String(msg==null?'':msg).slice(0,300),src:String(src||'').slice(0,160),view:(typeof S!=='undefined'&&S&&S.view)||'',role:(typeof S!=='undefined'&&S&&S.role)||''});while(a.length>this.max)a.shift();localStorage.setItem(this.key,JSON.stringify(a))}catch(e){}},
   list(){try{return JSON.parse(localStorage.getItem(this.key)||'[]')}catch(e){return []}},
@@ -3163,7 +3160,7 @@ function errCard(){
 }
 /* ========== shared data between devices (Supabase table ect_state) ========== */
 const SH_KEYS=PERSIST_KEYS.filter(k=>!['today','utcTime','whFail'].includes(k));
-const SH_ID={lines:'LineID',events:'EventID',users:'UserEmail',subs:'SubscriptionID',quotes:'id',invoices:'id',slots:'id',slotBlocks:'id',warehouses:'code',reports:'id',views:'id',customRoles:'name',accounts:'email',docs:'id',rgs:'id',redirects:'id',remarks:'id',chats:'id',chatMsgs:'id',calls:'id',msgs:'id'};
+const SH_ID={lines:'LineID',events:'EventID',users:'UserEmail',subs:'SubscriptionID',quotes:'id',invoices:'id',slots:'id',slotBlocks:'id',warehouses:'code',reports:'id',views:'id',customRoles:'name',accounts:'email',docs:'id',rgs:'id',redirects:'id',remarks:'id',msgs:'id'};
 const SH_APPEND=['revisions','whLog','outbox','audit'];
 const SH_OBJ=['access','remind','whNotified','wh','settings','brand'];
 const Shared={v:0,base:null,baseStr:null,status:'off',err:'',last:null,by:'',busy:false,again:false,force:false,merges:0,renames:[],conflicts:0,polls:0,pushes:0,hold:false,lateRender:false,lastToast:0,trace:[]};
@@ -6983,13 +6980,13 @@ function revWrap(ref,tab){
   const rest=[];let n=mh.nextSibling;while(n){const nx=n.nextSibling;rest.push(n);n=nx}
   const ov=document.createElement('div');ov.id='revOv';rest.forEach(x=>ov.appendChild(x));const pane=document.createElement('div');pane.id='revPane';pane.hidden=true;
   mh.insertAdjacentHTML('afterend',`<div class="revhdr" id="revHdr" style="display:flex;gap:6px 18px;flex-wrap:wrap;font-size:13px;padding:8px 0;border-bottom:1px solid var(--line)"><span><span class="mu">HBL</span> <b>${esc(slotFirst(shipHbl(sh)))}</b></span><span><span class="mu">Container</span> <b>${esc(slotFirst(shipCont(sh)))}</b></span><span><span class="mu">Warehouse</span> <b>${esc(whCodeOf(sh)||'-')}</b></span><span><span class="mu">Shipment</span> <b>${esc(sh.ref)}</b></span><span><span class="mu">Invoice</span> <b>${esc(slotFirst(shipInvL(sh)))}</b></span></div><div class="tabs" id="revTabs" role="tablist" aria-label="Shipment sections"></div>`);
-  m.appendChild(ov);m.appendChild(pane);S.ui.rev=Object.assign({ref,tab:'overview',hf:{},vis:['Internal'],reply:''},S.ui.rev&&S.ui.rev.ref===ref?S.ui.rev:{});S.ui.rev.ref=ref;revShow(ref,tab||S.ui.rev.tab||'overview');
+  const host=mh.parentNode;host.appendChild(ov);host.appendChild(pane);S.ui.rev=Object.assign({ref,tab:'overview',hf:{},vis:['Internal'],reply:''},S.ui.rev&&S.ui.rev.ref===ref?S.ui.rev:{});S.ui.rev.ref=ref;revShow(ref,tab||S.ui.rev.tab||'overview');
 }
 function revShow(ref,tab){
-  const sh=getShip(ref),R=S.ui.rev;if(!sh)return;if(!['overview','history','documents','messages'].includes(tab))tab='overview';R.tab=tab;
+  const sh=getShip(ref),R=S.ui.rev;if(!sh)return;if(tab==='history')tab='overview';if(!['overview','documents','messages'].includes(tab))tab='overview';R.tab=tab;
   const un=msgUnread(ref),bar=document.getElementById('revTabs'),ov=document.getElementById('revOv'),pane=document.getElementById('revPane');if(!bar||!ov||!pane)return;
-  bar.innerHTML=[['overview','Details'],['history','Complete History'],['documents','Documents'],['messages','Messages'+(un?` <span class="badge" aria-label="${un} unread">${un}</span>`:'')]].map(([k,l])=>`<button role="tab" aria-selected="${tab===k}" class="${tab===k?'on':''}" data-act="revTab" data-t="${k}" data-ref="${esc(ref)}">${l}</button>`).join('');
-  ov.hidden=tab!=='overview';pane.hidden=tab==='overview';
+  bar.innerHTML=[['overview','Summary'],['documents','Documents'],['messages','Messages'+(un?` <span class="badge" aria-label="${un} unread">${un}</span>`:'')]].map(([k,l])=>`<button role="tab" aria-selected="${tab===k}" class="${tab===k?'on':''}" data-act="revTab" data-t="${k}" data-ref="${esc(ref)}">${l}</button>`).join('');
+  ov.hidden=tab!=='overview';pane.hidden=tab==='overview';let hi=document.getElementById('revHistInline');if(!hi){hi=document.createElement('div');hi.id='revHistInline';ov.parentNode.insertBefore(hi,pane)}hi.hidden=tab!=='overview';hi.innerHTML=tab==='overview'?'<h3 class="sec">Complete history</h3>'+revHistoryHTML(sh):'';
   if(tab==='history')pane.innerHTML=revHistoryHTML(sh);if(tab==='documents')pane.innerHTML=revDocsHTML(sh);if(tab==='messages'){pane.innerHTML=revMsgsHTML(sh);msgMarkRead(ref);const l=document.getElementById('revMsgList');if(l)l.scrollTop=l.scrollHeight;const b=bar.querySelector('.badge');if(b)b.remove()}
   try{history.replaceState(null,'','#ship='+encodeURIComponent(ref)+'&tab='+tab)}catch(e){}
 }
@@ -7294,100 +7291,6 @@ function revFiHTML(sh){
 function markLegacyClosed(){shipsAll0().forEach(sh=>{if(sh.status==='Delivered'&&!sh.lines.some(l=>l.ClosedOn))sh.lines.forEach(l=>{l.ClosedOn='legacy'})})}
 {const a0=addSampleHistory;addSampleHistory=function(){const r=a0.apply(this,arguments);try{markLegacyClosed()}catch(e){}return r}}
 
-/* ========== chat and calls ========== */
-const userByEmail=e=>S.users.find(u=>String(u.UserEmail).toLowerCase()===String(e||'').toLowerCase());
-const isInternalU=u=>!!u&&roleMeta(u.Role).type==='Internal';
-function userCompany(u){if(!u)return '';if(isInternalU(u))return 'internal';if(u.Role==='Carrier Partner')return 'carrier:'+carrKey(canonCarrier(u.Carrier));if(u.Role===PARTNER)return 'partner:'+String(u.UserEmail).toLowerCase();if(u.Role===PEXEC)return 'partner:'+String(u.Partner||'').toLowerCase();return 'warehouse:'+carrKey((whList(u)[0])||'all')}
-function companyName(key){if(key==='internal')return 'Internal team';if(key.startsWith('carrier:')){const u=S.users.find(x=>userCompany(x)===key);return u?canonCarrier(u.Carrier):'Carrier'}if(key.startsWith('partner:')){const o=userByEmail(key.slice(8));return o?(o.DisplayName||o.UserEmail):'Partner'}const u=S.users.find(x=>userCompany(x)===key);return u?'Warehouse: '+(whList(u)[0]||'all warehouses'):'Warehouse operations'}
-const meU=()=>userByEmail(S.email)||{UserEmail:S.email,Role:S.role};
-const meInternal=()=>roleMeta(S.role).type==='Internal';
-function chatVisible(c,email,role){
-  email=String(email||S.email||'').toLowerCase();const mem=(c.members||[]).map(x=>String(x).toLowerCase());if(!mem.includes(email))return false;
-  const us=mem.map(userByEmail).filter(Boolean);if(!us.some(isInternalU))return false;
-  const me=userByEmail(email);if(me&&!isInternalU(me)){const co=userCompany(me);if(us.some(u=>!isInternalU(u)&&userCompany(u)!==co))return false}
-  return true;
-}
-const chatsMine=()=>(S.chats||[]).filter(c=>chatVisible(c)).sort((a,b)=>chatLast(b)-chatLast(a));
-const chatMsgsOf=id=>(S.chatMsgs||[]).filter(m=>m.chat===id).sort((a,b)=>a.t-b.t);
-const chatLast=c=>{const m=chatMsgsOf(c.id).pop();return m?m.t:c.t};
-const chatReadAt=id=>((S.chatReads||{})[String(S.email).toLowerCase()]||{})[id]||0;
-const chatUnread=c=>chatMsgsOf(c.id).filter(m=>m.t>chatReadAt(c.id)&&String(m.by).toLowerCase()!==String(S.email).toLowerCase()).length;
-const chatUnreadAll=()=>chatsMine().reduce((a,c)=>a+chatUnread(c),0);
-function chatMarkRead(id){S.chatReads=S.chatReads||{};const k=String(S.email).toLowerCase();S.chatReads[k]=Object.assign({},S.chatReads[k],{[id]:Date.now()})}
-function chatPeople(){const me=String(S.email).toLowerCase();return S.users.filter(u=>String(u.UserEmail).toLowerCase()!==me&&(meInternal()||isInternalU(u)))}
-const chatTitle=c=>{if(c.title)return c.title;const o=(c.members||[]).filter(e=>String(e).toLowerCase()!==String(S.email).toLowerCase()).map(e=>(userByEmail(e)||{DisplayName:e}).DisplayName);return o.join(', ')||'Chat'};
-function chatCreate(title,members,first){
-  const me=String(S.email).toLowerCase(),mem=uniq([me,...(members||[]).map(x=>String(x).toLowerCase())]),us=mem.map(userByEmail);
-  if(mem.length<2)return {ok:false,msg:'Choose at least one person'};if(us.some(u=>!u))return {ok:false,msg:'One of the people was not found'};
-  const group=mem.length>2,t=String(title||'').trim();if(group&&!t)return {ok:false,msg:'Give the group a name'};if(t.length>60)return {ok:false,msg:'The group name can be up to 60 characters'};
-  if(!meInternal()){if(group||!isInternalU(us.find(u=>String(u.UserEmail).toLowerCase()!==me)))return {ok:false,msg:'You can chat with the internal team only'}}
-  const ext=us.filter(u=>!isInternalU(u)),cos=uniq(ext.map(userCompany)),ints=us.filter(isInternalU),made=[];
-  const groups=cos.length>1?cos.map(co=>[...ints,...ext.filter(u=>userCompany(u)===co)]):[us];
-  groups.forEach(g=>{const ms=g.map(u=>String(u.UserEmail).toLowerCase()),dm=ms.length===2;
-    const ex=(S.chats||[]).find(c=>dm&&(c.members||[]).length===2&&ms.every(m=>c.members.map(x=>String(x).toLowerCase()).includes(m)));
-    const c=ex||{id:'CH-'+((S.chats||[]).length+1)+'-'+Date.now().toString(36)+made.length,title:dm?'':(t+(groups.length>1?' ('+companyName(userCompany(g.find(u=>!isInternalU(u))||{}))+')':'')),type:dm?'dm':'group',members:ms,by:me,t:Date.now()};
-    if(!ex){S.chats=S.chats||[];S.chats.push(c);audit('Chat created','',(c.title||'one-to-one')+' ('+ms.length+' people)')}made.push(c);if(first&&String(first).trim())chatSend(c.id,first,[])});
-  return {ok:true,msg:made.length>1?'Created '+made.length+' separate chats, one for each company, so companies never see each other':'Chat ready',chats:made};
-}
-function chatSend(id,text,att){
-  const c=(S.chats||[]).find(x=>x.id===id);if(!c||!chatVisible(c))return {ok:false,msg:'That chat is not available to you'};
-  const v=String(text||'').trim();if(!v&&!(att||[]).length)return {ok:false,msg:'Write a message first'};if(v.length>2000)return {ok:false,msg:'A message can be up to 2000 characters'};
-  const m={id:'CM-'+((S.chatMsgs||[]).length+1)+'-'+Date.now().toString(36),chat:id,t:Date.now(),by:S.email,text:v,att:att||[]};S.chatMsgs=S.chatMsgs||[];S.chatMsgs.push(m);chatMarkRead(id);return {ok:true,msg:'Sent',m};
-}
-const CALL_DUR=[15,30,45,60,90,120];
-function callSchedule(f){
-  if(!meInternal())return {ok:false,msg:'Only the internal team schedules calls'};
-  const c=(S.chats||[]).find(x=>x.id===f.chat);if(!c||!chatVisible(c))return {ok:false,msg:'Open a chat first'};
-  const title=String(f.title||'').trim(),link=String(f.link||'').trim();
-  if(title.length<3||title.length>80)return {ok:false,msg:'Give the call an agenda or title (3 to 80 characters)'};if(!isoOK(f.date))return {ok:false,msg:'Choose the date'};if(f.date<S.today)return {ok:false,msg:'The date cannot be in the past'};
-  if(!/^([01]\d|2[0-3]):[0-5]\d$/.test(f.time||''))return {ok:false,msg:'Choose the start time'};if(!CALL_DUR.includes(Number(f.dur)))return {ok:false,msg:'Choose the duration'};
-  if(!link)return {ok:false,msg:'Add the meeting link or location'};if(link.length>300)return {ok:false,msg:'The link or location can be up to 300 characters'};
-  const me=String(S.email).toLowerCase(),parts=uniq((f.members||[]).map(x=>String(x).toLowerCase()).filter(e=>e!==me&&userByEmail(e)));if(!parts.length)return {ok:false,msg:'Choose who is invited'};
-  const call={id:'CALL-'+((S.calls||[]).length+1)+'-'+Date.now().toString(36),chat:c.id,title,date:f.date,time:f.time,dur:Number(f.dur),link,by:me,t:Date.now(),members:parts};S.calls=S.calls||[];S.calls.push(call);
-  const when=fmt(f.date)+' at '+f.time+' for '+f.dur+' minutes',org=(userByEmail(me)||{}).DisplayName||me;
-  parts.forEach(e=>{const u=userByEmail(e);slotMail(e,'Call invitation: '+title,org+' has scheduled a call.\n\nAgenda: '+title+'\nWhen: '+when+'\nWhere: '+link+'\nInvited: '+parts.length+' participant'+(parts.length===1?'':'s')+' and the organiser',"Call invitation")});
-  chatSend(c.id,'Call scheduled: '+title+'\n'+when+'\n'+link,[]);audit('Call scheduled','',title+', '+when);return {ok:true,msg:'Call scheduled. '+parts.length+' participant'+(parts.length===1?'':'s')+' notified by email.',call};
-}
-/* ----- screens ----- */
-function viewChat(){
-  const U=S.ui.chat=S.ui.chat||{sel:'',q:'',mq:''},list=chatsMine().filter(c=>!U.q||(chatTitle(c)+' '+chatMsgsOf(c.id).map(m=>m.text).join(' ')).toLowerCase().includes(String(U.q).toLowerCase())),cur=(S.chats||[]).find(c=>c.id===U.sel&&chatVisible(c))||null;
-  const msgs=cur?chatMsgsOf(cur.id).filter(m=>!U.mq||m.text.toLowerCase().includes(String(U.mq).toLowerCase())):[],calls=cur?(S.calls||[]).filter(k=>k.chat===cur.id&&k.date>=S.today).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time)):[];
-  return pageHead('Chat','Message the internal team, or the people you work with, in one-to-one and group chats. Share small files, search, and see what is unread. Internal staff can schedule a call from any chat. External users see only the internal team and their own company.')+
-  `<div class="chatw"><div class="card" style="padding:12px"><div class="row" style="gap:6px;margin-bottom:8px"><input id="chat_q" class="in grow" value="${esc(U.q||'')}" placeholder="Search chats" aria-label="Search chats"><button class="btn pri" data-act="chatNew">New Chat</button></div><div id="chatList">${list.map(c=>{const u=chatUnread(c),l=chatMsgsOf(c.id).pop();return `<button class="chatitem ${cur&&cur.id===c.id?'on':''}" data-act="chatOpen" data-id="${esc(c.id)}"><span class="row" style="justify-content:space-between;gap:6px"><b>${esc(chatTitle(c))}</b>${u?`<span class="badge" aria-label="${u} unread">${u}</span>`:''}</span><small class="mu">${l?esc(String(l.text).slice(0,60)):'No messages yet'}</small></button>`}).join('')||'<div class="empty">No chats yet. Start one with New Chat.</div>'}</div></div>
-  <div class="card" style="padding:12px;min-height:360px">${cur?`<div class="row" style="justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:6px"><div><b style="font-size:16px">${esc(chatTitle(cur))}</b><br><small class="mu">${cur.members.map(e=>esc((userByEmail(e)||{DisplayName:e}).DisplayName)).join(', ')}</small></div><span class="row" style="gap:6px"><input id="chat_mq" class="in" value="${esc(U.mq||'')}" placeholder="Search in this chat" style="width:170px" aria-label="Search in this chat">${meInternal()?`<button class="btn" data-act="callNew" data-id="${esc(cur.id)}">Schedule a Call</button>`:''}</span></div>
-  ${calls.length?`<div class="note" style="margin-bottom:8px">${calls.map(k=>`<div><b>${esc(k.title)}</b>, ${fmtS(k.date)} at ${esc(k.time)} (${k.dur} min). ${esc(k.link)}</div>`).join('')}</div>`:''}
-  <div id="chatMsgs" style="max-height:340px;overflow:auto;padding:4px">${msgs.map(m=>{const u=userByEmail(m.by),mine=String(m.by).toLowerCase()===String(S.email).toLowerCase();return `<div style="margin:0 0 8px;display:flex;justify-content:${mine?'flex-end':'flex-start'}"><div style="max-width:78%;padding:8px 12px;border-radius:12px;background:${mine?'var(--accent)':'var(--chip)'};color:${mine?'#fff':'var(--ink)'}"><small style="opacity:.85">${esc((u||{DisplayName:m.by}).DisplayName)} · ${new Date(m.t).toLocaleString()}</small><div style="white-space:pre-wrap">${esc(m.text)}</div>${(m.att||[]).map(id=>{const d=(S.docs||[]).find(x=>x.id===id);return d?`<button class="btn sm" data-act="revDocOpen" data-id="${esc(id)}">${esc(d.name)}</button>`:''}).join(' ')}</div></div>`}).join('')||'<div class="empty">No messages match.</div>'}</div>
-  <div class="row" style="gap:6px;margin-top:8px;align-items:flex-end"><textarea id="chat_text" class="in grow" rows="2" maxlength="2000" placeholder="Write a message" aria-label="Message"></textarea><input type="file" id="chat_file" style="width:auto" aria-label="Attach a file"><button class="btn pri" data-act="chatSend" data-id="${esc(cur.id)}">Send</button></div><p class="hint">Files up to 300 KB for now.</p>`:'<div class="empty">Choose a chat on the left, or start a new one.</div>'}</div></div>`;
-}
-function chatNewModal(){
-  const ppl=chatPeople(),groups={};ppl.forEach(u=>{const k=userCompany(u);(groups[k]=groups[k]||[]).push(u)});
-  openModal(`<div class="mh"><h2>New Chat</h2><button class="x" data-act="close" aria-label="Close">&times;</button></div><div id="ch_err"></div>${meInternal()?'':'<p class="mu">You can chat with the internal team.</p>'}<div style="max-height:280px;overflow:auto;border:1px solid var(--line);border-radius:10px;padding:8px">${Object.keys(groups).sort((a,b)=>a==='internal'?-1:b==='internal'?1:companyName(a).localeCompare(companyName(b))).map(k=>`<b>${esc(companyName(k))}</b>${groups[k].map(u=>`<label class="row" style="gap:8px;padding:3px 0"><input type="checkbox" data-ch="chPick" value="${esc(u.UserEmail)}" style="width:auto"> ${esc(u.DisplayName)} <small class="mu">${esc(u.Role)}</small></label>`).join('')}`).join('')||'<div class="empty">Nobody to chat with yet.</div>'}</div>
-  ${meInternal()?'<label class="f" style="margin-top:8px">Group name (needed for more than one person)<input id="ch_title" class="in" maxlength="60"></label><p class="hint">If you choose people from different companies, a separate chat is made for each company, so companies never see each other.</p>':''}<label class="f" style="margin-top:8px">First message (optional)<input id="ch_first" class="in" maxlength="2000"></label><div class="row sec"><button class="btn pri" data-act="chatCreate">Start Chat</button><button class="btn" data-act="close">Cancel</button></div>`);
-}
-function callModal(chatId){
-  const c=(S.chats||[]).find(x=>x.id===chatId);if(!c)return;const ppl=c.members.map(userByEmail).filter(u=>u&&String(u.UserEmail).toLowerCase()!==String(S.email).toLowerCase());
-  openModal(`<div class="mh"><h2>Schedule a Call</h2><button class="x" data-act="close" aria-label="Close">&times;</button></div><div id="cl_err"></div><div class="g2"><label class="f">Agenda or title<input id="cl_title" class="in" maxlength="80"></label><label class="f">Meeting link or location<input id="cl_link" class="in" maxlength="300" placeholder="https://..."></label><label class="f">Date<input id="cl_date" type="date" class="in" min="${S.today}" value="${S.today}"></label><label class="f">Start time<input id="cl_time" type="time" class="in" value="10:00"></label><label class="f">Duration<select id="cl_dur" class="in">${CALL_DUR.map(d=>`<option value="${d}" ${d===30?'selected':''}>${d} minutes</option>`).join('')}</select></label></div><b>Invite</b><div style="max-height:180px;overflow:auto;border:1px solid var(--line);border-radius:10px;padding:8px">${ppl.map(u=>`<label class="row" style="gap:8px;padding:3px 0"><input type="checkbox" data-ch="clPick" value="${esc(u.UserEmail)}" checked style="width:auto"> ${esc(u.DisplayName)} <small class="mu">${esc(u.Role)}</small></label>`).join('')}</div><div class="row sec"><button class="btn pri" data-act="callSave" data-id="${esc(chatId)}">Schedule and Notify</button><button class="btn" data-act="close">Cancel</button></div>`);
-}
-document.addEventListener('click',async e=>{
-  const t=e.target.closest&&e.target.closest('[data-act]');if(!t)return;const a=t.dataset.act,d=t.dataset;if(!['chatNew','chatOpen','chatCreate','chatSend','callNew','callSave'].includes(a))return;e.stopImmediatePropagation();const U=S.ui.chat=S.ui.chat||{sel:'',q:'',mq:''};
-  if(a==='chatNew'){chatNewModal();return}
-  if(a==='chatOpen'){U.sel=d.id;chatMarkRead(d.id);render();const m=document.getElementById('chatMsgs');if(m)m.scrollTop=m.scrollHeight;return}
-  if(a==='callNew'){callModal(d.id);return}
-  if(a==='chatCreate'){const sel=[...document.querySelectorAll('[data-ch=chPick]:checked')].map(x=>x.value),r=chatCreate((document.getElementById('ch_title')||{value:''}).value,sel,(document.getElementById('ch_first')||{value:''}).value);if(!r.ok){const x=document.getElementById('ch_err');if(x)x.innerHTML=`<div class="err" role="alert" style="margin-bottom:10px">${esc(r.msg)}</div>`;return}closeModal();U.sel=r.chats[0].id;chatMarkRead(U.sel);render();toast(r.msg);return}
-  if(a==='callSave'){const v=id=>(document.getElementById(id)||{value:''}).value,r=callSchedule({chat:d.id,title:v('cl_title'),link:v('cl_link'),date:v('cl_date'),time:v('cl_time'),dur:v('cl_dur'),members:[...document.querySelectorAll('[data-ch=clPick]:checked')].map(x=>x.value)});if(!r.ok){const x=document.getElementById('cl_err');if(x)x.innerHTML=`<div class="err" role="alert" style="margin-bottom:10px">${esc(r.msg)}</div>`;return}closeModal();render();toast(r.msg);return}
-  if(a==='chatSend'){const box=document.getElementById('chat_text'),f=document.getElementById('chat_file'),files=f&&f.files?[...f.files]:[];if(files.some(x=>x.size>300*1024)){toast('Files can be up to 300 KB each for now','bad');return}
-    let att=[];if(files.length){const er=docCheck(files,'CHAT-'+d.id);if(er.length){toast(er[0],'bad');return}const r=await docsUpload('CHAT-'+d.id,files,'Others','Chat attachment');att=r.ok.map(x=>x.id)}
-    const r=chatSend(d.id,(box||{value:''}).value,att);if(!r.ok){toast(r.msg,'bad');return}render();const m=document.getElementById('chatMsgs');if(m)m.scrollTop=m.scrollHeight}
-},true);
-document.addEventListener('input',e=>{const t=e.target;if(!t)return;if(t.id==='chat_q'||t.id==='chat_mq'){const U=S.ui.chat=S.ui.chat||{sel:'',q:'',mq:''},p=t.selectionStart;if(t.id==='chat_q')U.q=t.value;else U.mq=t.value;render();const n=document.getElementById(t.id);if(n){n.focus();try{n.setSelectionRange(p,p)}catch(x){}}}});
-{const r0=render;render=function(){r0.apply(this,arguments);try{const it=document.querySelector('#nav .nav-i[data-id=chat]'),n=chatUnreadAll();if(it&&n&&!it.querySelector('.badge'))it.insertAdjacentHTML('beforeend',`<span class="badge" aria-label="${n} unread chat messages">${n}</span>`)}catch(e){}}}
-{const m7=migrateData;migrateData=function(){m7.apply(this,arguments);if(!Array.isArray(S.chats))S.chats=[];if(!Array.isArray(S.chatMsgs))S.chatMsgs=[];if(!Array.isArray(S.calls))S.calls=[];if(!S.chatReads)S.chatReads={};if((S.settings.permV7||0)<1){ROLES.forEach(r=>{S.access[r]=S.access[r]||[];if(!S.access[r].includes('chat'))S.access[r].push('chat')});S.settings.permV7=1}}}
-setInterval(()=>{try{if(S.view==='chat'&&!(document.activeElement&&/^(TEXTAREA|INPUT|SELECT)$/.test(document.activeElement.tagName))&&!document.querySelector('#modal .mh'))render()}catch(e){}},20000);
-TABS.push({id:'chat',label:'Chat'});ACCESS_ITEMS.push({id:'chat',label:'Chat: the Chat page'});
-MODULES.push({id:'chatmod',label:'Chat and calls',V:['chat'],C:[],E:[],D:[],note:'View: the Chat page, to message people and join calls. External users see only the internal team and their own company.'});
-{const g=NAV_GROUPS,oi=g.findIndex(x=>x[0]==='Operations');if(oi>=0){const L=g[oi][1],i=L.indexOf('tasks');L.splice(i>=0?i+1:0,0,'chat')}}
-ICON.chat='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.4A8 8 0 1 1 21 12z"/></svg>';
-
 const pickupCol=()=>colx('Pickup vs plan',sh=>{if(!sh.f.PickupActual||!sh.f.PickupPlanned)return '-';const d=diffDays(sh.f.PickupActual,sh.f.PickupPlanned);return d<=0?'<span class="ok-t">'+(d===0?'On time':(-d)+' day(s) early')+'</span>':'<span class="late-t">'+d+' day(s) late</span>'},sh=>{if(!sh.f.PickupActual||!sh.f.PickupPlanned)return '';const d=diffDays(sh.f.PickupActual,sh.f.PickupPlanned);return d<=0?(d===0?'On time':(-d)+' early'):d+' late'});
 const pickupDatesCol=()=>colx('Pickup planned / actual',sh=>fmtS(sh.f.PickupPlanned)+' / '+fmtS(sh.f.PickupActual),sh=>(sh.f.PickupPlanned||'')+' / '+(sh.f.PickupActual||''));
 document.addEventListener('click',e=>{
@@ -7538,7 +7441,7 @@ function render(){
   $('#demoDate').value=S.today;$('#roleSel').value=S.role;{const dl=$('#demoDate').closest('label');if(dl)dl.style.display=CLOCK.mode==='real'?'none':''}
   {const isC=S.role==='Carrier Partner';$('#carrierLbl').style.display=isC?'':'none';if(isC)$('#carrierSel').innerHTML=carriersList().map(c=>`<option ${c===S.carrier?'selected':''}>${esc(c)}</option>`).join('')}
   {const isW=S.role==='Warehouse Team';$('#whTeamLbl').style.display=isW?'':'none';if(isW)$('#whTeamSel').innerHTML=S.users.filter(u=>u.Role==='Warehouse Team').map(u=>`<option value="${esc(u.UserEmail)}" ${u.UserEmail===S.whTeam?'selected':''}>${esc(u.DisplayName)} (${esc(u.Warehouses||'no warehouse')})</option>`).join('')}
-  const V={track:viewTrack,request:viewRequest,milestones:viewMilestones,carrierupdates:viewCarrierUpdates,warehouse:viewWarehouse,dataquality:viewDataQuality,tasks:viewTasks,reports:viewReports,rptdl:viewRptDl,faudit:viewFAudit,rg:viewRG,redirects:viewRedirects,scm:viewScm,chat:viewChat,slotreq:viewSlotReq,slotmgmt:viewSlotMgmt,freighttrends:viewFreightTrends,dashboard:viewDash,carrier:viewCarrier,transit:viewTransit,commercial:viewCommercial,admin:viewAdmin,team:viewTeam};
+  const V={track:viewTrack,request:viewRequest,milestones:viewMilestones,carrierupdates:viewCarrierUpdates,warehouse:viewWarehouse,dataquality:viewDataQuality,tasks:viewTasks,reports:viewReports,rptdl:viewRptDl,faudit:viewFAudit,rg:viewRG,redirects:viewRedirects,scm:viewScm,slotreq:viewSlotReq,slotmgmt:viewSlotMgmt,freighttrends:viewFreightTrends,dashboard:viewDash,carrier:viewCarrier,transit:viewTransit,commercial:viewCommercial,admin:viewAdmin,team:viewTeam};
   $('#sampleFlag').innerHTML=hasSample()?'<span class="pill warn">Sample history loaded</span><button class="btn sm" data-act="sampleRemove">Remove</button>':'';
   $('#view').innerHTML=towerStrip()+V[S.view]();
   if(S.view==='request'&&S.ui.reqTab!=='bulk')syncForm();

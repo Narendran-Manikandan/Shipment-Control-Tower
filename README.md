@@ -22,11 +22,14 @@ To share data between devices, run `supabase-setup.sql` once in a free Supabase 
 This is a demo with sample data. The sign-in is not real security: users.js is public and anyone with the shared database key can change its data, so use throwaway passwords and no real company information.
 
 
-## Newest changes (20 Nov, second release)
+## Fixes in this version
+- The shipment window no longer collapses: the tab content now sits inside the window, so the window looks as it did before the tabs were added.
+- **Chat and calls have been removed** from the application.
+
+## Newest changes (20 Nov, later)
 - **POD and the Closed state.** After a delivery is recorded, the carrier uploads the proof of delivery (a PDF, or several photos or pages combined into one PDF) from the update window. Uploading it closes the shipment. Shipments delivered before this change count as Closed. A Logistics Executive, Associate or Analyst can reopen a closed shipment with a reason, and the change is audited.
 - **Carrier freight invoices.** A carrier can submit invoices only for Closed shipments, several per shipment (Handling, Storage, Duties or Other with free text). Each invoice has a number, date, value, type, the freight invoice PDF and a Quote Approval (PDF, image, or an .eml or Outlook .msg mail copy, which is turned into a print-style PDF). The documents are merged in this order: Freight Invoice, HBL/HAWB, Shipment Invoice, Packing List, POD, Quote Approval, compressed to stay under 5 MB (if it cannot fit, the carrier is told and nothing is sent). A missing document is skipped and logged. The carrier sees only their own invoices, never quotes or the total freight cost.
 - **Automatic email to the payment party.** Set the client code, each carrier's code and number and CC list, the payment party addresses and the default CC list in Administration, Settings. The subject is {Client Code}_{Carrier Code}_{Carrier Number}_Freight Invoice_{Invoice Number}. If anything is missing the invoice is still accepted and the email is held, then sent automatically once the setup is complete. The merged PDF shows in the shipment's Documents tab with its invoice number and type. Emails are recorded on the Email Outbox screen until your company's email service is connected.
-- **Chat and calls.** A Chat page for every role: one-to-one and group chats, search, small file sharing (up to 300 KB), timestamps and unread counts with a badge in the menu. External users can reach only the internal team and their own company. If an internal user picks people from different companies, a separate chat is made for each company, so companies never see each other. Internal users can Schedule a Call from a chat (agenda, date, time, duration, invitees, link or location); each invitee is emailed and a note is posted in the chat. Privacy is enforced in the app, not in the database, until real sign-in exists.
 
 ## Changes before that
 ## Newest changes (20 Nov)
@@ -37,7 +40,7 @@ This is a demo with sample data. The sign-in is not real security: users.js is p
 - **Project Name** (optional) on shipments and quotes, with a project list that stops two spellings, a Project filter on the Shipment Monitor, search by project, and quoted, invoiced and paid totals per project in Freight Commercials.
 - **ASN numbers, item by item,** in Receipts: type one in the table, or upload a file with three columns (Shipment Reference, Item Code, ASN Number) with a preview and error rows. ASN shows in the shipment history and is searchable.
 - **Delivery slot booking** lists shipments as HBL | Container | Warehouse | Shipment | Invoice and searches all five (and the project).
-- **The shipment window has tabs:** Details, Complete History (filters, search, manual remarks, the items with ASN), Documents (by category, versions, upload) and Messages (visibility by group, replies, mentions, attachments up to 300 KB, unread count and notices). The address keeps the tab, for example #ship=SHP-0001&tab=documents.
+- **The shipment window has three tabs:** Summary (the window as before, with the complete history under it: filters, search, manual remarks and the items with ASN), Documents (by category, versions, upload) and Messages (visibility by group, replies, mentions, attachments up to 300 KB, unread count and notices). The address keeps the tab, for example #ship=SHP-0001&tab=documents.
 - **SCM Search** (Operations): one search box plus advanced filters across item, PO, invoice, shipment, HBL, container, shipper, consignee and project. Delivered shipments show the actual delivery date; others show the planned date and TBA. Sorting, paging and CSV and Excel export. Only a role called SCM has it to begin with; give it to other roles in Role Access.
 - **Limits:** role checks and message privacy are enforced in the app, not in the database, until real sign-in exists. Emails are recorded on the Email Outbox screen, not sent.
 
