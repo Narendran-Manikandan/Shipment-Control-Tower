@@ -522,7 +522,7 @@ const isOcean=m=>/^(Ocean|Sea)/.test(String(m||''));
 const modeClass=m=>isOcean(m)?'Sea':(m==='Air'||m==='Courier')?'Air':'Road';
 const normMode=m=>{const x=String(m==null?'':m).trim(),k=x.toLowerCase().replace(/[\s]+/g,'').replace(/and/g,'+');return ({sea:'Ocean',ocean:'Ocean',road:'Truck',truck:'Truck',trucking:'Truck',air:'Air',courier:'Courier','ocean+rail':'Ocean+Rail','sea+rail':'Ocean+Rail','ocean+truck':'Ocean+Truck','sea+truck':'Ocean+Truck','ocean+road':'Ocean+Truck','sea+road':'Ocean+Truck'})[k]||x};
 const INCOS=['EXW','FCA','FOB','CIF','CIP','CPT','DAP','DDP'];
-const ROLES=['In Organization','Logistics Executive','Logistics Associate','Logistics Analyst','Logistics Manager','Carrier Partner','Warehouse Team','External Logistics Partner','Partner Executive'];
+const ROLES=['In Organization','Logistics Executive','Logistics Associate','Logistics Analyst','Logistics Manager','Warehouse Lead','Carrier Partner','Warehouse Team','External Logistics Partner','Partner Executive'];
 const TYPES=['Raw Materials','Consumables','Finished Goods','Machineries','Others'];
 const NATURES=['DG','Non-DG'];
 const normNature=v=>{const x=String(v||'').toLowerCase().replace(/[^a-z]/g,'');if(['dg','dgr','dangerousgoods','hazardous','hazmat'].includes(x))return 'DG';if(['nondg','nodg','ndg','nondangerousgoods','nonhazardous','nonhazmat'].includes(x))return 'Non-DG';return ''};
@@ -591,7 +591,7 @@ let S;
 function init(){
   clockRefresh();
   S={brand:clone(BRAND_DEFAULT),today:CLOCK.today,role:'Logistics Analyst',email:'demo.user@yourcompany.com',baseEmail:'demo.user@yourcompany.com',carrier:'',view:'track',
-     lines:clone(RAW.lines),events:clone(RAW.events),users:clone(RAW.users),access:{},customRoles:[],accounts:[],docs:[],rg:{},rgs:[],redirects:[],subs:clone(RAW.subs),
+     lines:clone(RAW.lines),events:clone(RAW.events),users:clone(RAW.users),access:{},customRoles:[],accounts:[],docs:[],rg:{},rgs:[],redirects:[],remarks:[],msgs:[],msgReads:{},subs:clone(RAW.subs),
      quotes:[],invoices:[],remind:{},revisions:[],uf:null,warehouses:[],slots:[],slotBlocks:[],whTeam:'',whLog:[],whNotified:{},wh:{lead:1,weekDay:4,overdue:true},utcTime:CLOCK.utc,whFail:false,mf:{log:[],ver:{master:1,commercial:1},hl:{},dock:false,closed:false,file:'master',tab:'tblShipments',q:'',only:false},outbox:[],audit:[],settings:{domain:'yourcompany.com',strip:{track:true},permV:2},draft:[],lastSaved:null,bulkResult:null,msResult:null,
      ui:{q:'',dash:{ym:CLOCK.today.slice(0,7),sel:CLOCK.today,mode:'All',ms:'All',q:'',status:'All',overdueOnly:false,tile:null,type:'All',nature:'All',mm:{measure:'ships',basis:'pickup',dim:'mode',carrier:'All',sel:null}},
          carrier:{mode:'All',win:'All',type:'All',nature:'All',metric:'ontime',target:90,mm:{measure:'weight',basis:'pickup',dim:'carrier',carrier:'All',sel:null}},tr:{seg:'d2d',basis:'actual',group:'mode',pcts:[50,90,95],mode:'All',carrier:'All',stype:'All',nature:'All',oc:'All',dc:'All',op:'All',dp:'All',win:'All'},com:'quotes',invCarrier:'All',invStatus:'All',admin:'users',msFilter:'active',cu:{carrier:'',filter:'active',q:''},ft:{series:'both',metric:'avg',group:'none',oc:'All',op:'All',dc:'All',dp:'All',nature:'All',mode:'All',vol:'All'},kt:{},sp:{carrier:'All'},wh:{tab:'schedule',code:'All',days:14},per:{kind:'all',y:+CLOCK.today.slice(0,4),q:Math.ceil(+CLOCK.today.slice(5,7)/3),m:+CLOCK.today.slice(5,7),basis:'pickup'},sort:{},sl:{tab:'my',f:'All',ship:'',week:'',pick:'first',first:null,second:null,vehicle:'',driver:'',phone:'',note:''},dm:{tab:'review',f:'Open',code:'All',week:'',sel:[],prop:null}}};
@@ -1217,7 +1217,7 @@ const slotStartOf=w=>w.slotStart||'08:00';
 const slotFrom=(w,n)=>toMin(slotStartOf(w))+(n-1)*60;
 const slotLabel=(w,n)=>fromMin(slotFrom(w,n))+' to '+fromMin(slotFrom(w,n)+60);
 const slotWhen=(w,date,n)=>typeof n==='string'?(n==='D'?dayLab(date)+' (time to be confirmed)':dayLab(date)+' '+n.slice(1).replace('-',' to ')):dayLab(date)+' '+slotLabel(w,n);
-const isWT=()=>S.role==='Warehouse Team';
+const isWT=()=>S.role==='Warehouse Team'||S.role==='Warehouse Lead';
 const myWhCodes=()=>{if(isWT()){const u=S.users.find(x=>x.UserEmail.toLowerCase()===String(S.email).toLowerCase());return u?whList(u):[]}return whSorted().map(w=>w.code)};
 const slotFind=id=>S.slots.find(r=>r.id===id);
 function slotEff(r){const sh=getShip(r.ref);if(sh&&sh.cancelled&&SLOT_HOLD.includes(r.status))return 'Cancelled';if(sh&&sh.status==='Delivered'&&SLOT_HOLD.includes(r.status))return r.status==='Approved'?'Completed':'Cancelled';return r.status}
@@ -1428,8 +1428,8 @@ function slotModal(id){
 function slCollect(){const U=S.ui.sl,g=id=>document.getElementById(id);if(g('sl_vehicle')){U.vehicle=g('sl_vehicle').value;U.driver=g('sl_driver').value;U.phone=g('sl_phone').value;U.note=g('sl_note').value}}
 function slBookWeek(){const U=S.ui.sl,sh=getShip(U.ship),w=sh&&whFind(whCodeOf(sh));if(!w)return '';const L=whLocal(w).date;return U.week||weekStart(sh.dueL&&sh.dueL>L?sh.dueL:L)}
 function slotBookPanel(){
-  const U=S.ui.sl,list=slotBookable(),sh=U.ship?getShip(U.ship):null,w=sh?whFind(whCodeOf(sh)):null;
-  const head=`<div class="card"><label class="f" style="max-width:640px">Shipment to deliver<select data-ch="slShip"><option value="">Choose a shipment</option>${list.map(s=>`<option value="${esc(s.ref)}" ${s.ref===U.ship?'selected':''}>${esc(s.ref)}, ${esc(s.route)}, ${esc(whCodeOf(s))}, due ${s.dueL?fmtS(s.dueL):'no date'}</option>`).join('')}</select></label>${list.length?'':'<p class="mu" style="margin-top:8px">No shipment is waiting for a slot.</p>'}</div>`;
+  const U=S.ui.sl,list=slotBookable().filter(s=>slQ(s)||s.ref===U.ship),sh=U.ship?getShip(U.ship):null,w=sh?whFind(whCodeOf(sh)):null;
+  const head=`<div class="card"><label class="f" style="max-width:640px">Search (HBL, container, warehouse, shipment, invoice or project)<input id="sl_q" class="in" value="${esc(U.q||'')}" placeholder="Type to narrow the list" autocomplete="off"></label><label class="f" style="max-width:920px;margin-top:8px">Shipment to deliver, listed as HBL | Container | Warehouse | Shipment | Invoice<select data-ch="slShip" size="${Math.min(8,Math.max(3,list.length+1))}" style="height:auto"><option value="">Choose a shipment</option>${list.map(s=>`<option value="${esc(s.ref)}" ${s.ref===U.ship?'selected':''}>${esc(slotShipLabel(s))}</option>`).join('')}</select></label>${list.length?'':'<p class="mu" style="margin-top:8px">No shipment is waiting for a slot.</p>'}</div>`;
   if(!sh||!w||!slotEligible(sh)||slotActive(sh.ref))return head+'<div class="card empty">Choose a shipment to see the free slots at its warehouse.</div>';
   const L=whLocal(w).date,wk=slBookWeek(),sel=[U.first&&Object.assign({tag:'first'},U.first),U.second&&Object.assign({tag:'second'},U.second)].filter(Boolean);
   return head+`<div class="card"><div class="row" style="justify-content:space-between"><h3 style="margin:0">${esc(sh.ref)} to ${esc(w.code)}</h3><span>${dgTag(sh.nature)} ${typeBadge(sh.stype)}</span></div>
@@ -1450,7 +1450,7 @@ function viewSlotReq(){
   return pageHead('Delivery Slot Requests',S.role==='Carrier Partner'?'Book a time slot to deliver your shipments to the warehouse, and follow the answer. The warehouse team approves your request or proposes a new slot.':'Book delivery slots for shipments and follow the warehouse answers. Carriers can book their own shipments directly.')+
   `<div class="kpis">${tile('Requested','Awaiting approval',cnt(r=>eff(r)==='Requested'),'')}${tile('Approved','Approved',cnt(r=>eff(r)==='Approved'),'ok')}${tile('Reply','Needs your reply',cnt(r=>eff(r)==='Alternative proposed'),cnt(r=>eff(r)==='Alternative proposed')?'late':'','a new slot is proposed')}${tile('Closed','Closed',cnt(F.Closed),'')}<button class="kpi tile acc ${U.tab==='wait'?'sel':''}" data-act="slTile" data-id="Waiting"><small>Shipments with no slot</small><b>${waiting.length}</b><small>due within 14 days</small></button></div>
   <div class="tabs">${tabs.map(([k,l])=>`<button class="${U.tab===k?'on':''}" data-act="slTab" data-t="${k}">${l}</button>`).join('')}</div>`+
-  (U.tab==='book'?slotBookPanel():U.tab==='wait'?`<div class="card" style="padding:0"><div class="tbw"><table class="tb"><tr><th>Shipment</th><th>Carrier</th><th>Warehouse</th><th>Expected delivery</th><th class="r">Days to go</th><th class="r">Packages</th><th class="r">Weight</th><th>Goods</th><th></th></tr>${slotBookable().map(s=>`<tr class="${slotSoon(s)?'tr-pend':''}"><td><b>${s.ref}</b><br><small class="mu">${esc(s.route)}</small></td><td>${esc(s.carrier)}</td><td>${esc(whCodeOf(s))}</td><td>${s.dueL?esc(dayLab(s.dueL)):'-'}</td><td class="r">${s.dueL?diffDays(s.dueL,S.today):'-'}</td><td class="r">${s.packages||'-'}</td><td class="r">${s.weight?kg(s.weight):'-'}</td><td>${typeBadge(s.stype)}${dgTag(s.nature)}</td><td class="r"><button class="btn sm pri" data-act="slBookFor" data-ref="${s.ref}">Book a slot</button></td></tr>`).join('')||'<tr><td colspan="9" class="empty">Every shipment already has a slot.</td></tr>'}</table></div></div><p class="hint">Shipments due within 14 days are highlighted. Only shipments with a warehouse in the warehouse list can be booked.</p>`:
+  (U.tab==='book'?slotBookPanel():U.tab==='wait'?`<div class="card" style="padding:0"><div class="tbw"><table class="tb"><tr><th>HBL</th><th>Container</th><th>Warehouse</th><th>Shipment</th><th>Invoice</th><th>Carrier</th><th>Expected delivery</th><th class="r">Days to go</th><th class="r">Packages</th><th class="r">Weight</th><th>Goods</th><th></th></tr>${slotBookable().filter(slQ).map(s=>`<tr class="${slotSoon(s)?'tr-pend':''}"><td>${esc(slotFirst(shipHbl(s)))}</td><td>${esc(slotFirst(shipCont(s)))}</td><td>${esc(whCodeOf(s))}</td><td><b>${s.ref}</b><br><small class="mu">${esc(s.route)}</small></td><td>${esc(slotFirst(shipInvL(s)))}</td><td>${esc(s.carrier)}</td><td>${s.dueL?esc(dayLab(s.dueL)):'-'}</td><td class="r">${s.dueL?diffDays(s.dueL,S.today):'-'}</td><td class="r">${s.packages||'-'}</td><td class="r">${s.weight?kg(s.weight):'-'}</td><td>${typeBadge(s.stype)}${dgTag(s.nature)}</td><td class="r"><button class="btn sm pri" data-act="slBookFor" data-ref="${s.ref}">Book a slot</button></td></tr>`).join('')||'<tr><td colspan="9" class="empty">Every shipment already has a slot.</td></tr>'}</table></div></div><p class="hint">Shipments due within 14 days are highlighted. Only shipments with a warehouse in the warehouse list can be booked.</p>`:
    `<div class="chips" style="margin:0 0 10px">${[['All','All'],['Requested','Awaiting approval'],['Approved','Approved'],['Reply','Needs your reply'],['Closed','Closed']].map(([k,l])=>`<button class="chip ${U.f===k?'on':''}" data-act="slTile" data-id="${k}">${l}</button>`).join('')}</div>
    <div class="card" style="padding:0"><div class="tbw"><table class="tb"><tr><th>Request</th><th>Shipment</th><th>Warehouse</th><th>Slot (local time)</th><th>Status</th><th>Requested by</th><th>Vehicle and driver</th><th>Latest update</th><th></th></tr>${rows.map(slReqRow).join('')||'<tr><td colspan="9" class="empty">No requests yet. Use Book a slot.</td></tr>'}</table></div></div>`);
 }
@@ -2376,7 +2376,7 @@ function dvLocate(){
   navigator.geolocation.getCurrentPosition(p=>{document.getElementById('dv_loc').value=p.coords.latitude.toFixed(4)+', '+p.coords.longitude.toFixed(4);out.textContent='Location added'},()=>{out.textContent='Location is switched off. Type where you are.'},{timeout:8000});
 }
 /* ========== go live: storage, sign-in and roles, flows ========== */
-const PERSIST_KEYS=['today','lines','events','users','access','subs','quotes','invoices','remind','revisions','warehouses','slots','slotBlocks','whLog','whNotified','wh','utcTime','whFail','outbox','audit','settings','brand','views','reports','whSince','customRoles','accounts','docs','rg','rgs','redirects'];
+const PERSIST_KEYS=['today','lines','events','users','access','subs','quotes','invoices','remind','revisions','warehouses','slots','slotBlocks','whLog','whNotified','wh','utcTime','whFail','outbox','audit','settings','brand','views','reports','whSince','customRoles','accounts','docs','rg','rgs','redirects','remarks','msgs','msgReads'];
 const Store={key:'ect.state.v1',modeKey:'ect.mode',last:null,err:'',
   available(){try{localStorage.setItem('ect.test','1');localStorage.removeItem('ect.test');return true}catch(e){return false}},
   mode(){if(window.ECT_LOGIN&&window.ECT_LOGIN.storage==='shared'&&window.ECT_LOGIN.shared&&window.ECT_LOGIN.shared.url)return 'shared';const d=window.ECT_LOGIN&&window.ECT_LOGIN.storage==='browser'?'browser':'demo';try{return localStorage.getItem(this.modeKey)||d}catch(e){return d}},
@@ -2607,7 +2607,7 @@ function syncRoles(){
   if(!S.users.some(u=>u.Role===PARTNER)){const c={};S.lines.forEach(l=>{c[l.Shipper]=(c[l.Shipper]||0)+1});const top=Object.keys(c).sort((a,b)=>c[b]-c[a])[0]||'';S.users.push({UserEmail:'logistics.partner@yourcompany.com',DisplayName:'Shipper logistics partner',Role:PARTNER,Carrier:'',Warehouses:'',Shippers:top})}
   migrateData();syncRoles()}}
 /* ----- profiles (custom roles) ----- */
-const PROFILE_PRESETS={Finance:['tasks','track','dashboard','commercial','invoices','freighttrends','reports'],SCM:['tasks','track','request','milestones','dataquality','dashboard','carrier','transit','reports','slotreq','warehouse']};
+const PROFILE_PRESETS={Finance:['tasks','track','dashboard','commercial','invoices','freighttrends','reports'],SCM:['tasks','track','request','milestones','dataquality','dashboard','carrier','transit','reports','slotreq','warehouse','scm']};
 function roleNameCheck(n){
   n=String(n||'').replace(/\s+/g,' ').trim();
   if(n.length<2||n.length>40)return {err:'The profile name needs 2 to 40 characters'};
@@ -2813,7 +2813,7 @@ function migratePerms(){
 {const m0=migrateData;migrateData=function(){m0.apply(this,arguments);migratePerms()}}
 /* ========== export all data (ZIP or JSON) and restore from a dump ========== */
 const DATASETS=[
- {id:'shipments',file:'shipments.json',label:'Shipment data',keys:['lines','subs','revisions','docs','rg','rgs','redirects']},
+ {id:'shipments',file:'shipments.json',label:'Shipment data',keys:['lines','subs','revisions','docs','rg','rgs','redirects','remarks','msgs','msgReads']},
  {id:'milestones',file:'milestones.json',label:'Milestones',keys:['events']},
  {id:'slots',file:'delivery_slots.json',label:'Delivery slots',keys:['slots','slotBlocks']},
  {id:'users',file:'user_list.json',label:'User list, roles and access',keys:['users','access','customRoles','accounts']},
@@ -2972,7 +2972,7 @@ document.addEventListener('keydown',e=>{
   if((e.key==='ArrowDown'||e.key==='ArrowUp')&&w.contains(document.activeElement)){const it=[...w.querySelectorAll('[role=menuitem]')];if(it.length){e.preventDefault();const i=it.indexOf(document.activeElement);it[(i+(e.key==='ArrowDown'?1:-1)+it.length)%it.length].focus()}}
 });
 /* ========== delete shipment, shipping documents, quotation id ========== */
-const DOC_TYPES=['Shipment invoice','Packing list','BL / HAWB / AWB','Others'];
+const DOC_TYPES=['Shipment invoice','Packing list','BL / HAWB / AWB','Others','POD','Quote approval','ASN','Freight payment (merged)'];
 const DOC_MAX=5*1024*1024,DOC_PER=10,DOC_EXT=['pdf','xls','xlsx','csv','png','jpg','jpeg','gif','webp'];
 const DOC_ACCEPT=DOC_EXT.map(x=>'.'+x).join(',');
 const docsOf=ref=>(S.docs||[]).filter(d=>d.ref===ref);
@@ -3034,7 +3034,7 @@ function monBarHTML(){
 {const s0=addSampleHistory;addSampleHistory=function(){const r=s0.apply(this,arguments);S.lines.forEach(l=>{if(l.Mode)l.Mode=normMode(l.Mode);if(l.ContainerType)l.ContainerType=normCtype(l.ContainerType)});return r}}
 document.addEventListener('change',e=>{if(e.target&&e.target.id==='f_ctype'){const b=document.getElementById('setptBox');if(b){b.style.display=isReefer(e.target.value)?'':'none';if(!isReefer(e.target.value)){const i=document.getElementById('f_setpt');if(i)i.value=''}}}});
 /* ========== demo sign-in (email and password), problem log, report a problem ========== */
-const APP_BUILD='site build 2026-11-15 11:27 UTC';
+const APP_BUILD='site build 2026-11-20 07:56 UTC';
 const ErrLog={key:'ect.errors',max:60,
   add(kind,msg,src){try{const a=JSON.parse(localStorage.getItem(this.key)||'[]');a.push({t:new Date().toISOString(),kind,msg:String(msg==null?'':msg).slice(0,300),src:String(src||'').slice(0,160),view:(typeof S!=='undefined'&&S&&S.view)||'',role:(typeof S!=='undefined'&&S&&S.role)||''});while(a.length>this.max)a.shift();localStorage.setItem(this.key,JSON.stringify(a))}catch(e){}},
   list(){try{return JSON.parse(localStorage.getItem(this.key)||'[]')}catch(e){return []}},
@@ -3123,7 +3123,7 @@ function errCard(){
 }
 /* ========== shared data between devices (Supabase table ect_state) ========== */
 const SH_KEYS=PERSIST_KEYS.filter(k=>!['today','utcTime','whFail'].includes(k));
-const SH_ID={lines:'LineID',events:'EventID',users:'UserEmail',subs:'SubscriptionID',quotes:'id',invoices:'id',slots:'id',slotBlocks:'id',warehouses:'code',reports:'id',views:'id',customRoles:'name',accounts:'email',docs:'id',rgs:'id',redirects:'id'};
+const SH_ID={lines:'LineID',events:'EventID',users:'UserEmail',subs:'SubscriptionID',quotes:'id',invoices:'id',slots:'id',slotBlocks:'id',warehouses:'code',reports:'id',views:'id',customRoles:'name',accounts:'email',docs:'id',rgs:'id',redirects:'id',remarks:'id',msgs:'id'};
 const SH_APPEND=['revisions','whLog','outbox','audit'];
 const SH_OBJ=['access','remind','whNotified','wh','settings','brand'];
 const Shared={v:0,base:null,baseStr:null,status:'off',err:'',last:null,by:'',busy:false,again:false,force:false,merges:0,renames:[],conflicts:0,polls:0,pushes:0,hold:false,lateRender:false,lastToast:0,trace:[]};
@@ -3683,6 +3683,7 @@ function singlePanel(){
    <div class="g3">
    <label class="f">Shipper${shipperFieldHTML()}</label>
    <label class="f">Consignee${consigneeFieldHTML()}</label>
+   <label class="f">Project name (optional)<input id="f_project" class="in" list="dl_project" autocomplete="off" maxlength="60"></label>
    <label class="f">Carrier or forwarder<input id="f_carrier" class="in" list="dl_carrier" autocomplete="off"></label>
    <label class="f">Mode<select id="f_mode" data-ch="mode">${opts(MODES,'Ocean')}</select></label>
    <label class="f">Shipment type (what is shipping)<select id="f_stype" class="in"><option value="">Select a type</option>${TYPES.map(x=>`<option>${x}</option>`).join('')}</select></label>
@@ -4165,7 +4166,7 @@ function bulkCancelRun(reason,note){
 }
 function monHTML(all){
   const D=S.ui.dash,q=D.q.toLowerCase();
-  const rows=(D.status==='Cancelled'?cancelledList():all).filter(sh=>(D.status==='All'||D.status==='Cancelled'||sh.status===D.status||(D.status==='Delayed'&&isLateNow(sh))||(D.status==='Invoice pending'&&can('invoices')&&isInvPending(sh))||(D.status==='At risk'&&riskInfo(sh)&&!isLateNow(sh))||(D.status==='Free time ending'&&['ending','over'].includes((freeInfo(sh)||{}).state)))).filter(sh=>!D.overdueOnly||isLateNow(sh)).filter(sh=>!D.missDocs||missingDocs(sh)).filter(sh=>!D.pendRG||rgPending(sh)).filter(sh=>!D.poMiss||poMissing(sh)).filter(sh=>!D.ent||entMatch(sh,D.ent))
+  const rows=(D.status==='Cancelled'?cancelledList():all).filter(sh=>(D.status==='All'||D.status==='Cancelled'||sh.status===D.status||(D.status==='Delayed'&&isLateNow(sh))||(D.status==='Invoice pending'&&can('invoices')&&isInvPending(sh))||(D.status==='At risk'&&riskInfo(sh)&&!isLateNow(sh))||(D.status==='Free time ending'&&['ending','over'].includes((freeInfo(sh)||{}).state)))).filter(sh=>!D.overdueOnly||isLateNow(sh)).filter(sh=>!D.missDocs||missingDocs(sh)).filter(sh=>!D.pendRG||rgPending(sh)).filter(sh=>!D.poMiss||poMissing(sh)).filter(sh=>!D.ent||entMatch(sh,D.ent)).filter(sh=>!D.proj||carrKey((sh.lines.find(l=>l.ProjectName)||{}).ProjectName||'')===carrKey(D.proj))
     .filter(sh=>!q||(sh.ref+' '+sh.carrier+' '+sh.shipper+' '+sh.consignee+' '+sh.route+' '+sh.pos.join(' ')+' '+shipHay(sh)).toLowerCase().includes(q)).sort((a,b)=>(a.due||'9').localeCompare(b.due||'9'));
   if(!rows.length)return monBarHTML()+monEmptyHTML();
   const cb=can('cancelship'),elig=s=>!s.cancelled;D.chk=(D.chk||[]).filter(r=>rows.some(s=>s.ref===r&&elig(s)));
@@ -4503,7 +4504,7 @@ function quotesModal(ref){
   openModal(`<div class="mh"><div><h2>Quotes for ${esc(ref)}</h2><div class="mu">${esc(sh.mode)}, ${esc(sh.route)}, Incoterm ${esc(sh.inco)}</div></div><button class="x" data-act="close" aria-label="Close">&times;</button></div>
   ${ql.length?`<div class="tbw"><table class="tb"><tr><th>Vendor</th><th>Quotation ID</th><th class="r">Amount</th><th class="r">Transit days</th><th>Status</th><th></th></tr>${ql.map(q=>`<tr><td>${esc(q.vendor)}</td><td>${esc(q.qid||'-')}</td><td class="r">${usd(q.amount)}</td><td class="r">${q.days||'-'}</td><td><span class="pill ${q.status==='Selected'?'ok':'chip'}">${q.status}</span></td>
    <td class="r">${q.status!=='Selected'?`<button class="btn sm pri" data-act="quoteSelect" data-id="${q.id}" data-ref="${esc(ref)}">Select and nominate</button>`:''}</td></tr>`).join('')}</table></div>`:'<div class="empty">No quotes recorded yet.</div>'}
-  <h3 class="sec">Add a quote</h3><div class="g3"><label class="f">Vendor<input id="q_vendor" class="in" value="${esc(sh.carrier)}"></label><label class="f">Amount (USD)<input id="q_amt" class="in" inputmode="decimal"></label><label class="f">Transit days<input id="q_days" class="in" inputmode="numeric"></label><label class="f">Quotation ID<input id="q_qid" class="in" maxlength="40" placeholder="Carrier quotation number"></label></div>
+  <h3 class="sec">Add a quote</h3><div class="g3"><label class="f">Vendor<input id="q_vendor" class="in" value="${esc(sh.carrier)}"></label><label class="f">Project (optional)<input id="q_project" class="in" list="dl_project" maxlength="60" value="${esc(shipProject(sh))}" autocomplete="off"></label><label class="f">Amount (USD)<input id="q_amt" class="in" inputmode="decimal"></label><label class="f">Transit days<input id="q_days" class="in" inputmode="numeric"></label><label class="f">Quotation ID<input id="q_qid" class="in" maxlength="40" placeholder="Carrier quotation number"></label></div>
   <div class="row sec"><button class="btn pri" data-act="quoteAdd" data-ref="${esc(ref)}">Add quote</button></div>
   <p class="hint">Selecting a quote nominates that vendor as the carrier and records today's date as the nomination date. Other quotes for the shipment are marked rejected.</p>`);
 }
@@ -5883,9 +5884,9 @@ function viewRG(){
   return pageHead('Receipts','Receipt of Goods in Oracle, tracked for every PO and item line. DAP and DDP shipments need only a Final RG after delivery. All other terms need an In-Transit RG once the shipment is in transit, then a Final RG after delivery. One shipment can have several RG numbers, one RG can cover several lines or POs, and a line can be received in parts. A stage is complete when the full quantity is received or the line is marked NA.')+
   `<div class="fa-tiles">${tile('Pending','All Pending',P,P.length?'late':'')}${tile('It','In-Transit RG Pending',ip,ip.length?'acc':'')}${tile('Fin','Final RG Pending',fp,fp.length?'acc':'')}${tile('Done','RG Complete',dn,'ok')}</div>
   <div class="card"><div class="row"><label class="f grow">Search<input id="rg_q" class="in" value="${esc(F.q||'')}" placeholder="HBL, MBL, invoice, container, PO, item or RG number"></label>
-  <span class="row" style="align-self:flex-end;gap:6px;flex-wrap:wrap">${may?`<button class="btn sm pri" data-act="rgRecSel" ${F.sel.length?'':'disabled'}>Record RG for Selected Lines (${F.sel.length})</button>`:''}<button class="btn sm" data-act="rdQuick" data-id="rgpending">Download RG Pending Report</button>${may?'<label class="btn sm pri" style="cursor:pointer">Upload RG Details<input type="file" id="rgFile" accept=".xlsx,.xls,.csv" hidden></label>':''}</span></div></div>
-  <div class="card" style="padding:0"><div class="tbw"><table class="tb fa-tb" data-sort="on"><tr><th style="width:30px"><input type="checkbox" data-ch="rgSelAllRows" aria-label="Select all shown" ${shown.length&&shown.every(x=>F.sel.includes(x.key))?'checked':''}></th><th>HBL / HAWB</th><th>MBL / MAWB</th><th>Invoice No.</th><th>Container</th><th>PO Number</th><th>Item Number</th><th class="r">Quantity</th><th>Required Milestone</th><th>In-Transit RG</th><th>Final RG</th><th></th></tr>
-  ${shown.map(x=>{const sh=x.sh,l=x.l;return `<tr><td><input type="checkbox" data-ch="rgSel" data-k="${esc(x.key)}" ${F.sel.includes(x.key)?'checked':''} aria-label="Select line"></td><td><b>${esc(rgHbl(sh,l)||'-')}</b><br><small class="mu nw">Ref ${esc(sh.ref)}</small></td><td>${esc(faMblOf(sh)||'-')}</td><td>${esc(l.InvoiceNumber||'-')}</td><td>${esc(rgCont(sh,l)||'-')}</td><td>${l.PONumber?esc(l.PONumber):'<span class="late-t">Missing</span>'}</td><td>${esc(l.ItemNumber||'-')}</td><td class="r">${qtyTxt(num(l.ItemQty))}</td>
+  <span class="row" style="align-self:flex-end;gap:6px;flex-wrap:wrap">${may?`<button class="btn sm pri" data-act="rgRecSel" ${F.sel.length?'':'disabled'}>Record RG for Selected Lines (${F.sel.length})</button>`:''}<button class="btn sm" data-act="rdQuick" data-id="rgpending">Download RG Pending Report</button>${may?'<label class="btn sm pri" style="cursor:pointer">Upload RG Details<input type="file" id="rgFile" accept=".xlsx,.xls,.csv" hidden></label>':''}${may?'<button class="btn sm" data-act="asnTpl">ASN Template</button><label class="btn sm pri" style="cursor:pointer">Upload ASN Numbers<input type="file" id="asnFile" accept=".xlsx,.xls,.csv" hidden></label>':''}</span></div></div>
+  <div class="card" style="padding:0"><div class="tbw"><table class="tb fa-tb" data-sort="on"><tr><th style="width:30px"><input type="checkbox" data-ch="rgSelAllRows" aria-label="Select all shown" ${shown.length&&shown.every(x=>F.sel.includes(x.key))?'checked':''}></th><th>HBL / HAWB</th><th>MBL / MAWB</th><th>Invoice No.</th><th>Container</th><th>PO Number</th><th>Item Number</th><th>ASN Number</th><th class="r">Quantity</th><th>Required Milestone</th><th>In-Transit RG</th><th>Final RG</th><th></th></tr>
+  ${shown.map(x=>{const sh=x.sh,l=x.l;return `<tr><td><input type="checkbox" data-ch="rgSel" data-k="${esc(x.key)}" ${F.sel.includes(x.key)?'checked':''} aria-label="Select line"></td><td><b>${esc(rgHbl(sh,l)||'-')}</b><br><small class="mu nw">Ref ${esc(sh.ref)}</small></td><td>${esc(faMblOf(sh)||'-')}</td><td>${esc(l.InvoiceNumber||'-')}</td><td>${esc(rgCont(sh,l)||'-')}</td><td>${l.PONumber?esc(l.PONumber):'<span class="late-t">Missing</span>'}</td><td>${esc(l.ItemNumber||'-')}</td><td>${may?`<input class="in" data-ch="asnEdit" data-id="${esc(l.LineID)}" value="${esc(l.ASN||'')}" placeholder="Pending" maxlength="40" style="width:130px" aria-label="ASN number for item ${esc(l.ItemNumber||'')}">`:(l.ASN?esc(l.ASN):'<span class="mu">Pending</span>')}</td><td class="r">${qtyTxt(num(l.ItemQty))}</td>
    <td>${x.pend.length?x.pend.map(s=>`<span class="pill warn">${RG_ST[s]}</span>`).join(' '):'<span class="pill ok">Complete</span>'}${x.n.one?'<br><small class="mu">Final RG only (DAP/DDP)</small>':''}</td><td>${rgStageCell(x,'it')}</td><td>${rgStageCell(x,'fin')}</td><td class="r">${may?`<button class="btn sm pri" data-act="rgOpen" data-ref="${esc(sh.ref)}" data-line="${esc(l.LineID)}">Record RG</button>`:''}</td></tr>`}).join('')||'<tr><td colspan="12" class="empty">Nothing here.</td></tr>'}</table></div></div>
   ${list.length>shown.length?`<p class="hint">Showing the first ${shown.length} of ${list.length} lines. Search to narrow the list.</p>`:''}
   <p class="hint">RG numbers are optional. Tick lines of one shipment and choose Record RG, or download the pending report (one row per line), fill in the RG details in Excel and upload it back. An RG number is normally used on one shipment only. The Monthly RG Accrual report is on the Reports page.</p>`;
@@ -6051,7 +6052,7 @@ const SD_PERIODS=['No preference','Morning','Afternoon'];
 const sdSlot=(time,end)=>'T'+time+(end?'-'+end:'');
 function slotDayPanel(sh,w){
   const U=S.ui.sl,list=slotBookable(),L=whLocal(w).date;
-  const head=`<div class="card"><label class="f" style="max-width:640px">Shipment to deliver<select data-ch="slShip"><option value="">Choose a shipment</option>${list.map(s=>`<option value="${esc(s.ref)}" ${s.ref===U.ship?'selected':''}>${esc(s.ref)}, ${esc(s.route)}, ${esc(whCodeOf(s))}, due ${s.dueL?fmtS(s.dueL):'no date'}</option>`).join('')}</select></label></div>`;
+  const head=`<div class="card"><label class="f" style="max-width:640px">Search (HBL, container, warehouse, shipment, invoice or project)<input id="sl_q" class="in" value="${esc(U.q||'')}" placeholder="Type to narrow the list" autocomplete="off"></label><label class="f" style="max-width:920px;margin-top:8px">Shipment to deliver, listed as HBL | Container | Warehouse | Shipment | Invoice<select data-ch="slShip" size="${Math.min(8,Math.max(3,list.length+1))}" style="height:auto"><option value="">Choose a shipment</option>${list.map(s=>`<option value="${esc(s.ref)}" ${s.ref===U.ship?'selected':''}>${esc(slotShipLabel(s))}</option>`).join('')}</select></label></div>`;
   const D=U.day||(U.day={date:'',date2:'',period:'No preference',vehicle:'',driver:'',phone:'',note:''});
   return head+`<div class="card"><div class="row" style="justify-content:space-between"><h3 style="margin:0">${esc(sh.ref)} to ${esc(w.code)}</h3><span>${dgTag(sh.nature)} ${typeBadge(sh.stype)}</span></div>
    <dl class="kv" style="margin-top:8px"><div><small>Route</small><dd>${esc(sh.route)}, ${esc(sh.carrier)}</dd></div><div><small>Expected delivery</small><dd>${sh.dueL?esc(dayFull(sh.dueL)):'No date yet'}</dd></div><div><small>Packages, weight</small><dd>${esc((sh.packages||'-')+', '+(sh.weight?kg(sh.weight):'-'))}</dd></div><div><small>Containers</small><dd>${esc(sh.containers.filter(Boolean).join(', ')||'-')}</dd></div><div><small>PO numbers</small><dd>${esc(sh.pos.join(', ')||'-')}</dd></div><div><small>Warehouse type</small><dd>${esc(w.type||'-')}</dd></div></dl>
@@ -6587,7 +6588,7 @@ function listRows(arr,kind){
     return `<tr class="click" data-act="open" data-ref="${sh.ref}"><td><span class="pill info">${CT_SHORT[k]}</span></td><td><b>${sh.ref}</b><br><small class="mu">${esc(sh.route)}</small></td><td>${esc(sh.carrier)}</td><td>${fmtS(p)}</td><td>${gap}</td><td>${pill(sh)}</td></tr>`}).join('')+'</table></div>';
 }
 /* ----- Roles ----- */
-const roleNameOK=(name,old)=>{name=String(name||'').replace(/\s+/g,' ').trim();if(!name)return {err:'Enter a name for the role'};if(name.length>40)return {err:'The name can be up to 40 characters'};if(ROLES.some(r=>r.toLowerCase()===name.toLowerCase()&&r!==old))return {err:'A role called '+name+' already exists'};return {name}};
+const roleNameOK=(name,old)=>{name=String(name||'').replace(/\s+/g,' ').trim();if(!name)return {err:'Enter a name for the role'};if(name.length>40)return {err:'The name can be up to 40 characters'};if(!/^[A-Za-z0-9 &.\-]+$/.test(name))return {err:'Use letters, numbers, spaces and the characters & . - in the name'};if(ROLES.some(r=>r.toLowerCase()===name.toLowerCase()&&r!==old))return {err:'A role called '+name+' already exists'};return {name}};
 function roleCreate(name,base,access,desc){
   const c=roleNameOK(name);if(c.err)return {ok:false,msg:c.err};
   S.customRoles.push({name:c.name,base:base||'',desc:String(desc||'').trim().slice(0,120),created:S.today,by:S.email});
@@ -6718,6 +6719,305 @@ document.addEventListener('click',e=>{
 },true);
 
 const riskCells=sh=>{const r=riskInfo(sh);return r?`<td><span class="pill ${r.level==='High'?'late':'warn'}">${r.level}</span></td><td>${esc(r.simple)}</td>`:'<td></td><td></td>'};
+/* ========== Role Type and Role ID, Warehouse Lead, Settings tabs, masters ========== */
+const ROLE_DEF={'In Organization':['Internal','ORG-01'],'Logistics Executive':['Internal','LGX-01'],'Logistics Associate':['Internal','LGA-01'],'Logistics Analyst':['Internal','LGN-01'],'Logistics Manager':['Internal','LGM-01'],'Warehouse Lead':['Internal','WHL-01'],'Carrier Partner':['External','CAR-01'],'Warehouse Team':['External','WHO-01'],'External Logistics Partner':['External','EXP-01'],'Partner Executive':['External','PEX-01']};
+const roleMeta=r=>{const m=(S.settings.roleIds||{})[r];if(m&&m.id)return m;const d=ROLE_DEF[r];return d?{type:d[0],id:d[1]}:{type:'Internal',id:(m&&m.id)||''}};
+const roleIdValid=s=>/^[A-Za-z0-9]+(-[A-Za-z0-9]+)*$/.test(s)&&s.length<=20;
+function roleIdsEnsure(){
+  const ri=S.settings.roleIds=S.settings.roleIds||{},used=new Set(Object.values(ri).map(x=>String(x.id||'').toUpperCase()).filter(Boolean));
+  ROLES.forEach(r=>{if(ri[r]&&ri[r].id)return;const d=ROLE_DEF[r];let id=d?d[1]:(r.replace(/[^A-Za-z]/g,'').slice(0,3).toUpperCase()||'ROL')+'-01',n=1;while(used.has(id.toUpperCase())){n++;id=id.replace(/-\d+$/,'')+'-'+String(n).padStart(2,'0')}used.add(id.toUpperCase());ri[r]={type:d?d[0]:'Internal',id}});
+}
+function roleIdsSave(rows){
+  const errs=[],seen=new Map();rows.forEach(r=>{if(!r.id)errs.push(r.role+': enter a Role ID');else if(!roleIdValid(r.id))errs.push(r.role+': the Role ID can use letters, numbers and hyphens, up to 20 characters');else{const k=r.id.toUpperCase();if(seen.has(k))errs.push('The Role ID '+r.id+' is used by both '+seen.get(k)+' and '+r.role);else seen.set(k,r.role)}});
+  if(errs.length)return {ok:false,msg:errs[0],errs};
+  const ri=S.settings.roleIds=S.settings.roleIds||{};rows.forEach(r=>{const old=ri[r.role]||{};ri[r.role]={type:ROLE_DEF[r.role]?ROLE_DEF[r.role][0]:r.type,id:r.id};if(old.id!==r.id)audit('Role ID changed','',r.role+': '+(old.id||'none')+' to '+r.id)});
+  S.users.forEach(u=>{const m=ri[u.Role];if(m){u.RoleID=m.id;u.RoleType=m.type}});return {ok:true,msg:'Role IDs saved'};
+}
+{const m1=migrateData;migrateData=function(){m1.apply(this,arguments);roleIdsEnsure();S.users.forEach(u=>{const m=roleMeta(u.Role);u.RoleID=m.id;u.RoleType=m.type});
+  if((S.settings.permV4||0)<1){const give=(roles,ids)=>roles.forEach(r=>{S.access[r]=S.access[r]||[];ids.forEach(i=>{if(!S.access[r].includes(i))S.access[r].push(i)})});give(['Warehouse Lead'],['tasks','track','slotmgmt','slotreq','warehouse','rg','redirects','redirectreq']);S.settings.permV4=1}}}
+/* ----- users table: Role Type, Role ID, Status and filters ----- */
+function usersPass(){
+  const t=document.getElementById('usersTbl');if(!t)return;const tb=t.querySelector('table');if(!tb||tb.dataset.rt)return;tb.dataset.rt='1';
+  const hr=tb.rows[0],ci=[...hr.cells].findIndex(c=>/^Role/.test(c.textContent.trim()));if(ci<0)return;
+  const f=S.ui.usf=S.ui.usf||{type:'',id:''};
+  const mkTh=(txt)=>{const th=document.createElement('th');th.textContent=txt;return th};
+  hr.insertBefore(mkTh('Role Type'),hr.cells[ci+1]||null);hr.insertBefore(mkTh('Role ID'),hr.cells[ci+2]||null);hr.insertBefore(mkTh('Status'),hr.cells[ci+3]||null);
+  [...tb.rows].slice(1).forEach(r=>{const el=r.querySelector('[data-i]'),u=el?S.users[Number(el.dataset.i)]:null;if(!u)return;const m=roleMeta(u.Role),act=(S.accounts||[]).some(a=>String(a.email||a.UserEmail||'').toLowerCase()===String(u.UserEmail).toLowerCase())||!(S.settings.auth&&S.settings.auth.on);
+    const add=(txt,idx)=>{const td=document.createElement('td');td.textContent=txt;r.insertBefore(td,r.cells[idx]||null)};add(m.type,ci+1);add(m.id,ci+2);add(act?'Active':'No sign-in yet',ci+3);
+    const hide=(f.type&&m.type!==f.type)||(f.id&&m.id!==f.id);r.style.display=hide?'none':''});
+  if(!document.getElementById('usf_bar')){const ids=[...new Set(ROLES.map(r=>roleMeta(r).id))].filter(Boolean).sort();t.insertAdjacentHTML('afterbegin',`<div id="usf_bar" class="row" style="gap:10px;margin-bottom:8px;align-items:flex-end"><label class="f">Role type<select data-ch="usfType" class="in" style="width:auto"><option value="">All</option><option ${f.type==='Internal'?'selected':''}>Internal</option><option ${f.type==='External'?'selected':''}>External</option></select></label><label class="f">Role ID<select data-ch="usfId" class="in" style="width:auto"><option value="">All</option>${ids.map(i=>`<option ${f.id===i?'selected':''}>${esc(i)}</option>`).join('')}</select></label></div>`)}
+}
+{const r0=render;render=function(){r0.apply(this,arguments);try{usersPass()}catch(e){}}}
+/* ----- masters ----- */
+const emailList=s=>String(s||'').split(/[;,]+/).map(x=>x.trim()).filter(Boolean);
+const emailsBad=a=>a.filter(x=>!/^[^\s@;,]+@[^\s@;,]+\.[^\s@;,]+$/.test(x));
+const carrierMaster=()=>S.settings.carrierMaster=S.settings.carrierMaster||[];
+const carrierRec=name=>{const k=carrKey(name);return carrierMaster().find(c=>carrKey(c.name)===k)||null};
+function carrierRecSave(name,patch){let c=carrierRec(name);if(!c){c={name:canonCarrier(name),code:'',number:'',cc:''};carrierMaster().push(c)}Object.assign(c,patch);return c}
+const projList=()=>{const s=new Map(),add=n=>{n=String(n||'').replace(/\s+/g,' ').trim();if(n&&!s.has(carrKey(n)))s.set(carrKey(n),n)};(S.settings.projects||[]).forEach(add);S.lines.forEach(l=>add(l.ProjectName));S.quotes.forEach(q=>add(q.project));return [...s.values()].sort((a,b)=>a.localeCompare(b))};
+function canonProject(name){const raw=String(name||'').replace(/\s+/g,' ').trim();if(!raw)return '';const k=carrKey(raw);return projList().find(p=>carrKey(p)===k)||raw}
+function projAdd(name){const n=canonProject(name);if(!n)return {ok:false,msg:'Enter a project name'};if(n.length>60)return {ok:false,msg:'The name can be up to 60 characters'};S.settings.projects=S.settings.projects||[];if(!S.settings.projects.some(p=>carrKey(p)===carrKey(n))){S.settings.projects.push(n);audit('Project added','',n)}return {ok:true,msg:'Project '+n+' added',name:n}}
+function projRename(old,nw){const n=String(nw||'').replace(/\s+/g,' ').trim();if(!n)return {ok:false,msg:'Enter a project name'};if(projList().some(p=>carrKey(p)===carrKey(n)&&carrKey(p)!==carrKey(old)))return {ok:false,msg:n+' already exists'};S.settings.projects=(S.settings.projects||[]).map(p=>carrKey(p)===carrKey(old)?n:p);if(!S.settings.projects.some(p=>carrKey(p)===carrKey(n)))S.settings.projects.push(n);S.lines.forEach(l=>{if(carrKey(l.ProjectName||'')===carrKey(old))l.ProjectName=n});S.quotes.forEach(q=>{if(carrKey(q.project||'')===carrKey(old))q.project=n});audit('Project renamed','',old+' to '+n);return {ok:true,msg:'Project renamed. Shipments and quotes follow.'}}
+function projDelete(name){const used=S.lines.some(l=>carrKey(l.ProjectName||'')===carrKey(name))||S.quotes.some(q=>carrKey(q.project||'')===carrKey(name));if(used)return {ok:false,msg:name+' is used by shipments or quotes. Rename it instead'};S.settings.projects=(S.settings.projects||[]).filter(p=>carrKey(p)!==carrKey(name));audit('Project deleted','',name);return {ok:true,msg:'Project deleted'}}
+function setCards(tab){
+  const ro=!can('settingsedit')?'disabled':'';
+  if(tab==='master'){
+    const cl=S.settings.client||{},cars=uniq([...carriersList(),...carrierMaster().map(c=>c.name)]).sort((a,b)=>a.localeCompare(b)),miss=cars.filter(c=>{const r=carrierRec(c);return !r||!r.code||!r.number});
+    return `<div class="card"><h3>Client</h3><p class="mu" style="margin-bottom:8px">The client code is used in the subject of every freight invoice email.</p><label class="f">Client code<input class="in" data-ch="setClient" value="${esc(cl.code||'')}" maxlength="20" style="width:200px" ${ro} aria-label="Client code"></label></div>
+    <div class="card"><h3>Carriers</h3><p class="mu" style="margin-bottom:8px">One row per carrier: its code, its number, and the people copied on its invoices. ${miss.length?`<b class="late-t">${miss.length} carrier${miss.length===1?'':'s'} still need a code and number.</b> Invoice emails for them are held until you fill these in.`:'Every carrier has a code and number.'}</p><div class="tbw"><table class="tb" data-sort="off"><tr><th>Carrier</th><th>Carrier code</th><th>Carrier number</th><th>CC for its invoices (separate with ;)</th></tr>${cars.map(c=>{const r=carrierRec(c)||{};return `<tr><td><b>${esc(c)}</b></td><td><input class="in" data-ch="setCar" data-f="code" data-n="${esc(c)}" value="${esc(r.code||'')}" maxlength="20" style="width:120px" ${ro} aria-label="Carrier code for ${esc(c)}"></td><td><input class="in" data-ch="setCar" data-f="number" data-n="${esc(c)}" value="${esc(r.number||'')}" maxlength="30" style="width:140px" ${ro} aria-label="Carrier number for ${esc(c)}"></td><td><input class="in" data-ch="setCar" data-f="cc" data-n="${esc(c)}" value="${esc(r.cc||'')}" style="width:100%" ${ro} aria-label="CC emails for ${esc(c)}"></td></tr>`}).join('')||'<tr><td colspan="4" class="empty">No carriers yet.</td></tr>'}</table></div></div>
+    <div class="card"><h3>Projects</h3><p class="mu" style="margin-bottom:8px">The list of project names offered on shipments and quotes, so a project is never spelled two ways.</p><div class="tbw"><table class="tb" data-sort="off"><tr><th>Project</th><th>Shipments</th><th>Quotes</th><th></th></tr>${projList().map(p=>`<tr><td><b>${esc(p)}</b></td><td>${S.lines.filter(l=>carrKey(l.ProjectName||'')===carrKey(p)&&0).length||uniq(S.lines.filter(l=>carrKey(l.ProjectName||'')===carrKey(p)).map(l=>l.ShipmentRef)).length}</td><td>${S.quotes.filter(q=>carrKey(q.project||'')===carrKey(p)).length}</td><td class="r"><button class="btn sm" data-act="projRen" data-n="${esc(p)}" ${ro}>Rename</button> <button class="btn sm danger" data-act="projDel" data-n="${esc(p)}" ${ro}>Delete</button></td></tr>`).join('')||'<tr><td colspan="4" class="empty">No projects yet.</td></tr>'}</table></div><div class="row sec"><input id="proj_new" class="in" placeholder="New project name" maxlength="60" style="width:260px" ${ro} aria-label="New project name"><button class="btn pri" data-act="projNew" ${ro}>Add Project</button></div></div>
+    <div class="card"><h3>Warehouses</h3><p class="mu" style="margin-bottom:8px">${S.warehouses.length} warehouses, ${S.warehouses.filter(w=>String(w.Receivers||'').trim()).length} with receiver names. Warehouses are set up in Administration, Warehouses.</p><button class="btn" data-act="setGoWh">Open Warehouses</button></div>`;
+  }
+  if(tab==='people'){
+    roleIdsEnsure();const used=r=>S.users.filter(u=>u.Role===r).length;
+    return `<div class="card"><h3>Role Types and Role IDs</h3><p class="mu" style="margin-bottom:8px">Every role has a type (Internal or External) and a unique Role ID. Access is checked against the role and its type. Internal means your own company. External means carriers, warehouse operations and partners.</p><div class="tbw"><table class="tb" data-sort="off"><tr><th>Role</th><th>Role type</th><th>Role ID</th><th>Users</th></tr>${ROLES.map(r=>{const m=roleMeta(r),built=!!ROLE_DEF[r];return `<tr><td><b>${esc(r)}</b>${built?'':' <span class="pill info">Your role</span>'}</td><td><select class="in" data-ch="setRoleType" data-r="${esc(r)}" style="width:auto" ${built||ro?'disabled':''} aria-label="Role type for ${esc(r)}"><option ${m.type==='Internal'?'selected':''}>Internal</option><option ${m.type==='External'?'selected':''}>External</option></select></td><td><input class="in" data-ch="setRoleId" data-r="${esc(r)}" value="${esc(m.id)}" maxlength="20" style="width:140px" ${ro} aria-label="Role ID for ${esc(r)}"></td><td>${used(r)}</td></tr>`}).join('')}</table></div><div class="row sec"><button class="btn pri" data-act="roleIdsSave" ${ro}>Save Role IDs</button></div></div>`;
+  }
+  if(tab==='finance'){
+    const f=S.settings.finance||{},cl=(S.settings.client||{}).code,cars=carriersList(),held=(S.invoices||[]).filter(i=>i.source==='carrier'&&i.status==='Pending Payment'&&i.hold).length;
+    return `<div class="card"><h3>Payment Party</h3><p class="mu" style="margin-bottom:8px">Freight invoices submitted by carriers are emailed automatically to the payment party. Separate several addresses with semicolons.</p>${held?`<div class="note" style="margin-bottom:8px"><b>${held} invoice email${held===1?' is':'s are'} held.</b> They send by themselves once the client code, the carrier code and number, and the To address are filled in.</div>`:''}<div class="g2"><label class="f">To (payment party)<input class="in" data-ch="setFin" data-f="to" value="${esc(f.to||'')}" ${ro} aria-label="Payment party email addresses"></label><label class="f">Default CC for every carrier (internal team and others)<input class="in" data-ch="setFin" data-f="cc" value="${esc(f.cc||'')}" ${ro} aria-label="Default CC email addresses"></label></div><p class="hint">Each invoice email also copies the carrier user who submitted it, and the CC list set for that carrier under Master data. Client code: <b>${esc(cl||'not set')}</b>.</p></div>
+    <div class="card"><h3>Invoice Rules</h3><p class="mu" style="margin:0">A carrier can submit invoices only for Closed shipments (delivered, with the POD uploaded). Each invoice needs a number, date, value, type, the freight invoice PDF and a Quote Approval. The documents are merged in this order: Freight Invoice, HBL/HAWB, Shipment Invoice, Packing List, POD, Quote Approval, and kept under 5 MB. The email subject is {Client Code}_{Carrier Code}_{Carrier Number}_Freight Invoice_{Invoice Number}.</p></div>`;
+  }
+  return '';
+}
+{const s0=settingsPanel;settingsPanel=function(){
+  const html=s0.apply(this,arguments),root=new DOMParser().parseFromString('<div id="r">'+html+'</div>','text/html').getElementById('r'),tab=S.ui.setTab||'master';
+  const cls=c=>{const t=((c.querySelector('h3')||{}).textContent||'').trim();return /^(Data backup|Sample history|Data in this demo)/.test(t)?'data':/^Carrier Names/.test(t)?'master':'rules'};
+  const tabs=[['master','Master data'],['people','People and IDs'],['finance','Finance and payment'],['rules','Rules and alerts'],['data','Data and demo']];
+  return `<div class="tabs" role="tablist" aria-label="Settings sections">${tabs.map(([k,l])=>`<button role="tab" aria-selected="${tab===k}" class="${tab===k?'on':''}" data-act="setTab" data-t="${k}">${l}</button>`).join('')}</div>${setCards(tab)}${[...root.children].filter(c=>cls(c)===tab).map(c=>c.outerHTML).join('')}`;
+}}
+document.addEventListener('click',e=>{
+  const t=e.target.closest&&e.target.closest('[data-act]');if(!t)return;const a=t.dataset.act,d=t.dataset;
+  if(!['setTab','setGoWh','roleIdsSave','projNew','projRen','projDel'].includes(a))return;e.stopImmediatePropagation();
+  if(a==='setTab'){S.ui.setTab=d.t;render();return}
+  if(a==='setGoWh'){S.ui.admin='warehouses';render();return}
+  if(!can('settingsedit')){toast('Your role is not allowed to do this','bad');return}
+  if(a==='roleIdsSave'){const rows=ROLES.map(r=>({role:r,type:(document.querySelector('[data-ch=setRoleType][data-r="'+r+'"]')||{value:roleMeta(r).type}).value,id:((document.querySelector('[data-ch=setRoleId][data-r="'+r+'"]')||{value:roleMeta(r).id}).value||'').trim()})),r=roleIdsSave(rows);toast(r.msg,r.ok?'':'bad');render();return}
+  if(a==='projNew'){const r=projAdd((document.getElementById('proj_new')||{value:''}).value);toast(r.msg,r.ok?'':'bad');render();return}
+  if(a==='projRen'){const n=prompt('New name for '+d.n,d.n);if(n===null)return;const r=projRename(d.n,n);toast(r.msg,r.ok?'':'bad');render();return}
+  if(a==='projDel'){if(!confirm('Delete the project '+d.n+'?'))return;const r=projDelete(d.n);toast(r.msg,r.ok?'':'bad');render();return}
+},true);
+document.addEventListener('change',e=>{
+  const t=e.target;if(!t||!t.dataset)return;const k=t.dataset.ch;
+  if(k==='usfType'||k==='usfId'){const f=S.ui.usf=S.ui.usf||{type:'',id:''};if(k==='usfType')f.type=t.value;else f.id=t.value;render();return}
+  if(!['setClient','setCar','setFin'].includes(k))return;
+  if(!can('settingsedit')){toast('Your role is not allowed to do this','bad');return}
+  if(k==='setClient'){const v=String(t.value||'').trim();if(v&&!/^[A-Za-z0-9_-]{1,20}$/.test(v)){toast('The client code can use letters, numbers, hyphens and underscores','bad');return}S.settings.client={code:v};audit('Client code changed','',v||'cleared');toast('Client code saved');invHeldRelease();render();return}
+  if(k==='setCar'){const f=t.dataset.f,v=String(t.value||'').trim();if(f==='cc'){const b=emailsBad(emailList(v));if(b.length){toast('Check this address: '+b[0],'bad');return}}if(f!=='cc'&&v&&!/^[A-Za-z0-9_-]{1,30}$/.test(v)){toast('Use letters, numbers, hyphens and underscores only','bad');return}carrierRecSave(t.dataset.n,{[f]:v});audit('Carrier master changed',t.dataset.n,f+': '+(v||'cleared'));toast('Saved');invHeldRelease();render();return}
+  if(k==='setFin'){const f=t.dataset.f,b=emailsBad(emailList(t.value));if(b.length){toast('Check this address: '+b[0],'bad');return}S.settings.finance=Object.assign({},S.settings.finance,{[f]:emailList(t.value).join('; ')});audit('Payment party changed','',f+': '+(S.settings.finance[f]||'cleared'));toast('Saved');invHeldRelease();render();return}
+},true);
+function invHeldRelease(){}
+
+/* ========== milestone labels (view only), Project Name, ASN, slot listing ========== */
+const MS_UI={'Pickup':'Pickup (Supplier)','ETD':'ETD (Port)','ETD (Departure)':'ETD (Port)','ETA':'ETA (Port)','ETA (Arrival)':'ETA (Port)','Delivery':'Final Destination Delivery','Delivery Due':'Final Destination Delivery Due','Delivery due':'Final Destination Delivery Due'};
+const MS_OPT={Pickup:'Pickup (Supplier), planned date',ETD:'ETD (Port), planned date',ETA:'ETA (Port), planned date',Delivery:'Final Destination Delivery, due date'};
+function msUiPass(){
+  [document.getElementById('view'),document.getElementById('modal')].filter(Boolean).forEach(r=>{
+    r.querySelectorAll('th,.pill.info,[data-msl]').forEach(el=>{const n=[...el.childNodes].find(x=>x.nodeType===3&&x.nodeValue.trim());if(n){const t=n.nodeValue.trim();if(MS_UI[t])n.nodeValue=n.nodeValue.replace(t,MS_UI[t])}});
+    r.querySelectorAll('#d_ms').forEach(sel=>[...sel.options].forEach(o=>{if(MS_OPT[o.value])o.textContent=MS_OPT[o.value]}));
+  });
+}
+{const r0=render;render=function(){r0.apply(this,arguments);try{msUiPass();projListSync()}catch(e){}}}
+{const d0=detailModal;detailModal=function(){d0.apply(this,arguments);try{msUiPass()}catch(e){}}}
+/* ----- Project Name ----- */
+const shipProject=sh=>((sh&&sh.lines||[]).find(l=>l.ProjectName)||{}).ProjectName||'';
+function projListSync(){let d=document.getElementById('dl_project');if(!d){d=document.createElement('datalist');d.id='dl_project';document.body.appendChild(d)}const v=projList().map(p=>`<option value="${esc(p)}">`).join('');if(d.innerHTML!==v)d.innerHTML=v}
+{const c0=createShipment;createShipment=function(b,items){const ref=c0.apply(this,arguments);try{const el=document.getElementById('f_project'),p=el?canonProject(el.value):'';if(p){S.lines.forEach(l=>{if(l.ShipmentRef===ref)l.ProjectName=p});S.settings.projects=S.settings.projects||[];if(!S.settings.projects.some(x=>carrKey(x)===carrKey(p)))S.settings.projects.push(p)}}catch(e){}return ref}}
+function projTotals(){
+  const by=new Map(),get=p=>{const k=carrKey(p);if(!by.has(k))by.set(k,{name:p,quoted:0,invoiced:0,paid:0,ships:0});return by.get(k)},seenQ=new Set();
+  shipsAll0().forEach(sh=>{const p=shipProject(sh);if(!p)return;const g=get(p);g.ships++;S.quotes.filter(q=>q.ref===sh.ref&&q.status==='Selected').forEach(q=>{seenQ.add(q.id);g.quoted+=num(q.amount)});S.invoices.filter(i=>i.ref===sh.ref).forEach(i=>{const v=num(i.freight)+num(i.extra);g.invoiced+=v;if(i.paid==='Paid'||i.status==='Paid')g.paid+=v})});
+  S.quotes.forEach(q=>{if(q.project&&!seenQ.has(q.id)&&q.status==='Selected')get(q.project).quoted+=num(q.amount)});
+  return [...by.values()].sort((a,b)=>b.invoiced+b.quoted-a.invoiced-a.quoted);
+}
+function projectCard(){
+  const T=projTotals(),sel=S.ui.projSel||'';if(!can('commercial'))return '';
+  const qs=sel?S.quotes.filter(q=>carrKey(q.project||shipProject(getShip(q.ref))||'')===carrKey(sel)):[];
+  return `<div class="card" id="projCard"><h3>Spending by Project</h3><p class="mu" style="margin-bottom:8px">Total quoted (selected quotes), invoiced and paid for each project. Projects come from the shipment and quote forms.</p><div class="tbw"><table class="tb" data-sort="off"><tr><th>Project</th><th class="r">Shipments</th><th class="r">Total quoted</th><th class="r">Total invoiced</th><th class="r">Total paid</th><th></th></tr>${T.map(p=>`<tr><td><b>${esc(p.name)}</b></td><td class="r">${p.ships}</td><td class="r">${usd(p.quoted)}</td><td class="r">${usd(p.invoiced)}</td><td class="r">${usd(p.paid)}</td><td class="r"><button class="btn sm" data-act="projPick" data-n="${esc(p.name)}">${carrKey(sel)===carrKey(p.name)?'Hide quotes':'Show quotes'}</button></td></tr>`).join('')||'<tr><td colspan="6" class="empty">No project names have been used yet.</td></tr>'}</table></div>${sel?`<h3 class="sec">Quotes for ${esc(sel)}</h3><div class="tbw"><table class="tb" data-sort="off"><tr><th>Shipment</th><th>Vendor</th><th class="r">Amount</th><th>Status</th></tr>${qs.map(q=>`<tr><td>${esc(q.ref)}</td><td>${esc(q.vendor)}</td><td class="r">${usd(q.amount)}</td><td>${esc(q.status)}</td></tr>`).join('')||'<tr><td colspan="4" class="empty">No quotes.</td></tr>'}</table></div>`:''}</div>`;
+}
+{const v0=viewCommercial;viewCommercial=function(){return v0.apply(this,arguments)+projectCard()}}
+{const m0=monBarHTML;monBarHTML=function(){const h=m0.apply(this,arguments),D=S.ui.dash;return h.replace('<label class="mu sm">Entered by','<label class="mu sm">Project <select data-ch="monProj" class="in" style="width:auto" aria-label="Project"><option value="">Any</option>'+projList().map(p=>'<option '+(carrKey(D.proj||'')===carrKey(p)?'selected':'')+'>'+esc(p)+'</option>').join('')+'</select></label><label class="mu sm">Entered by')}}
+/* ----- ASN ----- */
+const asnOK=s=>/^[A-Za-z0-9][A-Za-z0-9._\/-]{0,39}$/.test(s);
+const shipAsn=sh=>uniq((sh&&sh.lines||[]).map(l=>l.ASN).filter(Boolean));
+function asnSet(lineId,val){const l=S.lines.find(x=>x.LineID===lineId);if(!l)return {ok:false,msg:'Line not found'};const v=String(val||'').trim();if(v&&!asnOK(v))return {ok:false,msg:'The ASN number can use letters, numbers and . / - _, up to 40 characters'};const old=l.ASN||'';if(old===v)return {ok:true,msg:'No change'};l.ASN=v;audit('ASN '+(old?'changed':'recorded'),l.ShipmentRef,(l.ItemNumber||'item')+': '+(old||'none')+' to '+(v||'cleared'));return {ok:true,msg:v?'ASN saved':'ASN cleared'}}
+const asnAlias={ref:['shipmentreference','shipmentref','shipment','reference','ref'],item:['itemcode','itemnumber','item','partno','sku'],asn:['asnnumber','asn','asnno']};
+function asnCheck(rows){
+  const col=(r,k)=>{const key=Object.keys(r).find(h=>asnAlias[k].includes(carrKey(h)));return key?String(r[key]==null?'':r[key]).trim():null},items=[],seen=new Map(),vis=new Set(shipsAll().map(s=>s.ref));
+  rows.forEach((r,i)=>{const ref=col(r,'ref'),item=col(r,'item'),asn=col(r,'asn'),it={row:i+2,ref:ref||'',item:item||'',asn:asn||'',errs:[],n:0};
+    if(ref===null||item===null||asn===null){it.errs.push('The file needs three columns: Shipment Reference, Item Code and ASN Number')}
+    else{if(!ref)it.errs.push('Shipment Reference is empty');else if(!vis.has(ref))it.errs.push('Shipment '+ref+' was not found');
+      if(!item)it.errs.push('Item Code is empty');if(!asn)it.errs.push('ASN Number is empty');else if(!asnOK(asn))it.errs.push('The ASN number can use letters, numbers and . / - _, up to 40 characters');
+      if(!it.errs.length){const ls=S.lines.filter(l=>l.ShipmentRef===ref&&String(l.ItemNumber||'').trim().toLowerCase()===item.toLowerCase());if(!ls.length)it.errs.push('Item '+item+' is not on shipment '+ref);else{it.n=ls.length;const k=ref+'|'+item.toLowerCase();if(seen.has(k)&&seen.get(k)!==asn)it.errs.push('Item '+item+' has two different ASN numbers in this file');seen.set(k,asn)}}}
+    items.push(it)});
+  return {items,ok:items.filter(x=>!x.errs.length).length,bad:items.filter(x=>x.errs.length).length};
+}
+function asnApply(items){let n=0;items.filter(x=>!x.errs.length).forEach(it=>{S.lines.filter(l=>l.ShipmentRef===it.ref&&String(l.ItemNumber||'').trim().toLowerCase()===it.item.toLowerCase()).forEach(l=>{if((l.ASN||'')!==it.asn){l.ASN=it.asn;n++}})});audit('ASN bulk update','',n+' line(s) updated');return n}
+function asnPreviewModal(res,fname){
+  openModal(`<div class="mh"><h2>ASN Upload: Preview</h2><button class="x" data-act="close" aria-label="Close">&times;</button></div><p>${esc(fname)}: <b>${res.ok} row${res.ok===1?'':'s'} ready</b>, <b class="${res.bad?'late-t':''}">${res.bad} with a problem</b>. Nothing is saved until you apply.</p><div class="tbw" style="max-height:340px;overflow:auto"><table class="tb" data-sort="off"><tr><th>Row</th><th>Shipment</th><th>Item</th><th>ASN</th><th>Result</th></tr>${res.items.slice(0,200).map(x=>`<tr><td>${x.row}</td><td>${esc(x.ref)}</td><td>${esc(x.item)}</td><td>${esc(x.asn)}</td><td>${x.errs.length?'<span class="late-t">'+esc(x.errs[0])+'</span>':'<span class="ok-t">Ready'+(x.n>1?' ('+x.n+' lines)':'')+'</span>'}</td></tr>`).join('')}</table></div>${res.items.length>200?'<p class="hint">Showing the first 200 rows.</p>':''}<div class="row sec"><button class="btn pri" data-act="asnApply" ${res.ok?'':'disabled'}>Apply ${res.ok} Row${res.ok===1?'':'s'}</button>${res.bad?'<button class="btn" data-act="asnErr">Download Error Rows</button>':''}<button class="btn" data-act="close">Cancel</button></div>`);
+  S.ui.asnPrev=res;
+}
+document.addEventListener('click',e=>{
+  const t=e.target.closest&&e.target.closest('[data-act]');if(!t)return;const a=t.dataset.act;
+  if(!['asnTpl','asnApply','asnErr','projPick'].includes(a))return;e.stopImmediatePropagation();
+  if(a==='projPick'){S.ui.projSel=carrKey(S.ui.projSel||'')===carrKey(t.dataset.n)?'':t.dataset.n;render();return}
+  if(a==='asnTpl'){xlsxSave('ASN-template.xlsx',[{name:'ASN',headers:['Shipment Reference','Item Code','ASN Number'],rows:[{'Shipment Reference':'YC-2611-0001','Item Code':'ITEM-001','ASN Number':'ASN-12345'}]}]);return}
+  if(a==='asnApply'){if(!can('rgedit')){toast('Your role is not allowed to do this','bad');return}const n=asnApply((S.ui.asnPrev||{items:[]}).items);closeModal();render();toast(n+' line(s) updated');return}
+  if(a==='asnErr'){const bad=(S.ui.asnPrev||{items:[]}).items.filter(x=>x.errs.length);downloadText('ASN-error-rows.csv','\uFEFF'+toCSV(['Row','Shipment Reference','Item Code','ASN Number','Problem'],bad.map(x=>[x.row,x.ref,x.item,x.asn,x.errs.join('; ')])),'text/csv');return}
+},true);
+document.addEventListener('change',async e=>{
+  const t=e.target;if(!t||!t.dataset&&t.id!=='asnFile')return;
+  if(t.dataset&&t.dataset.ch==='monProj'){S.ui.dash.proj=t.value;render();return}
+  if(t.dataset&&t.dataset.ch==='asnEdit'){if(!can('rgedit')){toast('Your role is not allowed to do this','bad');render();return}const r=asnSet(t.dataset.id,t.value);toast(r.msg,r.ok?'':'bad');if(!r.ok)render();return}
+  if(t.id==='asnFile'&&t.files&&t.files[0]){if(!can('rgedit')){toast('Your role is not allowed to do this','bad');return}const f=t.files[0];try{const wb=XLSX.read(await f.arrayBuffer(),{type:'array'}),rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''});if(!rows.length){toast('The file has no rows','bad');return}asnPreviewModal(asnCheck(rows),f.name)}catch(x){toast('The file could not be read','bad')}t.value=''}
+},true);
+/* ----- slot listing ----- */
+const slotFirst=(a,n)=>a.length?a[0]+(a.length>1?' +'+(a.length-1):''):'-';
+const slotShipLabel=s=>[slotFirst(shipHbl(s)),slotFirst(shipCont(s)),whCodeOf(s)||'-',s.ref,slotFirst(shipInvL(s))].join(' | ');
+const slotHay=s=>[shipHay(s),whCodeOf(s),shipProject(s)].join(' ').toLowerCase();
+const slQ=s=>!(S.ui.sl&&S.ui.sl.q)||slotHay(s).includes(String(S.ui.sl.q).toLowerCase());
+{const v0=viewSlotReq;viewSlotReq=function(){const h=v0.apply(this,arguments),U=S.ui.sl;if(U.tab!=='wait')return h;const bar=`<div class="card"><label class="f" style="max-width:560px">Search shipments<input id="sl_q" class="in" value="${esc(U.q||'')}" placeholder="HBL, container, warehouse, shipment, invoice or project" autocomplete="off"></label></div>`;const i=h.indexOf('<div class="card" style="padding:0">');return i<0?h:h.slice(0,i)+bar+h.slice(i)}}
+document.addEventListener('input',e=>{const t=e.target;if(t&&t.id==='sl_q'){const p=t.selectionStart;S.ui.sl.q=t.value;render();const n=document.getElementById('sl_q');if(n){n.focus();try{n.setSelectionRange(p,p)}catch(x){}}}});
+
+/* ========== shipment review tabs and the SCM search page ========== */
+const tsKey=s=>{const m=/^(\d{4}-\d{2}-\d{2})(?: (\d{1,2}):(\d{2}) ?([AP]M)?)?/.exec(String(s||''));if(!m)return String(s||'');let hh=Number(m[2]||0);if(m[4]==='PM'&&hh<12)hh+=12;if(m[4]==='AM'&&hh===12)hh=0;return m[1]+' '+String(hh).padStart(2,'0')+':'+(m[3]||'00')};
+const userRole=e=>{const u=S.users.find(x=>String(x.UserEmail).toLowerCase()===String(e||'').toLowerCase());return u?{name:u.DisplayName,role:u.Role}:{name:e||'System',role:''}};
+const actionType=a=>/document/i.test(a)?'Document':/ASN/i.test(a)?'ASN':/redirect/i.test(a)?'Redirect':/invoice|freight|payment/i.test(a)?'Invoice':/slot/i.test(a)?'Slot':/\bRG\b|receipt/i.test(a)?'Receipt':/remark/i.test(a)?'Remark':/milestone|date|nominat|pickup|ETD|ETA|deliver|update/i.test(a)?'Milestone':'Other';
+function revHistory(sh){
+  const out=[],add=(ts,action,by,status,remarks,type)=>{const u=userRole(by);out.push({ts:tsKey(ts),date:String(ts||'').slice(0,10),action,by:u.name,role:u.role,status:status||'',remarks:remarks||'',type})};
+  const f=sh.f;if(f.EnteredOn)add(f.EnteredOn+' 00:00','Shipment created',f.EnteredBy,'','Entered by '+(f.EnteredRole||'a user'),'Created');
+  const ev=S.events.filter(e=>e.ShipmentRef===sh.ref).sort((a,b)=>(a.EventDate||'').localeCompare(b.EventDate||'')||a.EventID.localeCompare(b.EventID));
+  ev.forEach((e,i)=>add(e.EventDate+' 12:00','Status update: '+e.Status,e.PostedBy,(i?ev[i-1].Status+' to ':'')+e.Status,[e.Location,e.Note].filter(Boolean).join(': '),'Status'));
+  S.audit.filter(a=>a.ref===sh.ref).forEach(a=>add(a.time,a.action,a.user,'',a.detail,actionType(a.action)));
+  S.slots.filter(r=>r.ref===sh.ref).forEach(r=>(r.history||[]).forEach(h=>add(h.on+' 12:00','Delivery slot',h.by,'',h.text,'Slot')));
+  (S.remarks||[]).filter(r=>r.ref===sh.ref).forEach(r=>add(r.ts,'Remark',r.by,'',r.text,'Remark'));
+  return out.sort((a,b)=>a.ts.localeCompare(b.ts));
+}
+const revCanRemark=()=>can('editship')||can('milestones')||can('redirect');
+function remarkAdd(ref,text){const v=String(text||'').trim();if(!revCanRemark())return {ok:false,msg:'Your role cannot add remarks'};if(!v)return {ok:false,msg:'Write the remark first'};if(v.length>500)return {ok:false,msg:'A remark can be up to 500 characters'};const t=new Date(),ts=S.today+' '+String(t.getHours()).padStart(2,'0')+':'+String(t.getMinutes()).padStart(2,'0');S.remarks=S.remarks||[];S.remarks.push({id:'RM-'+(S.remarks.length+1)+'-'+Date.now().toString(36),ref,ts,by:S.email,role:S.role,text:v});audit('Remark added',ref,v.slice(0,80));return {ok:true,msg:'Remark added'}}
+function revItemsHTML(sh){return `<h3 class="sec">Items in this shipment</h3><div class="tbw"><table class="tb" data-sort="off"><tr><th>Item code</th><th>PO number</th><th class="r">Quantity</th><th class="r">Weight (kg)</th><th class="r">CBM</th><th>Status</th><th>ASN number</th></tr>${sh.lines.map(l=>`<tr><td>${esc(l.ItemNumber||'-')}</td><td>${esc(l.PONumber||'-')}</td><td class="r">${qtyTxt(num(l.ItemQty))}</td><td class="r">${l.WeightKg?num(l.WeightKg):'-'}</td><td class="r">${l.Cbm?num(l.Cbm):'-'}</td><td>${esc(l.CurrentStatus||sh.status)}</td><td>${l.ASN?esc(l.ASN):'<span class="mu">Pending</span>'}</td></tr>`).join('')}</table></div>`}
+function revHistoryHTML(sh){
+  const R=S.ui.rev,hf=R.hf=R.hf||{from:'',to:'',user:'',type:'',q:''},all=revHistory(sh),users=uniq(all.map(x=>x.by)).sort(),types=uniq(all.map(x=>x.type)).sort(),q=String(hf.q||'').toLowerCase();
+  const rows=all.filter(x=>(!hf.from||x.date>=hf.from)&&(!hf.to||x.date<=hf.to)&&(!hf.user||x.by===hf.user)&&(!hf.type||x.type===hf.type)&&(!q||[x.action,x.by,x.role,x.status,x.remarks].join(' ').toLowerCase().includes(q)));
+  return `<div class="row" style="gap:10px;flex-wrap:wrap;align-items:flex-end"><label class="f">From<input type="date" class="in" data-ch="revHf" data-k="from" value="${esc(hf.from)}"></label><label class="f">To<input type="date" class="in" data-ch="revHf" data-k="to" value="${esc(hf.to)}"></label><label class="f">User<select class="in" data-ch="revHf" data-k="user" style="width:auto"><option value="">Anyone</option>${users.map(u=>`<option ${hf.user===u?'selected':''}>${esc(u)}</option>`).join('')}</select></label><label class="f">Action type<select class="in" data-ch="revHf" data-k="type" style="width:auto"><option value="">All</option>${types.map(u=>`<option ${hf.type===u?'selected':''}>${esc(u)}</option>`).join('')}</select></label><label class="f grow">Search<input class="in" data-ch="revHf" data-k="q" value="${esc(hf.q)}" placeholder="Action, person or remark"></label></div>
+  <div class="tbw" style="margin-top:8px"><table class="tb" data-sort="off" id="revHistTbl"><tr><th>Date and time</th><th>Action</th><th>Performed by</th><th>Status change</th><th>Remarks</th></tr>${rows.map(x=>`<tr><td class="nw">${esc(x.ts)}</td><td>${esc(x.action)}</td><td>${esc(x.by)}${x.role?'<br><small class="mu">'+esc(x.role)+'</small>':''}</td><td>${esc(x.status||'-')}</td><td>${esc(x.remarks||'-')}</td></tr>`).join('')||'<tr><td colspan="5" class="empty">Nothing matches.</td></tr>'}</table></div>
+  ${revCanRemark()?`<div class="row" style="margin-top:8px"><input id="rev_remark" class="in grow" maxlength="500" placeholder="Add a remark to the history" aria-label="New remark"><button class="btn pri" data-act="revRemark" data-ref="${esc(sh.ref)}">Add Remark</button></div>`:''}${revItemsHTML(sh)}`;
+}
+const REV_CATS=[['Shipment Invoice',['Shipment invoice']],['Packing List',['Packing list']],['POD',['POD']],['BL / HAWB / AWB',['BL / HAWB / AWB']],['Freight Invoice',['Carrier freight invoice','Freight payment (merged)']],['Quote Approval',['Quote approval']],['ASN',['ASN']],['Others',['Others']]];
+function revDocsHTML(sh){
+  const docs=(S.docs||[]).filter(d=>d.ref===sh.ref).sort((a,b)=>(a.on||'').localeCompare(b.on||'')||String(a.id).localeCompare(String(b.id)));
+  const ver=d=>docs.filter(x=>x.type===d.type&&x.name===d.name&&(docs.indexOf(x)<=docs.indexOf(d))).length;
+  const up=can('editship');
+  return `${up?`<div class="row" style="gap:8px;flex-wrap:wrap;align-items:flex-end;margin-bottom:10px"><label class="f">Document type<select id="rev_dtype" class="in" style="width:auto">${REV_CATS.map(([c,ts])=>`<option value="${esc(ts[0])}">${esc(c)}</option>`).join('')}</select></label><label class="f">File<input type="file" id="rev_dfile" class="in" multiple></label><button class="btn pri" data-act="revUpload" data-ref="${esc(sh.ref)}">Upload</button></div>`:''}
+  ${REV_CATS.map(([c,ts])=>{const L=docs.filter(d=>ts.includes(d.type));return `<h3 class="sec">${esc(c)} <small class="mu">(${L.length})</small></h3>${L.length?`<div class="tbw"><table class="tb" data-sort="off"><tr><th>Document</th><th>Type</th><th>Uploaded by</th><th>Date</th><th>Version</th><th class="r">Size</th><th></th></tr>${L.map(d=>{const u=userRole(d.by);return `<tr><td>${esc(d.desc&&d.type==='Freight payment (merged)'?d.desc:d.name)}</td><td>${esc(d.type)}</td><td>${esc(u.name)}${u.role?'<br><small class="mu">'+esc(u.role)+'</small>':''}</td><td>${fmtS(d.on)}</td><td>v${ver(d)}</td><td class="r">${kbTxt(d.size)}</td><td class="r"><button class="btn sm" data-act="revDocOpen" data-id="${esc(d.id)}">Preview or Download</button></td></tr>`}).join('')}</table></div>`:'<p class="mu" style="margin:0 0 4px">No documents.</p>'}`}).join('')}`;
+}
+/* ----- messages ----- */
+const MSG_GROUPS=['Internal','External','Carrier','Finance','Warehouse','Admin'];
+const grpRoles=g=>g==='Internal'?ROLES.filter(r=>roleMeta(r).type==='Internal'):g==='External'?ROLES.filter(r=>roleMeta(r).type==='External'):g==='Carrier'?['Carrier Partner']:g==='Finance'?ROLES.filter(r=>/finance/i.test(r)||(S.access[r]||[]).includes('commercial')):g==='Warehouse'?['Warehouse Team','Warehouse Lead']:g==='Admin'?ROLES.filter(r=>(S.access[r]||[]).includes('settingsedit')):[];
+const msgVisible=(m,role,email)=>{role=role||S.role;email=String(email||S.email||'').toLowerCase();return String(m.by).toLowerCase()===email||(m.ment||[]).map(x=>String(x).toLowerCase()).includes(email)||(m.vis||[]).some(g=>grpRoles(g).includes(role))};
+const msgsFor=ref=>(S.msgs||[]).filter(m=>m.ref===ref&&msgVisible(m));
+const msgReadAt=ref=>((S.msgReads||{})[String(S.email).toLowerCase()]||{})[ref]||0;
+const msgUnread=ref=>msgsFor(ref).filter(m=>m.t>msgReadAt(ref)&&String(m.by).toLowerCase()!==String(S.email).toLowerCase()).length;
+function msgMarkRead(ref){S.msgReads=S.msgReads||{};const k=String(S.email).toLowerCase();S.msgReads[k]=Object.assign({},S.msgReads[k],{[ref]:Date.now()})}
+function usersForShip(sh){return S.users.filter(u=>{if(roleMeta(u.Role).type==='Internal'&&!['Warehouse Lead'].includes(u.Role))return true;if(u.Role==='Carrier Partner')return canonCarrier(u.Carrier)===canonCarrier(sh.carrier);if(u.Role==='Warehouse Lead'||u.Role==='Warehouse Team')return whList(u).some(c=>whKey(c)===whKey(whCodeOf(sh)))||/^(all|\*)$/i.test(String(u.Warehouses||'').trim());if(u.Role===PARTNER||u.Role===PEXEC){const org=u.Role===PEXEC?S.users.find(x=>String(x.UserEmail).toLowerCase()===String(u.Partner).toLowerCase()):u;if(!org)return false;const L=v=>String(v||'').split(/[;|]+/).map(shipperKey).filter(Boolean);return L(org.Shippers).includes(shipperKey(sh.shipper))||L(org.Receivers).includes(shipperKey(sh.consignee))}return false})}
+function msgParseMentions(text){const out=[];(String(text).match(/@[\w.+-]+@[\w.-]+\.\w+/g)||[]).forEach(x=>{const e=x.slice(1).toLowerCase();if(S.users.some(u=>String(u.UserEmail).toLowerCase()===e))out.push(e)});ROLES.forEach(r=>{if(String(text).includes('@'+r))S.users.filter(u=>u.Role===r).forEach(u=>out.push(String(u.UserEmail).toLowerCase()))});return uniq(out)}
+function msgPost(ref,text,groups,parent,att){
+  const v=String(text||'').trim(),sh=getShip(ref);if(!sh)return {ok:false,msg:'Shipment not found'};if(!v&&!(att||[]).length)return {ok:false,msg:'Write a message first'};if(v.length>2000)return {ok:false,msg:'A message can be up to 2000 characters'};
+  const g=(groups||[]).filter(x=>MSG_GROUPS.includes(x));if(!g.length)return {ok:false,msg:'Choose who can see this message'};
+  const m={id:'MSG-'+((S.msgs||[]).length+1)+'-'+Date.now().toString(36),ref,parent:parent||'',t:Date.now(),by:S.email,role:S.role,text:v,vis:g,ment:msgParseMentions(v),att:att||[]};S.msgs=S.msgs||[];S.msgs.push(m);msgMarkRead(ref);
+  const to=usersForShip(sh).filter(u=>String(u.UserEmail).toLowerCase()!==String(S.email).toLowerCase()&&msgVisible(m,u.Role,u.UserEmail)).map(u=>u.UserEmail);
+  slotMail(to,'New message on shipment '+ref,(userRole(S.email).name)+' ('+S.role+') wrote on shipment '+ref+':\n\n'+(v||'(attachment)')+'\n\nOpen the shipment and choose Messages to reply.','Shipment message');audit('Message added',ref,'Visible to '+g.join(', '));
+  return {ok:true,msg:'Message sent',m};
+}
+function revMsgsHTML(sh){
+  const R=S.ui.rev,ms=msgsFor(sh.ref).sort((a,b)=>a.t-b.t),top=ms.filter(m=>!m.parent),sel=R.vis||['Internal'],rp=R.reply?ms.find(m=>m.id===R.reply):null;
+  const one=(m,sub)=>{const u=userRole(m.by);return `<div class="msg ${sub?'sub':''}" style="margin:${sub?'6px 0 0 26px':'0 0 10px'};padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--panel)"><div class="row" style="justify-content:space-between;gap:8px"><b>${esc(u.name)}</b><small class="mu">${esc(m.role)} · ${new Date(m.t).toLocaleString()}</small></div><div style="margin:4px 0;white-space:pre-wrap">${esc(m.text).replace(/(@[\\w.+-]+@[\\w.-]+\\.\\w+)/g,'<b>$1</b>')}</div>${(m.att||[]).map(id=>{const d=(S.docs||[]).find(x=>x.id===id);return d?`<button class="btn sm" data-act="revDocOpen" data-id="${esc(id)}">${esc(d.name)}</button> `:''}).join('')}<div class="row" style="gap:8px"><small class="mu">Visible to ${esc((m.vis||[]).join(', '))}</small><button class="btn sm" data-act="revReply" data-id="${m.id}">Reply</button></div></div>`};
+  return `<div id="revMsgList" style="max-height:300px;overflow:auto;margin-bottom:10px">${top.map(m=>one(m,false)+ms.filter(r=>r.parent===m.id).map(r=>one(r,true)).join('')).join('')||'<div class="empty">No messages yet.</div>'}</div>
+  ${rp?`<div class="note" style="margin-bottom:6px">Replying to ${esc(userRole(rp.by).name)}. <button class="btn sm" data-act="revReply" data-id="">Cancel reply</button></div>`:''}
+  <textarea id="rev_msg" class="in" rows="3" maxlength="2000" placeholder="Write a message. Use @email or @Role to mention someone." style="width:100%" aria-label="Message"></textarea>
+  <div class="row" style="gap:8px;flex-wrap:wrap;margin-top:6px;align-items:center"><span class="mu sm">Visible to:</span>${MSG_GROUPS.map(g=>`<label class="row" style="gap:4px"><input type="checkbox" data-ch="revVis" data-g="${g}" ${sel.includes(g)?'checked':''} style="width:auto"> ${g}</label>`).join('')}</div>
+  <div class="row" style="gap:8px;flex-wrap:wrap;margin-top:6px"><select id="rev_ment" class="in" style="width:auto" aria-label="Mention a person"><option value="">Mention a person</option>${usersForShip(sh).map(u=>`<option value="${esc(u.UserEmail)}">${esc(u.DisplayName)} (${esc(u.Role)})</option>`).join('')}</select><input type="file" id="rev_mfile" class="in" multiple style="width:auto" aria-label="Attach files"><button class="btn pri" data-act="revSend" data-ref="${esc(sh.ref)}">Send Message</button></div><p class="hint">Only the roles ticked can see a message. Files up to 300 KB each for now.</p>`;
+}
+/* ----- wrap the shipment window with tabs ----- */
+function revWrap(ref,tab){
+  const m=document.getElementById('modal'),mh=m&&m.querySelector('.mh'),sh=getShip(ref);if(!m||!mh||!sh)return;
+  if(m.querySelector('#revTabs')){revShow(ref,tab||S.ui.rev.tab);return}
+  const rest=[];let n=mh.nextSibling;while(n){const nx=n.nextSibling;rest.push(n);n=nx}
+  const ov=document.createElement('div');ov.id='revOv';rest.forEach(x=>ov.appendChild(x));const pane=document.createElement('div');pane.id='revPane';pane.hidden=true;
+  mh.insertAdjacentHTML('afterend',`<div class="revhdr" id="revHdr" style="display:flex;gap:6px 18px;flex-wrap:wrap;font-size:13px;padding:8px 0;border-bottom:1px solid var(--line)"><span><span class="mu">HBL</span> <b>${esc(slotFirst(shipHbl(sh)))}</b></span><span><span class="mu">Container</span> <b>${esc(slotFirst(shipCont(sh)))}</b></span><span><span class="mu">Warehouse</span> <b>${esc(whCodeOf(sh)||'-')}</b></span><span><span class="mu">Shipment</span> <b>${esc(sh.ref)}</b></span><span><span class="mu">Invoice</span> <b>${esc(slotFirst(shipInvL(sh)))}</b></span></div><div class="tabs" id="revTabs" role="tablist" aria-label="Shipment sections"></div>`);
+  m.appendChild(ov);m.appendChild(pane);S.ui.rev=Object.assign({ref,tab:'overview',hf:{},vis:['Internal'],reply:''},S.ui.rev&&S.ui.rev.ref===ref?S.ui.rev:{});S.ui.rev.ref=ref;revShow(ref,tab||S.ui.rev.tab||'overview');
+}
+function revShow(ref,tab){
+  const sh=getShip(ref),R=S.ui.rev;if(!sh)return;if(!['overview','history','documents','messages'].includes(tab))tab='overview';R.tab=tab;
+  const un=msgUnread(ref),bar=document.getElementById('revTabs'),ov=document.getElementById('revOv'),pane=document.getElementById('revPane');if(!bar||!ov||!pane)return;
+  bar.innerHTML=[['overview','Details'],['history','Complete History'],['documents','Documents'],['messages','Messages'+(un?` <span class="badge" aria-label="${un} unread">${un}</span>`:'')]].map(([k,l])=>`<button role="tab" aria-selected="${tab===k}" class="${tab===k?'on':''}" data-act="revTab" data-t="${k}" data-ref="${esc(ref)}">${l}</button>`).join('');
+  ov.hidden=tab!=='overview';pane.hidden=tab==='overview';
+  if(tab==='history')pane.innerHTML=revHistoryHTML(sh);if(tab==='documents')pane.innerHTML=revDocsHTML(sh);if(tab==='messages'){pane.innerHTML=revMsgsHTML(sh);msgMarkRead(ref);const l=document.getElementById('revMsgList');if(l)l.scrollTop=l.scrollHeight;const b=bar.querySelector('.badge');if(b)b.remove()}
+  try{history.replaceState(null,'','#ship='+encodeURIComponent(ref)+'&tab='+tab)}catch(e){}
+}
+{const d1=detailModal;detailModal=function(ref){d1.apply(this,arguments);try{S.ui.rev=S.ui.rev&&S.ui.rev.ref===ref?S.ui.rev:{ref,tab:'overview',hf:{},vis:['Internal'],reply:''};revWrap(ref,S.ui.rev.tab)}catch(e){}}}
+{const c1=closeModal;closeModal=function(){c1.apply(this,arguments);try{if(/^#ship=/.test(location.hash))history.replaceState(null,'',location.pathname+location.search);if(S.ui.rev)S.ui.rev.ref=''}catch(e){}}}
+function revFromHash(){const m=/^#ship=([^&]+)(?:&tab=(\w+))?/.exec(location.hash||'');if(!m)return;const ref=decodeURIComponent(m[1]);if(!getShip(ref))return;S.ui.rev={ref,tab:m[2]||'overview',hf:{},vis:['Internal'],reply:''};detailModal(ref)}
+{let once=false;const r0=render;render=function(){r0.apply(this,arguments);if(!once){once=true;try{revFromHash()}catch(e){}}}}
+window.addEventListener('hashchange',()=>{try{if(/^#ship=/.test(location.hash)&&(!S.ui.rev||!S.ui.rev.ref))revFromHash()}catch(e){}});
+document.addEventListener('click',async e=>{
+  const t=e.target.closest&&e.target.closest('[data-act]');if(!t)return;const a=t.dataset.act,d=t.dataset;
+  if(!['revTab','revRemark','revDocOpen','revUpload','revReply','revSend'].includes(a))return;e.stopImmediatePropagation();
+  if(a==='revTab'){revShow(d.ref,d.t);return}
+  if(a==='revDocOpen'){const r=await docOpenFile(d.id);if(r&&r.ok===false)toast(r.msg||'Could not open the document','bad');return}
+  if(a==='revRemark'){const r=remarkAdd(d.ref,(document.getElementById('rev_remark')||{value:''}).value);toast(r.msg,r.ok?'':'bad');if(r.ok)revShow(d.ref,'history');return}
+  if(a==='revReply'){S.ui.rev.reply=d.id||'';revShow(S.ui.rev.ref,'messages');return}
+  if(a==='revUpload'){if(!can('editship')){toast('Your role is not allowed to do this','bad');return}const f=document.getElementById('rev_dfile'),files=f?[...f.files]:[];if(!files.length){toast('Choose a file first','bad');return}const er=docCheck(files,d.ref);if(er.length){toast(er[0],'bad');return}const r=await docsUpload(d.ref,files,(document.getElementById('rev_dtype')||{value:'Others'}).value,'');toast(r.ok.length+' document(s) uploaded'+(r.bad.length?', '+r.bad[0]:''),r.ok.length?'':'bad');revShow(d.ref,'documents');return}
+  if(a==='revSend'){const R=S.ui.rev,box=document.getElementById('rev_msg'),mf=document.getElementById('rev_mfile'),files=mf?[...mf.files]:[];let txt=(box||{value:''}).value;const ment=(document.getElementById('rev_ment')||{value:''}).value;if(ment&&!txt.includes('@'+ment))txt+=' @'+ment;
+    if(files.some(f=>f.size>300*1024)){toast('Files can be up to 300 KB each for now','bad');return}
+    let att=[];if(files.length){const er=docCheck(files,d.ref);if(er.length){toast(er[0],'bad');return}const r=await docsUpload(d.ref,files,'Others','Message attachment');att=r.ok.map(x=>x.id)}
+    const r=msgPost(d.ref,txt,R.vis||['Internal'],R.reply||'',att);toast(r.msg,r.ok?'':'bad');if(r.ok){R.reply='';revShow(d.ref,'messages')}return}
+},true);
+document.addEventListener('change',e=>{const t=e.target;if(!t||!t.dataset)return;
+  if(t.dataset.ch==='revHf'){const hf=S.ui.rev.hf=S.ui.rev.hf||{};hf[t.dataset.k]=t.value;revShow(S.ui.rev.ref,'history');return}
+  if(t.dataset.ch==='revVis'){const R=S.ui.rev,s=new Set(R.vis||[]);if(t.checked)s.add(t.dataset.g);else s.delete(t.dataset.g);R.vis=[...s];return}
+});
+document.addEventListener('input',e=>{const t=e.target;if(t&&t.dataset&&t.dataset.ch==='revHf'&&t.dataset.k==='q'){const p=t.selectionStart;S.ui.rev.hf.q=t.value;revShow(S.ui.rev.ref,'history');const n=document.querySelector('[data-ch=revHf][data-k=q]');if(n){n.focus();try{n.setSelectionRange(p,p)}catch(x){}}}});
+/* ----- SCM search ----- */
+function scmRows(){
+  const rows=[];shipsAll().filter(s=>!s.cancelled).forEach(sh=>{const del=sh.status==='Delivered',act=del?(sh.f.DeliveredOn||''):'',plan=del?'':(sh.dueL||sh.due||'');sh.lines.forEach(l=>{rows.push({sh,ref:sh.ref,shipper:sh.shipper||'',consignee:sh.consignee||'',inv:l.InvoiceNumber||'',po:l.PONumber||'',item:l.ItemNumber||'',qty:num(l.ItemQty),del:act,planned:plan,delivered:del,wh:whCodeOf(sh)||'',project:l.ProjectName||'',asn:l.ASN||'',hbl:shipHbl(sh).join(' '),mbl:shipMbl(sh).join(' '),cont:shipCont(sh).join(' '),carrier:sh.carrier||'',hay:null})})});return rows}
+const scmHay=r=>r.hay||(r.hay=[r.ref,r.shipper,r.consignee,r.inv,r.po,r.item,r.wh,r.project,r.asn,r.hbl,r.mbl,r.cont,r.carrier].join(' ').toLowerCase());
+const SCM_COLS=[['ref','Shipment Number'],['shipper','Shipper'],['consignee','Consignee'],['inv','Invoice Number'],['po','PO Number'],['item','Item Number'],['qty','Qty'],['del','Delivered'],['planned','Planned Delivery']];
+function scmFilter(){
+  const S2=S.ui.scm=S.ui.scm||{q:'',adv:{},sort:{k:'planned',dir:1},page:1,size:25},a=S2.adv||{},has=(v,x)=>!x||String(v).toLowerCase().includes(String(x).toLowerCase());
+  const toks=String(S2.q||'').toLowerCase().split(/\s+/).filter(Boolean);
+  let rows=scmRows().filter(r=>toks.every(t=>scmHay(r).includes(t))&&has(r.item,a.item)&&has(r.po,a.po)&&has(r.inv,a.inv)&&has(r.ref,a.ship)&&has(r.hbl,a.hbl)&&has(r.cont,a.cont)&&has(r.shipper,a.shipper)&&has(r.consignee,a.cons)&&has(r.project,a.proj)&&(!a.wh||whKey(r.wh)===whKey(a.wh))&&(!a.status||(a.status==='Delivered'?r.delivered:!r.delivered))&&(!a.from||(r.del||r.planned)>=a.from)&&(!a.to||(r.del||r.planned)<=a.to));
+  const k=S2.sort.k,dir=S2.sort.dir,val=r=>k==='del'||k==='planned'?(r[k]||''):k==='qty'?r.qty:String(r[k]).toLowerCase();
+  rows.sort((x,y)=>{const vx=val(x),vy=val(y);const c=typeof vx==='number'?vx-vy:String(vx).localeCompare(String(vy),undefined,{numeric:true});return (c||x.ref.localeCompare(y.ref)||x.item.localeCompare(y.item))*dir});
+  return rows;
+}
+const scmCell=(r,k)=>k==='del'?(r.delivered?(r.del?fmtS(r.del):'-'):'TBA'):k==='planned'?(r.delivered?'':(r.planned?fmtS(r.planned):'-')):k==='qty'?qtyTxt(r.qty):r[k];
+function viewScm(){
+  const S2=S.ui.scm=S.ui.scm||{q:'',adv:{},sort:{k:'planned',dir:1},page:1,size:25},a=S2.adv||{},rows=scmFilter(),pages=Math.max(1,Math.ceil(rows.length/S2.size));if(S2.page>pages)S2.page=pages;const pg=rows.slice((S2.page-1)*S2.size,S2.page*S2.size),whs=whSortCodes(S.warehouses.map(w=>w.code));
+  const fld=(k,l)=>`<label class="f">${l}<input class="in" data-ch="scmAdv" data-k="${k}" value="${esc(a[k]||'')}"></label>`;
+  return pageHead('SCM Search','Find shipments by item, PO, invoice, shipment, HBL, container, shipper, consignee or project, with the delivery history of each item and PO.')+
+  `<div class="card"><div class="row" style="gap:8px"><input id="scm_q" class="in grow" value="${esc(S2.q||'')}" placeholder="Item code, PO number, invoice, shipment, HBL, container, shipper, consignee, project or anything else" aria-label="Search"><button class="btn pri" data-act="scmGo">Search</button><button class="btn" data-act="scmClear">Clear</button></div>
+  <details ${Object.values(a).some(Boolean)?'open':''} style="margin-top:10px"><summary style="cursor:pointer;font-weight:600">Advanced filters</summary><div class="g4" style="margin-top:8px">${fld('item','Item code')}${fld('po','PO number')}${fld('inv','Invoice number')}${fld('ship','Shipment number')}${fld('hbl','HBL')}${fld('cont','Container')}${fld('shipper','Shipper')}${fld('cons','Consignee')}${fld('proj','Project name')}<label class="f">Status<select class="in" data-ch="scmAdv" data-k="status"><option value="">All</option><option ${a.status==='Delivered'?'selected':''}>Delivered</option><option ${a.status==='Not delivered'?'selected':''}>Not delivered</option></select></label><label class="f">Warehouse<select class="in" data-ch="scmAdv" data-k="wh"><option value="">All</option>${whs.map(c=>`<option ${a.wh===c?'selected':''}>${esc(c)}</option>`).join('')}</select></label><label class="f">Date from<input type="date" class="in" data-ch="scmAdv" data-k="from" value="${esc(a.from||'')}"></label><label class="f">Date to<input type="date" class="in" data-ch="scmAdv" data-k="to" value="${esc(a.to||'')}"></label></div></details></div>
+  <div class="card" style="padding:0"><div class="row" style="padding:10px 14px;justify-content:space-between"><b id="scmCount">${rows.length} result${rows.length===1?'':'s'}</b><span class="row" style="gap:8px"><button class="btn sm" data-act="scmCsv" ${rows.length?'':'disabled'}>Export CSV</button><button class="btn sm" data-act="scmXls" ${rows.length?'':'disabled'}>Export Excel</button></span></div><div class="tbw"><table class="tb" id="scmTbl" data-sort="off"><tr>${SCM_COLS.map(([k,l])=>`<th><button class="linkbtn" data-act="scmSort" data-k="${k}" aria-label="Sort by ${l}">${l}${S2.sort.k===k?(S2.sort.dir>0?' ▲':' ▼'):''}</button></th>`).join('')}</tr>${pg.map(r=>`<tr class="click" data-act="open" data-ref="${esc(r.ref)}">${SCM_COLS.map(([k])=>`<td${k==='qty'?' class="r"':''}>${k==='ref'?'<b>'+esc(r.ref)+'</b>':esc(scmCell(r,k)||'')}</td>`).join('')}</tr>`).join('')||`<tr><td colspan="9" class="empty">${S2.q||Object.values(a).some(Boolean)?'No shipments match.':'Type something to search, or leave it empty to see everything you can access.'}</td></tr>`}</table></div>
+  <div class="row" style="padding:10px 14px;justify-content:space-between"><small class="mu">Page ${S2.page} of ${pages}. Delivered shipments show the actual delivery date. Others show the planned date, and the delivery as TBA.</small><span class="row" style="gap:6px"><button class="btn sm" data-act="scmPage" data-d="-1" ${S2.page<=1?'disabled':''}>Previous</button><button class="btn sm" data-act="scmPage" data-d="1" ${S2.page>=pages?'disabled':''}>Next</button></span></div></div>`;
+}
+document.addEventListener('click',e=>{
+  const t=e.target.closest&&e.target.closest('[data-act]');if(!t)return;const a=t.dataset.act,d=t.dataset;
+  if(!['scmGo','scmClear','scmSort','scmPage','scmCsv','scmXls'].includes(a))return;e.stopImmediatePropagation();const S2=S.ui.scm=S.ui.scm||{q:'',adv:{},sort:{k:'planned',dir:1},page:1,size:25};
+  if(a==='scmGo'){S2.q=(document.getElementById('scm_q')||{value:''}).value;S2.page=1;render();return}
+  if(a==='scmClear'){S2.q='';S2.adv={};S2.page=1;render();return}
+  if(a==='scmSort'){S2.sort=S2.sort.k===d.k?{k:d.k,dir:-S2.sort.dir}:{k:d.k,dir:1};S2.page=1;render();return}
+  if(a==='scmPage'){S2.page=Math.max(1,S2.page+Number(d.d));render();return}
+  const rows=scmFilter(),heads=SCM_COLS.map(c=>c[1]),data=rows.map(r=>SCM_COLS.map(([k])=>scmCell(r,k)||''));
+  if(a==='scmCsv'){downloadText('SCM-search-'+S.today+'.csv','\uFEFF'+toCSV(heads,data),'text/csv');return}
+  if(a==='scmXls'){xlsxSave('SCM-search-'+S.today+'.xlsx',[{name:'SCM Search',headers:heads,rows:rows.map(r=>Object.fromEntries(SCM_COLS.map(([k,l])=>[l,scmCell(r,k)||''])))}])}
+},true);
+document.addEventListener('change',e=>{const t=e.target;if(t&&t.dataset&&t.dataset.ch==='scmAdv'){const S2=S.ui.scm=S.ui.scm||{q:'',adv:{},sort:{k:'planned',dir:1},page:1,size:25};S2.adv=S2.adv||{};S2.adv[t.dataset.k]=t.value;S2.page=1;render()}});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target&&e.target.id==='scm_q'){const S2=S.ui.scm=S.ui.scm||{q:'',adv:{},sort:{k:'planned',dir:1},page:1,size:25};S2.q=e.target.value;S2.page=1;render()}});
+
+TABS.push({id:'scm',label:'SCM Search'});ACCESS_ITEMS.push({id:'scm',label:'SCM Search: the SCM Search page'});
+MODULES.push({id:'scmmod',label:'SCM Search',V:['scm'],C:[],E:[],D:[],note:'View: the SCM Search page, for finding shipments by item, PO, invoice and more. Only the SCM role has it to begin with.'});
+{const g=NAV_GROUPS;const oi=g.findIndex(x=>x[0]==='Operations');if(oi>=0){const L=g[oi][1],i=L.indexOf('track');L.splice(i>=0?i+1:L.length,0,'scm')}}
+ICON.scm='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3M8 11h6M11 8v6"/></svg>';
+{const m5=migrateData;migrateData=function(){m5.apply(this,arguments);if(PROFILE_PRESETS.SCM&&!PROFILE_PRESETS.SCM.includes('scm'))PROFILE_PRESETS.SCM.push('scm');if((S.settings.permV5||0)<1){ROLES.filter(r=>/^scm$/i.test(r)).forEach(r=>{S.access[r]=S.access[r]||[];if(!S.access[r].includes('scm'))S.access[r].push('scm')});S.settings.permV5=1}}}
 const pickupCol=()=>colx('Pickup vs plan',sh=>{if(!sh.f.PickupActual||!sh.f.PickupPlanned)return '-';const d=diffDays(sh.f.PickupActual,sh.f.PickupPlanned);return d<=0?'<span class="ok-t">'+(d===0?'On time':(-d)+' day(s) early')+'</span>':'<span class="late-t">'+d+' day(s) late</span>'},sh=>{if(!sh.f.PickupActual||!sh.f.PickupPlanned)return '';const d=diffDays(sh.f.PickupActual,sh.f.PickupPlanned);return d<=0?(d===0?'On time':(-d)+' early'):d+' late'});
 const pickupDatesCol=()=>colx('Pickup planned / actual',sh=>fmtS(sh.f.PickupPlanned)+' / '+fmtS(sh.f.PickupActual),sh=>(sh.f.PickupPlanned||'')+' / '+(sh.f.PickupActual||''));
 document.addEventListener('click',e=>{
@@ -6821,7 +7121,7 @@ const refsCell=sh=>`<div class="refs">${refPill('Inv',shipInvL(sh))}${refPill('M
 function shipIdCell(sh,line2){
   return `<b>${esc(sh.ref)}</b><br><small class="mu">${line2||[esc(sh.mode),esc(sh.stype||'Type not set')+(sh.nature==='DG'?' \u00b7 DG':''),esc(sh.route)].join(' \u00b7 ')}</small>`;
 }
-const shipHay=sh=>[sh.ref,sh.carrier,sh.route,sh.pos.join(' '),shipHbl(sh).join(' '),shipMbl(sh).join(' '),shipInvL(sh).join(' '),shipCont(sh).join(' ')].join(' ').toLowerCase();
+const shipHay=sh=>[sh.ref,sh.carrier,sh.route,sh.pos.join(' '),shipHbl(sh).join(' '),shipMbl(sh).join(' '),shipInvL(sh).join(' '),shipCont(sh).join(' '),(sh.lines.find(l=>l.ProjectName)||{}).ProjectName||'',sh.lines.map(l=>l.ASN||'').join(' '),sh.lines.map(l=>l.ItemNumber||'').join(' ')].join(' ').toLowerCase();
 document.addEventListener('input',e=>{const t=e.target;if(t&&t.id==='ms_q'){S.ui.msQ=t.value;clearTimeout(window._mst);window._mst=setTimeout(()=>{const p=t.selectionStart;render();const n=document.getElementById('ms_q');if(n){n.focus();try{n.setSelectionRange(p,p)}catch(x){}}},250)}});
 document.addEventListener('change',e=>{const t=e.target;if(t&&t.dataset&&t.dataset.ch==='msRefs'){uiSet({refs:t.checked});render()}});
 
@@ -6868,7 +7168,7 @@ function render(){
   $('#demoDate').value=S.today;$('#roleSel').value=S.role;{const dl=$('#demoDate').closest('label');if(dl)dl.style.display=CLOCK.mode==='real'?'none':''}
   {const isC=S.role==='Carrier Partner';$('#carrierLbl').style.display=isC?'':'none';if(isC)$('#carrierSel').innerHTML=carriersList().map(c=>`<option ${c===S.carrier?'selected':''}>${esc(c)}</option>`).join('')}
   {const isW=S.role==='Warehouse Team';$('#whTeamLbl').style.display=isW?'':'none';if(isW)$('#whTeamSel').innerHTML=S.users.filter(u=>u.Role==='Warehouse Team').map(u=>`<option value="${esc(u.UserEmail)}" ${u.UserEmail===S.whTeam?'selected':''}>${esc(u.DisplayName)} (${esc(u.Warehouses||'no warehouse')})</option>`).join('')}
-  const V={track:viewTrack,request:viewRequest,milestones:viewMilestones,carrierupdates:viewCarrierUpdates,warehouse:viewWarehouse,dataquality:viewDataQuality,tasks:viewTasks,reports:viewReports,rptdl:viewRptDl,faudit:viewFAudit,rg:viewRG,redirects:viewRedirects,slotreq:viewSlotReq,slotmgmt:viewSlotMgmt,freighttrends:viewFreightTrends,dashboard:viewDash,carrier:viewCarrier,transit:viewTransit,commercial:viewCommercial,admin:viewAdmin,team:viewTeam};
+  const V={track:viewTrack,request:viewRequest,milestones:viewMilestones,carrierupdates:viewCarrierUpdates,warehouse:viewWarehouse,dataquality:viewDataQuality,tasks:viewTasks,reports:viewReports,rptdl:viewRptDl,faudit:viewFAudit,rg:viewRG,redirects:viewRedirects,scm:viewScm,slotreq:viewSlotReq,slotmgmt:viewSlotMgmt,freighttrends:viewFreightTrends,dashboard:viewDash,carrier:viewCarrier,transit:viewTransit,commercial:viewCommercial,admin:viewAdmin,team:viewTeam};
   $('#sampleFlag').innerHTML=hasSample()?'<span class="pill warn">Sample history loaded</span><button class="btn sm" data-act="sampleRemove">Remove</button>':'';
   $('#view').innerHTML=towerStrip()+V[S.view]();
   if(S.view==='request'&&S.ui.reqTab!=='bulk')syncForm();
@@ -7184,7 +7484,7 @@ document.addEventListener('click',e=>{
    case 'comTab':S.ui.com=d.t;render();break;
    case 'quotesOpen':quotesModal(d.ref);break;
    case 'quoteAdd':{const amt=num(val('q_amt'));if(!val('q_vendor')||!(amt>0)){toast('Enter a vendor and an amount above 0','bad');break}
-     S.quotes.push({id:nextQuoteId(),ref:d.ref,vendor:canonCarrier(val('q_vendor')),amount:amt,days:num(val('q_days'))||'',qid:val('q_qid'),status:'Received',date:S.today});audit('Quote added',d.ref,val('q_vendor')+' '+usd(amt));quotesModal(d.ref);render();toast('Quote added');break}
+     S.quotes.push({id:nextQuoteId(),ref:d.ref,vendor:canonCarrier(val('q_vendor')),project:canonProject(val('q_project')),amount:amt,days:num(val('q_days'))||'',qid:val('q_qid'),status:'Received',date:S.today});audit('Quote added',d.ref,val('q_vendor')+' '+usd(amt));quotesModal(d.ref);render();toast('Quote added');break}
    case 'quoteSelect':{const q=S.quotes.find(x=>x.id===Number(d.id));if(!q)break;
      S.quotes.filter(x=>x.ref===d.ref).forEach(x=>x.status=x===q?'Selected':'Rejected');
      const sh=getShip(d.ref);sh.lines.forEach(l=>{l.Carrier=q.vendor;if(!l.NominatedOn)l.NominatedOn=S.today});

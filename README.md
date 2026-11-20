@@ -22,6 +22,20 @@ To share data between devices, run `supabase-setup.sql` once in a free Supabase 
 This is a demo with sample data. The sign-in is not real security: users.js is public and anyone with the shared database key can change its data, so use throwaway passwords and no real company information.
 
 
+## Newest changes (20 Nov)
+- **Role Type and Role ID.** Every role has a type (Internal or External) and a unique Role ID, set in Administration, Settings, People and IDs. The users table shows Role Type, Role ID and Status, and can be filtered by type and by Role ID. Built-in role types are fixed; roles you create can be Internal or External.
+- **Warehouse Lead** is a new Internal role (WHL-01) in charge of several warehouses. It sees only the warehouses assigned to it, can manage delivery slots and view receipts, and has no freight cost access. Set its warehouses in Users and roles.
+- **Settings has five tabs:** Master data (client code, carriers with code, number and CC list, the project list, a warehouse summary and the carrier names), People and IDs, Finance and payment (payment party To and default CC), Rules and alerts, and Data and demo. Warehouses are still set up in Administration, Warehouses.
+- **Milestone labels (view only).** On screen: Pickup (Supplier), ETD (Port), ETA (Port) and Final Destination Delivery. Reports, exports, emails and PDFs keep the original terms.
+- **Project Name** (optional) on shipments and quotes, with a project list that stops two spellings, a Project filter on the Shipment Monitor, search by project, and quoted, invoiced and paid totals per project in Freight Commercials.
+- **ASN numbers, item by item,** in Receipts: type one in the table, or upload a file with three columns (Shipment Reference, Item Code, ASN Number) with a preview and error rows. ASN shows in the shipment history and is searchable.
+- **Delivery slot booking** lists shipments as HBL | Container | Warehouse | Shipment | Invoice and searches all five (and the project).
+- **The shipment window has tabs:** Details, Complete History (filters, search, manual remarks, the items with ASN), Documents (by category, versions, upload) and Messages (visibility by group, replies, mentions, attachments up to 300 KB, unread count and notices). The address keeps the tab, for example #ship=SHP-0001&tab=documents.
+- **SCM Search** (Operations): one search box plus advanced filters across item, PO, invoice, shipment, HBL, container, shipper, consignee and project. Delivered shipments show the actual delivery date; others show the planned date and TBA. Sorting, paging and CSV and Excel export. Only a role called SCM has it to begin with; give it to other roles in Role Access.
+- **Not in this release yet:** POD upload and the Closed state, carrier freight invoice submission with the merged PDF and automatic email, and chat with calls.
+- **Limits:** role checks and message privacy are enforced in the app, not in the database, until real sign-in exists. Emails are recorded on the Email Outbox screen, not sent.
+
+## Changes before that
 ## Newest changes (15 Nov)
 - **At risk, in plain words.** The shipment window has a "Why it is at risk" panel with the level (High or Medium), one short line per warning sign (planned delivery may be too early, no update for N days, free time running out) and a one-line suggestion. Status labels read "In transit" and "At risk: High". The Shipment Monitor shows the short reason under the status, and the At risk tile list has Level and Why columns.
 - **Control Tower, All milestones.** The Milestone dropdown starts with All milestones (the starting choice, remembered per device). The calendar counts every milestone; the Overdue and Due-on-day lists have a Milestone column, quick filter chips and a count of milestones and shipments.
