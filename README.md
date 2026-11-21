@@ -22,6 +22,11 @@ To share data between devices, run `supabase-setup.sql` once in a free Supabase 
 This is a demo with sample data. The sign-in is not real security: users.js is public and anyone with the shared database key can change its data, so use throwaway passwords and no real company information.
 
 
+## Changes in this version (21 Nov)
+- **SCM Search dates now sort properly.** Delivered and Planned Delivery sort by their own date, oldest to newest and then newest to oldest. Rows with no date in that column always sit at the bottom, ordered by their other date, so shipment-number order never takes over. The page opens on Planned Delivery, oldest to newest, with delivered shipments at the bottom.
+- **ASN numbers are easier to edit in Receipts.** An empty ASN shows a Pending label with a + Add button. A recorded ASN shows as text with a pencil icon. Click either to get a box with Save and Cancel (Enter saves, Esc cancels). A wrong format shows its message in the cell. Hover a number to see who changed it and when. Clearing it returns the cell to Pending, and every change is audited. Roles without edit rights see text only.
+- **A new ASN Pending tile** in Receipts (after RG Complete) shows the lines and shipments with no ASN. Click it to list them and fill them in. **Download ASN Pending (Excel)** gives a file with Shipment Reference and Item Code filled in and the ASN Number empty, ready to complete and upload.
+
 ## Fixes in this version
 - The shipment window no longer collapses: the tab content now sits inside the window, so the window looks as it did before the tabs were added.
 - **Chat and calls have been removed** from the application.

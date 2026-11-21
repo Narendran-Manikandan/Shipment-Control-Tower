@@ -434,6 +434,8 @@ body.compact .tb td,body.compact .tb th{padding:4px 8px;font-size:12px;line-heig
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .riskbox{background:#2A1615;border-color:#6B2B27}}
 :root[data-theme="dark"] .riskbox{background:#2A1615;border-color:#6B2B27}
 
+.icobtn{border:0;background:transparent;cursor:pointer;padding:4px;border-radius:6px;color:var(--muted);display:inline-flex;min-width:28px;min-height:28px;align-items:center;justify-content:center;vertical-align:middle}.icobtn:hover,.icobtn:focus-visible{background:var(--chip);color:var(--ink)}
+
 /* chosen dark theme */
 :root[data-theme="dark"]{
 --bg:#151719;--panel:#1E2124;--panel2:#23272A;--ink:#ECEDED;--muted:#9DA3A4;--line:#33393C;--line2:#454C50;
@@ -3071,7 +3073,7 @@ function monBarHTML(){
 {const s0=addSampleHistory;addSampleHistory=function(){const r=s0.apply(this,arguments);S.lines.forEach(l=>{if(l.Mode)l.Mode=normMode(l.Mode);if(l.ContainerType)l.ContainerType=normCtype(l.ContainerType)});return r}}
 document.addEventListener('change',e=>{if(e.target&&e.target.id==='f_ctype'){const b=document.getElementById('setptBox');if(b){b.style.display=isReefer(e.target.value)?'':'none';if(!isReefer(e.target.value)){const i=document.getElementById('f_setpt');if(i)i.value=''}}}});
 /* ========== demo sign-in (email and password), problem log, report a problem ========== */
-const APP_BUILD='site build 2026-11-20 17:44 UTC';
+const APP_BUILD='site build 2026-11-21 06:19 UTC';
 const ErrLog={key:'ect.errors',max:60,
   add(kind,msg,src){try{const a=JSON.parse(localStorage.getItem(this.key)||'[]');a.push({t:new Date().toISOString(),kind,msg:String(msg==null?'':msg).slice(0,300),src:String(src||'').slice(0,160),view:(typeof S!=='undefined'&&S&&S.view)||'',role:(typeof S!=='undefined'&&S&&S.role)||''});while(a.length>this.max)a.shift();localStorage.setItem(this.key,JSON.stringify(a))}catch(e){}},
   list(){try{return JSON.parse(localStorage.getItem(this.key)||'[]')}catch(e){return []}},
@@ -5914,16 +5916,16 @@ function rgStageCell(x,st){
 }
 function viewRG(){
   const F=S.ui.rg=S.ui.rg||{f:'Pending',q:'',sel:[]};if(!Array.isArray(F.sel))F.sel=[];
-  const may=can('rgedit'),all=rgRowsAll(),P=all.filter(x=>x.pend.length),ip=P.filter(x=>x.pend.includes('it')),fp=P.filter(x=>x.pend.includes('fin')),dn=all.filter(x=>!x.pend.length);
-  const list=(F.f==='Pending'?P:F.f==='It'?ip:F.f==='Fin'?fp:dn),shown=list.slice(0,300),nSh=a=>uniq(a.map(x=>x.sh.ref)).length;
+  const may=can('rgedit'),all=rgRowsAll(),P=all.filter(x=>x.pend.length),ip=P.filter(x=>x.pend.includes('it')),fp=P.filter(x=>x.pend.includes('fin')),dn=all.filter(x=>!x.pend.length),asnP=all.filter(x=>!x.l.ASN);
+  const list=(F.f==='ASN'?asnP:F.f==='Pending'?P:F.f==='It'?ip:F.f==='Fin'?fp:dn),shown=list.slice(0,300),nSh=a=>uniq(a.map(x=>x.sh.ref)).length;
   const tile=(id,l,a,cls)=>`<button class="kpi tile fa-t ${cls||''} ${F.f===id?'sel':''}" data-act="rgTile" data-id="${id}" aria-pressed="${F.f===id}"><small>${l}</small><b>${a.length} <span class="fa-u">line${a.length===1?'':'s'}</span></b><span class="fa-i">${nSh(a)} shipment${nSh(a)===1?'':'s'}</span></button>`;
   const selRefs=uniq(F.sel.map(k=>k.split('|')[0]));
   return pageHead('Receipts','Receipt of Goods in Oracle, tracked for every PO and item line. DAP and DDP shipments need only a Final RG after delivery. All other terms need an In-Transit RG once the shipment is in transit, then a Final RG after delivery. One shipment can have several RG numbers, one RG can cover several lines or POs, and a line can be received in parts. A stage is complete when the full quantity is received or the line is marked NA.')+
-  `<div class="fa-tiles">${tile('Pending','All Pending',P,P.length?'late':'')}${tile('It','In-Transit RG Pending',ip,ip.length?'acc':'')}${tile('Fin','Final RG Pending',fp,fp.length?'acc':'')}${tile('Done','RG Complete',dn,'ok')}</div>
+  `<div class="fa-tiles">${tile('Pending','All Pending',P,P.length?'late':'')}${tile('It','In-Transit RG Pending',ip,ip.length?'acc':'')}${tile('Fin','Final RG Pending',fp,fp.length?'acc':'')}${tile('Done','RG Complete',dn,'ok')}${tile('ASN','ASN Pending',asnP,asnP.length?'acc':'')}</div>
   <div class="card"><div class="row"><label class="f grow">Search<input id="rg_q" class="in" value="${esc(F.q||'')}" placeholder="HBL, MBL, invoice, container, PO, item or RG number"></label>
-  <span class="row" style="align-self:flex-end;gap:6px;flex-wrap:wrap">${may?`<button class="btn sm pri" data-act="rgRecSel" ${F.sel.length?'':'disabled'}>Record RG for Selected Lines (${F.sel.length})</button>`:''}<button class="btn sm" data-act="rdQuick" data-id="rgpending">Download RG Pending Report</button>${may?'<label class="btn sm pri" style="cursor:pointer">Upload RG Details<input type="file" id="rgFile" accept=".xlsx,.xls,.csv" hidden></label>':''}${may?'<button class="btn sm" data-act="asnTpl">ASN Template</button><label class="btn sm pri" style="cursor:pointer">Upload ASN Numbers<input type="file" id="asnFile" accept=".xlsx,.xls,.csv" hidden></label>':''}</span></div></div>
+  <span class="row" style="align-self:flex-end;gap:6px;flex-wrap:wrap">${may?`<button class="btn sm pri" data-act="rgRecSel" ${F.sel.length?'':'disabled'}>Record RG for Selected Lines (${F.sel.length})</button>`:''}<button class="btn sm" data-act="rdQuick" data-id="rgpending">Download RG Pending Report</button>${may?'<label class="btn sm pri" style="cursor:pointer">Upload RG Details<input type="file" id="rgFile" accept=".xlsx,.xls,.csv" hidden></label>':''}${may?'<button class="btn sm" data-act="asnTpl">ASN Template</button><button class="btn sm" data-act="asnPendDl">Download ASN Pending (Excel)</button><label class="btn sm pri" style="cursor:pointer">Upload ASN Numbers<input type="file" id="asnFile" accept=".xlsx,.xls,.csv" hidden></label>':''}</span></div></div>
   <div class="card" style="padding:0"><div class="tbw"><table class="tb fa-tb" data-sort="on"><tr><th style="width:30px"><input type="checkbox" data-ch="rgSelAllRows" aria-label="Select all shown" ${shown.length&&shown.every(x=>F.sel.includes(x.key))?'checked':''}></th><th>HBL / HAWB</th><th>MBL / MAWB</th><th>Invoice No.</th><th>Container</th><th>PO Number</th><th>Item Number</th><th>ASN Number</th><th class="r">Quantity</th><th>Required Milestone</th><th>In-Transit RG</th><th>Final RG</th><th></th></tr>
-  ${shown.map(x=>{const sh=x.sh,l=x.l;return `<tr><td><input type="checkbox" data-ch="rgSel" data-k="${esc(x.key)}" ${F.sel.includes(x.key)?'checked':''} aria-label="Select line"></td><td><b>${esc(rgHbl(sh,l)||'-')}</b><br><small class="mu nw">Ref ${esc(sh.ref)}</small></td><td>${esc(faMblOf(sh)||'-')}</td><td>${esc(l.InvoiceNumber||'-')}</td><td>${esc(rgCont(sh,l)||'-')}</td><td>${l.PONumber?esc(l.PONumber):'<span class="late-t">Missing</span>'}</td><td>${esc(l.ItemNumber||'-')}</td><td>${may?`<input class="in" data-ch="asnEdit" data-id="${esc(l.LineID)}" value="${esc(l.ASN||'')}" placeholder="Pending" maxlength="40" style="width:130px" aria-label="ASN number for item ${esc(l.ItemNumber||'')}">`:(l.ASN?esc(l.ASN):'<span class="mu">Pending</span>')}</td><td class="r">${qtyTxt(num(l.ItemQty))}</td>
+  ${shown.map(x=>{const sh=x.sh,l=x.l;return `<tr><td><input type="checkbox" data-ch="rgSel" data-k="${esc(x.key)}" ${F.sel.includes(x.key)?'checked':''} aria-label="Select line"></td><td><b>${esc(rgHbl(sh,l)||'-')}</b><br><small class="mu nw">Ref ${esc(sh.ref)}</small></td><td>${esc(faMblOf(sh)||'-')}</td><td>${esc(l.InvoiceNumber||'-')}</td><td>${esc(rgCont(sh,l)||'-')}</td><td>${l.PONumber?esc(l.PONumber):'<span class="late-t">Missing</span>'}</td><td>${esc(l.ItemNumber||'-')}</td><td>${asnCellHTML(l,may)}</td><td class="r">${qtyTxt(num(l.ItemQty))}</td>
    <td>${x.pend.length?x.pend.map(s=>`<span class="pill warn">${RG_ST[s]}</span>`).join(' '):'<span class="pill ok">Complete</span>'}${x.n.one?'<br><small class="mu">Final RG only (DAP/DDP)</small>':''}</td><td>${rgStageCell(x,'it')}</td><td>${rgStageCell(x,'fin')}</td><td class="r">${may?`<button class="btn sm pri" data-act="rgOpen" data-ref="${esc(sh.ref)}" data-line="${esc(l.LineID)}">Record RG</button>`:''}</td></tr>`}).join('')||'<tr><td colspan="12" class="empty">Nothing here.</td></tr>'}</table></div></div>
   ${list.length>shown.length?`<p class="hint">Showing the first ${shown.length} of ${list.length} lines. Search to narrow the list.</p>`:''}
   <p class="hint">RG numbers are optional. Tick lines of one shipment and choose Record RG, or download the pending report (one row per line), fill in the RG details in Excel and upload it back. An RG number is normally used on one shipment only. The Monthly RG Accrual report is on the Reports page.</p>`;
@@ -7022,8 +7024,8 @@ function scmFilter(){
   const S2=S.ui.scm=S.ui.scm||{q:'',adv:{},sort:{k:'planned',dir:1},page:1,size:25},a=S2.adv||{},has=(v,x)=>!x||String(v).toLowerCase().includes(String(x).toLowerCase());
   const toks=String(S2.q||'').toLowerCase().split(/\s+/).filter(Boolean);
   let rows=scmRows().filter(r=>toks.every(t=>scmHay(r).includes(t))&&has(r.item,a.item)&&has(r.po,a.po)&&has(r.inv,a.inv)&&has(r.ref,a.ship)&&has(r.hbl,a.hbl)&&has(r.cont,a.cont)&&has(r.shipper,a.shipper)&&has(r.consignee,a.cons)&&has(r.project,a.proj)&&(!a.wh||whKey(r.wh)===whKey(a.wh))&&(!a.status||(a.status==='Delivered'?r.delivered:!r.delivered))&&(!a.from||(r.del||r.planned)>=a.from)&&(!a.to||(r.del||r.planned)<=a.to));
-  const k=S2.sort.k,dir=S2.sort.dir,val=r=>k==='del'||k==='planned'?(r[k]||''):k==='qty'?r.qty:String(r[k]).toLowerCase();
-  rows.sort((x,y)=>{const vx=val(x),vy=val(y);const c=typeof vx==='number'?vx-vy:String(vx).localeCompare(String(vy),undefined,{numeric:true});return (c||x.ref.localeCompare(y.ref)||x.item.localeCompare(y.item))*dir});
+  const k=S2.sort.k,dir=S2.sort.dir,isD=k==='del'||k==='planned',own=r=>k==='del'?(r.delivered?(r.del||''):''):(r.delivered?'':(r.planned||'')),oth=r=>k==='del'?(r.delivered?'':(r.planned||'')):(r.delivered?(r.del||''):''),val=r=>k==='qty'?r.qty:String(r[k]).toLowerCase();
+  rows.sort((x,y)=>{if(isD){const a=own(x),b=own(y);if(!a!==!b)return a?-1:1;let c=a.localeCompare(b)*dir;if(c)return c;const o1=oth(x),o2=oth(y);if(!o1!==!o2)return o1?-1:1;c=o1.localeCompare(o2)*dir;return c||x.ref.localeCompare(y.ref)||x.item.localeCompare(y.item)}const vx=val(x),vy=val(y);const c=typeof vx==='number'?vx-vy:String(vx).localeCompare(String(vy),undefined,{numeric:true});return (c||x.ref.localeCompare(y.ref)||x.item.localeCompare(y.item))*dir});
   return rows;
 }
 const scmCell=(r,k)=>k==='del'?(r.delivered?(r.del?fmtS(r.del):'-'):'TBA'):k==='planned'?(r.delivered?'':(r.planned?fmtS(r.planned):'-')):k==='qty'?qtyTxt(r.qty):r[k];
@@ -7290,6 +7292,30 @@ function revFiHTML(sh){
 {const rs=revShow;revShow=function(ref,tab){rs.apply(this,arguments);try{const sh=getShip(ref),hd=document.getElementById('revHdr');if(sh&&hd&&sh.status==='Delivered'){hd.querySelectorAll('.clsb').forEach(x=>x.remove());const cl=isClosed(sh);hd.insertAdjacentHTML('beforeend',`<span class="clsb">${cl?'<span class="pill ok">Closed</span>':'<span class="pill warn">POD needed</span>'}${cl&&can('redirect')?` <button class="btn sm" data-act="podReopen" data-ref="${esc(ref)}">Reopen</button>`:''}${!cl&&(can('redirect'))?` <button class="btn sm" data-act="podOpen" data-ref="${esc(ref)}">Upload POD</button>`:''}</span>`)}}catch(e){}}}
 function markLegacyClosed(){shipsAll0().forEach(sh=>{if(sh.status==='Delivered'&&!sh.lines.some(l=>l.ClosedOn))sh.lines.forEach(l=>{l.ClosedOn='legacy'})})}
 {const a0=addSampleHistory;addSampleHistory=function(){const r=a0.apply(this,arguments);try{markLegacyClosed()}catch(e){}return r}}
+
+/* ========== ASN edit cell, ASN Pending tile, ASN pending download ========== */
+const pencilSvg='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>';
+function asnCellHTML(l,may){
+  const id=l.LineID,item=l.ItemNumber||'';
+  if(!may)return l.ASN?esc(l.ASN):'<span class="mu">Pending</span>';
+  if(S.ui.asnEdit===id)return `<div class="row" style="gap:4px;flex-wrap:nowrap"><input id="asn_in" class="in" data-id="${esc(id)}" value="${esc(l.ASN||'')}" maxlength="40" style="width:120px" aria-label="ASN number for item ${esc(item)}"><button class="btn sm pri" data-act="asnSave" data-id="${esc(id)}" aria-label="Save ASN">Save</button><button class="btn sm" data-act="asnCancel" aria-label="Cancel editing">Cancel</button></div><div id="asn_err" class="late-t" style="font-size:12px;margin-top:2px" role="alert"></div>`;
+  const u=l.ASNBy?userRole(l.ASNBy).name:'',tip=l.ASN&&l.ASNOn?'Changed by '+(u||'a user')+' on '+fmt(l.ASNOn):'';
+  if(l.ASN)return `<span class="nw" ${tip?`title="${esc(tip)}"`:''}><b>${esc(l.ASN)}</b> <button class="icobtn" data-act="asnEdit" data-id="${esc(id)}" aria-label="Edit ASN for item ${esc(item)}" title="Edit ASN">${pencilSvg}</button>${S.ui.asnSaved===id?' <span class="ok-t" role="status">Saved</span>':''}</span>`;
+  return `<span class="nw"><span class="pill warn">Pending</span> <button class="btn sm" data-act="asnEdit" data-id="${esc(id)}" aria-label="Add ASN for item ${esc(item)}">+ Add</button>${S.ui.asnSaved===id?' <span class="ok-t" role="status">Cleared</span>':''}</span>`;
+}
+{const a0=asnSet;asnSet=function(id,v){const r=a0.apply(this,arguments);if(r.ok&&r.msg!=='No change'){const l=S.lines.find(x=>x.LineID===id);if(l){l.ASNBy=S.email;l.ASNOn=S.today}}return r}}
+{const a1=asnApply;asnApply=function(items){const before=new Map(S.lines.map(l=>[l.LineID,l.ASN||'']));const n=a1.apply(this,arguments);S.lines.forEach(l=>{if((l.ASN||'')!==before.get(l.LineID)){l.ASNBy=S.email;l.ASNOn=S.today}});return n}}
+const asnMissingRows=()=>rgRowsAll().filter(x=>!x.l.ASN&&x.l.ItemNumber);
+document.addEventListener('click',e=>{
+  const t=e.target.closest&&e.target.closest('[data-act]');if(!t)return;const a=t.dataset.act,d=t.dataset;
+  if(!['asnEdit','asnSave','asnCancel','asnPendDl'].includes(a))return;e.stopImmediatePropagation();
+  if(!can('rgedit')){toast('Your role is not allowed to do this','bad');return}
+  if(a==='asnPendDl'){const rows=asnMissingRows();if(!rows.length){toast('Every item line already has an ASN number');return}xlsxSave('ASN-pending-'+S.today+'.xlsx',[{name:'ASN',headers:['Shipment Reference','Item Code','ASN Number'],rows:rows.map(x=>({'Shipment Reference':x.sh.ref,'Item Code':x.l.ItemNumber,'ASN Number':''}))}]);return}
+  if(a==='asnEdit'){S.ui.asnEdit=d.id;S.ui.asnSaved=null;render();setTimeout(()=>{const i=document.getElementById('asn_in');if(i){i.focus();i.select()}},30);return}
+  if(a==='asnCancel'){S.ui.asnEdit=null;render();return}
+  if(a==='asnSave'){const i=document.getElementById('asn_in'),r=asnSet(d.id,i?i.value:'');if(!r.ok){const x=document.getElementById('asn_err');if(x)x.textContent=r.msg;if(i)i.focus();return}S.ui.asnEdit=null;S.ui.asnSaved=d.id;render();toast(r.msg);setTimeout(()=>{if(S.ui.asnSaved===d.id){S.ui.asnSaved=null;if(S.view==='rg')render()}},2000)}
+},true);
+document.addEventListener('keydown',e=>{const t=e.target;if(t&&t.id==='asn_in'){if(e.key==='Enter'){e.preventDefault();const b=document.querySelector('[data-act=asnSave]');if(b)b.click()}else if(e.key==='Escape'){e.preventDefault();S.ui.asnEdit=null;render()}}});
 
 const pickupCol=()=>colx('Pickup vs plan',sh=>{if(!sh.f.PickupActual||!sh.f.PickupPlanned)return '-';const d=diffDays(sh.f.PickupActual,sh.f.PickupPlanned);return d<=0?'<span class="ok-t">'+(d===0?'On time':(-d)+' day(s) early')+'</span>':'<span class="late-t">'+d+' day(s) late</span>'},sh=>{if(!sh.f.PickupActual||!sh.f.PickupPlanned)return '';const d=diffDays(sh.f.PickupActual,sh.f.PickupPlanned);return d<=0?(d===0?'On time':(-d)+' early'):d+' late'});
 const pickupDatesCol=()=>colx('Pickup planned / actual',sh=>fmtS(sh.f.PickupPlanned)+' / '+fmtS(sh.f.PickupActual),sh=>(sh.f.PickupPlanned||'')+' / '+(sh.f.PickupActual||''));
